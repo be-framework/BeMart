@@ -1,224 +1,150 @@
-{#
-  BeMart admin Tax-rule list — EC-CUBE goTaxRuleList (税率設定).
-
-  PORT of EC-CUBE 4.3 admin-theme `Setting/Shop/tax_rule.twig`
-  (src/Eccube/Resource/template/admin/Setting/Shop/tax_rule.twig).
-
-  Setting/Shop section, LIST + inline-FORM page. It extends the admin
-  frame (`admin-base.html.twig`, the port of EC-CUBE's admin
-  `default_frame.twig`), not the storefront `base.html.twig`. The markup
-  skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim from
-  EC-CUBE; only the dynamic bindings are rebound to the TaxRuleList
-  resource body (src/Resource/Page/Admin/TaxRule/TaxRuleList.php — body
-  carries `count` + `taxRules` (a list of {taxRuleId, taxRate,
-  roundingType, applyDate}) and an AdminTaxRuleForm exposed as `form`).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `form_widget(form.taxRate)` / `form.applyDate` ->
-     `form.input('taxRate')` / `form.input('applyDate')` — the real
-     AdminTaxRuleForm inline-create inputs (Ray.WebFormModule).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - `form_widget(form.rounding_type)` -> the 課税規則 select is backed
-     by the `mtb_rounding_type` master-data table; AdminTaxRuleListFetched
-     carries `roundingType` only as a bare int with no joined option set,
-     so AdminTaxRuleForm omits the control. The 課税規則 cell renders
-     without an input. FLAGGED missing-body-field — enumerated as residual.
-   - `{% for TaxRule in TaxRules %}` -> the resource body's `taxRules`
-     list. EC-CUBE keys the row + actions by `TaxRule.id`; the projection
-     surfaces `taxRuleId`, so BeMart keys the row + actions by `taxRuleId`.
-   - per-row `forms[TaxRule.id]` inline-EDIT form -> ALPS exposes no
-     `doUpdateTaxRule` (edits flow as delete-then-create — see the
-     TaxRule resource docblock), so the resource carries no per-row edit
-     form. The `edit` panel keeps EC-CUBE's structure but renders the
-     persisted row values as plain text; the `mode`/`tax_rule_id` hidden
-     inputs and the `edit` controls have no BeMart submit target.
-     Enumerated as residual.
-   - `TaxRule.default_tax_rule` -> the AdminTaxRuleListFetched projection
-     does NOT carry the default-tax-rule flag; the row always renders the
-     editable / deletable path. FLAGGED missing-body-field.
-   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
-     CSRF widget. OMITTED exactly as the storefront ports omit it.
-   - the `errors` / `forms` per-row form-collection maps -> Symfony
-     FormView runtime; dropped. The page renders no `has-error` state.
-#}
 {% extends 'admin-base.html.twig' %}
+{#
+  BeMart admin Tax-rule list — clean-room build (idea-admin design language).
+
+  DATA CONTRACT (src/Resource/Page/Admin/TaxRule/TaxRuleList.php onGet):
+    count       int          — total number of tax-rule rows
+    taxRules    list<{taxRuleId: string, taxRate: float,
+                      roundingType: int, applyDate: string}>
+    form        AdminTaxRuleForm — inline-create inputs (taxRate, applyDate)
+
+  FORM CONTRACT (src/Form/AdminTaxRuleForm.php):
+    fields: taxRate (number, id=tax_rule_tax_rate),
+            applyDate (datetime-local, id=tax_rule_apply_date)
+
+  ACTIONS (derived from ALPS #[Link] declarations):
+    POST   /admin/tax-rule/tax-rule-list — doCreateTaxRule  (create new rule)
+    DELETE /admin/tax-rule/tax-rule      — doDeleteTaxRule  (remove one rule)
+      via GET  ?taxRuleId=…&_method=delete  (method-override)
+
+  CSRF: csrfToken from resource body; field name "csrfToken".
+
+  No doUpdateTaxRule — alps.json routes edits as delete-then-create.
+  roundingType is rendered read-only (bare int; no option-set in projection).
+#}
 
 {% set route = 'admin-tax-rule-tax-rule-list' %}
 {% set title = '税率設定' %}
 {% set sub_title = '店舗設定' %}
 
-{% block stylesheet %}
-    <style type="text/css">
-        .edit {
-            display: none;
-        }
-
-        .has-error .list {
-            display: none;
-        }
-
-        .has-error .edit {
-            display: block;
-        }
-    </style>
-{% endblock stylesheet %}
-
-{% block javascript %}
-    <script type="text/javascript">
-        $(function() {
-            $('.tax_rule_list_item td.action a.edit-button').click(function() {
-                var id = $(this).data('id');
-                var tr = $('#ex-tax_rule-' + id);
-                $(tr).find('.list').hide();
-                $(tr).find('.edit').show();
-            });
-
-            $('.tax_rule_list_item .cancel').click(function() {
-                location.href = '/admin/tax-rule/tax-rule-list';
-            });
-        });
-    </script>
-{% endblock javascript %}
-
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header">
-                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="商品共通の税率を設定できます。新しい税率を追加することで基本税率設定を上書きすることが可能です。">
-                            <span>税率設定</span>
-                            <i class="fa fa-question-circle fa-lg ms-1"></i>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table tabel-sm">
-                            <colgroup>
-                                <col width="5%">
-                                <col width="">
-                                <col width="15%">
-                                <col width="35%">
-                                <col width="5%">
-                                <col width="">
-                            </colgroup>
-                            <thead>
-                            <tr>
-                                <th class="border-top-0 pt-2 pb-2 ps-3">ID</th>
-                                <th class="border-top-0 pt-2 pb-2 ps-3">税率</th>
-                                <th class="border-top-0 pt-2 pb-2 ps-3">課税規則</th>
-                                <th class="border-top-0 pt-2 pb-2 ps-3">適用日時</th>
-                                <th class="border-top-0 pt-2 pb-2 ps-3"></th>
-                                <th class="border-top-0 pt-2 pb-2 ps-3 pe-5"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-
-                            <tr id="tax_rule_item_new">
-                                <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="/admin/tax-rule/tax-rule-list">
-                                    <input type="hidden" id="tax_rule__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-                                    <td class="align-middle ps-3"></td>
-                                    <td class="align-middle" style="width:230px;">
-                                        <div class="input-group">
-                                            {{ form.input('taxRate')|raw }}
-                                            <div class="input-group-text">%</div>
-                                        </div>
-                                    </td>
-                                    <td class="align-middle">
-                                    </td>
-                                    <td class="align-middle">
-                                        {{ form.input('applyDate')|raw }}
-                                    </td>
-                                    <td class="align-middle"></td>
-                                    <td class="align-middle pe-5">
-                                        <div class="row justify-content-end">
-                                            <button class="btn btn-ec-regular px-4" type="submit">新規作成</button>
-                                        </div>
-                                    </td>
-                                </form>
-                            </tr>
-
-                            {% for TaxRule in taxRules %}
-                                <tr id="ex-tax_rule-{{ TaxRule.taxRuleId }}" class="tax_rule_list_item">
-                                    <form name="edit-form" id="edit-form_{{ TaxRule.taxRuleId }}" method="post" action="/admin/tax-rule/tax-rule-list">
-                                        <input type="hidden" value="{{ TaxRule.taxRuleId }}" name="tax_rule_id">
-                                        <input type="hidden" value="edit_inline" name="mode"/>
-                                        <td class="align-middle ps-3"><span>{{ TaxRule.taxRuleId }}</span></td>
-                                        <td class="align-middle text-end" style="width:230px;">
-                                            <div class="list">
-                                                <span class="col-6 text-end pe-0">{{ TaxRule.taxRate }}</span><span class="col-6 ps-1">%</span>
-                                            </div>
-                                        </td>
-                                        <td class="align-middle">
-                                            <div class="list">
-                                                <span>{{ TaxRule.roundingType }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="align-middle">
-                                            <div class="list">
-                                                <span>{{ TaxRule.applyDate }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="align-middle">
-                                            <div class="edit">
-                                                <button type="submit" class="btn text-nowrap btn-ec-conversion">決定</button>
-                                                <button type="button" class="btn text-nowrap btn-ec-sub cancel" data-id="{{ TaxRule.taxRuleId }}">キャンセル</button>
-                                            </div>
-                                        </td>
-                                        <td class="align-middle action">
-                                            <div class="col-12 col-sm-10 col-md-8 col-lg-6 float-end">
-                                                <div class="row pe-2">
-                                                    <div class="col-6 text-center pe-0"><a class="btn btn-ec-actionIcon edit-button" data-bs-toggle="tooltip" data-id="{{ TaxRule.taxRuleId }}" data-bs-placement="top" title="編集"><i class="fa fa-pencil fa-lg text-secondary" aria-hidden="true"></i></a></div>
-
-                                                    <div class="col-6 text-center">
-                                                        <div class="d-inline-block me-3" data-bs-toggle="tooltip" data-bs-placement="top"
-                                                             title="削除">
-                                                            <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#DeleteModal_{{ TaxRule.taxRuleId }}">
-                                                                <i class="fa fa-close fa-lg text-secondary"></i>
-                                                            </a>
-                                                        </div>
-                                                        <!-- 削除モーダル -->
-                                                        <div class="modal fade" id="DeleteModal_{{ TaxRule.taxRuleId }}" tabindex="-1" role="dialog"
-                                                             aria-labelledby="DeleteModal_{{ TaxRule.taxRuleId }}" aria-hidden="true">
-                                                            <div class="modal-dialog" role="document">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title fw-bold">
-                                                                            削除します
-                                                                        </h5>
-                                                                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                    </div>
-                                                                    <div class="modal-body text-start">
-                                                                        <p class="text-start modal-message">この操作はあとから取り消すことができません。「{{ TaxRule.taxRuleId }}」を削除してよろしいですか？</p>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">
-                                                                            キャンセル
-                                                                        </button>
-                                                                        <a class="btn btn-ec-delete" href="/admin/tax-rule/tax-rule?taxRuleId={{ TaxRule.taxRuleId }}&_method=delete"
-                                                                           data-confirm="false">
-                                                                            削除
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </form>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="idea-admin-list-toolbar">
+    <div class="idea-admin-list-toolbar__left">
+        <span class="idea-admin-count">{{ count }} 件</span>
     </div>
+</div>
+
+<section class="idea-admin-panel" aria-labelledby="section-tax-rule-list">
+    <div class="idea-admin-panel__head">
+        <h3 id="section-tax-rule-list">
+            <i class="fa fa-percent fa-fw" aria-hidden="true"></i>
+            税率ルール
+        </h3>
+    </div>
+    <div class="idea-admin-panel__body" style="padding: 0;">
+
+        <div class="idea-admin-table-wrap">
+            <table class="idea-admin-table" id="tax-rule-list-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>税率</th>
+                        <th>端数処理</th>
+                        <th>適用日時</th>
+                        <th class="idea-admin-table__actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {# inline-create row #}
+                    <tr id="tax_rule_item_new">
+                        <form id="form1"
+                              role="form"
+                              method="post"
+                              action="/admin/tax-rule/tax-rule-list">
+                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                            <td>—</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:.4rem;">
+                                    <div class="idea-admin-field__input" style="margin:0;flex:1;">
+                                        {{ form.input('taxRate')|raw }}
+                                        {% if form.error('taxRate') %}
+                                            <span class="idea-admin-error">{{ form.error('taxRate') }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <span aria-label="パーセント">%</span>
+                                </div>
+                            </td>
+                            <td>—</td>
+                            <td>
+                                <div class="idea-admin-field__input" style="margin:0;">
+                                    {{ form.input('applyDate')|raw }}
+                                    {% if form.error('applyDate') %}
+                                        <span class="idea-admin-error">{{ form.error('applyDate') }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="idea-admin-table__actions">
+                                <button class="idea-admin-action idea-admin-action--primary" type="submit">
+                                    <i class="fa fa-plus fa-fw" aria-hidden="true"></i>
+                                    新規作成
+                                </button>
+                            </td>
+                        </form>
+                    </tr>
+
+                    {% for TaxRule in taxRules %}
+                    <tr id="tax-rule-row-{{ TaxRule.taxRuleId }}">
+                        <td>{{ TaxRule.taxRuleId }}</td>
+                        <td>{{ TaxRule.taxRate }}&nbsp;%</td>
+                        <td>{{ TaxRule.roundingType }}</td>
+                        <td>{{ TaxRule.applyDate }}</td>
+                        <td class="idea-admin-table__actions">
+                            {# delete trigger — opens per-row confirm dialog #}
+                            <button class="idea-admin-icon-btn idea-admin-text-btn--danger"
+                                    type="button"
+                                    aria-label="削除"
+                                    data-delete-id="{{ TaxRule.taxRuleId }}"
+                                    onclick="document.getElementById('delete-dialog-{{ TaxRule.taxRuleId }}').showModal()">
+                                <i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    {# per-row confirm dialog (native <dialog>) #}
+                    <dialog id="delete-dialog-{{ TaxRule.taxRuleId }}"
+                            aria-labelledby="delete-dialog-title-{{ TaxRule.taxRuleId }}">
+                        <div class="idea-admin-panel" style="margin:0;border:none;box-shadow:none;">
+                            <div class="idea-admin-panel__head">
+                                <h3 id="delete-dialog-title-{{ TaxRule.taxRuleId }}">
+                                    <i class="fa fa-exclamation-triangle fa-fw" aria-hidden="true"></i>
+                                    確認
+                                </h3>
+                            </div>
+                            <div class="idea-admin-panel__body">
+                                <p>税率ルール「{{ TaxRule.taxRuleId }}」を削除します。この操作は取り消せません。</p>
+                                <div style="display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem;">
+                                    <button class="idea-admin-action"
+                                            type="button"
+                                            onclick="this.closest('dialog').close()">
+                                        キャンセル
+                                    </button>
+                                    <a class="idea-admin-action idea-admin-action--destructive"
+                                       href="/admin/tax-rule/tax-rule?taxRuleId={{ TaxRule.taxRuleId }}&amp;_method=delete"
+                                       rel="doDeleteTaxRule">
+                                        <i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+                                        削除
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </dialog>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
 {% endblock %}

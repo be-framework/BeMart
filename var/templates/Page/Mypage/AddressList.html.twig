@@ -1,94 +1,71 @@
-{#
-  BeMart address book list — EC-CUBE goCustomerAddressList.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}お届け先の管理 | IDEA STORE{% endblock %}
+{% block content %}
 
-  PORT of EC-CUBE 4.3 default-theme `Mypage/delivery.twig`
-  (src/Eccube/Resource/template/default/Mypage/delivery.twig).
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><a href="/mypage">マイページ</a><span>/</span><span>お届け先の管理</span>
+</nav>
 
-  Markup skeleton, `ec-mypageRole` / `ec-off1Grid` / `ec-addressRole` /
-  `ec-addressList` / `ec-addressList__item` classes and the block
-  structure are kept verbatim from EC-CUBE. Only the dynamic bindings
-  are rebound to the AddressList resource body
-  (src/Resource/Page/Mypage/AddressList.php):
-    customerId, count,
-    addresses[] { addressId, name01, name02, kana01, kana02,
-                  companyName, phoneNumber, postalCode, pref, prefName,
-                  addr01, addr02 }
+<section class="idea-container idea-section idea-account-layout">
 
-  Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
+  <nav class="idea-account-nav" aria-label="マイページメニュー">
+    <p class="idea-eyebrow">Account menu</p>
+    <ul class="idea-account-nav__list">
+      <li><a href="/mypage">注文履歴</a></li>
+      <li><a href="/mypage/favorite-list">お気に入り</a></li>
+      <li><a href="/mypage/change">会員情報の変更</a></li>
+      <li class="is-active"><a href="/mypage/address-list">お届け先の管理</a></li>
+      <li><a href="/mypage/withdraw">退会手続き</a></li>
+    </ul>
+  </nav>
 
-  Phase 3 ENRICHMENT — the `CustomerAddress` ALPS descriptor + the
-  AddressEntity projection were widened with `prefName` (the prefecture
-  DISPLAY name — `mtb_pref.name`). SqlAddressStorage LEFT JOINs the
-  `mtb_pref` master; FakeAddressStorage carries the parallel field. The
-  address line now renders the prefecture NAME (it previously rendered
-  the bare integer `pref` master id).
+  <div class="idea-account-main">
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `Customer.CustomerAddresses` -> the resource body's `addresses`
-     list; `|length` -> the body's `count`.
-   - `eccube_config.eccube_deliv_addr_max` — the address-count cap that
-     gates the add-button vs the over-limit message. The render-diff
-     stub feeds the same cap on both sides so the add-button branch is
-     taken identically (a list under the cap).
-   - `csrf_token_for_anchor()` — BeMart renders the token into the
-     `token-for-anchor` attribute expected by EC-CUBE's `function.js`;
-     the router normalizes the generated `_token` field to `csrfToken`.
-   - `CustomerAddress.Pref` -> the body's `prefName` (the prefecture
-     display name); a null `prefName` (unresolved master) renders empty.
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'mypage' %}
-{% set route = 'mypage-address-list' %}
-{% set title = 'マイページ' %}
-
-{% block main %}
-    <div class="ec-layoutRole__main">
-        <div class="ec-mypageRole">
-            <div class="ec-pageHeader">
-                <h1>マイページ/お届け先一覧</h1>
-            </div>
-            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'delivery', name01: name01|default(''), name02: name02|default('') } %}
-        </div>
-        <div class="ec-mypageRole">
-            {% if count > 0 %}
-                <p class="ec-para-normal">{{ count }}件のお届け先があります</p>
-            {% else %}
-                <p class="ec-para-normal">お届け先は登録されていません。</p>
-            {% endif %}
-        </div>
-        <div class="ec-mypageRole">
-            <div class="ec-off1Grid">
-                <div class="ec-off1Grid__cell">
-                    <div class="ec-addressRole">
-                        <div class="ec-addressRole__actions">
-                            <a class="ec-inlineBtn" href="/mypage/address">新規お届け先を追加する</a>
-                        </div>
-                    </div>
-                    {% if count > 0 %}
-                        <div class="ec-addressList">
-                            {% for CustomerAddress in addresses %}
-                                <div class="ec-addressList__item">
-                                    <a class="ec-addressList__remove" href="/mypage/address?addressId={{ CustomerAddress.addressId }}&_method=delete" token-for-anchor="{{ csrf_token_for_anchor() }}" data-method="delete">
-                                        <div class="ec-icon">
-                                            <img src="{{ asset('assets/icon/cross.svg') }}" alt="remove">
-                                        </div>
-                                    </a>
-                                    <div class="ec-addressList__address">
-                                        <div>{{ CustomerAddress.name01 }}&nbsp;{{ CustomerAddress.name02 }}</div>
-                                        <div>〒{{ CustomerAddress.postalCode }} {{ CustomerAddress.prefName|default('') }}{{ CustomerAddress.addr01 }}{{ CustomerAddress.addr02 }}</div>
-                                        <div>{{ CustomerAddress.phoneNumber }}</div>
-                                    </div>
-                                    <div class="ec-addressList__action">
-                                        <a class="ec-inlineBtn" href="/mypage/address?addressId={{ CustomerAddress.addressId }}">変更</a>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+    <div class="idea-panel-head">
+      <div>
+        <p class="idea-eyebrow">Address book</p>
+        <h1 class="idea-section-title">お届け先の管理</h1>
+      </div>
+      <a class="idea-button" href="/mypage/address">新しいお届け先を追加する</a>
     </div>
+
+    {% if count|default(0) > 0 %}
+      <p class="idea-muted">{{ count }} 件のお届け先が登録されています。</p>
+
+      <div class="idea-address-list">
+        {% for address in addresses|default([]) %}
+          <article class="idea-checkout-panel idea-address-card" aria-label="{{ address.name01 }} {{ address.name02 }} のお届け先">
+            <div class="idea-panel-head">
+              <div class="idea-info-list">
+                <p><strong>{{ address.name01 }} {{ address.name02 }}</strong>{% if address.kana01 or address.kana02 %}<span class="idea-muted"> （{{ address.kana01|default('') }} {{ address.kana02|default('') }}）</span>{% endif %}</p>
+                {% if address.companyName %}<p class="idea-muted">{{ address.companyName }}</p>{% endif %}
+                <p>〒{{ address.postalCode }}　{{ address.prefName|default('') }}{{ address.addr01 }}{{ address.addr02 }}</p>
+                {% if address.phoneNumber %}<p class="idea-muted">{{ address.phoneNumber }}</p>{% endif %}
+              </div>
+              <div class="idea-actions">
+                <a class="idea-button idea-button--light" href="/mypage/address?addressId={{ address.addressId }}">編集</a>
+                <form method="post" action="/mypage/address" class="idea-address-delete-form">
+                  <input type="hidden" name="_method" value="delete">
+                  <input type="hidden" name="addressId" value="{{ address.addressId }}">
+                  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                  <button type="submit" class="idea-text-button" aria-label="{{ address.name01 }} {{ address.name02 }} のお届け先を削除">削除</button>
+                </form>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <div class="idea-empty">
+        <p class="idea-eyebrow">No addresses saved</p>
+        <h2>お届け先がまだ登録されていません。</h2>
+        <p class="idea-muted">よく利用するお届け先を登録しておくと、次回の注文がスムーズになります。</p>
+        <a class="idea-button" href="/mypage/address">お届け先を追加する</a>
+      </div>
+    {% endif %}
+
+  </div>
+
+</section>
 {% endblock %}

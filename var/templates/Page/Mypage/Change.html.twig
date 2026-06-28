@@ -1,231 +1,238 @@
-{#
-  BeMart profile-edit page — EC-CUBE doUpdateCustomer (mypage_change).
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}会員情報の編集 | IDEA STORE{% endblock %}
+{% block content %}
 
-  PORT of EC-CUBE 4.3 default-theme `Mypage/change.twig`
-  (src/Eccube/Resource/template/default/Mypage/change.twig).
+{# Account nav — active tab: change #}
+{% set mypageNav = [
+  { key: 'index',    label: '注文履歴',       href: '/mypage' },
+  { key: 'favorite', label: 'お気に入り',     href: '/mypage/favorite-list' },
+  { key: 'change',   label: '会員情報の編集', href: '/mypage/change' },
+  { key: 'delivery', label: 'お届け先',       href: '/mypage/address-list' },
+  { key: 'withdraw', label: '退会手続き',     href: '/mypage/withdraw' },
+] %}
 
-  Markup skeleton, `ec-mypageRole` / `ec-editRole` / `ec-off1Grid` /
-  `ec-borderedDefs` / `ec-halfInput` / `ec-zipInput` / `ec-select` /
-  `ec-input` / `ec-telInput` / `ec-birth` / `ec-radio` /
-  `ec-RegisterRole__actions` classes + the <dl>/<dt>/<dd> definition-list
-  structure are kept verbatim from EC-CUBE.
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span>
+  <a href="/mypage">マイページ</a><span>/</span>
+  <span>会員情報の編集</span>
+</nav>
 
-  Phase 3 — FORM page (Ray.WebFormModule). The Change resource exposes a
-  real `ChangeForm` (an AbstractForm) as `body.form`, pre-populated by
-  `onGet` with the logged-in customer's current profile. The inputs are
-  rendered through it:
-
-    {{ form.input('name01')|raw }}   <- real <input> w/ name/attrs/value
-    {{ form.error('name01') }}       <- inline Be-domain error, if any
-
-  EC-CUBE renders the same inputs through the Symfony FormView
-  (`form_widget(form.name.name01)`); Ray.WebFormModule is BeMart's
-  BEAR-idiomatic equivalent. The field names / placeholders in
-  ChangeForm::init() are ported from EC-CUBE's `EntryType` leaf fields +
-  the template's `form_widget` `attr` options. The render-diff test
-  stubs EC-CUBE's `form_widget` / `form_label` to delegate to the SAME
-  ChangeForm so the inputs + labels diff to ZERO.
-
-  Validation authority stays with the Be Framework Becoming chain — the
-  form is a field-definition + renderer.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `form._token` — Symfony CSRF widget; BeMart has no CSRF widget, the
-     hidden token is kept with the body's `csrfToken` (null in the html
-     context — the EventListener mirrors the live token in).
-   - `has_errors(...)` — request-validation runtime; resolves false on a
-     fresh form, so the conditional ` error` class never appears.
-   - The `{% for f in form|filter(...) %}` entity-extension auto-render
-     loop is OMITTED — a core install has no such extensions.
-   - `pref` / `birth_*` / `sex` / `job` render as the bare empty
-     `<select>` / `<radio>`: their option sets are EC-CUBE master data
-     the resource body does not carry. Enumerated as residual.
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'mypage' %}
-{% set route = 'mypage-change' %}
-{% set title = 'マイページ' %}
-
-{% block javascript %}
-    <script src="//yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
-{% endblock javascript %}
-
-{% block main %}
-    <div class="ec-layoutRole__main">
-        <div class="ec-mypageRole">
-            <div class="ec-pageHeader">
-                <h1>マイページ/会員情報編集</h1>
-            </div>
-            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'change', name01: name01|default(''), name02: name02|default('') } %}
-        </div>
-        <div class="ec-mypageRole">
-            <div class="ec-editRole">
-                <div class="ec-off1Grid">
-                    <div class="ec-off1Grid__cell">
-                        <form method="post" action="/mypage/change" novalidate class="h-adr">
-                            <span class="p-country-name" style="display:none;">Japan</span>
-                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                            <div class="ec-borderedDefs">
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">お名前</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-halfInput">
-                                            {{ form.input('name01')|raw }}
-                                            {{ form.input('name02')|raw }}
-                                            {{ form.error('name01') }}
-                                            {{ form.error('name02') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">お名前(カナ)</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-halfInput">
-                                            {{ form.input('kana01')|raw }}
-                                            {{ form.input('kana02')|raw }}
-                                            {{ form.error('kana01') }}
-                                            {{ form.error('kana02') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">会社名</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-halfInput">
-                                            {{ form.input('companyName')|raw }}
-                                            {{ form.error('companyName') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">住所</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-zipInput"><span>〒</span>
-                                            {{ form.input('postalCode')|raw }}
-                                            <div class="ec-zipInputHelp">
-                                                <div class="ec-zipInputHelp__icon">
-                                                    <div class="ec-icon"><img
-                                                                src="{{ asset('assets/icon/question-white.svg') }}" alt="">
-                                                    </div>
-                                                </div><a href="https://www.post.japanpost.jp/zipcode/" target="_blank"><span>郵便番号検索</span></a>
-                                            </div>
-                                            {{ form.error('postalCode') }}
-                                        </div>
-
-                                        <div class="ec-select">
-                                            {{ form.input('pref')|raw }}
-                                            {{ form.error('pref') }}
-                                        </div>
-                                        <div class="ec-input">
-                                            {{ form.input('addr01')|raw }}
-                                            {{ form.error('addr01') }}
-                                        </div>
-                                        <div class="ec-input">
-                                            {{ form.input('addr02')|raw }}
-                                            {{ form.error('addr02') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">電話番号</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-telInput">
-                                            {{ form.input('phoneNumber')|raw }}
-                                            {{ form.error('phoneNumber') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">メールアドレス</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-input">
-                                            {{ form.input('email')|raw }}
-                                            {{ form.error('email') }}
-                                        </div>
-                                        <div class="ec-input">
-                                            {{ form.input('email_confirm')|raw }}
-                                            {{ form.error('email_confirm') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">パスワード</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-input">
-                                            {{ form.input('password')|raw }}
-                                            {{ form.error('password') }}
-                                        </div>
-                                        <div class="ec-input">
-                                            {{ form.input('password_confirm')|raw }}
-                                            {{ form.error('password_confirm') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">生年月日</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-birth">
-                                            {{ form.input('birth_year')|raw }}<span>/</span>
-                                            {{ form.input('birth_month')|raw }}<span>/</span>
-                                            {{ form.input('birth_day')|raw }}
-                                            {{ form.error('birth_year') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">性別</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-radio">
-                                            {{ form.input('sex')|raw }}
-                                            {{ form.error('sex') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">職業</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-select">
-                                            {{ form.input('job')|raw }}
-                                            {{ form.error('job') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                            </div>
-
-                            <div class="ec-RegisterRole__actions">
-                                <div class="ec-off4Grid">
-                                    <div class="ec-off4Grid__cell">
-                                        <button type="submit"
-                                                class="ec-blockBtn--cancel">登録する</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+<section class="idea-container" style="padding-top:clamp(1.4rem,3vw,2.5rem);">
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2rem;align-items:start;">
+    <div>
+      <p class="idea-eyebrow">Account profile</p>
+      <h1 class="idea-title idea-title--compact">会員情報の編集</h1>
+      <p class="idea-muted">お名前・住所・メールアドレス・パスワード等を変更できます。</p>
     </div>
+    <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end;padding-top:.5rem;">
+      {% for nav in mypageNav %}
+        <a href="{{ nav.href }}"
+           style="font-size:.86rem;font-weight:{% if nav.key == 'change' %}900{% else %}700{% endif %};color:{% if nav.key == 'change' %}var(--idea-ink){% else %}var(--idea-muted){% endif %};">
+          {{ nav.label }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="idea-container idea-section idea-section--tight">
+  <form class="h-adr" method="post" action="/mypage/change" novalidate>
+    <span class="p-country-name" aria-hidden="true">Japan</span>
+    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+    <div class="idea-checkout-main" style="max-width:780px;">
+
+      {# 氏名 #}
+      <div class="idea-checkout-panel">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Name</p>
+            <h2 class="idea-section-title">お名前</h2>
+          </div>
+        </div>
+        <div class="idea-form-grid idea-form-grid--two">
+          <label class="idea-field">姓
+            {{ form.input('name01')|raw }}
+            <span class="idea-form-error">{{ form.error('name01') }}</span>
+          </label>
+          <label class="idea-field">名
+            {{ form.input('name02')|raw }}
+            <span class="idea-form-error">{{ form.error('name02') }}</span>
+          </label>
+          <label class="idea-field">セイ（カナ）
+            {{ form.input('kana01')|raw }}
+            <span class="idea-form-error">{{ form.error('kana01') }}</span>
+          </label>
+          <label class="idea-field">メイ（カナ）
+            {{ form.input('kana02')|raw }}
+            <span class="idea-form-error">{{ form.error('kana02') }}</span>
+          </label>
+        </div>
+      </div>
+
+      {# 会社名 #}
+      <div class="idea-checkout-panel">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Organization</p>
+            <h2 class="idea-section-title">会社名（任意）</h2>
+          </div>
+        </div>
+        <div class="idea-form-grid">
+          <label class="idea-field idea-field--full">会社名
+            {{ form.input('companyName')|raw }}
+            <span class="idea-form-error">{{ form.error('companyName') }}</span>
+          </label>
+        </div>
+      </div>
+
+      {# 住所 #}
+      <div class="idea-checkout-panel">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Address</p>
+            <h2 class="idea-section-title">住所</h2>
+          </div>
+        </div>
+        <div class="idea-form-grid">
+          <label class="idea-field">郵便番号
+            {{ form.input('postalCode')|raw }}
+            <span class="idea-form-error">{{ form.error('postalCode') }}</span>
+          </label>
+          <label class="idea-field">都道府県
+            {{ form.input('pref')|raw }}
+            <span class="idea-form-error">{{ form.error('pref') }}</span>
+          </label>
+          <label class="idea-field idea-field--full">市区町村
+            {{ form.input('addr01')|raw }}
+            <span class="idea-form-error">{{ form.error('addr01') }}</span>
+          </label>
+          <label class="idea-field idea-field--full">番地・建物名
+            {{ form.input('addr02')|raw }}
+            <span class="idea-form-error">{{ form.error('addr02') }}</span>
+          </label>
+        </div>
+      </div>
+
+      {# 電話番号 #}
+      <div class="idea-checkout-panel">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Phone</p>
+            <h2 class="idea-section-title">電話番号</h2>
+          </div>
+        </div>
+        <div class="idea-form-grid">
+          <label class="idea-field">電話番号
+            {{ form.input('phoneNumber')|raw }}
+            <span class="idea-form-error">{{ form.error('phoneNumber') }}</span>
+          </label>
+        </div>
+      </div>
+
+      {# メールアドレス #}
+      <div class="idea-checkout-panel">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Email</p>
+            <h2 class="idea-section-title">メールアドレス</h2>
+          </div>
+        </div>
+        <div class="idea-form-grid">
+          <label class="idea-field idea-field--full">メールアドレス
+            {{ form.input('email')|raw }}
+            <span class="idea-form-error">{{ form.error('email') }}</span>
+          </label>
+          <label class="idea-field idea-field--full">メールアドレス（確認）
+            {{ form.input('email_confirm')|raw }}
+            <span class="idea-form-error">{{ form.error('email_confirm') }}</span>
+          </label>
+        </div>
+      </div>
+
+      {# パスワード #}
+      <div class="idea-checkout-panel">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Password</p>
+            <h2 class="idea-section-title">パスワード</h2>
+          </div>
+        </div>
+        <p class="idea-muted" style="margin:0 0 .75rem;font-size:.88rem;">変更しない場合は空白のままにしてください。</p>
+        <div class="idea-form-grid">
+          <label class="idea-field idea-field--full">新しいパスワード
+            {{ form.input('password')|raw }}
+            <span class="idea-form-error">{{ form.error('password') }}</span>
+          </label>
+          <label class="idea-field idea-field--full">新しいパスワード（確認）
+            {{ form.input('password_confirm')|raw }}
+            <span class="idea-form-error">{{ form.error('password_confirm') }}</span>
+          </label>
+        </div>
+      </div>
+
+      {# 生年月日 #}
+      <div class="idea-checkout-panel">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Date of birth</p>
+            <h2 class="idea-section-title">生年月日（任意）</h2>
+          </div>
+        </div>
+        <div class="idea-form-grid idea-form-grid--three">
+          <label class="idea-field">年
+            {{ form.input('birth_year')|raw }}
+            <span class="idea-form-error">{{ form.error('birth_year') }}</span>
+          </label>
+          <label class="idea-field">月
+            {{ form.input('birth_month')|raw }}
+            <span class="idea-form-error">{{ form.error('birth_month') }}</span>
+          </label>
+          <label class="idea-field">日
+            {{ form.input('birth_day')|raw }}
+            <span class="idea-form-error">{{ form.error('birth_day') }}</span>
+          </label>
+        </div>
+      </div>
+
+      {# 性別 #}
+      <div class="idea-checkout-panel">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Gender</p>
+            <h2 class="idea-section-title">性別（任意）</h2>
+          </div>
+        </div>
+        <div class="idea-option-list">
+          {{ form.input('sex')|raw }}
+        </div>
+        <span class="idea-form-error">{{ form.error('sex') }}</span>
+      </div>
+
+      {# 職業 #}
+      <div class="idea-checkout-panel">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Occupation</p>
+            <h2 class="idea-section-title">職業（任意）</h2>
+          </div>
+        </div>
+        <div class="idea-form-grid">
+          <label class="idea-field">職業
+            {{ form.input('job')|raw }}
+            <span class="idea-form-error">{{ form.error('job') }}</span>
+          </label>
+        </div>
+      </div>
+
+      {# 送信 #}
+      <div class="idea-form-actions">
+        <button type="submit" class="idea-button">変更を保存する</button>
+        <a href="/mypage" class="idea-muted" style="font-size:.9rem;">マイページへ戻る</a>
+      </div>
+
+    </div>
+  </form>
+</section>
+
 {% endblock %}

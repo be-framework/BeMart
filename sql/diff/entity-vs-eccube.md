@@ -1,6 +1,6 @@
 # BeMart Entity ↔ EC-CUBE 4.3 MySQL Schema Diff
 
-Source schema: `sql/schema/ec-cube-4.3-mysql-mysqldump.sql` (1184 lines, 65 tables: 43 `dtb_*` + 22 `mtb_*`).
+Source schema: `sql/schema/bemart-schema.sql` (65 tables: 43 `dtb_*` + 22 `mtb_*`, authored from first principles against the EC-CUBE 4.3 structure).
 BeMart Entities: `be/src/Reason/Entity/*.php` (34 files).
 
 ## Global notes (apply once, then ignored per-row)

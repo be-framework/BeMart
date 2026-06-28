@@ -6,9 +6,9 @@ Phase 2 inputs that drive the EC-CUBE → BEAR.Sunday + Be Framework migration.
 
 ```
 sql/
-├── schema/                              # source-of-truth EC-CUBE 4.3 schema
-│   └── ec-cube-4.3-mysql-mysqldump.sql  # 65 tables, structure only, utf8mb4_bin
-├── migrations/                          # BeMart schema deltas applied after the EC-CUBE dump
+├── schema/                              # source-of-truth BeMart schema
+│   └── bemart-schema.sql                # 65 tables, authored from first principles, utf8mb4_bin
+├── migrations/                          # BeMart schema deltas applied after the base schema
 ├── seed/                                # committed reference/master data
 │   ├── mtb-master.sql                   # 22 mtb_* tables, 395 reference rows
 │   └── dtb-system-master.sql            # installer-level dtb_* system rows
@@ -21,7 +21,7 @@ sql/
 ## Production database bring-up
 
 A live production database needs four committed artefact sets: the **schema**
-(`schema/ec-cube-4.3-mysql-mysqldump.sql`), BeMart **migrations**
+(`schema/bemart-schema.sql`), BeMart **migrations**
 (`migrations/*.sql`), the **mtb_\* master seed** (`seed/mtb-master.sql`),
 and the **dtb_\* system master seed** (`seed/dtb-system-master.sql`).
 `setup-db.sh` stitches them together so a prod DB can be stood up
@@ -47,10 +47,9 @@ The script:
    (not `CREATE TABLE IF NOT EXISTS`). **Warning:** any existing data in the
    target database is destroyed; never point it at a populated prod DB —
    use it to *bring up* a fresh one.
-2. Loads the schema **wrapped in `SET FOREIGN_KEY_CHECKS=0/1`**. The dump
-   carries cross-table FKs but no such pragma, so a plain sequential load
-   trips on the first table (`dtb_authority_role` → `dtb_member`). This
-   mirrors the workaround in `be/tests/Sql/bootstrap.php` (Phase 2a Step 2).
+2. Loads the schema **wrapped in `SET FOREIGN_KEY_CHECKS=0/1`**. The schema
+   carries cross-table FKs, so we disable FK checks during load to allow any
+   table ordering. This mirrors the workaround in `be/tests/Sql/bootstrap.php`.
 3. Applies BeMart schema deltas under `migrations/*.sql` in filename order.
 4. Loads `seed/mtb-master.sql`.
 5. Loads `seed/dtb-system-master.sql`: installer-level rows such as the
@@ -124,14 +123,15 @@ corrected an earlier order that started from the SQL impl):
 ## Running the SQL test suites
 
 ```bash
-vendor/bin/phpunit --testsuite bemart-sql    # storage + Final-direct
-vendor/bin/phpunit tests/Resource/Sql/       # Resource-layer hypermedia
+composer test:sql                            # Resource-layer hypermedia (sql testsuite)
+vendor/bin/phpunit --testsuite sql           # same, long form
+vendor/bin/phpunit tests/Resource/Sql/       # explicit directory form
 vendor/bin/phpunit                           # everything (~765 tests)
 ```
 
-The `bemart-sql` suite drops + recreates `eccubedb_test` on every run
-(schema loaded with FK checks disabled). Each test runs inside a
-transaction `tearDown` rolls back.
+The `sql` suite runs `be/tests/Sql/bootstrap.php` on first use, which drops
++ recreates `eccubedb_test` and loads `bemart-schema.sql` with FK checks
+disabled. Each test runs inside a transaction that `tearDown` rolls back.
 
 If `DATABASE_URL` is unset the SQL suites skip cleanly. If it is set but
 the server is unreachable, the suite fails fast (no silent skips). If it

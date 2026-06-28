@@ -1,104 +1,215 @@
-{#
-  BeMart admin テンプレート登録 — EC-CUBE admin-theme
-  `Store/template_add.twig`.
-
-  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Store/template_add.twig`
-  — the shop design-template registration screen. It extends the admin
-  frame (`admin-base.html.twig`, the port of EC-CUBE's admin
-  `default_frame.twig`), not the storefront `base.html.twig`.
-
-  Store section, Tier-2 FORM page. EC-CUBE renders a template-code,
-  template-name and zip-archive file-upload form (`Form/Type/Admin/TemplateType`,
-  admin template block prefix). The Be `doTemplateInstall` write
-  transition is a Phase-A stub, so this port renders the upload shell —
-  the three inputs plus the 雛形 (template-zip) download link. The
-  markup skeleton + `c-*` / Bootstrap classes are kept verbatim from
-  EC-CUBE; only the dynamic bindings are rebound to the TemplateAdd
-  resource body (src/Resource/Page/Admin/Template/TemplateAdd.php —
-  body carries `form`, an AdminTemplateAddForm).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `form_widget(form.code|name|file)` -> `form.input('templateCode'|'templateName'|'file')` — the
-     real AdminTemplateAddForm fields (Ray.WebFormModule).
-   - `form_widget(form._token)` (CSRF hidden input) -> `csrfToken|default('')`
-     — EC-CUBE per-request CSRF runtime; enumerated as residual.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-template-template-add' %}
-{% set title = 'テンプレート登録' %}
+{% set title = 'テンプレートをアップロード' %}
 {% set sub_title = 'オーナーズストア' %}
 
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/Template/TemplateAdd.php onGet):
+    form        object — AdminTemplateAddForm (Ray.WebFormModule)
+                  fields: templateCode (text), templateName (text), file (file)
+    csrfToken   string — CSRF token
+
+  ACTIONS (derived from #[Link] annotations on TemplateAdd):
+    POST /admin/template/template-add  enctype=multipart/form-data  — doInstallTemplate
+    GET  /admin/template/template-list                               — goTemplateList
+
+  idea-admin vocabulary used:
+    idea-admin-panel / __head / __body
+    idea-admin-field / __label / __input
+    idea-admin-required     — required badge
+    idea-admin-error        — field error text
+    idea-admin-notice       — info strip (zip format hint)
+    idea-admin-action       — button / link affordance
+    idea-admin-action--primary
+    idea-admin-toolbar / __back / __actions — sticky footer bar
+    idea-admin-upload-drop  — custom drop-zone (block stylesheet)
+#}
+
+{% block stylesheet %}
+<style>
+.idea-admin-upload-drop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  min-height: 9rem;
+  border: 2px dashed var(--idea-stone);
+  border-radius: var(--idea-admin-radius-panel);
+  background: rgba(255, 253, 248, .6);
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  padding: 1.25rem;
+  text-align: center;
+}
+.idea-admin-upload-drop:hover,
+.idea-admin-upload-drop.is-over {
+  border-color: var(--idea-olive);
+  background: rgba(82, 107, 85, .05);
+}
+.idea-admin-upload-drop__icon {
+  font-size: 2rem;
+  color: var(--idea-stone-2);
+  pointer-events: none;
+}
+.idea-admin-upload-drop__label {
+  font-size: .86rem;
+  font-weight: 700;
+  color: var(--idea-ink);
+  pointer-events: none;
+}
+.idea-admin-upload-drop__sub {
+  font-size: .76rem;
+  color: var(--idea-muted);
+  pointer-events: none;
+}
+.idea-admin-upload-drop__chosen {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--idea-olive);
+  pointer-events: none;
+  display: none;
+}
+/* The real file input sits invisible but covers the drop zone for clicks */
+.idea-admin-upload-drop input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+</style>
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script>
+(function () {
+  var drop = document.getElementById('file-drop-zone');
+  var fileInput = document.getElementById('admin_template_file');
+  var chosen = document.getElementById('file-chosen');
+  var defaultLabel = document.getElementById('file-default-label');
+  if (!drop || !fileInput) { return; }
+
+  function updateName(name) {
+    if (name) {
+      chosen.textContent = name;
+      chosen.style.display = 'block';
+      defaultLabel.style.display = 'none';
+    } else {
+      chosen.style.display = 'none';
+      defaultLabel.style.display = 'block';
+    }
+  }
+
+  fileInput.addEventListener('change', function () {
+    var f = fileInput.files && fileInput.files[0];
+    updateName(f ? f.name : '');
+  });
+
+  drop.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    drop.classList.add('is-over');
+  });
+  drop.addEventListener('dragleave', function () {
+    drop.classList.remove('is-over');
+  });
+  drop.addEventListener('drop', function (e) {
+    e.preventDefault();
+    drop.classList.remove('is-over');
+    if (e.dataTransfer && e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      updateName(e.dataTransfer.files[0].name);
+    }
+  });
+}());
+</script>
+{% endblock javascript %}
+
 {% block main %}
-    <form role="form" method="post" action="/admin/template/template-add" id="template_add_form" enctype="multipart/form-data" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">テンプレート登録</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3"><span>テンプレートコード</span></div>
-                                <div class="col">
-                                    {{ form.input('templateCode')|raw }}
-                                    {% if form.error('templateCode') %}<span class="invalid-feedback d-block">{{ form.error('templateCode') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>テンプレート名</span></div>
-                                <div class="col">
-                                    {{ form.input('templateName')|raw }}
-                                    {% if form.error('templateName') %}<span class="invalid-feedback d-block">{{ form.error('templateName') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>テンプレートファイル</span></div>
-                                <div class="col">
-                                    {{ form.input('file')|raw }}
-                                    {% if form.error('file') %}<span class="invalid-feedback d-block">{{ form.error('file') }}</span>{% endif %}
-                                    <small class="text-muted d-block">テンプレートファイルはzip形式で圧縮してください。</small>
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"></div>
-                                <div class="col">
-                                    <a href="/admin/template/template-list">雛形ファイルダウンロード</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+{# ── Upload form — doInstallTemplate ── #}
+<form
+  id="template-add-form"
+  method="post"
+  action="/admin/template/template-add"
+  enctype="multipart/form-data"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
-                </div>
-            </div>
+  <div class="idea-admin-panel" style="max-width:680px;">
+    <div class="idea-admin-panel__head">
+      <h3>テンプレート情報</h3>
+      <p class="idea-admin-panel__hint">3つの項目はすべて必須です。</p>
+    </div>
+    <div class="idea-admin-panel__body">
+
+      {# ── templateCode ── #}
+      <div class="idea-admin-field">
+        <div class="idea-admin-field__label">
+          <label for="admin_template_code">テンプレートコード</label>
+          <span class="idea-admin-required">必須</span>
         </div>
-
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/template/template-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>テンプレート一覧へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="idea-admin-field__input">
+          {{ form.input('templateCode')|raw }}
+          <span class="idea-admin-error">{{ form.error('templateCode') }}</span>
         </div>
-    </form>
+      </div>
+
+      {# ── templateName ── #}
+      <div class="idea-admin-field">
+        <div class="idea-admin-field__label">
+          <label for="admin_template_name">テンプレート名</label>
+          <span class="idea-admin-required">必須</span>
+        </div>
+        <div class="idea-admin-field__input">
+          {{ form.input('templateName')|raw }}
+          <span class="idea-admin-error">{{ form.error('templateName') }}</span>
+        </div>
+      </div>
+
+      {# ── file upload ── #}
+      <div class="idea-admin-field">
+        <div class="idea-admin-field__label">
+          <label for="admin_template_file">テンプレートファイル</label>
+          <span class="idea-admin-required">必須</span>
+        </div>
+        <div class="idea-admin-field__input">
+          <div class="idea-admin-upload-drop" id="file-drop-zone">
+            {{ form.input('file')|raw }}
+            <i class="fa fa-cloud-upload idea-admin-upload-drop__icon" aria-hidden="true"></i>
+            <span id="file-default-label">
+              <span class="idea-admin-upload-drop__label">ここにファイルをドロップ、またはクリックして選択</span>
+              <span class="idea-admin-upload-drop__sub">ZIP 形式 / 最大 10 MB</span>
+            </span>
+            <span class="idea-admin-upload-drop__chosen" id="file-chosen"></span>
+          </div>
+          <span class="idea-admin-error">{{ form.error('file') }}</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {# ── Sticky action toolbar ── #}
+  <div class="idea-admin-toolbar">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/template/template-list">
+        <i class="fa fa-angle-left" aria-hidden="true"></i>
+        テンプレート一覧
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-upload" aria-hidden="true"></i>
+        アップロード
+      </button>
+    </div>
+  </div>
+
+</form>
+
 {% endblock %}

@@ -1,91 +1,99 @@
-{#
-  BeMart Shopping shipping page — EC-CUBE goShoppingShipping.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}お届け先の選択 | IDEA STORE{% endblock %}
+{% block content %}
 
-  PORT of EC-CUBE 4.3 default-theme `Shopping/shipping.twig`
-  (src/Eccube/Resource/template/default/Shopping/shipping.twig).
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><a href="/cart">カート</a><span>/</span><span>お届け先の選択</span>
+</nav>
 
-  DATA page (radio list of registered shipping addresses) — see
-  var/templates/README.md. Markup skeleton, the `ec-role` /
-  `ec-pageHeader` / `ec-registerRole` / `ec-off1Grid` / `ec-addressRole` /
-  `ec-addressList` / `ec-registerRole__actions` classes and the block
-  structure are kept verbatim from EC-CUBE.
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-shipping-title">
+  <div>
+    <p class="idea-eyebrow">Shipping address</p>
+    <h1 id="idea-shipping-title" class="idea-title idea-title--compact">お届け先を<br>選択する</h1>
+    <p class="idea-muted">登録済みのお届け先から選ぶか、新しいお届け先を追加してください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Checkout step</span>
+    <strong>配送先</strong>
+    <small>IDEA STORE</small>
+  </div>
+</section>
 
-  EC-CUBE renders one `<input type="radio">` per address inside a
-  `{% for choice in form.addresses.vars.choices %}` loop. The address
-  set is NOT a free-text form — it is a fixed radio list of the
-  customer's already-registered addresses — so the port renders the
-  radios as plain markup driven by the body's `addresses` list (the
-  data-page recipe), not through a form object.
+<div class="idea-container idea-checkout-progress" aria-label="購入ステップ">
+  <span><b>1</b>カート</span>
+  <span><b>2</b>購入入口</span>
+  <span class="is-active"><b>3</b>配送先</span>
+  <span><b>4</b>確認</span>
+  <span><b>5</b>完了</span>
+</div>
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `form._token` — Symfony CSRF widget; kept as the hidden `_token`
-     input bound to the body's `csrfToken` (null in the html context).
-   - `Customer.CustomerAddresses|length < eccube_config.eccube_deliv_
-     addr_max` — the over-limit warning is gated on a count the body
-     does not carry. The body's `addresses` list is empty (a Wave-future
-     TODO — see src/Resource/Page/Shopping/Shipping.php), which is below
-     any limit, so the port renders the add-new-address branch (the
-     common case). The over-limit warning branch is OMITTED.
-   - `has_errors(form.addresses)` — request-validation runtime; resolves
-     false on a fresh page, so the unselected-address warning is OMITTED.
-
-  MISSING BODY FIELD follow-up: the authenticated customer's registered
-  shipping-address list (`addresses` is empty). With no addresses the
-  `{% for %}` radio loop emits nothing — exactly the empty
-  `ec-addressList` skeleton. Surfacing the address book is a dedicated
-  vertical-slice (AddressStorage scoped to the session), tracked in the
-  enrichment backlog.
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'other_page' %}
-{% set route = 'shopping-shipping' %}
-{% set title = 'お届け先の指定' %}
-
-{% block main %}
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1>お届け先の指定</h1>
+<section class="idea-container idea-section idea-checkout-layout" aria-labelledby="idea-shipping-title">
+  <div class="idea-checkout-main">
+    <article class="idea-checkout-panel">
+      <div class="idea-panel-head">
+        <div>
+          <p class="idea-eyebrow">Saved addresses</p>
+          <h2 class="idea-section-title">配送先一覧</h2>
         </div>
-    </div>
+        {# rel=goShoppingShippingEdit → page://self/shopping/shipping-edit #}
+        <a class="idea-link" href="/shopping/shipping-edit" rel="goShoppingShippingEdit">新しいお届け先を追加</a>
+      </div>
 
-    <div class="ec-registerRole">
-        <div class="ec-off1Grid">
-            <div class="ec-off1Grid__cell">
-                <div class="ec-addressRole">
-                    <div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="/shopping/shipping-edit">新規お届け先を追加する</a></div>
-                </div>
+      {# rel=doSelectShippingAddress → page://self/shopping/shipping POST #}
+      <form method="post" action="/shopping/shipping" aria-label="お届け先選択フォーム">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
-                <form method="post" action="/shopping/shipping">
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                    <div class="ec-addressList">
-                        {% for address in addresses %}
-                        <div class="ec-addressList__item">
-                            <div class="ec-addressList__remove">
-                                <input type="radio" id="address{{ address.id }}" name="address" value="{{ address.id }}" />
-                            </div>
-                            <div class="ec-addressList__address">
-                                <div>{{ address.name01 }}&nbsp;{{ address.name02 }}</div>
-                                <div>〒{{ address.postalCode }} {{ address.pref }}{{ address.addr01 }}{{ address.addr02 }}</div>
-                                <div>{{ address.phoneNumber }}</div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
+        {% if addresses is defined and addresses|length > 0 %}
+          <div class="idea-option-list" role="radiogroup" aria-label="お届け先">
+            {% for address in addresses %}
+              <label class="idea-option-card idea-address-option">
+                <input type="radio"
+                       name="shippingAddressId"
+                       value="{{ address.shippingAddressId|default(address.addressId|default('')) }}"
+                       {% if loop.first %}checked{% endif %}>
+                <span class="idea-address-detail">
+                  <strong>{{ address.name01|default('') }} {{ address.name02|default('') }}</strong>
+                  <span class="idea-muted">
+                    〒{{ address.postalCode|default('') }}
+                    {{ address.pref|default('') }}
+                    {{ address.addr01|default('') }}
+                    {{ address.addr02|default('') }}
+                  </span>
+                  <span class="idea-muted">{{ address.phoneNumber|default('') }}</span>
+                </span>
+              </label>
+            {% endfor %}
+          </div>
 
-                    <div class="ec-registerRole__actions">
-                        <div class="ec-off4Grid">
-                            <div class="ec-off4Grid__cell">
-                                <button type="submit" class="ec-blockBtn--action">選択したお届け先に送る</button>
-                                <a class="ec-blockBtn--cancel" href="/shopping">戻る</a>
-                            </div>
-                        </div>
-                    </div>
+        {% else %}
+          <div class="idea-empty" role="status">
+            <p class="idea-eyebrow">No saved addresses</p>
+            <p>登録済みのお届け先がありません。</p>
+            <p class="idea-muted">上の「新しいお届け先を追加」から住所を登録してください。</p>
+          </div>
+        {% endif %}
 
-                </form>
-            </div>
+        <div class="idea-form-actions">
+          {% if addresses is defined and addresses|length > 0 %}
+            <button type="submit" class="idea-button" rel="doSelectShippingAddress">このお届け先に送る</button>
+          {% endif %}
+          {# rel=goShopping → page://self/shopping #}
+          <a class="idea-link" href="/shopping" rel="goShopping">注文手続きに戻る</a>
         </div>
+      </form>
+    </article>
+  </div>
 
+  <aside class="idea-summary-panel" aria-label="サポート情報">
+    <p class="idea-eyebrow">Delivery info</p>
+    <h2 class="idea-section-title" style="font-size: clamp(1.2rem, 2vw, 1.6rem);">配送について</h2>
+    <div class="idea-info-list">
+      <p>選択したお届け先へ商品を発送します。</p>
+      <p class="idea-muted">複数の住所へ送る場合は、注文手続き画面の「複数お届け先」をご利用ください。</p>
     </div>
+    {# rel=goShoppingShippingMultiple → page://self/shopping/shipping-multiple #}
+    <a class="idea-link idea-summary-link" href="/shopping/shipping-multiple" rel="goShoppingShippingMultiple">複数のお届け先に送る</a>
+  </aside>
+</section>
+
 {% endblock %}

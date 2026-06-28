@@ -13,17 +13,23 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 
 /**
- * Phase 3 — HTML render check for the admin 受注メール確認 Order Tier-2 page.
+ * HTML render test for admin 受注メール送信確認 (goAdminOrderMailConfirm).
  *
- * Render-smoke standard: the page renders a full admin-frame HTML
- * document through {@see HtmlModule} with the body shape supplied by
- * {@see \MyVendor\BeMart\Resource\Page\Admin\Order\MailConfirm}. The
- * EC-CUBE residual-diff fidelity check is a follow-up gated on the
- * EC-CUBE 4.3 reference clone (`tools/ec-cube-source/`).
+ * Verification layers:
+ *   L1 — Required data present: orderNo rendered in the page.
+ *   L2 — Action contract: form POSTs to /admin/order/send-mail with
+ *         required hidden fields (csrfToken, orderNo); back link carries
+ *         rel="goOrderMail" to /admin/order/send-mail.
+ *   Frame — idea-admin shell landmarks present (idea-admin-shell,
+ *            idea-admin-content).
+ *
+ * EC-CUBE markup parity checks (c-headerBar, c-contentsArea, etc.)
+ * are archived — they tested the old EC-CUBE-mirrored template.
  */
 final class AdminOrderMailConfirmHtmlRenderTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
+    private const TEST_ORDER_NO = 'past0000000000000000000000000001';
 
     private ResourceInterface $resource;
 
@@ -44,7 +50,8 @@ final class AdminOrderMailConfirmHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testMailConfirmRendersAsHtmlDocument(): void
+    /** Frame: renders a full HTML document with idea-admin shell. */
+    public function testRendersFullHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/admin/order/mail-confirm');
 
@@ -52,25 +59,101 @@ final class AdminOrderMailConfirmHtmlRenderTest extends TestCase
 
         $html = $ro->toString();
 
+        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
         $this->assertStringContainsString('</body>', $html);
-
-        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testMailConfirmPreservesEcCubeAdminMarkupStructure(): void
+    /** Frame landmark: idea-admin-shell wraps the entire admin chrome. */
+    public function testIdeaAdminShellLandmarkPresent(): void
     {
         $html = $this->resource->get('page://self/admin/order/mail-confirm')->toString();
 
-        foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-contentsArea">',
-            'id="mail_confirm_form"',
-            '送信内容の確認',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        $this->assertStringContainsString('idea-admin-shell', $html);
+        $this->assertStringContainsString('idea-admin-content', $html);
+    }
+
+    /** L1 — required data: orderNo passed through the GET is rendered. */
+    public function testOrderNoRenderedInPage(): void
+    {
+        $ro = $this->resource->get(
+            'page://self/admin/order/mail-confirm',
+            ['orderNo' => self::TEST_ORDER_NO],
+        );
+        $html = $ro->toString();
+
+        $this->assertStringContainsString(self::TEST_ORDER_NO, $html);
+    }
+
+    /** L2 — action contract: form POSTs to /admin/order/send-mail. */
+    public function testFormActionPostsToSendMail(): void
+    {
+        $html = $this->resource->get(
+            'page://self/admin/order/mail-confirm',
+            ['orderNo' => self::TEST_ORDER_NO],
+        )->toString();
+
+        $this->assertStringContainsString('method="post"', $html);
+        $this->assertStringContainsString('action="/admin/order/send-mail"', $html);
+    }
+
+    /** L2 — action contract: hidden orderNo field is present in the form. */
+    public function testHiddenOrderNoFieldPresent(): void
+    {
+        $html = $this->resource->get(
+            'page://self/admin/order/mail-confirm',
+            ['orderNo' => self::TEST_ORDER_NO],
+        )->toString();
+
+        $this->assertMatchesRegularExpression(
+            '/type="hidden"[^>]*name="orderNo"/',
+            $html,
+            'Hidden orderNo field must be present for POST submission',
+        );
+    }
+
+    /** L2 — action contract: hidden csrfToken field is present in the form. */
+    public function testHiddenCsrfTokenFieldPresent(): void
+    {
+        $html = $this->resource->get('page://self/admin/order/mail-confirm')->toString();
+
+        $this->assertMatchesRegularExpression(
+            '/type="hidden"[^>]*name="csrfToken"/',
+            $html,
+            'Hidden csrfToken field must be present for CSRF protection',
+        );
+    }
+
+    /** L2 — navigation link: back link carries rel="goOrderMail". */
+    public function testBackLinkHasGoOrderMailRel(): void
+    {
+        $html = $this->resource->get(
+            'page://self/admin/order/mail-confirm',
+            ['orderNo' => self::TEST_ORDER_NO],
+        )->toString();
+
+        $this->assertMatchesRegularExpression(
+            '/rel="goOrderMail"/',
+            $html,
+            'Back link must carry rel="goOrderMail" per ALPS link contract',
+        );
+        $this->assertStringContainsString('/admin/order/send-mail', $html);
+    }
+
+    /**
+     * EC-CUBE parity: old markup structure assertions (c-headerBar,
+     * c-contentsArea, id="mail_confirm_form" with mode=complete, etc.)
+     * no longer apply — the template is a clean-room idea-admin design.
+     *
+     * @group ec-cube-parity-archived
+     */
+    public function testEcCubeMarkupParityArchived(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE markup parity checks retired. '
+            . 'Template is a clean-room idea-admin design; '
+            . 'functional assertions are in the other test methods.',
+        );
     }
 }

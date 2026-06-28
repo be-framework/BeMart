@@ -13,14 +13,11 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 
 /**
- * Phase 3 — HTML render check for the admin 支払方法設定（編集）
- * Setting/Shop Tier-2 page.
+ * HTML render checks for the admin 支払方法設定（編集／新規）page.
  *
- * Render-smoke standard: the page renders a full admin-frame HTML
- * document through {@see HtmlModule} with the body shape supplied by
- * {@see \MyVendor\BeMart\Resource\Page\Admin\Payment\Payment}. The
- * EC-CUBE residual-diff fidelity check is a follow-up gated on the
- * EC-CUBE 4.3 reference clone (`tools/ec-cube-source/`).
+ * L1 — required data / field output present in the rendered HTML.
+ * L2 — action/method affordances correct (form action, _method, rel, href).
+ * L3 — structural landmarks present (idea-admin-shell, idea-admin-content).
  */
 final class AdminPaymentEditHtmlRenderTest extends TestCase
 {
@@ -45,7 +42,10 @@ final class AdminPaymentEditHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testPaymentEditRendersAsHtmlDocument(): void
+    // ── L3: Frame landmarks ─────────────────────────────────────────────────
+
+    /** @test */
+    public function frameIsWellFormedHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/admin/payment/payment');
 
@@ -55,47 +55,136 @@ final class AdminPaymentEditHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
         $this->assertStringContainsString('</body>', $html);
-
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testPaymentEditPreservesEcCubeAdminMarkupStructure(): void
+    /** @test */
+    public function frameContainsIdeaAdminShellAndContentLandmarks(): void
     {
         $html = $this->resource->get('page://self/admin/payment/payment')->toString();
 
-        foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-contentsArea">',
-            'id="payment_edit_form"',
-            '支払方法設定',
-            '支払方法名',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        $this->assertStringContainsString('class="idea-admin-shell"', $html);
+        $this->assertStringContainsString('class="idea-admin-content"', $html);
     }
 
-    public function testPaymentCreateFormPostsToCollectionWithSemanticFieldNames(): void
+    // ── L1: Required data / field output (create mode) ──────────────────────
+
+    /** @test */
+    public function createModeRendersAllRequiredFormFields(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment')->toString();
+
+        foreach (['paymentMethodName', 'charge', 'ruleMin', 'ruleMax'] as $field) {
+            $this->assertStringContainsString('name="' . $field . '"', $html, "field missing: {$field}");
+        }
+        // visible is a checkbox; the form helper renders name="visible[]"
+        $this->assertStringContainsString('id="payment_visible"', $html, 'visible checkbox missing');
+    }
+
+    /** @test */
+    public function createModeRendersFormIdAndTitle(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment')->toString();
+
+        $this->assertStringContainsString('id="payment_create_form"', $html);
+        $this->assertStringContainsString('支払方法登録', $html);
+    }
+
+    // ── L2: Action / method affordances (create mode) ───────────────────────
+
+    /** @test */
+    public function createModeFormPostsToPaymentListCollection(): void
     {
         $html = $this->resource->get('page://self/admin/payment/payment')->toString();
 
         $this->assertStringContainsString('action="/admin/payment/payment-list"', $html);
-        $this->assertStringContainsString('name="paymentMethodName"', $html);
-        $this->assertStringContainsString('name="ruleMin"', $html);
-        $this->assertStringContainsString('name="ruleMax"', $html);
-        $this->assertStringNotContainsString('name="_method" value="put"', $html);
+        $this->assertStringNotContainsString('_method" value="put"', $html);
+        $this->assertStringNotContainsString('_method" value="delete"', $html);
     }
 
-    public function testPaymentEditFormExposesPutAffordance(): void
+    // ── L1: Required data / field output (edit mode) ────────────────────────
+
+    /** @test */
+    public function editModeRendersAllRequiredFormFields(): void
     {
         $html = $this->resource->get('page://self/admin/payment/payment', [
             'paymentId' => 'pay-credit',
         ])->toString();
 
-        $this->assertStringContainsString('action="/admin/payment/payment?paymentId=pay-credit&amp;_method=put"', $html);
-        $this->assertStringContainsString('name="_method" value="put"', $html);
+        foreach (['paymentMethodName', 'charge', 'ruleMin', 'ruleMax'] as $field) {
+            $this->assertStringContainsString('name="' . $field . '"', $html, "field missing: {$field}");
+        }
+        // visible is a checkbox; the form helper renders name="visible[]"
+        $this->assertStringContainsString('id="payment_visible"', $html, 'visible checkbox missing');
+    }
+
+    /** @test */
+    public function editModeRendersFormIdAndTitle(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment', [
+            'paymentId' => 'pay-credit',
+        ])->toString();
+
+        $this->assertStringContainsString('id="payment_edit_form"', $html);
+        $this->assertStringContainsString('支払方法編集', $html);
+    }
+
+    /** @test */
+    public function editModeRendersPaymentIdInHiddenField(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment', [
+            'paymentId' => 'pay-credit',
+        ])->toString();
+
         $this->assertStringContainsString('name="paymentId" value="pay-credit"', $html);
-        $this->assertStringContainsString('name="paymentMethodName"', $html);
+    }
+
+    // ── L2: Action / method affordances (edit mode) ─────────────────────────
+
+    /** @test */
+    public function editModeFormExposesMethodOverridePut(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment', [
+            'paymentId' => 'pay-credit',
+        ])->toString();
+
+        $this->assertStringContainsString(
+            'action="/admin/payment/payment?paymentId=pay-credit&amp;_method=put"',
+            $html,
+        );
+        $this->assertStringContainsString('name="_method" value="put"', $html);
+    }
+
+    /** @test */
+    public function editModeDeleteFormExposesMethodOverrideDelete(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment', [
+            'paymentId' => 'pay-credit',
+        ])->toString();
+
+        $this->assertStringContainsString(
+            'action="/admin/payment/payment?paymentId=pay-credit&amp;_method=delete"',
+            $html,
+        );
+        $this->assertStringContainsString('name="_method" value="delete"', $html);
+    }
+
+    /** @test */
+    public function editModeToolbarBackLinkGoesToPaymentList(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment', [
+            'paymentId' => 'pay-credit',
+        ])->toString();
+
+        $this->assertStringContainsString('href="/admin/payment/payment-list"', $html);
+    }
+
+    /** @test */
+    public function createModeToolbarBackLinkGoesToPaymentList(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment')->toString();
+
+        $this->assertStringContainsString('href="/admin/payment/payment-list"', $html);
     }
 }

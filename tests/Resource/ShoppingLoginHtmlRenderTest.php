@@ -6,68 +6,27 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Form\LoginForm;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
-use Ray\WebFormModule\FormFactory;
-use Twig\Environment;
-use Twig\Markup;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
 
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
-use function dirname;
-use function explode;
-use function http_build_query;
-use function implode;
-use function is_dir;
-use function is_string;
-use function preg_replace;
-use function str_contains;
-use function str_replace;
-use function trim;
 
 /**
- * Phase 3 — fidelity check for the Shopping login (goShoppingLogin) HTML
- * port.
+ * Phase 3 — functional / semantic verification for the Shopping login
+ * (goShoppingLogin) IdeaStore HTML port.
  *
- * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
- * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
+ * L1 (required fields / data output) and L2 (form action/method, link href/rel)
+ * assertions confirm that the IdeaStore template satisfies the contracts
+ * declared by:
  *
- * `Shopping/login.twig` is a FORM page. EC-CUBE's `shopping_login`
- * route reuses `CustomerLoginType` — the same Symfony form type the
- * standalone `goLogin` page uses — so the Shopping Login resource
- * exposes the same {@see LoginForm} (an AbstractForm) as `body.form`.
- * This test renders EC-CUBE's `form_widget(form.email)` calls
- * through the SAME `LoginForm` instance so the inputs diff to ZERO.
- * `is_granted('IS_AUTHENTICATED_REMEMBERED')` is stubbed FALSE — the
- * guest-purchase grid cell renders (the anonymous-checkout case, which
- * IS what this page is for). `BaseInfo.option_remember_me` is false so
- * the remember-me checkbox is omitted on both sides. The residual is
- * the genuinely EC-CUBE-runtime-only `<head>` frame material.
+ *  - {@see \MyVendor\BeMart\Resource\Page\Shopping\Login} #[Link] annotations
+ *  - {@see \MyVendor\BeMart\Form\LoginForm} field definitions (email, password)
+ *  - get-shopping-login.json JSON Schema
+ *
+ * EC-CUBE markup-parity assertions have been archived below — they are no
+ * longer meaningful after the IdeaStore clean-room rebuild.
  */
 final class ShoppingLoginHtmlRenderTest extends TestCase
 {
-    /** @var list<string> */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>BeMart / ログイン</title>',
-        '<title>EC-CUBE / ログイン</title>',
-        '<meta name="author" content="">',
-    ];
-
     private ResourceInterface $resource;
 
     protected function setUp(): void
@@ -75,6 +34,10 @@ final class ShoppingLoginHtmlRenderTest extends TestCase
         $injector = HtmlTestInjector::getInstance();
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
+
+    // -----------------------------------------------------------------------
+    // L0 — document well-formedness
+    // -----------------------------------------------------------------------
 
     public function testShoppingLoginRendersAsHtmlDocument(): void
     {
@@ -86,200 +49,129 @@ final class ShoppingLoginHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
         $this->assertStringContainsString('</body>', $html);
-
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testShoppingLoginPreservesEcCubeMarkupStructure(): void
+    // -----------------------------------------------------------------------
+    // L1 — required fields / data output
+    // -----------------------------------------------------------------------
+
+    /** The page title must identify the checkout entry point in Japanese. */
+    public function testPageTitleContainsJapaneseCheckoutLabel(): void
     {
         $html = $this->resource->get('page://self/shopping/login')->toString();
 
-        foreach ([
-            '<h1>ログイン</h1>',
-            '<div class="ec-grid3">',
-            'class="ec-grid3__cell2"',
-            '<div class="ec-login">',
-            '<div class="ec-login__input">',
-            '<div class="ec-grid2">',
-            '<div class="ec-guest">',
-            'class="ec-blockBtn--cancel"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        $this->assertStringContainsString('購入', $html);
+        $this->assertStringContainsString('IDEA STORE', $html);
     }
 
-    /** The login inputs are rendered by a real form library. */
+    /** Both email and password inputs must be present for the login form. */
     public function testShoppingLoginRendersRealFormInputs(): void
     {
         $html = $this->resource->get('page://self/shopping/login')->toString();
 
+        // email field — id and name come from LoginForm::init()
         $this->assertStringContainsString('id="email"', $html);
         $this->assertStringContainsString('name="email"', $html);
+
+        // password field
         $this->assertStringContainsString('id="password"', $html);
         $this->assertStringContainsString('type="password"', $html);
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
+    /** The guest purchase path must be offered as a distinct call-to-action. */
+    public function testGuestCheckoutLinkIsPresent(): void
+    {
+        $html = $this->resource->get('page://self/shopping/login')->toString();
+
+        // rel=goShoppingNonMember → page://self/shopping/non-member → /shopping/non-member
+        $this->assertStringContainsString('/shopping/non-member', $html);
+        $this->assertStringContainsString('ゲスト', $html);
+    }
+
+    // -----------------------------------------------------------------------
+    // L2 — form action/method and link href/rel contracts
+    // -----------------------------------------------------------------------
+
+    /**
+     * The login form must POST to /login.
+     *
+     * Derived from #[Link(rel: 'doLogin', href: 'page://self/login', method: 'post')]
+     * in {@see \MyVendor\BeMart\Resource\Page\Shopping\Login}.
+     */
+    public function testLoginFormActionAndMethod(): void
+    {
+        $html = $this->resource->get('page://self/shopping/login')->toString();
+
+        $this->assertMatchesRegularExpression(
+            '/method=["\']post["\']/i',
+            $html,
+            'Login form must use POST method',
+        );
+        $this->assertStringContainsString('action="/login"', $html);
+    }
+
+    /**
+     * The registration link must point to /entry.
+     *
+     * Derived from #[Link(rel: 'goCustomerRegistration', href: 'page://self/entry')]
+     * in {@see \MyVendor\BeMart\Resource\Page\Shopping\Login}.
+     */
+    public function testRegistrationLinkHref(): void
+    {
+        $html = $this->resource->get('page://self/shopping/login')->toString();
+
+        $this->assertStringContainsString('href="/entry"', $html);
+    }
+
+    /**
+     * The guest-purchase link must point to /shopping/non-member.
+     *
+     * Derived from #[Link(rel: 'goShoppingNonMember', href: 'page://self/shopping/non-member')]
+     * in {@see \MyVendor\BeMart\Resource\Page\Shopping\Login}.
+     */
+    public function testGuestLinkHref(): void
+    {
+        $html = $this->resource->get('page://self/shopping/login')->toString();
+
+        $this->assertStringContainsString('href="/shopping/non-member"', $html);
+    }
+
+    /** The hidden _target_path input must redirect to /shopping after login. */
+    public function testLoginTargetPathHiddenField(): void
+    {
+        $html = $this->resource->get('page://self/shopping/login')->toString();
+
+        $this->assertStringContainsString('name="_target_path"', $html);
+        $this->assertStringContainsString('value="/shopping"', $html);
+    }
+
+    // -----------------------------------------------------------------------
+    // @group ec-cube-parity-archived
+    // EC-CUBE markup-parity assertions — archived after IdeaStore rebuild.
+    // These tests matched BeMart's output against EC-CUBE 4.3 default-theme
+    // rendering. The IdeaStore template uses idea-* vocabulary, so pixel-
+    // level parity with EC-CUBE is no longer a goal.
+    // -----------------------------------------------------------------------
+
+    /** @group ec-cube-parity-archived */
+    public function testShoppingLoginPreservesEcCubeMarkupStructure(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE markup parity archived: IdeaStore clean-room rebuild uses idea-* '
+            . 'vocabulary instead of ec-* classes. Functional contracts are verified '
+            . 'by L1/L2 tests above.',
+        );
+    }
+
+    /** @group ec-cube-parity-archived */
     public function testShoppingLoginHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
-        $beMart = $this->resource->get('page://self/shopping/login')->toString();
-        $ecCube = $this->renderEcCube();
-
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's Shopping login HTML diverged from EC-CUBE's beyond "
-            . "the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
+        $this->markTestSkipped(
+            'EC-CUBE render diff archived: IdeaStore clean-room rebuild. '
+            . 'Structural contracts (form action, field names, link hrefs) '
+            . 'are covered by L2 tests in this class.',
         );
-
-        $this->assertLessThan(
-            14,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
-    }
-
-    private static function isResidual(string $line): bool
-    {
-        foreach (self::RESIDUAL_ALLOWLIST as $allowed) {
-            if ($line === $allowed) {
-                return true;
-            }
-        }
-
-        foreach ([
-            'eccube-csrf-token',
-            '<title>',
-            'meta name="author"',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function renderEcCube(): string
-    {
-        $ecCubeTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/default';
-        if (! is_dir($ecCubeTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
-
-        $twig = new Environment(new EcCubeStubLoader($ecCubeTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-        $this->registerEcCubeStubs($twig);
-
-        return $twig->render('Shopping/login.twig', [
-            'form' => new EcCubeStub([
-                'email' => 'email',
-                'password' => 'password',
-                'login_memory' => 'login_memory',
-            ]),
-            'error' => null,
-            // option_remember_me null -> the remember-me checkbox is
-            // omitted on both sides.
-            'BaseInfo' => new EcCubeStub(['option_remember_me' => null]),
-            'eccube_config' => ['locale' => 'ja'],
-            'Page' => new EcCubeStub([
-                'meta_tags' => '', 'description' => '', 'author' => '',
-                'keyword' => '', 'meta_robots' => '',
-            ]),
-            'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
-                'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
-                'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
-                'ColumnNum' => 1,
-            ]),
-            'app' => new EcCubeStub(['session' => new EcCubeStub([
-                'flashbag' => new EcCubeFlashBag(),
-            ]), 'request' => new EcCubeStub(['_route' => 'shopping_login'])]),
-            'subtitle' => 'ログイン',
-            'title' => 'ログイン',
-        ]);
-    }
-
-    private function registerEcCubeStubs(Environment $twig): void
-    {
-        $trans = static function (string $key, array $params = []): string {
-            $messages = EcCubeStub::jaMessages();
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('nl2br', static fn ($s): string => nl2br((string) $s), ['is_safe' => ['html']]));
-        $twig->addFilter(new TwigFilter('number_format', static fn ($n): string => number_format((float) $n)));
-        $twig->addFilter(new TwigFilter('price', static function ($n): string {
-            $f = new \NumberFormatter('ja_JP', \NumberFormatter::CURRENCY);
-
-            return (string) $f->formatCurrency((float) ($n ?? 0), 'JPY');
-        }));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        // IS_AUTHENTICATED_REMEMBERED false — the guest-purchase cell
-        // renders (the anonymous-checkout case this page is for).
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
-
-        // FORM-PAGE recipe: `form_widget(form.email)` delegates to
-        // BeMart's real LoginForm so the login `<input>`s are
-        // byte-identical to BeMart's port.
-        $form = (new FormFactory())->newInstance(LoginForm::class);
-        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form): Markup {
-            if ($form instanceof LoginForm && is_string($field) && $field !== '') {
-                return new Markup($form->input($field), 'UTF-8');
-            }
-
-            return new Markup('', 'UTF-8');
-        }));
-        $twig->addFunction(new TwigFunction('form_label', static fn ($f = '', $l = '', $o = []): string => ''));
-        $twig->addFunction(new TwigFunction('form_errors', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('form_rest', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('has_errors', static fn (...$f): bool => false));
-    }
-
-    /** @return list<string> */
-    private function normalize(string $html): array
-    {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
-        }
-
-        return $lines;
     }
 }

@@ -1,106 +1,283 @@
-{#
-  BeMart admin order-mail composer — EC-CUBE admin-theme `Order/mail.twig`.
-
-  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Order/mail.twig`
-  — the back-office 受注メール送信 composition screen. It extends the
-  admin frame (`admin-base.html.twig`).
-
-  Tier-2 port note: EC-CUBE composes a mail (template select, subject,
-  header / footer body) and shows a send-history list + a preview
-  modal. The Be domain re-sends the order-confirmation mail keyed by
-  orderNo only ({@see \MyVendor\BeMart\Be\Input\AdminSendOrderMailInput}
-  — the Mailer interface takes the order entity), so the custom
-  subject / header / footer overrides are Phase 2 scope. The
-  composition form renders so the page is faithful; the send-history
-  list is dropped as an enumerated residual.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
-     AdminOrderMailForm leaf fields (Ray.WebFormModule).
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
-#}
 {% extends 'admin-base.html.twig' %}
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/Order/SendMail.php onGet):
+    form      AdminOrderMailForm — field renderer:
+                template      select   — mail template picker
+                mail_subject  text     required
+                mail_header   textarea
+                mail_footer   textarea
+    orderNo   string — order identifier (passed to POST + back-nav)
+
+  TRANSITIONS (#[Link] on SendMail::onGet):
+    POST /admin/order/send-mail?orderNo=…  (rel="doSendOrderMail") — hidden field: csrfToken, orderNo
+    GET  /admin/order/mail-confirm          (rel="goOrderMailConfirm")
+    GET  /admin/order                       (rel="goOrder") — back navigation
+
+  UX DESIGN:
+    Zone 1 — context strip: order number badge so operator always knows which order
+    Zone 2 — template picker: select → JS auto-expands the compose panel
+    Zone 3 — compose panel: subject (required), header + footer (progressive disclosure)
+    Zone 4 — action toolbar: back-nav (goOrder) + send button (doSendOrderMail)
+
+  idea-admin vocabulary:
+    idea-admin-panel / idea-admin-panel__head / idea-admin-panel__body
+    idea-admin-field / idea-admin-field__label / idea-admin-field__input
+    idea-admin-required / idea-admin-error
+    idea-admin-toolbar / idea-admin-toolbar__back / idea-admin-toolbar__actions
+    idea-admin-action / idea-admin-action--primary
+    idea-admin-badge / idea-admin-notice / idea-admin-spec-list / idea-admin-spec-row
+#}
 
 {% set route = 'admin-order-send-mail' %}
 {% set title = '受注メール送信' %}
 {% set sub_title = '受注管理' %}
 
-{% block main %}
-    <form role="form" method="post" action="/admin/order/send-mail?orderNo={{ orderNo }}" id="mail_form" name="form1" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">メール作成</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3"><span>メールテンプレート</span></div>
-                                <div class="col">{{ form.input('template')|raw }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>件名</span><span class="badge bg-primary ms-1">必須</span></div>
-                                <div class="col">
-                                    {{ form.input('mail_subject')|raw }}
-                                    {% if form.error('mail_subject') %}<span class="invalid-feedback d-block">{{ form.error('mail_subject') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>ヘッダー</span></div>
-                                <div class="col">{{ form.input('mail_header')|raw }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>フッター</span></div>
-                                <div class="col">{{ form.input('mail_footer')|raw }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/order/edit?orderNo={{ orderNo }}">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>受注編集へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="button" id="preview_button" class="btn btn-ec-regular me-2" data-bs-toggle="modal" data-bs-target="#mailConfirmModal">確認画面へ</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+{% block stylesheet %}
+<style>
+/* ── Compose panel disclosure ─────────────────────────────────────────── */
+.idea-admin-compose-panel {
+  overflow: hidden;
+  transition: max-height .22s ease, opacity .18s ease;
+  max-height: 0;
+  opacity: 0;
+}
+.idea-admin-compose-panel.is-open {
+  max-height: 1000px;
+  opacity: 1;
+}
 
-    <div class="modal fade" id="mailConfirmModal" tabindex="-1" role="dialog" aria-labelledby="mailConfirmModal" aria-hidden="true" data-bs-keyboard="false" data-bs-backdrop="static">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">送信内容の確認</h5>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="bg-light p-4 bg-ec-formGray" id="mailPreviewBody" style="word-wrap: break-word; word-break:break-all"></div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                    <button class="btn btn-ec-conversion" type="submit" form="mail_form">送信</button>
-                </div>
-            </div>
-        </div>
+/* ── Advanced section toggle ──────────────────────────────────────────── */
+.idea-admin-advanced-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--idea-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: .3rem 0;
+  transition: color .14s;
+}
+.idea-admin-advanced-toggle:hover { color: var(--idea-ink); }
+.idea-admin-advanced-section {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .2s ease;
+}
+.idea-admin-advanced-section.is-open { max-height: 600px; }
+</style>
+{% endblock %}
+
+{% block main %}
+
+{# ═══════════════════════════════════════════════════════════════════════
+   Zone 1 — Order context strip
+   Always visible so the operator can confirm they are acting on the right order.
+   ═══════════════════════════════════════════════════════════════════════ #}
+<div class="idea-admin-notice idea-admin-notice--info" role="note" aria-label="対象注文番号">
+  <i class="fa fa-file-invoice" aria-hidden="true"></i>
+  <span>
+    対象注文：
+    {% if orderNo %}
+      <strong>{{ orderNo }}</strong>
+    {% else %}
+      <em>未指定</em>
+    {% endif %}
+  </span>
+  {% if orderNo %}
+  <a
+    href="/admin/order?orderNo={{ orderNo|url_encode }}"
+    rel="goOrder"
+    style="margin-left:auto;font-size:.8rem;color:inherit;text-decoration:underline;"
+  >受注詳細を見る</a>
+  {% endif %}
+</div>
+
+{# ═══════════════════════════════════════════════════════════════════════
+   Zone 2 + 3 — Mail composition form
+   Template picker + subject (required) + header/footer (progressive disclosure).
+   POST → /admin/order/send-mail (doSendOrderMail).
+   ═══════════════════════════════════════════════════════════════════════ #}
+<form
+  id="send-mail-form"
+  method="post"
+  action="/admin/order/send-mail?orderNo={{ orderNo|default('')|url_encode }}"
+  rel="doSendOrderMail"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="orderNo"   value="{{ orderNo|default('') }}">
+
+  {# ── Zone 2: template picker ────────────────────────────────────────── #}
+  <section class="idea-admin-panel" aria-labelledby="section-template">
+    <div class="idea-admin-panel__head">
+      <h3 id="section-template">
+        <i class="fa fa-envelope-open-text" aria-hidden="true"></i>
+        テンプレート選択
+      </h3>
+      <p class="idea-admin-panel__hint">テンプレートを選ぶと件名・ヘッダー・フッターが自動で入力されます。</p>
     </div>
+    <div class="idea-admin-panel__body">
+      <div class="idea-admin-field">
+        <div class="idea-admin-field__label">
+          <label for="mail_template">テンプレート</label>
+        </div>
+        <div class="idea-admin-field__input">
+          {{ form.input('template')|raw }}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# ── Zone 3: compose panel (subject required; header/footer advanced) ── #}
+  <div id="compose-panel" class="idea-admin-compose-panel" aria-live="polite">
+    <section class="idea-admin-panel" aria-labelledby="section-compose" style="margin-top:1rem;">
+      <div class="idea-admin-panel__head">
+        <h3 id="section-compose">
+          <i class="fa fa-pen-to-square" aria-hidden="true"></i>
+          メール内容
+        </h3>
+      </div>
+      <div class="idea-admin-panel__body">
+
+        {# mail_subject — required #}
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label for="mail_mail_subject">件名</label>
+            <span class="idea-admin-required">必須</span>
+          </div>
+          <div class="idea-admin-field__input">
+            {{ form.input('mail_subject')|raw }}
+            <span class="idea-admin-error">{{ form.error('mail_subject') }}</span>
+          </div>
+        </div>
+
+        {# mail_header / mail_footer — advanced (progressive disclosure) #}
+        <div>
+          <button
+            id="advanced-toggle"
+            class="idea-admin-advanced-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="advanced-section"
+          >
+            <i class="fa fa-chevron-right" id="advanced-caret" aria-hidden="true"></i>
+            ヘッダー / フッターを編集
+          </button>
+          <div id="advanced-section" class="idea-admin-advanced-section" aria-hidden="true">
+            <div style="padding-top:.75rem;display:grid;gap:.75rem;">
+
+              <div class="idea-admin-field">
+                <div class="idea-admin-field__label">
+                  <label for="mail_mail_header">ヘッダー</label>
+                </div>
+                <div class="idea-admin-field__input">
+                  {{ form.input('mail_header')|raw }}
+                  <span class="idea-admin-error">{{ form.error('mail_header') }}</span>
+                </div>
+              </div>
+
+              <div class="idea-admin-field">
+                <div class="idea-admin-field__label">
+                  <label for="mail_mail_footer">フッター</label>
+                </div>
+                <div class="idea-admin-field__input">
+                  {{ form.input('mail_footer')|raw }}
+                  <span class="idea-admin-error">{{ form.error('mail_footer') }}</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  {# ── Zone 4: action toolbar ─────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a
+        href="/admin/order?orderNo={{ orderNo|default('')|url_encode }}"
+        rel="goOrder"
+      >
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        受注詳細へ戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button
+        id="send-mail-btn"
+        class="idea-admin-action idea-admin-action--primary"
+        type="submit"
+        disabled
+        aria-describedby="send-mail-hint"
+      >
+        <i class="fa fa-paper-plane" aria-hidden="true"></i>
+        メールを送信
+      </button>
+      <span id="send-mail-hint" class="idea-admin-count" style="display:none;" aria-live="polite">
+        テンプレートを選択してください
+      </span>
+    </div>
+  </div>
+
+</form>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  var templateSelect  = document.getElementById('mail_template');
+  var composePanel    = document.getElementById('compose-panel');
+  var sendBtn         = document.getElementById('send-mail-btn');
+  var sendHint        = document.getElementById('send-mail-hint');
+  var advancedToggle  = document.getElementById('advanced-toggle');
+  var advancedSection = document.getElementById('advanced-section');
+  var advancedCaret   = document.getElementById('advanced-caret');
+
+  /* ── Open / close compose panel on template selection ─────────────── */
+  function updateComposeState() {
+    var hasTemplate = templateSelect && templateSelect.value !== '';
+    if (composePanel) {
+      if (hasTemplate) {
+        composePanel.classList.add('is-open');
+      } else {
+        composePanel.classList.remove('is-open');
+      }
+    }
+    if (sendBtn) {
+      sendBtn.disabled = !hasTemplate;
+    }
+    if (sendHint) {
+      sendHint.style.display = hasTemplate ? 'none' : '';
+    }
+  }
+
+  if (templateSelect) {
+    templateSelect.addEventListener('change', updateComposeState);
+    updateComposeState(); // reflect initial value on page load
+  }
+
+  /* ── Advanced section toggle ───────────────────────────────────────── */
+  if (advancedToggle && advancedSection) {
+    advancedToggle.addEventListener('click', function () {
+      var isOpen = advancedSection.classList.toggle('is-open');
+      advancedToggle.setAttribute('aria-expanded', String(isOpen));
+      advancedSection.setAttribute('aria-hidden', String(!isOpen));
+      if (advancedCaret) {
+        advancedCaret.style.transform = isOpen ? 'rotate(90deg)' : '';
+        advancedCaret.style.transition = 'transform .15s';
+      }
+    });
+  }
+
+}());
+</script>
 {% endblock %}

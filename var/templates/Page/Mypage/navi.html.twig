@@ -1,50 +1,48 @@
 {#
-  BeMart Mypage account-nav fragment — EC-CUBE Mypage/navi.twig.
+  BeMart — account nav partial.
 
-  PORT of EC-CUBE 4.3 default-theme `Mypage/navi.twig`
-  (src/Eccube/Resource/template/default/Mypage/navi.twig).
+  Included by every Mypage page. Does not extend a layout.
+  Variables supplied by the including template:
+    mypageno  string  active section key: index | favorite | change | delivery | withdraw
+    name01    string  given name from resource body (Mypage.onGet → MypageFetched.name01)
+    name02    string  family name from resource body (Mypage.onGet → MypageFetched.name02)
 
-  Included by every Mypage screen as the shared account-nav + welcome
-  block. The Mypage pages pass two variables when including it:
-   - `mypageno` — the active-tab key (`index` / `favorite` / `change` /
-     `delivery` / `withdraw`), exactly as EC-CUBE's templates `{% set %}`
-     it; drives the `active` class.
-   - `name01` / `name02` — the logged-in customer's name, from the page
-     resource body (EC-CUBE reads `app.user.name01/02`).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `BaseInfo.option_favorite_product` — the favorites nav item is
-     gated on this store option. BeMart's favorites IS a shipped
-     feature (FavoriteList resource), so the item is rendered
-     unconditionally; the render-diff test sets the EC-CUBE stub's
-     `option_favorite_product` truthy so both sides emit the item.
-   - `BaseInfo.option_point` — the welcome__point line is gated on the
-     points option. BeMart has no points feature, so the line is
-     OMITTED (never invented); the render-diff stub sets
-     `option_point` falsy so EC-CUBE omits it too — no residual.
-   - `app.user.name01/02` -> the resource body's `name01` / `name02`.
+  Navigation items derive from Mypage.php #[Link] declarations:
+    goMypage              /mypage
+    goFavoriteList        /mypage/favorite-list
+    goMypageChange        /mypage/change
+    goCustomerAddressList /mypage/address-list
+    goMypageWithdraw      /mypage/withdraw
 #}
-<div class="ec-navlistRole">
-    <ul class="ec-navlistRole__navlist">
-        <li class="ec-navlistRole__item {% if mypageno|default('') == 'index' %}active{% endif %}">
-            <a href="/mypage">ご注文履歴</a>
-        </li>
-        <li class="ec-navlistRole__item {% if mypageno|default('') == 'favorite' %}active{% endif %}">
-            <a href="/mypage/favorite-list">お気に入り一覧</a>
-        </li>
-        <li class="ec-navlistRole__item {% if mypageno|default('') == 'change' %}active{% endif %}">
-            <a href="/mypage/change">会員情報編集</a>
-        </li>
-        <li class="ec-navlistRole__item {% if mypageno|default('') == 'delivery' %}active{% endif %}">
-            <a href="/mypage/address-list">お届け先一覧</a>
-        </li>
-        <li class="ec-navlistRole__item {% if mypageno|default('') == 'withdraw' %}active{% endif %}">
-            <a href="/mypage/withdraw">退会手続き</a>
-        </li>
-    </ul>
-</div>
+<nav class="idea-account-nav" aria-label="アカウントメニュー">
+  <ul class="idea-account-nav__list" role="list">
 
-<div class="ec-welcomeMsg">
-    <p>ようこそ{{ name01|default('') }} {{ name02|default('') }}さん</p>
+    <li class="idea-account-nav__item{% if mypageno|default('') == 'index' %} is-active{% endif %}">
+      <a href="/mypage" rel="goMypage">注文履歴</a>
+    </li>
+
+    <li class="idea-account-nav__item{% if mypageno|default('') == 'favorite' %} is-active{% endif %}">
+      <a href="/mypage/favorite-list" rel="goFavoriteList">お気に入り</a>
+    </li>
+
+    <li class="idea-account-nav__item{% if mypageno|default('') == 'change' %} is-active{% endif %}">
+      <a href="/mypage/change" rel="goMypageChange">会員情報</a>
+    </li>
+
+    <li class="idea-account-nav__item{% if mypageno|default('') == 'delivery' %} is-active{% endif %}">
+      <a href="/mypage/address-list" rel="goCustomerAddressList">お届け先</a>
+    </li>
+
+    <li class="idea-account-nav__item{% if mypageno|default('') == 'withdraw' %} is-active{% endif %}">
+      <a href="/mypage/withdraw" rel="goMypageWithdraw">退会</a>
+    </li>
+
+  </ul>
+</nav>
+
+<div class="idea-account-welcome">
+  <span class="idea-eyebrow">アカウント</span>
+  <p class="idea-account-welcome__name">
+    {{ name01|default('') }}{{ name02|default('') }}
+  </p>
 </div>

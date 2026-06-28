@@ -1,208 +1,205 @@
-{#
-  BeMart admin Member list — EC-CUBE goMemberList (メンバー管理).
-
-  PORT of EC-CUBE 4.3 admin-theme `Setting/System/member.twig`
-  (src/Eccube/Resource/template/admin/Setting/System/member.twig).
-
-  Setting/System section, DATA/LIST page. It extends the admin frame
-  (`admin-base.html.twig`, the port of EC-CUBE's admin `default_frame.twig`),
-  not the storefront `base.html.twig`. The markup skeleton + `c-*` / `ec-*`
-  / Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
-  bindings are rebound to the MemberList resource body
-  (src/Resource/Page/Admin/MemberList.php — body carries `count` +
-  `members`, a list of {adminId, loginId, name, authority, work}).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `{% for Member in Members %}` -> the resource body's `members` list.
-     EC-CUBE keys the per-row action `<a>`s by `Member.id` (dtb_member
-     primary key); the MemberListFetched projection does not surface the
-     numeric id, only `loginId`, so BeMart keys the row + actions by
-     `loginId`. Same anchors, same classes — only the id param differs.
-   - `Member.department` -> NOT carried by the MemberListFetched
-     projection (EC-CUBE's dtb_member.department was out of the Wave 8
-     admin-grid slice). The 所属 column cell renders empty, not invented.
-     FLAGGED missing-body-field — enumerated as residual.
-   - `Member.Authority.name` -> the projection carries `authority` only
-     as a bare int (mtb_authority id), with no joined master-data label.
-     The 権限 column cell renders empty. FLAGGED missing-body-field.
-   - `Member.Work.name` -> the projection carries `work` only as a bare
-     int (mtb_work id). The 稼働 column cell renders empty. FLAGGED.
-   - `Member.two_factor_auth_enabled` / `two_factor_auth_key` -> NOT
-     carried by the projection (2FA columns were out of the Wave 8
-     slice). The 2段階認証 column cell renders empty. FLAGGED.
-   - `Member.id == app.user.id` (self-row delete guard) -> BeMart's html
-     context has no operator entity, so the self-target branch is never
-     taken; every row renders the normal delete affordance.
-   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
-     CSRF widget. OMITTED exactly as the storefront ports omit it.
-     EC-CUBE-runtime only — enumerated as residual.
-   - EC-CUBE's outer `<form name="form1">` wrapper posts nothing on this
-     port. BeMart renders it as a `<div id="form1">` so the per-row delete
-     forms remain valid, browser-visible affordances.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-member-list' %}
 {% set title = 'メンバー管理' %}
 {% set sub_title = 'システム設定' %}
 
-{% block javascript %}
-    <script>
-        $('.action-down, .action-up').on('click', function(e) {
-            var self = $(this),
-                current = $(this).parents('tr');
-            $('body').append($('<div class="modal-backdrop show"></div>'));
-            $.ajax({
-                url: self.attr('href'),
-                method: self.data('method'),
-            }).done(function() {
-                if (self.hasClass('action-down')) {
-                    current.next().after(current);
-                } else {
-                    current.prev().before(current);
-                }
-            }).always(function() {
-                $('.modal-backdrop').remove();
-                $('.action-up, .action-down').removeClass('disabled');
-                $('.action-up').first().addClass('disabled');
-                $('.action-down').last().addClass('disabled');
-            });
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/MemberList.php onGet):
+    members     list<{adminId, loginId, name, authority, work, sortNo}>
+    count       int   — total rows returned
+    filters     {nameKeyword: string|null, limit: int, offset: int}
+    csrfToken   string — CSRF token (used by per-row delete forms)
 
-            return false;
-        });
-    </script>
-{% endblock %}
+  ACTIONS (derived from #[Link] on MemberList / Member resource):
+    GET  /admin/member-list                           — goMemberList (this page, search)
+    GET  /admin/member                                — goMember (detail / create form)
+    POST /admin/member                                — doCreateMember
+    PUT  /admin/member?_method=put                    — doUpdateMember
+    DELETE /admin/member?loginId=…&_method=delete     — doDeleteMember
+
+  authority: 0=システム管理者 / 1=店舗オーナー
+  work:      0=非稼働 / 1=稼働
+
+  Projection gaps (Wave 8 slice, FLAGGED):
+    authority  — bare int only; no joined mtb_authority label available
+    work       — bare int only; no joined mtb_work label available
+
+  idea-admin vocabulary:
+    idea-admin-list-toolbar   result count + action strip
+    idea-admin-search-bar     keyword filter form
+    idea-admin-count          result count chip
+    idea-admin-action         button / link affordance
+    idea-admin-action--primary   primary CTA
+    idea-admin-action--destructive  danger action
+    idea-admin-table-wrap     overflow container for the data table
+    idea-admin-table          data table
+    idea-admin-table__actions action cell (right-aligned, no-wrap)
+    idea-admin-icon-btn       icon-only button
+    idea-admin-badge          status chip
+    idea-admin-badge--public  positive / active state
+    idea-admin-badge--private neutral / restricted state
+    idea-admin-empty          zero-result state
+#}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div id="ex-member-new" class="d-block mb-3">
-                    <a class="btn btn-ec-regular" href="/admin/member">新規登録</a>
-                </div>
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-body p-0">
-                        <div id="form1" data-form-name="form1">
-                            <table class="table table-sm">
-                                <thead>
-                                <tr>
-                                    <th class="border-top-0 pt-2 pb-2 text-center">
-                                        名前
-                                    </th>
-                                    <th class="border-top-0 pt-2 pb-2 text-center">
-                                        所属
-                                    </th>
-                                    <th class="border-top-0 pt-2 pb-2 text-center">
-                                        権限
-                                    </th>
-                                    <th class="border-top-0 pt-2 pb-2 text-center">
-                                        稼働
-                                    </th>
-                                    <th class="border-top-0 pt-2 pb-2 text-center">
-                                        2段階認証
-                                    </th>
-                                    <th class="border-top-0 pt-2 pb-2 text-center"></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for Member in members %}
-                                    <tr id="ex-member-{{ Member.loginId }}">
-                                        <td class="align-middle text-center ps-3">
-                                            {{ Member.name }}
-                                        </td>
-                                        <td class="align-middle text-center">
-                                        </td>
-                                        <td class="align-middle text-center">
-                                        </td>
-                                        <td class="align-middle text-center">
-                                        </td>
-                                        <td class="align-middle text-center">
-                                        </td>
-                                        <td class="align-middle pe-3">
-                                            <div class="text-end">
-                                                <div class="px-1 d-inline-block">
-                                                    <a class="btn btn-ec-actionIcon action-edit"
-                                                       href="/admin/member?loginId={{ Member.loginId }}"
-                                                       data-bs-toggle="tooltip"
-                                                       data-bs-placement="top"
-                                                       title="編集">
-                                                        <i class="fa fa-pencil fa-lg text-secondary" aria-hidden="true"></i>
-                                                    </a>
-                                                </div>
-                                                <div class="px-1 d-inline-block">
-                                                    <a class="btn btn-ec-actionIcon action-up {% if loop.first %} disabled {% endif %}"
-                                                       href="/admin/member-list?loginId={{ Member.loginId }}"
-                                                       data-bs-toggle="tooltip"
 
-                                                       data-bs-placement="top"
-                                                       title="上へ">
-                                                        <i class="fa fa-arrow-up fa-lg text-secondary" aria-hidden="true"></i>
-                                                    </a>
-                                                </div>
-                                                <div class="px-1 d-inline-block">
-                                                    <a class="btn btn-ec-actionIcon action-down {% if loop.last %} disabled {% endif %}"
-                                                       href="/admin/member-list?loginId={{ Member.loginId }}"
-                                                       data-bs-toggle="tooltip"
+{# ── Keyword search form (GET, safe read — no CSRF) ── #}
+<form
+  id="member-search-form"
+  method="get"
+  action="/admin/member-list"
+  role="search"
+  aria-label="メンバー検索"
+>
+  <div class="idea-admin-search-bar">
+    <input
+      type="search"
+      name="nameKeyword"
+      value="{{ filters.nameKeyword|default('') }}"
+      placeholder="名前で絞り込む"
+      aria-label="名前キーワード"
+    >
+    <button class="idea-admin-action idea-admin-action--primary" type="submit">
+      <i class="fa fa-search" aria-hidden="true"></i>
+      検索
+    </button>
+  </div>
+</form>
 
-                                                       data-bs-placement="top"
-                                                       title="下へ">
-                                                        <i class="fa fa-arrow-down fa-lg text-secondary" aria-hidden="true"></i>
-                                                    </a>
-                                                </div>
-                                                <div class="px-1 d-inline-block">
-                                                    <div class="d-inline-block me-2" data-bs-toggle="tooltip" data-bs-placement="top"
-                                                         title="削除">
-                                                        <a class="btn btn-ec-actionIcon action-delete"
-                                                           data-bs-toggle="modal"
-                                                           data-bs-target="#member_delete_{{ Member.loginId }}">
-                                                            <i class="fa fa-close fa-lg text-secondary" aria-hidden="true"></i>
-                                                        </a>
-                                                    </div>
-                                                    <div class="modal fade" id="member_delete_{{ Member.loginId }}" tabindex="-1"
-                                                         role="dialog"
-                                                         aria-labelledby="member_delete_{{ Member.loginId }}" aria-hidden="true">
-                                                        <div class="modal-dialog" role="document">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title fw-bold">
-                                                                        メンバーを削除します。</h5>
-                                                                    <button class="btn-close" type="button"
-                                                                            data-bs-dismiss="modal"
-                                                                            aria-label="Close">
-                                                                    </button>
-                                                                </div>
-                                                                <div class="modal-body text-start">
-                                                                    <p class="text-start">
-                                                                        メンバーを削除してよろしいですか？</p>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル
-                                                                    </button>
-                                                                    <form method="post" action="/admin/member?loginId={{ Member.loginId }}&_method=delete" class="d-inline">
-                                                                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                                                                        <input type="hidden" name="mode" value="member_form">
-                                                                        <button class="btn btn-ec-delete" type="submit" data-confirm="false">
-                                                                            削除
-                                                                        </button>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+{# ── Toolbar: result count + register action ── #}
+<div class="idea-admin-list-toolbar">
+  <div class="idea-admin-list-toolbar__left">
+    <span class="idea-admin-count">{{ count }}件</span>
+  </div>
+  <div class="idea-admin-list-toolbar__right">
+    <a class="idea-admin-action idea-admin-action--primary" href="/admin/member">
+      <i class="fa fa-plus" aria-hidden="true"></i>
+      新規登録
+    </a>
+  </div>
+</div>
+
+{# ── Member table / empty state ── #}
+{% if count %}
+
+  <div class="idea-admin-table-wrap">
+    <table class="idea-admin-table" aria-label="メンバー一覧">
+      <thead>
+        <tr>
+          <th scope="col">名前</th>
+          <th scope="col">ログインID</th>
+          <th scope="col">権限</th>
+          <th scope="col">稼働</th>
+          <th scope="col" class="idea-admin-table__actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for member in members %}
+        <tr id="member-{{ member.loginId }}">
+
+          <td>
+            <a href="/admin/member?loginId={{ member.loginId|url_encode }}">
+              {{ member.name }}
+            </a>
+          </td>
+
+          <td>{{ member.loginId }}</td>
+
+          <td>
+            {# authority: 0=システム管理者, 1=店舗オーナー (bare int — no joined label) #}
+            {% if member.authority is same as(0) %}
+              <span class="idea-admin-badge idea-admin-badge--public">システム管理者</span>
+            {% elseif member.authority is same as(1) %}
+              <span class="idea-admin-badge idea-admin-badge--private">店舗オーナー</span>
+            {% else %}
+              <span class="idea-admin-badge">—</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {# work: 0=非稼働, 1=稼働 (bare int — no joined label) #}
+            {% if member.work is same as(1) %}
+              <span class="idea-admin-badge idea-admin-badge--public">稼働</span>
+            {% else %}
+              <span class="idea-admin-badge idea-admin-badge--discontinued">非稼働</span>
+            {% endif %}
+          </td>
+
+          <td class="idea-admin-table__actions">
+            <a
+              class="idea-admin-icon-btn"
+              href="/admin/member?loginId={{ member.loginId|url_encode }}"
+              aria-label="{{ member.name }}を編集"
+            >
+              <i class="fa fa-pencil" aria-hidden="true"></i>
+            </a>
+            <button
+              class="idea-admin-icon-btn idea-admin-action--destructive"
+              type="button"
+              aria-label="{{ member.name }}を削除"
+              aria-haspopup="dialog"
+              onclick="document.getElementById('delete-dialog-{{ member.loginId }}').showModal()"
+            >
+              <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# ── Delete confirmation dialogs (one per row) ── #}
+  {% for member in members %}
+  <dialog
+    id="delete-dialog-{{ member.loginId }}"
+    aria-labelledby="delete-title-{{ member.loginId }}"
+    style="border:1px solid rgba(205,191,170,.45);border-radius:12px;padding:0;max-width:30rem;width:90%;"
+  >
+    <div class="idea-admin-panel__head">
+      <h3 id="delete-title-{{ member.loginId }}" style="margin:0;font-size:.9rem;font-weight:700;">削除の確認</h3>
     </div>
+    <div class="idea-admin-panel__body">
+      <p style="margin:0;font-size:.88rem;">
+        <strong>{{ member.name }}</strong> を削除しますか？この操作は元に戻せません。
+      </p>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:.6rem;padding:.75rem 1rem;border-top:1px solid rgba(205,191,170,.35);">
+      <button
+        class="idea-admin-action"
+        type="button"
+        onclick="this.closest('dialog').close()"
+      >キャンセル</button>
+      <form
+        method="post"
+        action="/admin/member?loginId={{ member.loginId|url_encode }}&_method=delete"
+        style="display:contents;"
+      >
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="mode" value="member_form">
+        <button class="idea-admin-action idea-admin-action--destructive" type="submit">
+          削除
+        </button>
+      </form>
+    </div>
+  </dialog>
+  {% endfor %}
+
+{% else %}
+
+  <div class="idea-admin-empty" role="status">
+    <i class="fa fa-users fa-2x" aria-hidden="true"></i>
+    <p class="idea-admin-empty__title">メンバーが登録されていません</p>
+    <p style="font-size:.84rem;">
+      <a class="idea-admin-action idea-admin-action--primary" href="/admin/member">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        新規登録
+      </a>
+    </p>
+  </div>
+
+{% endif %}
+
 {% endblock %}

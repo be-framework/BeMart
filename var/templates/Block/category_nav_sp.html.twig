@@ -1,30 +1,24 @@
 {#
-  EC-CUBE default-theme Block/category_nav_sp.twig static first slice.
+  BeMart – Block/category_nav_sp.html.twig
+  Mobile-drawer category navigation block (no extends; self-contained include).
+
+  Rendered inside the drawer overlay in base.html.twig on small screens.
+  Category set is derived from the Products resource (page://self/products),
+  where category_id query parameter filters by the categories declared in
+  Products::categoryName().  No Twig variables are injected; the category
+  list is static in the resource layer and mirrored here.
+
+  Design language: IdeaStore (idea-* vocabulary).
 #}
-<div class="ec-headerCategoryArea">
-    <div class="ec-headerCategoryArea__heading">
-        <p>商品カテゴリ</p>
-    </div>
-    <div class="ec-itemNav">
-        <ul class="ec-itemNav__nav">
-            <li>
-                <a href="/products?category_id=2">新入荷</a>
-            </li>
-            <li>
-                <a href="/products?category_id=1">ジェラート</a>
-            </li>
-            <li>
-                <a href="/products?category_id=3">彩のデザート</a>
-            </li>
-            <li>
-                <a href="/products?category_id=4">CUBE</a>
-            </li>
-            <li>
-                <a href="/products?category_id=5">アイスサンド</a>
-            </li>
-            <li>
-                <a href="/products?category_id=6">フルーツ</a>
-            </li>
-        </ul>
-    </div>
-</div>
+<nav class="idea-sp-category-nav" aria-label="商品カテゴリ">
+  <p class="idea-eyebrow">カテゴリ</p>
+  <div class="idea-chip-row">
+    <a href="/products?category_id=2">新入荷</a>
+    <a href="/products?category_id=1">ジェラート</a>
+    <a href="/products?category_id=3">彩のデザート</a>
+    <a href="/products?category_id=4">CUBE</a>
+    <a href="/products?category_id=5">アイスサンド</a>
+    <a href="/products?category_id=6">フルーツ</a>
+  </div>
+  <a class="idea-view-all" href="/products">すべての商品</a>
+</nav>

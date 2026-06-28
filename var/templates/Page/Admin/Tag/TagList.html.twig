@@ -1,266 +1,277 @@
-{#
-  BeMart admin Tag list — EC-CUBE goTagList (タグ管理).
-
-  PORT of EC-CUBE 4.3 admin-theme `Product/tag.twig`
-  (src/Eccube/Resource/template/admin/Product/tag.twig).
-
-  Product section, LIST + inline-FORM page. It extends the admin frame
-  (`admin-base.html.twig`, the port of EC-CUBE's admin
-  `default_frame.twig`), not the storefront `base.html.twig`. The markup
-  skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim from
-  EC-CUBE; only the dynamic bindings are rebound to the TagList resource
-  body (src/Resource/Page/Admin/Tag/TagList.php — body carries `tags`
-  (a list of {tagId, tagName}), `count` and an AdminTagForm exposed as
-  `form`).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `form_widget(form.name)` -> `form.input('tagName')` — the real
-     AdminTagForm inline-create input (Ray.WebFormModule).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - `{% for Tag in Tags %}` -> the resource body's `tags` list.
-   - `Tag.id` / `Tag.name` -> the BeMart projection keys `tagId` /
-     `tagName`. `Tag.sortNo` -> dtb_tag has the column but TagEntity
-     does NOT project it (the storage tracks sort_no internally — see
-     FakeTagStorage); the `data-sort-no` attribute renders empty.
-     FLAGGED for enrichment follow-up.
-   - per-row `forms[Tag.id]` inline-EDIT form -> ALPS exposes neither
-     `doUpdateTag` nor `goTag` (only DELETE — see the Tag resource
-     docblock), so the resource carries no per-row edit form. The
-     `mode-edit` collapse panel keeps EC-CUBE's structure but renders a
-     plain `<input>` repopulated from the row; it sits inside a `d-none`
-     collapse and has no BeMart submit target. Enumerated as residual.
-   - the entity-extension `auto_render` `{% for %}` loop ->
-     EC-CUBE entity-extension runtime; dropped (EC-CUBE-runtime only).
-   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
-     CSRF widget. OMITTED exactly as the storefront ports omit it.
-#}
 {% extends 'admin-base.html.twig' %}
+{#
+  BeMart admin Tag list — clean-room rebuild.
+
+  DATA CONTRACT (src/Resource/Page/Admin/Tag/TagList.php onGet):
+    count   int                             — total tag count
+    tags    list<{tagId: string, tagName: string}>
+    form    AdminTagForm                    — inline-create input (tagName field)
+
+  FORM CONTRACT (src/Form/AdminTagForm.php):
+    fields: tagName (text, id=admin_tag_name)
+
+  ACTIONS (derived from #[Link] annotations on the resource):
+    POST   /admin/tag/tag-list              — doCreateTag
+    DELETE /admin/tag/tag?tagId={id}       — doDeleteTag (via JS-driven confirm dialog)
+
+  CSRF: csrfToken hidden input; no doUpdateTag declared in ALPS.
+
+  IdeaStore admin design vocabulary (idea-admin-*):
+    idea-admin-panel         card section
+    idea-admin-panel__head   section header
+    idea-admin-panel__body   section content
+    idea-admin-field         label + input row
+    idea-admin-required      required badge
+    idea-admin-error         validation error text
+    idea-admin-table-wrap    responsive table container
+    idea-admin-table         data table
+    idea-admin-action        button/link affordance
+    idea-admin-icon-btn      compact icon-only button
+    idea-admin-count         record count chip
+    idea-admin-list-toolbar  top-of-list toolbar (left/right slots)
+    idea-admin-empty         zero-state block
+#}
 
 {% set route = 'admin-tag-tag-list' %}
 {% set title = 'タグ管理' %}
 {% set sub_title = '商品管理' %}
 
-{% block stylesheet %}
-    <style>
-        .list-group-item:hover {
-            z-index: inherit;
-        }
-    </style>
-{% endblock stylesheet %}
 {% block javascript %}
-    <script>
-        $(function() {
-            // 初期表示時のsort noを保持.
-            var oldSortNos = [];
-            $('.sortable-item').each(function() {
-                oldSortNos.push(this.dataset.sortNo);
-            });
-            oldSortNos.sort(function(a, b) {
-                return a - b;
-            }).reverse();
-            // 並び替え後にsort noを更新
-            var updateSortNo = function() {
-                var newSortNos = {};
-                var i = 0;
-                $('.sortable-item').each(function() {
-                    newSortNos[this.dataset.id] = oldSortNos[i];
-                    i++;
-                });
-                $.ajax({
-                    url: '/admin/sort-no-move?masterType=tag&_method=put',
-                    type: 'POST',
-                    data: newSortNos
-                }).always(function() {
-                    $(".modal-backdrop").remove();
-                });
-            };
-            // 最初と最後の↑↓を再描画
-            var redrawDisableAllows = function() {
-                var items = $('.sortable-item');
-                items.find('a').removeClass('disabled');
-                items.first().find('a.action-up').addClass('disabled');
-                items.last().find('a.action-down').addClass('disabled');
-            };
-            // オーバレイ後, 表示順の更新を行う
-            var moveSortNo = function() {
-                $('body').append($('<div class="modal-backdrop show"></div>'));
-                updateSortNo();
-                redrawDisableAllows();
-            };
-            // Drag and Drop
-            $('.sortable-container').sortable({
-                items: '> .sortable-item',
-                cursor: 'move',
-                update: function(e, ui) {
-                    moveSortNo();
-                }
-            });
-            // Up
-            $('.sortable-item').on('click', 'a.action-up', function(e) {
-                e.preventDefault();
-                var current = $(this).parents("li");
-                if (current.prev().hasClass('sortable-item')) {
-                    current.prev().before(current);
-                    moveSortNo();
-                }
-            });
-            // Down
-            $('.sortable-item').on('click', 'a.action-down', function(e) {
-                e.preventDefault();
-                var current = $(this).parents("li");
-                if (current.next().hasClass('sortable-item')) {
-                    current.next().after(current);
-                    moveSortNo();
-                }
-            });
+<script>
+(function () {
+    'use strict';
 
-            // 編集
-            $('.sortable-item').on('click', 'a.action-edit', function(e) {
-                e.preventDefault();
-                var current = $(this).parents("li");
-                current.find('.mode-view').addClass('d-none');
-                current.find('.mode-edit').removeClass('d-none');
-            });
+    /* ── Sort-order helpers ──────────────────────────────────────────── */
+    var oldSortNos = [];
+    document.querySelectorAll('[data-tag-id]').forEach(function (row) {
+        oldSortNos.push(parseInt(row.dataset.sortNo || '0', 10));
+    });
+    oldSortNos.sort(function (a, b) { return b - a; });
 
-            // 編集キャンセル
-            $('.sortable-item').on('click', 'button.action-edit-cancel', function(e) {
-                location.href = '/admin/tag/tag-list';
-            });
-            // 編集時, エラーがあれば入力欄を表示.
-            $('.sortable-item').find('.is-invalid').each(function(e) {
-                var current = $(this).parents("li");
-                current.find('.mode-view').addClass('d-none');
-                current.find('.mode-edit').removeClass('d-none');
-            });
-
-            // 削除モーダルのhrefとmessageの変更
-            $('#DeleteModal').on('shown.bs.modal', function(event) {
-                var target = $(event.relatedTarget);
-                // hrefの変更
-                $(this).find('[data-post-action="delete"]').attr('href', target.data('url'));
-
-                // messageの変更
-                $(this).find('p.modal-message').text(target.data('message'));
-            });
+    function pushSortNos() {
+        var payload = {};
+        var i = 0;
+        document.querySelectorAll('[data-tag-id]').forEach(function (row) {
+            payload[row.dataset.tagId] = oldSortNos[i];
+            i++;
         });
-    </script>
+        fetch('/admin/sort-no-move?masterType=tag&_method=put', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(payload).toString()
+        }).finally(function () {
+            redrawArrows();
+        });
+    }
+
+    function redrawArrows() {
+        var rows = document.querySelectorAll('[data-tag-id]');
+        rows.forEach(function (row) {
+            row.querySelector('.js-move-up').removeAttribute('disabled');
+            row.querySelector('.js-move-down').removeAttribute('disabled');
+        });
+        if (rows.length > 0) {
+            rows[0].querySelector('.js-move-up').setAttribute('disabled', '');
+            rows[rows.length - 1].querySelector('.js-move-down').setAttribute('disabled', '');
+        }
+    }
+
+    /* ── Up / Down buttons ───────────────────────────────────────────── */
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.js-move-up, .js-move-down');
+        if (!btn) return;
+        e.preventDefault();
+        var row = btn.closest('[data-tag-id]');
+        if (!row) return;
+        if (btn.classList.contains('js-move-up') && row.previousElementSibling) {
+            row.parentNode.insertBefore(row, row.previousElementSibling);
+            pushSortNos();
+        } else if (btn.classList.contains('js-move-down') && row.nextElementSibling) {
+            row.parentNode.insertBefore(row.nextElementSibling, row);
+            pushSortNos();
+        }
+    });
+
+    /* ── Delete confirmation dialog ──────────────────────────────────── */
+    var dialog = document.getElementById('js-delete-dialog');
+    var dialogMsg = dialog ? dialog.querySelector('.js-dialog-message') : null;
+    var dialogConfirm = dialog ? dialog.querySelector('.js-dialog-confirm') : null;
+
+    document.addEventListener('click', function (e) {
+        var trigger = e.target.closest('[data-delete-url]');
+        if (!trigger || !dialog) return;
+        e.preventDefault();
+        if (dialogMsg) dialogMsg.textContent = trigger.dataset.deleteMessage || '';
+        if (dialogConfirm) dialogConfirm.href = trigger.dataset.deleteUrl;
+        dialog.removeAttribute('hidden');
+        dialog.setAttribute('aria-modal', 'true');
+        if (dialogConfirm) dialogConfirm.focus();
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!dialog) return;
+        if (e.target.closest('.js-dialog-cancel') || e.target === dialog) {
+            dialog.setAttribute('hidden', '');
+            dialog.removeAttribute('aria-modal');
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (!dialog || dialog.hasAttribute('hidden')) return;
+        if (e.key === 'Escape') {
+            dialog.setAttribute('hidden', '');
+            dialog.removeAttribute('aria-modal');
+        }
+    });
+
+    redrawArrows();
+}());
+</script>
 {% endblock %}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-body p-0">
-                        <div class="card rounded border-0">
-                            <ul class="list-group list-group-flush sortable-container">
-                                <li class="list-group-item">
-                                    <form role="form" class="row" method="post" action="/admin/tag/tag-list">
-                                        <input type="hidden" id="admin_tag__token" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_tag')) }}">
-                                        <div class="col-auto align-items-center">
-                                            {{ form.input('tagName')|raw }}
-                                        </div>
 
-                                        <div class="col-auto align-items-center">
-                                            <button class="btn btn-ec-regular" type="submit">
-                                                新規作成
-                                            </button>
-                                        </div>
-                                  </form>
-                                </li>
-                                <li class="list-group-item">
-                                    <div class="row">
-                                        <div class="col-auto"><strong>&nbsp;</strong></div>
-                                        <div class="col-auto"><strong>ID</strong></div>
-                                        <div class="col-1"><strong>タグ</strong></div>
-                                    </div>
-                                </li>
-                                {% for Tag in tags %}
-                                    <li id="ex-tag-{{ Tag.tagId }}" class="list-group-item sortable-item" data-id="{{ Tag.tagId }}"
-                                        data-sort-no="">
-                                        <div class="row justify-content-around mode-view">
-                                            <div class="col-auto d-flex align-items-center"><i class="fa fa-bars text-ec-gray"></i></div>
-                                            <div class="col-auto d-flex align-items-center">{{ Tag.tagId }}</div>
-                                            <div class="col d-flex align-items-center"><a>{{ Tag.tagName }}</a>
-                                            </div>
-                                            <div class="col-auto text-end">
-                                                <a class="btn btn-ec-actionIcon me-2 action-up{% if loop.first %} disabled{% endif %}" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="上へ">
-                                                    <i class="fa fa-arrow-up fa-lg text-secondary"></i>
-                                                </a>
-                                                <a class="btn btn-ec-actionIcon me-2 action-down{% if loop.last %} disabled{% endif %}" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="下へ">
-                                                    <i class="fa fa-arrow-down fa-lg text-secondary"></i>
-                                                </a>
-                                                <a class="btn btn-ec-actionIcon me-2 action-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="編集">
-                                                    <i class="fa fa-pencil fa-lg text-secondary"></i>
-                                                </a>
-                                                <div class="d-inline-block me-2" data-bs-toggle="tooltip"
-                                                     data-bs-placement="top" title="削除">
-                                                    <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#DeleteModal"
-                                                       data-url="/admin/tag/tag?tagId={{ Tag.tagId }}"
-                                                       data-message="この操作はあとから取り消すことができません。「{{ Tag.tagName }}」を削除してよろしいですか？">
-                                                        <i class="fa fa-close fa-lg text-secondary"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <form class="row d-none mode-edit" method="post" action="/admin/tag/tag-list">
-                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_tag')) }}">
-                                            <div class="col-auto align-items-center">
-                                                <input type="text" class="form-control" name="name" value="{{ Tag.tagName }}" data-origin-value="{{ Tag.tagName }}">
-                                            </div>
+{# ── Count toolbar ──────────────────────────────────────────────────────── #}
+<div class="idea-admin-list-toolbar">
+    <div class="idea-admin-list-toolbar__left">
+        <span class="idea-admin-count">{{ count }} 件</span>
+    </div>
+</div>
 
-                                            <div class="col-auto align-items-center">
-                                                <button class="btn btn-ec-conversion" type="submit">決定</button>
-                                            </div>
-                                            <div class="col-auto align-items-center">
-                                                <button class="btn btn-ec-sub action-edit-cancel" type="button">キャンセル</button>
-                                            </div>
-                                        </form>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            <!-- 削除モーダル -->
-                            <div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog"
-                                 aria-labelledby="DeleteModal" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title fw-bold">
-                                                削除します
-                                            </h5>
-                                            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close">
-
-                                            </button>
-                                        </div>
-                                        <div class="modal-body text-start">
-                                            <p class="text-start modal-message"><!-- jsでメッセージを挿入 --></p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">
-                                                キャンセル
-                                            </button>
-                                            <a class="btn btn-ec-delete" href="#"
-                                               data-post-action="delete"
-                                               token-for-anchor="{{ csrf_token_for_anchor('admin_tag_delete') }}"
-                                               data-method="delete"
-                                               data-confirm="false">
-                                                削除
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+{# ── Inline-create form ─────────────────────────────────────────────────── #}
+<section class="idea-admin-panel" aria-labelledby="section-create-tag">
+    <div class="idea-admin-panel__head">
+        <h3 id="section-create-tag">新規タグ登録</h3>
+    </div>
+    <div class="idea-admin-panel__body">
+        <form
+            role="form"
+            method="post"
+            action="/admin/tag/tag-list"
+            aria-label="タグ新規登録フォーム"
+        >
+            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+            <div class="idea-admin-field">
+                <div class="idea-admin-field__label">
+                    <label for="admin_tag_name">タグ名</label>
+                    <span class="idea-admin-required">必須</span>
                 </div>
-                <p>項目の順番はドラッグ＆ドロップでも変更可能です。</p>
+                <div class="idea-admin-field__input">
+                    {{ form.input('tagName')|raw }}
+                    {% if form.error('tagName') %}
+                        <span class="idea-admin-error">{{ form.error('tagName') }}</span>
+                    {% endif %}
+                </div>
             </div>
+            <div style="margin-top:.75rem; text-align:right;">
+                <button class="idea-admin-action idea-admin-action--primary" type="submit">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                    登録
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+{# ── Tag list ───────────────────────────────────────────────────────────── #}
+{% if tags is empty %}
+    <div class="idea-admin-empty">
+        <span class="idea-admin-empty__title">タグが登録されていません</span>
+        <p>上のフォームから新しいタグを登録してください。</p>
+    </div>
+{% else %}
+    <div class="idea-admin-table-wrap" style="margin-top:1rem;">
+        <table class="idea-admin-table" aria-label="タグ一覧">
+            <thead>
+                <tr>
+                    <th scope="col" style="width:2.5rem;"></th>
+                    <th scope="col" style="width:5rem;">ID</th>
+                    <th scope="col">タグ名</th>
+                    <th scope="col" class="idea-admin-table__actions">操作</th>
+                </tr>
+            </thead>
+            <tbody id="js-tag-list">
+                {% for Tag in tags %}
+                <tr data-tag-id="{{ Tag.tagId }}" data-sort-no="">
+                    <td style="cursor:move; color:var(--idea-muted); text-align:center;">
+                        <i class="fa fa-bars" aria-hidden="true"></i>
+                    </td>
+                    <td>{{ Tag.tagId }}</td>
+                    <td>{{ Tag.tagName }}</td>
+                    <td class="idea-admin-table__actions">
+                        <button
+                            class="idea-admin-icon-btn js-move-up"
+                            type="button"
+                            title="上へ"
+                            aria-label="{{ Tag.tagName }} を上へ移動"
+                        ><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+                        <button
+                            class="idea-admin-icon-btn js-move-down"
+                            type="button"
+                            title="下へ"
+                            aria-label="{{ Tag.tagName }} を下へ移動"
+                        ><i class="fa fa-arrow-down" aria-hidden="true"></i></button>
+                        <a
+                            class="idea-admin-icon-btn idea-admin-text-btn--danger"
+                            href="#"
+                            data-delete-url="/admin/tag/tag?tagId={{ Tag.tagId }}"
+                            data-delete-message="{{ Tag.tagName }} を削除してよろしいですか？"
+                            aria-label="{{ Tag.tagName }} を削除"
+                            title="削除"
+                        ><i class="fa fa-trash" aria-hidden="true"></i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p style="margin-top:.6rem; color:var(--idea-muted); font-size:.8rem;">
+        <i class="fa fa-info-circle" aria-hidden="true"></i>
+        行をドラッグして並び順を変更できます。
+    </p>
+{% endif %}
+
+{# ── Delete confirmation dialog ─────────────────────────────────────────── #}
+<div
+    id="js-delete-dialog"
+    role="dialog"
+    aria-labelledby="js-delete-dialog-title"
+    hidden
+    style="
+        position:fixed; inset:0; z-index:200;
+        display:flex; align-items:center; justify-content:center;
+        background:rgba(41,37,31,.45);
+    "
+>
+    <div class="idea-admin-panel" style="max-width:420px; width:92%; padding:0; overflow:hidden;">
+        <div class="idea-admin-panel__head">
+            <h3 id="js-delete-dialog-title" style="color:#a9472e;">
+                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                削除の確認
+            </h3>
+        </div>
+        <div class="idea-admin-panel__body">
+            <p class="js-dialog-message" style="margin:0;"></p>
+        </div>
+        <div style="
+            display:flex; justify-content:flex-end; gap:.6rem;
+            padding:.75rem 1rem;
+            border-top:1px solid rgba(205,191,170,.4);
+        ">
+            <button
+                class="idea-admin-action js-dialog-cancel"
+                type="button"
+            >キャンセル</button>
+            <a
+                class="idea-admin-action idea-admin-action--destructive js-dialog-confirm"
+                href="#"
+                data-method="delete"
+            >
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                削除する
+            </a>
         </div>
     </div>
+</div>
 
 {% endblock %}

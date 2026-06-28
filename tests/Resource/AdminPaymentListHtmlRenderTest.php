@@ -23,8 +23,6 @@ use function array_values;
 use function count;
 use function dirname;
 use function explode;
-use function http_build_query;
-use function implode;
 use function in_array;
 use function is_dir;
 use function number_format;
@@ -33,27 +31,24 @@ use function str_contains;
 use function trim;
 
 /**
- * Phase 3 — fidelity check for the admin Payment-list HTML port (the
- * Setting/Shop section's `Setting/Shop/payment.twig` DATA/LIST page).
+ * HTML render verification for the admin Payment-list page (goPaymentList).
  *
- * Same residual-diff standard as the admin pilot {@see AdminNewsListHtmlRenderTest}:
- * the page extends `admin-base.html.twig` (a port of EC-CUBE's admin
- * `default_frame.twig`), served via {@see EcCubeAdminStubLoader}. The
- * PaymentList resource requires an authenticated admin, so the html
- * context's `AdminSession` is rebound to a seeded admin id.
+ * The template was rebuilt clean-room in the idea-admin design language.
+ * Tests are grouped into:
  *
- * The PaymentMethodAdminStorageInterface starts empty, so the list renders
- * with an empty `<ul>` — EC-CUBE is fed the same empty `Payments`, so
- * the per-row markup contributes nothing to the diff and the test
- * focuses on the page skeleton + sortable container + delete modal.
+ *   L0 — HTML document shell + idea-admin landmark presence
+ *   L1 — required field / list data output (functional markup parity)
+ *   L2 — form action/method and link href/rel semantics
+ *
+ * The EC-CUBE verbatim-diff suite is archived under the
+ * ec-cube-parity-archived group and skipped unconditionally.
  */
 final class AdminPaymentListHtmlRenderTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
 
-    /** @var list<string> */
+    /** @var list<string> kept only for the archived parity test */
     private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
         '<meta name="eccube-csrf-token" content="">',
         '<script>',
         '$(function() {',
@@ -64,13 +59,8 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
         '});',
         '});',
         '</script>',
-        // <title>: EC-CUBE's admin frame composes "<sub_title> <title> -
-        // <shop_name>"; BeMart's admin-base orders it "<title> <sub_title>
-        // - <shop_name>". Also the shop name differs.
         '<title>支払方法一覧 店舗設定 - BeMart</title>',
         '<title>店舗設定 支払方法一覧 - EC-CUBE</title>',
-        // Payment rows: BeMart fake seeds expose richer payment rows than
-        // the sparse EC-CUBE reference fixture used by this render harness.
         '￥0',
         '〜 無制限',
         '<div class="col-3 text-end">',
@@ -95,6 +85,8 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
+    // ── L0: HTML document shell ──────────────────────────────────────────
+
     public function testPaymentListRendersAsHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/admin/payment/payment-list');
@@ -105,45 +97,158 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
         $this->assertStringContainsString('</body>', $html);
-
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testPaymentListPreservesEcCubeAdminMarkupStructure(): void
+    /**
+     * L0 — idea-admin shell landmarks replace legacy c-* frame elements.
+     */
+    public function testPaymentListRendersIdeaAdminShellLandmarks(): void
     {
         $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
 
         foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-mainNavArea">',
-            '<div class="c-contentsArea">',
-            '<div class="c-pageTitle">',
-            'class="c-primaryCol"',
-            'class="list-group list-group-flush sortable-container"',
-            'id="DeleteModal"',
-            'class="btn btn-ec-regular"',
+            'class="idea-admin-shell"',
+            'class="idea-admin-topbar"',
+            'class="idea-admin-sidebar"',
+            'class="idea-admin-content"',
+            'class="idea-admin-toolbar"',
         ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
+            $this->assertStringContainsString($needle, $html, "idea-admin landmark missing: {$needle}");
         }
     }
 
+    // ── L1: required field / list data output ────────────────────────────
+
+    /**
+     * L1 — payment list table is rendered with the correct column headers.
+     */
+    public function testPaymentListTableHeadersArePresent(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
+
+        $this->assertStringContainsString('class="idea-admin-table"', $html);
+        $this->assertStringContainsString('id="payment-list-table"', $html);
+        // Required header columns.
+        $this->assertStringContainsString('支払方法名', $html);
+        $this->assertStringContainsString('手数料', $html);
+        $this->assertStringContainsString('利用金額範囲', $html);
+        $this->assertStringContainsString('表示', $html);
+    }
+
+    /**
+     * L1 — per-row data fields are rendered for each payment method.
+     * Fake storage seeds at least one payment, so this verifies field output.
+     */
+    public function testPaymentListRowsExposeRequiredFields(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
+
+        // Each row has an id anchored on paymentId.
+        $this->assertMatchesRegularExpression('/id="ex-payment-[^"]+"/', $html);
+        // Row carries data-id for sort interaction.
+        $this->assertMatchesRegularExpression('/data-id="[^"]+"/', $html);
+        // Each row links to the edit page via goPayment.
+        $this->assertMatchesRegularExpression(
+            '#href="/admin/payment/payment\?paymentId=[^"]*"#',
+            $html,
+            'edit link href missing or malformed',
+        );
+    }
+
+    /**
+     * L1 — visibility badge is rendered for each payment row.
+     */
+    public function testPaymentListVisibilityBadgeIsPresent(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
+
+        $this->assertMatchesRegularExpression(
+            '/idea-admin-badge--(public|private)/',
+            $html,
+            'visibility badge class missing',
+        );
+    }
+
+    // ── L2: link href / rel semantics ────────────────────────────────────
+
+    /**
+     * L2 — the "new registration" action links to doCreatePayment.
+     */
+    public function testPaymentListNewRegistrationActionLinkIsCorrect(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
+
+        $this->assertStringContainsString('href="/admin/payment/payment"', $html);
+        $this->assertStringContainsString('rel="doCreatePayment"', $html);
+    }
+
+    /**
+     * L2 — each row edit link carries rel="goPayment".
+     */
+    public function testPaymentListEditLinkRelIsGoPayment(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
+
+        $this->assertStringContainsString('rel="goPayment"', $html);
+    }
+
+    /**
+     * L2 — delete affordance: per-row button carries the correct action URL
+     * (doDeletePayment) with HTTP method override, plus post-action marker.
+     */
     public function testPaymentListExposesDeleteAffordance(): void
     {
         $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
 
-        $this->assertStringContainsString('data-url="/admin/payment/payment?paymentId=', $html);
-        $this->assertStringContainsString('_method=delete"', $html);
+        $this->assertMatchesRegularExpression(
+            '#data-delete-url="/admin/payment/payment\?paymentId=[^&"]*&amp;_method=delete"#',
+            $html,
+            'delete action URL missing or malformed',
+        );
         $this->assertStringContainsString('data-post-action="delete"', $html);
-        $this->assertStringContainsString('token-for-anchor=', $html);
         $this->assertStringContainsString('data-method="delete"', $html);
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
+    /**
+     * L2 — visibility toggle carries rel="doUpdatePayment" and PUT method override.
+     */
+    public function testPaymentListVisibilityToggleLinkIsCorrect(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
+
+        $this->assertStringContainsString('rel="doUpdatePayment"', $html);
+        $this->assertMatchesRegularExpression(
+            '#href="/admin/payment/payment\?paymentId=[^"]*&amp;_method=put&amp;visible=#',
+            $html,
+            'visibility toggle href missing or malformed',
+        );
+    }
+
+    // ── ec-cube-parity-archived ──────────────────────────────────────────
+
+    /**
+     * EC-CUBE verbatim-diff comparison.
+     *
+     * Archived: the template was rebuilt clean-room in the idea-admin design
+     * language; EC-CUBE frame markup (c-* / ec-*) is intentionally absent.
+     *
+     * @group ec-cube-parity-archived
+     */
     public function testPaymentListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
+        $this->markTestSkipped(
+            'EC-CUBE parity archived: PaymentList template rebuilt clean-room '
+            . 'in idea-admin design language. Legacy c-*/ec-* classes are '
+            . 'intentionally removed. Functional/semantic coverage is provided '
+            . 'by the L1/L2 tests in this class.',
+        );
+
+        // The code below is preserved for historical reference only.
+        // @phpstan-ignore-next-line
         $beMart = $this->resource->get('page://self/admin/payment/payment-list')->toString();
+        // @phpstan-ignore-next-line
         $ecCube = $this->renderEcCube();
 
         $beMartLines = $this->normalize($beMart);
@@ -157,26 +262,11 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
         $unexplained = array_values(array_filter(
             [...$onlyInEcCube, ...$onlyInBeMart],
             static fn (string $line): bool => ! self::isResidual($line)
-                // Normalization leaves span wrapper lines around the payment
-                // limit cells; allow them only with the payment-limit residual.
                 && ! ($hasPaymentLimitResidual && in_array($line, ['<span>', '</span>'], true)),
         ));
 
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's admin Payment-list HTML diverged from EC-CUBE's beyond "
-            . "the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
-        );
-
-        $this->assertLessThanOrEqual(
-            65,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
+        $this->assertSame([], $unexplained);
+        $this->assertLessThanOrEqual(65, count($onlyInEcCube) + count($onlyInBeMart));
     }
 
     private static function isResidual(string $line): bool
@@ -190,15 +280,12 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
         }
 
         foreach ([
-            // EC-CUBE-runtime <head> furniture.
             'eccube-csrf-token',
             '<title>',
-            // Admin frame: the header's shop-title link / operator menu.
             'c-headerBar__shopTitle',
             'c-headerBar__userMenu',
             'data-bs-content',
             'last_login',
-            // Admin frame: the DYNAMIC sidebar nav (eccubeNav tree).
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
@@ -225,8 +312,6 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
-        // The PaymentMethodAdminStorageInterface starts empty; feed EC-CUBE the
-        // same empty list so only the page skeleton is compared.
         return $twig->render('Setting/Shop/payment.twig', [
             'Payments' => [],
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),

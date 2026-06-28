@@ -7,64 +7,27 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use PHPUnit\Framework\TestCase;
-use Twig\Environment;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
-use function dirname;
-use function explode;
-use function http_build_query;
-use function implode;
-use function is_dir;
-use function preg_replace;
-use function str_contains;
-use function str_replace;
-use function trim;
-
 /**
- * Phase 3 — fidelity check for the Help/guide (goHelpGuide) HTML port.
+ * L1/L2 semantic render verification for Help/Guide (goHelpGuide).
  *
- * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
- * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
+ * The template is a clean-room IdeaStore page — ec-* class parity checks
+ * against EC-CUBE's default-theme have been retired (see @group below).
  *
- * `Help/guide.twig` is the simplest storefront page: a header-only
- * `ec-role` / `ec-pageHeader` block with NO data binding (the guide
- * body in EC-CUBE is admin-editable layout-block content, which BeMart
- * has no equivalent for). The Help/Guide resource
- * (src/Resource/Page/Help/Guide.php) is a pure renderer; the port is
- * EC-CUBE's header-only default page. The residual is the genuinely
- * EC-CUBE-runtime-only `<head>` frame material.
+ * L1 — required fields / data output:
+ *   - HTTP 200, Content-Type text/html
+ *   - IdeaStore base layout rendered (doctype, lang="ja", idea-store body)
+ *   - Page title block contains the Japanese title + brand suffix
+ *   - Guide heading visible in the page body
+ *   - Empty-state placeholder rendered when staticContent.sections is empty
+ *
+ * L2 — link href / rel:
+ *   - goTop link → href="/" rel="goTop"
+ *   - Breadcrumb home link → href="/"
  */
 final class HelpGuideHtmlRenderTest extends TestCase
 {
-    /**
-     * EC-CUBE lines with no BeMart counterpart and vice versa. Each entry
-     * is a whitespace-collapsed line; the comment states WHY it is
-     * acceptable.
-     *
-     * @var list<string>
-     */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>BeMart / ご利用ガイド</title>',
-        '<title>EC-CUBE / ご利用ガイド</title>',
-        '<meta name="author" content="">',
-    ];
-
     private ResourceInterface $resource;
 
     protected function setUp(): void
@@ -73,186 +36,134 @@ final class HelpGuideHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testHelpGuidePageRendersAsHtmlDocument(): void
+    // -------------------------------------------------------------------------
+    // L1 — required data output / structural fields
+    // -------------------------------------------------------------------------
+
+    public function testResponseIsHttp200WithHtmlContentType(): void
     {
         $ro = $this->resource->get('page://self/help/guide');
 
         $this->assertSame(Code::OK, $ro->code);
-
-        $html = $ro->toString();
-
-        $this->assertStringContainsString('<!doctype html>', $html);
-        $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
-        $this->assertStringContainsString('</body>', $html);
-
+        $ro->toString();
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testHelpGuidePagePreservesEcCubeMarkupStructure(): void
+    public function testIdeaStoreBaseLayoutIsRendered(): void
+    {
+        $html = $this->resource->get('page://self/help/guide')->toString();
+
+        $this->assertStringContainsString('<!doctype html>', $html);
+        $this->assertStringContainsString('<html lang="ja">', $html);
+        $this->assertStringContainsString('class="idea-store"', $html);
+        $this->assertStringContainsString('</body>', $html);
+    }
+
+    public function testPageTitleContainsJapaneseTitleAndBrandSuffix(): void
+    {
+        $html = $this->resource->get('page://self/help/guide')->toString();
+
+        $this->assertStringContainsString('<title>ご利用ガイド | IDEA STORE</title>', $html);
+    }
+
+    public function testGuideHeadingIsRenderedInPageBody(): void
+    {
+        $html = $this->resource->get('page://self/help/guide')->toString();
+
+        $this->assertStringContainsString('ご利用ガイド', $html);
+        $this->assertStringContainsString('id="idea-guide-title"', $html);
+    }
+
+    /**
+     * When staticContent.sections is empty (current Wave 3H state), the page
+     * must render the placeholder instead of an empty definition list.
+     */
+    public function testEmptySectionsRendersPlaceholder(): void
+    {
+        $html = $this->resource->get('page://self/help/guide')->toString();
+
+        $this->assertStringContainsString('id="idea-guide-empty"', $html);
+        $this->assertStringNotContainsString('id="idea-guide-sections"', $html);
+    }
+
+    public function testIdeaStoreClassesAreUsedInBody(): void
     {
         $html = $this->resource->get('page://self/help/guide')->toString();
 
         foreach ([
-            '<div class="ec-role">',
-            '<div class="ec-pageHeader">',
-            '<h1>ご利用ガイド</h1>',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
+            'idea-container',
+            'idea-section',
+            'idea-eyebrow',
+            'idea-section-title',
+        ] as $class) {
+            $this->assertStringContainsString($class, $html, "Missing IdeaStore class: {$class}");
         }
     }
 
+    // -------------------------------------------------------------------------
+    // L2 — link href / rel
+    // -------------------------------------------------------------------------
+
     /**
-     * The honesty test: diff BeMart's rendered Help/guide page against
-     * EC-CUBE's own rendering. Every difference must be in the residual
-     * allowlist.
+     * Guide.php declares #[Link(rel: 'goTop', href: 'page://self/')].
+     * The template must surface this as href="/" with rel="goTop".
+     */
+    public function testGoTopLinkHasCorrectHrefAndRel(): void
+    {
+        $html = $this->resource->get('page://self/help/guide')->toString();
+
+        $this->assertStringContainsString('href="/"', $html);
+        $this->assertStringContainsString('rel="goTop"', $html);
+    }
+
+    public function testBreadcrumbContainsHomeLink(): void
+    {
+        $html = $this->resource->get('page://self/help/guide')->toString();
+
+        $this->assertStringContainsString('idea-breadcrumb', $html);
+        $this->assertStringContainsString('<a href="/">Home</a>', $html);
+    }
+
+    // -------------------------------------------------------------------------
+    // EC-CUBE parity — archived
+    // -------------------------------------------------------------------------
+
+    /**
+     * EC-CUBE markup structure parity check — retired when the template was
+     * rebuilt with IdeaStore design language (idea-* classes).
+     *
+     * The original test asserted ec-role / ec-pageHeader nodes.
+     * Those nodes no longer exist in the IdeaStore clean-room template.
+     *
+     * @group ec-cube-parity-archived
+     */
+    public function testHelpGuidePagePreservesEcCubeMarkupStructure(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE markup parity retired: template rebuilt with IdeaStore '
+            . 'design language (idea-* classes). Structural assertions converted '
+            . 'to L1/L2 functional tests above.'
+        );
+    }
+
+    /**
+     * EC-CUBE line-diff parity test — retired when the template was rebuilt
+     * with IdeaStore design language.
+     *
+     * The original test diffed BeMart's rendered HTML against EC-CUBE 4.3's
+     * real Help/guide.twig. The IdeaStore clean-room template deliberately
+     * diverges from EC-CUBE's DOM, so a structural line-diff is not meaningful.
+     *
+     * @group ec-cube-parity-archived
      */
     #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testHelpGuideHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
-        $beMart = $this->resource->get('page://self/help/guide')->toString();
-        $ecCube = $this->renderEcCubeHelpGuide();
-
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's Help/guide HTML diverged from EC-CUBE's beyond the "
-            . "residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
+        $this->markTestSkipped(
+            'EC-CUBE parity diff retired: template rebuilt clean-room in '
+            . 'IdeaStore design language. EC-CUBE DOM structure intentionally '
+            . 'absent. See testGoTopLinkHasCorrectHrefAndRel / '
+            . 'testGuideHeadingIsRenderedInPageBody for live functional coverage.'
         );
-
-        $this->assertLessThan(
-            14,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
-    }
-
-    private static function isResidual(string $line): bool
-    {
-        foreach (self::RESIDUAL_ALLOWLIST as $allowed) {
-            if ($line === $allowed) {
-                return true;
-            }
-        }
-
-        foreach ([
-            'eccube-csrf-token',
-            '<title>',
-            'meta name="author"',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Render EC-CUBE 4.3's real Help/guide.twig + default_frame.twig from
-     * the gitignored clone, with EC-CUBE's Twig API stubbed.
-     */
-    private function renderEcCubeHelpGuide(): string
-    {
-        $ecCubeTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/default';
-        if (! is_dir($ecCubeTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
-
-        $twig = new Environment(new EcCubeStubLoader($ecCubeTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-        $this->registerEcCubeStubs($twig);
-
-        return $twig->render('Help/guide.twig', [
-            'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
-            'eccube_config' => ['locale' => 'ja'],
-            'Page' => new EcCubeStub([
-                'meta_tags' => '',
-                'description' => '',
-                'author' => '',
-                'keyword' => '',
-                'meta_robots' => '',
-            ]),
-            'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
-                'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
-                'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
-                'ColumnNum' => 1,
-            ]),
-            'app' => new EcCubeStub(['session' => new EcCubeStub([
-                'flashbag' => new EcCubeFlashBag(),
-            ]), 'request' => new EcCubeStub(['_route' => 'help_guide'])]),
-            'subtitle' => 'ご利用ガイド',
-            'title' => 'ご利用ガイド',
-        ]);
-    }
-
-    private function registerEcCubeStubs(Environment $twig): void
-    {
-        $trans = static function (string $key, array $params = []): string {
-            $messages = EcCubeStub::jaMessages();
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('nl2br', static fn (string $s): string => nl2br($s)));
-        $twig->addFilter(new TwigFilter('number_format', static fn ($n): string => number_format((float) $n)));
-        $twig->addFilter(new TwigFilter('price', static function ($n): string {
-            $f = new \NumberFormatter('ja_JP', \NumberFormatter::CURRENCY);
-
-            return (string) $f->formatCurrency((float) ($n ?? 0), 'JPY');
-        }));
-        $twig->addFilter(new TwigFilter('purify', static fn (string $s): string => $s));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
-    }
-
-    /**
-     * Collapse a rendered HTML document to a list of non-empty,
-     * whitespace-trimmed lines for structural line-diffing.
-     *
-     * @return list<string>
-     */
-    private function normalize(string $html): array
-    {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
-        }
-
-        return $lines;
     }
 }
