@@ -163,34 +163,48 @@ final class MypageHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
+        $this->assertStringContainsString('<main>', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testMypagePreservesEcCubeMarkupStructure(): void
+    /**
+     * L1/L2 functional check: the mypage dashboard renders the account
+     * navigation and order-history section for the authenticated customer.
+     *
+     * L1 — required fields / data output (goMypage ALPS transitions present).
+     * L2 — link href values match resource #[Link] declarations in Mypage.php.
+     */
+    public function testMypagePreservesSemanticStructure(): void
     {
         $html = $this->resource->get('page://self/mypage')->toString();
 
-        foreach ([
-            '<div class="ec-mypageRole">',
-            '<div class="ec-pageHeader">',
-            '<div class="ec-navlistRole">',
-            'class="ec-navlistRole__navlist"',
-            '<div class="ec-welcomeMsg">',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        // L1 — all five account-nav destinations are present
+        $this->assertStringContainsString('href="/mypage"', $html, 'goMypage nav link required');
+        $this->assertStringContainsString('href="/mypage/favorite-list"', $html, 'goFavoriteList nav link required');
+        $this->assertStringContainsString('href="/mypage/change"', $html, 'goMypageChange nav link required');
+        $this->assertStringContainsString('href="/mypage/address-list"', $html, 'goCustomerAddressList nav link required');
+        $this->assertStringContainsString('href="/mypage/withdraw"', $html, 'goMypageWithdraw nav link required');
+
+        // L2 — rel attributes match ALPS link-relation names from Mypage.php #[Link]
+        $this->assertStringContainsString('rel="goFavoriteList"', $html, 'goFavoriteList rel required');
+        $this->assertStringContainsString('rel="goMypageChange"', $html, 'goMypageChange rel required');
+        $this->assertStringContainsString('rel="goCustomerAddressList"', $html, 'goCustomerAddressList rel required');
+        $this->assertStringContainsString('rel="goMypageWithdraw"', $html, 'goMypageWithdraw rel required');
+
+        // L1 — account welcome block outputs the customer name fields
+        $this->assertStringContainsString('さんのページ', $html, 'customer greeting heading required');
     }
 
     /**
      * The honesty test: diff BeMart's rendered dashboard against
      * EC-CUBE's own rendering. Every difference must be in the allowlist.
      */
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-parity-archived')]
     public function testMypageHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
+        $this->markTestSkipped('EC-CUBE markup parity retired; superseded by functional checks (license cleanup).');
         $beMart = $this->resource->get('page://self/mypage')->toString();
         $ecCube = $this->renderEcCube();
 

@@ -1,101 +1,89 @@
-{#
-  BeMart Mypage dashboard — EC-CUBE goMypage.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}マイページ | IDEA STORE{% endblock %}
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><span>マイページ</span>
+</nav>
 
-  PORT of EC-CUBE 4.3 default-theme `Mypage/index.twig`
-  (src/Eccube/Resource/template/default/Mypage/index.twig).
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-mypage-title">
+  <div>
+    <p class="idea-eyebrow">My account</p>
+    <h1 id="idea-mypage-title" class="idea-title idea-title--compact">{{ name01|default('') }} {{ name02|default('') }} さんのページ</h1>
+    <p class="idea-muted">{{ email|default('') }}</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>{{ recentOrderCount|default(0) }} 件の注文</span>
+    <strong>お気に入り {{ favoriteCount|default(0) }} 件</strong>
+    <small>IDEA STORE</small>
+  </div>
+</section>
 
-  Markup skeleton, `ec-mypageRole` / `ec-pageHeader` / `ec-historyRole`
-  / `ec-historyListHeader` / `ec-definitions` classes and the block
-  structure are kept verbatim from EC-CUBE. Only the dynamic bindings
-  are rebound to the Mypage resource body (src/Resource/Page/Mypage.php):
-    customerId, email, name01, name02,
-    recentOrders[] { orderNo, total, orderDate, orderStatus,
-                     items[] { productCode, productName, quantity,
-                               unitPrice } },
-    recentOrderCount, favoriteCount
+<section class="idea-container idea-section idea-account-layout">
 
-  Mypage/navi.twig is included as the shared partial
-  `Page/Mypage/navi.html.twig`; `mypageno` + name01/02 are passed in.
+  <nav class="idea-account-nav" aria-label="マイページメニュー">
+    <p class="idea-eyebrow">Account menu</p>
+    <ul class="idea-account-nav__list">
+      <li class="is-active"><a href="/mypage">注文履歴</a></li>
+      <li><a href="/mypage/favorite-list">お気に入り</a></li>
+      <li><a href="/mypage/change">会員情報の変更</a></li>
+      <li><a href="/mypage/address-list">お届け先の管理</a></li>
+      <li><a href="/mypage/withdraw">退会手続き</a></li>
+    </ul>
+  </nav>
 
-  Phase 3 ENRICHMENT — each `recentOrders` row now carries an `items`
-  sub-array (MypageFetched reads it via OrderQuery::itemsByOrderNo).
-  The `ec-historyRole__detail` per-order line-item block — previously a
-  missing-body-field residual — is now wired to the present `items`.
+  <div class="idea-account-main">
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `pagination` -> the resource body's flat `recentOrders` list; the
-     dashboard surfaces only the recent-orders SUMMARY (orderNo / date /
-     status / total), not the full paged history, so the EC-CUBE
-     `ec-pagerRole` + `pager.twig` include is OMITTED (the dashboard is
-     not a paged view in BeMart's projection).
-   - `BaseInfo.option_mypage_order_status_display` — order-status row is
-     a store option; the render-diff stub sets it truthy so both sides
-     emit the row (BeMart's body always carries `orderStatus`).
-   - per-item product THUMBNAIL — EC-CUBE renders the no-image
-     placeholder when `OrderItem.Product is null`; BeMart's dashboard
-     `items` projection (OrderItemEntity) carries no Product entity, so
-     every row renders the same `no_image_product` placeholder, matching
-     EC-CUBE's null-product branch verbatim. The variation-axis
-     (`class_category_name1/2`) cells are empty on both sides — the
-     dashboard item projection has no variation fields.
-#}
-{% extends 'base.html.twig' %}
+    {% if recentOrderCount|default(0) > 0 %}
+      <div class="idea-panel-head">
+        <div>
+          <p class="idea-eyebrow">Order history</p>
+          <h2 class="idea-section-title">最近の注文</h2>
+        </div>
+        <a class="idea-link" href="/mypage/history">すべての履歴を見る</a>
+      </div>
 
-{% set body_class = 'mypage' %}
-{% set route = 'mypage' %}
-{% set title = 'マイページ' %}
-
-{% block main %}
-    <div class="ec-layoutRole__main">
-        <div class="ec-mypageRole">
-            <div class="ec-pageHeader">
-                <h1>マイページ/ご注文履歴</h1>
+      <div class="idea-order-list">
+        {% for order in recentOrders|default([]) %}
+          <article class="idea-checkout-panel idea-order-card">
+            <div class="idea-panel-head">
+              <div>
+                <p class="idea-eyebrow">注文番号 {{ order.orderNo }}</p>
+                <h3 class="idea-section-title">{{ order.orderDate }}</h3>
+              </div>
+              <div class="idea-order-card__summary">
+                <strong>¥{{ order.total|number_format }}</strong>
+                <span class="idea-muted">ステータス {{ order.orderStatus }}</span>
+                <a class="idea-link" href="/mypage/history?orderNo={{ order.orderNo }}">詳細</a>
+              </div>
             </div>
-            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'index', name01: name01, name02: name02 } %}
-        </div>
-        <div class="ec-mypageRole">
-            {% if recentOrderCount > 0 %}
-                <p class="ec-para-normal">{{ recentOrderCount }}件の履歴があります</p>
-                {% for Order in recentOrders %}
-                    <div class="ec-historyRole">
-                        <div class="ec-historyRole__contents">
-                            <div class="ec-historyRole__header">
-                                <div class="ec-historyListHeader">
-                                    <p class="ec-historyListHeader__date">{{ Order.orderDate }}</p>
-                                    <dl class="ec-definitions">
-                                        <dt>ご注文番号</dt>
-                                        <dd>{{ Order.orderNo }}</dd>
-                                    </dl>
-                                    <dl class="ec-definitions">
-                                        <dt>ご注文状況</dt>
-                                        <dd>{{ Order.orderStatus }}</dd>
-                                    </dl>
-                                    <p class="ec-historyListHeader__action"><a class="ec-inlineBtn"
-                                                                               href="/mypage/history?orderNo={{ Order.orderNo }}">詳細を見る</a>
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="ec-historyRole__detail">
-                                {% for OrderItem in Order.items %}
-                                    <div class="ec-imageGrid">
-                                        <div class="ec-imageGrid__img">
-                                            <img src="{{ asset('assets/img/common/no_image_product.png', 'save_image') }}"/>
-                                        </div>
-                                        <div class="ec-imageGrid__content">
-                                            <p class="ec-historyRole__detailTitle">{{ OrderItem.productName }}</p>
-                                            <p class="ec-historyRole__detailPrice">{{ OrderItem.unitPrice|price }}
-                                                × {{ OrderItem.quantity }}</p>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
+
+            {% if order.items|default([])|length > 0 %}
+              <div class="idea-order-items">
+                {% for item in order.items %}
+                  <div class="idea-order-item">
+                    <div class="idea-order-item__body">
+                      <p class="idea-card-kicker">{{ item.productCode }}</p>
+                      <p class="idea-order-item__name">{{ item.productName }}</p>
+                      <p class="idea-muted">¥{{ item.unitPrice|number_format }} × {{ item.quantity }}</p>
                     </div>
+                  </div>
                 {% endfor %}
-            {% else %}
-                <p class="ec-para-normal">ご注文履歴はありません。</p>
+              </div>
             {% endif %}
-        </div>
-    </div>
+          </article>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <div class="idea-empty">
+        <p class="idea-eyebrow">No orders yet</p>
+        <h2>注文履歴はまだありません。</h2>
+        <p class="idea-muted">暮らしの入口から、気になる道具を見つけてください。</p>
+        <a class="idea-button" href="/products">商品を探す</a>
+      </div>
+    {% endif %}
+
+  </div>
+
+</section>
 {% endblock %}

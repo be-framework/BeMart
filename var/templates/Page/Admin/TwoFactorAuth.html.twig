@@ -1,81 +1,245 @@
-{#
-  BeMart admin 2段階認証 (challenge) — EC-CUBE admin two_factor_auth.
-
-  PORT of EC-CUBE 4.3 admin-theme `two_factor_auth.twig`
-  (src/Eccube/Resource/template/admin/two_factor_auth.twig).
-
-  This is a top-level wave login-context FORM page. It extends the admin
-  LOGIN frame (`admin-login-base.html.twig`, the port of EC-CUBE's
-  `login_frame.twig`) — EC-CUBE's `two_factor_auth.twig` likewise
-  `{% extends '@admin/login_frame.twig' %}`. The markup skeleton +
-  Bootstrap classes are kept verbatim; only the dynamic bindings are
-  rebound to the TwoFactorAuth resource body
-  (src/Resource/Page/Admin/TwoFactorAuth.php).
-
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md):
-  the resource exposes an
-  {@see \MyVendor\BeMart\Form\AdminTwoFactorAuthForm} as `body['form']`.
-  The token input renders through that real form object:
-
-    {{ form.input('deviceToken')|raw }}
-
-  EC-CUBE renders the same input through the Symfony FormView
-  (`form_widget(form.device_token)`); Ray.WebFormModule is BeMart's
-  BEAR-idiomatic equivalent.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - canonical form action -> `/admin/two-factor-auth`.
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - `{% if error %}` -> EC-CUBE's auth-error string. The thin-renderer
-     resource surfaces a domain rejection through `body.message` (none
-     for a pristine GET); rendered in the same `text-danger` block.
-   - `form_errors(form.device_token)` -> inline field error; renders
-     nothing for the pristine form, exactly as EC-CUBE.
-   - `"now"|date("Y")` -> the current year, inlined as a literal.
-#}
 {% extends 'admin-login-base.html.twig' %}
 
-{% set title = '2段階認証' %}
+{% set title = '二要素認証' %}
+
+{% block stylesheet %}
+<style>
+/* ─── 2FA challenge card (extends login card vocabulary) ─────────────────── */
+
+.idea-admin-2fa-card {
+  background: var(--idea-surface);
+  border: 1px solid rgba(205, 191, 170, .55);
+  border-radius: var(--idea-admin-radius-panel);
+  box-shadow: var(--idea-shadow-float);
+  overflow: hidden;
+}
+
+.idea-admin-2fa-card__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .35rem;
+  padding: 1.75rem 2rem 1.25rem;
+  background: var(--idea-surface-soft);
+  border-bottom: 1px solid rgba(205, 191, 170, .4);
+  text-align: center;
+}
+
+.idea-admin-2fa-card__brand {
+  font-family: var(--idea-font-serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: -.02em;
+  color: var(--idea-ink);
+  text-decoration: none;
+}
+
+.idea-admin-2fa-card__subtitle {
+  font-size: .72rem;
+  color: var(--idea-muted);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.idea-admin-2fa-card__icon {
+  margin-top: .25rem;
+  font-size: 1.6rem;
+  color: var(--idea-olive);
+}
+
+.idea-admin-2fa-card__body {
+  padding: 1.5rem 2rem 2rem;
+  display: grid;
+  gap: 1.1rem;
+}
+
+/* ─── Token input group ──────────────────────────────────────────────────── */
+
+.idea-admin-2fa-group {
+  display: grid;
+  gap: .35rem;
+}
+
+.idea-admin-2fa-group label {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--idea-muted);
+  letter-spacing: .03em;
+}
+
+.idea-admin-2fa-token-wrap {
+  display: flex;
+  gap: .55rem;
+  align-items: center;
+}
+
+.idea-admin-2fa-token-wrap input[type="text"] {
+  flex: 1;
+  min-height: 2.75rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: rgba(255, 253, 248, .95);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: 1.3rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .18em;
+  text-align: center;
+  padding: .4rem .6rem;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.idea-admin-2fa-token-wrap input[type="text"]:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .18);
+}
+
+.idea-admin-2fa-token-wrap input[aria-invalid="true"] {
+  border-color: #c06f4f;
+  box-shadow: 0 0 0 3px rgba(192, 111, 79, .14);
+}
+
+/* ─── Hint text ───────────────────────────────────────────────────────────── */
+
+.idea-admin-2fa-hint {
+  font-size: .78rem;
+  color: var(--idea-muted);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* ─── Alert strip ────────────────────────────────────────────────────────── */
+
+.idea-admin-2fa-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: .55rem;
+  padding: .65rem .8rem;
+  border-radius: var(--idea-admin-radius-input);
+  border: 1px solid rgba(169, 71, 46, .28);
+  background: rgba(169, 71, 46, .07);
+  color: #a9472e;
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+/* ─── Submit button ───────────────────────────────────────────────────────── */
+
+.idea-admin-2fa-submit {
+  width: 100%;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  background: var(--idea-olive);
+  border: 1px solid var(--idea-olive);
+  border-radius: var(--idea-admin-radius-button);
+  color: var(--idea-surface);
+  font: inherit;
+  font-size: .92rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(82, 107, 85, .22);
+  transition: background .15s, border-color .15s, box-shadow .15s;
+}
+
+.idea-admin-2fa-submit:hover {
+  background: var(--idea-focus);
+  border-color: var(--idea-focus);
+}
+
+.idea-admin-2fa-submit:active {
+  box-shadow: none;
+  transform: translateY(1px);
+}
+
+/* ─── Footer link + copyright ─────────────────────────────────────────────── */
+
+.idea-admin-2fa-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .45rem;
+  margin-top: 1.25rem;
+  font-size: .75rem;
+  color: var(--idea-muted);
+  text-align: center;
+}
+
+.idea-admin-2fa-footer a {
+  color: var(--idea-muted);
+  font-weight: 700;
+  text-decoration: underline;
+  transition: color .14s;
+}
+
+.idea-admin-2fa-footer a:hover { color: var(--idea-ink); }
+</style>
+{% endblock %}
 
 {% block main %}
 
-    <div class="container" style="margin-top: 150px;">
-        <div class="row">
-            <div class="col-12 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
-                <div class="text-center p-5 bg-white">
-                    <form name="form1" id="form1" method="post" action="/admin/two-factor-auth">
-                        <input type="hidden" id="admin_two_factor_auth__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-                        <p><img src="{{ asset('assets/img/logo2.png', 'admin') }}" alt="BeMart" width="106"></p>
-                        <h5 class="mb-3">2段階認証</h5>
+<article class="idea-admin-2fa-card" role="main" aria-label="二要素認証">
 
-                        {% if message is defined and message %}
-                            <div class="text-danger mb-3 text-start small">{{ message }}</div>
-                        {% endif %}
+  <header class="idea-admin-2fa-card__head">
+    <a class="idea-admin-2fa-card__brand" href="/admin/login">BeMart</a>
+    <span class="idea-admin-2fa-card__subtitle">管理画面</span>
+    <span class="idea-admin-2fa-card__icon" aria-hidden="true">
+      <i class="fa fa-shield-halved"></i>
+    </span>
+  </header>
 
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="mb-3 d-flex justify-content-center">
-                                    {{ form.input('deviceToken')|raw }}
-                                </div>
-                                {% if form.error('deviceToken') %}<span class="invalid-feedback d-block">{{ form.error('deviceToken') }}</span>{% endif %}
-                            </div>
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-primary w-100">認証</button>
-                            </div>
-                        </div>
+  <div class="idea-admin-2fa-card__body">
 
-                    </form>
-                </div>
-            </div>
-            <div class="col-12">
-                <p class="text-center mt-3">
-                    <small>Copyright &copy; 2026 BeMart. All Rights Reserved.</small>
-                </p>
-            </div>
-        </div>
+    {% if message is defined and message %}
+    <div class="idea-admin-2fa-alert" role="alert" aria-live="assertive">
+      <i class="fa fa-circle-exclamation" aria-hidden="true"></i>
+      <span>{{ message }}</span>
     </div>
+    {% endif %}
+
+    <form method="post" action="/admin/two-factor-auth" novalidate rel="doVerifyTwoFactorAuth">
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+      <div style="display: grid; gap: 1.1rem;">
+
+        <div class="idea-admin-2fa-group">
+          <label for="admin_two_factor_auth_device_token">認証コード</label>
+          <div class="idea-admin-2fa-token-wrap">
+            {{ form.input('deviceToken')|raw }}
+          </div>
+          {% if form.error('deviceToken') %}
+          <span class="idea-admin-error" role="alert">{{ form.error('deviceToken') }}</span>
+          {% endif %}
+        </div>
+
+        <p class="idea-admin-2fa-hint">
+          認証アプリに表示された 6 桁のコードを入力してください。
+        </p>
+
+        <button type="submit" class="idea-admin-2fa-submit">
+          <i class="fa fa-check" aria-hidden="true"></i>
+          確認
+        </button>
+
+      </div>
+    </form>
+
+  </div>
+
+</article>
+
+<footer class="idea-admin-2fa-footer">
+  <a href="/admin/login" rel="goAdminLogin">
+    <i class="fa fa-arrow-left" aria-hidden="true"></i>
+    ログインに戻る
+  </a>
+  <span>&copy; 2026 BeMart</span>
+</footer>
 
 {% endblock %}

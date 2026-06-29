@@ -1,108 +1,296 @@
-{#
-  BeMart admin product-CSV upload — EC-CUBE admin-theme
-  `Product/csv_product.twig`.
-
-  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Product/csv_product.twig`
-  — the ~283-line CSV-upload screen. It extends the admin frame
-  (`admin-base.html.twig`), not the storefront frame.
-
-  Tier-2 port note: EC-CUBE's screen renders a CSV file-upload form,
-  a 雛形 (template-CSV) download link and a format-description table.
-  The Be `doImportProductCsv` write transition is a Phase-A stub, so
-  this port renders the upload shell — the file input, the skeleton
-  link and the format table. The four `csv_*` screens share this
-  structure (see AbstractCsvUpload); only the heading and the table
-  rows differ.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `form_widget(form.import_file)` -> `form.input('import_file')` —
-     the real AdminCsvUploadForm field (Ray.WebFormModule).
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
-#}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-product-csv' %}
+{% set route = 'admin-product-csv-product' %}
 {% set title = csvTitle %}
 {% set sub_title = '商品管理' %}
 
+{% block stylesheet %}
+<style>
+/* ── Drop-zone ─────────────────────────────────────────────────────────────── */
+.idea-admin-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  min-height: 9rem;
+  border: 2px dashed var(--idea-stone);
+  border-radius: var(--idea-admin-radius-panel);
+  background: var(--idea-surface-soft);
+  color: var(--idea-muted);
+  font-size: .88rem;
+  cursor: pointer;
+  transition: border-color .18s, background .18s, color .18s;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  position: relative;
+}
+.idea-admin-dropzone:hover,
+.idea-admin-dropzone.is-over {
+  border-color: var(--idea-olive);
+  background: rgba(82, 107, 85, .06);
+  color: var(--idea-ink);
+}
+.idea-admin-dropzone.has-file {
+  border-color: var(--idea-olive);
+  background: rgba(82, 107, 85, .05);
+}
+.idea-admin-dropzone__icon {
+  font-size: 2rem;
+  color: var(--idea-stone-2);
+}
+.idea-admin-dropzone.is-over .idea-admin-dropzone__icon,
+.idea-admin-dropzone.has-file .idea-admin-dropzone__icon {
+  color: var(--idea-olive);
+}
+.idea-admin-dropzone__label { font-weight: 700; color: var(--idea-ink); }
+.idea-admin-dropzone__hint  { font-size: .78rem; }
+.idea-admin-dropzone__file-name {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--idea-olive);
+  word-break: break-all;
+}
+/* Visually-hidden real file input overlays the zone */
+.idea-admin-dropzone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Column reference table in side panel ───────────────────────────────── */
+.idea-admin-col-ref {
+  font-size: .82rem;
+  border-collapse: collapse;
+  width: 100%;
+}
+.idea-admin-col-ref th {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--idea-muted);
+  padding: .45rem .7rem;
+  border-bottom: 1px solid rgba(205, 191, 170, .45);
+  text-align: left;
+  background: var(--idea-surface-soft);
+}
+.idea-admin-col-ref td {
+  padding: .5rem .7rem;
+  border-bottom: 1px solid rgba(205, 191, 170, .22);
+  vertical-align: top;
+}
+.idea-admin-col-ref tbody tr:last-child td { border-bottom: none; }
+.idea-admin-col-ref__name { font-weight: 700; color: var(--idea-ink); white-space: nowrap; }
+.idea-admin-col-ref__desc { color: var(--idea-muted); font-size: .78rem; }
+
+/* ── Export action card ─────────────────────────────────────────────────── */
+.idea-admin-export-card {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  padding: .9rem 1rem;
+}
+.idea-admin-export-card__body {
+  font-size: .83rem;
+  color: var(--idea-muted);
+  line-height: 1.5;
+}
+
+/* ── Narrow layout: side stacks below primary on mobile ─────────────────── */
+@media (max-width: 1100px) {
+  .idea-admin-col-ref th,
+  .idea-admin-col-ref td { padding: .4rem .55rem; }
+}
+</style>
+{% endblock %}
+
 {% block main %}
-    <form role="form" method="post" action="/admin/product-csv" id="csv_product_form" enctype="multipart/form-data" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_csv_import')) }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
+<form
+  method="post"
+  action="/admin/product/csv-product"
+  enctype="multipart/form-data"
+  novalidate
+  aria-label="{{ csvTitle }}"
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">{{ csvTitle }}</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3"><span>CSVファイル</span></div>
-                                <div class="col">
-                                    {{ form.input('import_file')|raw }}
-                                    {% if form.error('import_file') %}<span class="invalid-feedback d-block">{{ form.error('import_file') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"></div>
-                                <div class="col">
-                                    <a href="/admin/product-csv">雛形ファイルダウンロード</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+  <div class="idea-admin-layout">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">CSVファイルフォーマット</span>
-                        </div>
-                        <div class="card-body p-0">
-                            <table class="table table-sm" id="csv_product_format">
-                                <thead>
-                                <tr>
-                                    <th class="border-top-0 pt-2 pb-2 ps-3">項目名</th>
-                                    <th class="border-top-0 pt-2 pb-2 pe-3">説明</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for col in columns %}
-                                    <tr>
-                                        <td class="align-middle ps-3">{{ col.name }}</td>
-                                        <td class="align-middle pe-3">{{ col.description }}</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+    {# ── Primary column: upload panel ──────────────────────────────────── #}
+    <div class="idea-admin-primary">
 
-                </div>
-            </div>
+      <div class="idea-admin-panel" role="region" aria-label="CSVファイル選択">
+        <div class="idea-admin-panel__head">
+          <h3><i class="fa fa-upload fa-fw" aria-hidden="true"></i> {{ csvTitle }}</h3>
+          <p class="idea-admin-panel__hint">CSVファイルを選択またはドロップしてアップロードします</p>
         </div>
+        <div class="idea-admin-panel__body">
 
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/product-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>商品管理へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">CSVファイルをアップロード</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          <div class="idea-admin-dropzone" id="js-dropzone" role="button" aria-label="CSVファイルを選択">
+            <i class="fa fa-file-csv idea-admin-dropzone__icon" aria-hidden="true"></i>
+            <span class="idea-admin-dropzone__label" id="js-dropzone-label">クリックまたはドラッグでファイルを選択</span>
+            <span class="idea-admin-dropzone__hint">.csv ファイル（UTF-8）</span>
+            <span class="idea-admin-dropzone__file-name" id="js-dropzone-filename" hidden></span>
+            {{ form.input('import_file')|raw }}
+          </div>
+
+          <div class="idea-admin-error" id="js-file-error">
+            {{ form.error('import_file') }}
+          </div>
+
+          <p style="font-size:.8rem;color:var(--idea-muted);margin:0;">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+            文字コード UTF-8、1 行目をヘッダ行とした CSV を使用してください。
+          </p>
+
         </div>
-    </form>
+      </div>
+
+    </div>{# /primary #}
+
+    {# ── Side column: export + format reference ────────────────────────── #}
+    <div class="idea-admin-side">
+
+      {# Export download #}
+      <div class="idea-admin-panel" role="region" aria-label="CSVエクスポート">
+        <div class="idea-admin-panel__head">
+          <h3><i class="fa fa-download fa-fw" aria-hidden="true"></i> エクスポート</h3>
+        </div>
+        <div class="idea-admin-export-card">
+          <p class="idea-admin-export-card__body">
+            現在の商品マスタを CSV 形式でダウンロードします。
+            このファイルをテンプレートとして編集し、インポートに使用できます。
+          </p>
+          <a
+            href="/admin/product-csv"
+            class="idea-admin-action"
+            download
+            aria-label="商品CSVをダウンロード"
+          >
+            <i class="fa fa-file-csv" aria-hidden="true"></i>
+            商品 CSV をダウンロード
+          </a>
+        </div>
+      </div>
+
+      {# Column format reference #}
+      <div class="idea-admin-panel" role="region" aria-label="CSVフォーマット">
+        <div class="idea-admin-panel__head">
+          <h3><i class="fa fa-table fa-fw" aria-hidden="true"></i> フォーマット</h3>
+          <p class="idea-admin-panel__hint">取込み可能な列と値の仕様</p>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="idea-admin-col-ref" aria-label="CSV列定義">
+            <thead>
+              <tr>
+                <th>列名</th>
+                <th>説明</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for col in columns %}
+              <tr>
+                <td class="idea-admin-col-ref__name">{{ col.name }}</td>
+                <td class="idea-admin-col-ref__desc">{{ col.description }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>{# /side #}
+
+  </div>{# /layout #}
+
+  {# ── Fixed bottom toolbar ───────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="toolbar" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/product-list" rel="goProductList">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        商品一覧へ戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button
+        type="submit"
+        class="idea-admin-action idea-admin-action--primary"
+        id="js-submit-btn"
+        aria-label="選択したCSVファイルをアップロード"
+      >
+        <i class="fa fa-upload" aria-hidden="true"></i>
+        アップロード
+      </button>
+    </div>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  var zone      = document.getElementById('js-dropzone');
+  var fileInput = zone ? zone.querySelector('input[type="file"]') : null;
+  var label     = document.getElementById('js-dropzone-label');
+  var filename  = document.getElementById('js-dropzone-filename');
+  var submitBtn = document.getElementById('js-submit-btn');
+
+  if (!zone || !fileInput) return;
+
+  function showFile(name) {
+    if (label)    label.hidden   = true;
+    if (filename) {
+      filename.textContent = name;
+      filename.hidden = false;
+    }
+    zone.classList.add('has-file');
+    if (submitBtn) submitBtn.disabled = false;
+  }
+
+  function clearFile() {
+    if (label)    label.hidden   = false;
+    if (filename) filename.hidden = true;
+    zone.classList.remove('has-file');
+  }
+
+  /* Initial state — disable submit until a file is chosen */
+  if (submitBtn) submitBtn.disabled = true;
+
+  fileInput.addEventListener('change', function () {
+    if (fileInput.files && fileInput.files[0]) {
+      showFile(fileInput.files[0].name);
+    } else {
+      clearFile();
+    }
+  });
+
+  /* Drag-and-drop */
+  zone.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    zone.classList.add('is-over');
+  });
+  zone.addEventListener('dragleave', function () {
+    zone.classList.remove('is-over');
+  });
+  zone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    zone.classList.remove('is-over');
+    var dt = e.dataTransfer;
+    if (dt && dt.files && dt.files[0]) {
+      /* Assign to real input via DataTransfer */
+      try {
+        fileInput.files = dt.files;
+      } catch (_) { /* read-only in some browsers — fallback: show name only */ }
+      showFile(dt.files[0].name);
+    }
+  });
+}());
+</script>
 {% endblock %}

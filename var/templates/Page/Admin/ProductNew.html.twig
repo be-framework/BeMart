@@ -1,110 +1,480 @@
-{#
-  BeMart admin product create page.
-
-  First-slice EC-CUBE Product/product.twig port: the full EC-CUBE edit
-  screen has product images/categories/classes/tax/product-class joins
-  that BeMart does not yet expose. This form connects only the already
-  implemented AdminCreateProductInput fields, so the browser can create
-  products without inventing missing data.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-product-new' %}
 {% set title = '商品登録' %}
 {% set sub_title = '商品管理' %}
 
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/ProductNew.php onGet):
+    csrfToken           string|null
+    productStatusOptions object { 1: '公開', 2: '非公開', 3: '廃止' }
+
+  FORM CONTRACT (src/Form/AdminProductEditForm.php):
+    productName   text  required  max:128
+    productCode   text  required  max:64
+    price02       text  required  min:0
+    stock         text  optional  (null = unlimited)
+    productStatus select (1/2/3)
+    description   textarea
+    searchWord    text
+    note          textarea
+
+  ACTION (from #[Link] rel='doCreateProduct'):
+    POST /admin/product
+
+  Back link (from #[Link] rel='goProductList'):
+    GET /admin/product-list
+
+  UX DECISIONS:
+    - Two-column layout: primary (identity + pricing + content) / side (status + tips)
+    - Status selector promoted to side panel — the first decision before writing content
+    - Price and stock co-located in one "価格・在庫" panel (always entered together)
+    - Description is the largest field — full-width textarea in its own panel
+    - searchWord + note demoted to a collapsible "詳細情報" panel (low frequency)
+    - Required badge on productName, productCode, price02; all others optional
+    - Bottom sticky toolbar: "商品一覧に戻る" left / "登録する" primary right
+    - Live char-count on productName (max 128) via vanilla JS
+    - Keyboard shortcut hint (Ctrl/Cmd+Enter submits) in toolbar
+#}
+
+{% block stylesheet %}
+<style>
+/* ─── Page-local additions (idea-admin-* namespace) ─────────────────── */
+.idea-admin-charcount {
+  font-size: .72rem;
+  color: var(--idea-muted);
+  text-align: right;
+  line-height: 1;
+}
+.idea-admin-charcount--warn { color: var(--idea-clay); font-weight: 700; }
+
+.idea-admin-field-hint {
+  font-size: .74rem;
+  color: var(--idea-muted);
+  line-height: 1.4;
+  margin-top: .1rem;
+}
+
+.idea-admin-status-radio {
+  display: grid;
+  gap: .5rem;
+}
+.idea-admin-status-radio__item {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .48rem .7rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  cursor: pointer;
+  transition: background .13s, border-color .13s;
+  background: rgba(255,253,248,.95);
+}
+.idea-admin-status-radio__item:has(input:checked) {
+  border-color: var(--idea-olive);
+  background: rgba(82,107,85,.07);
+}
+.idea-admin-status-radio__item input[type="radio"] {
+  accent-color: var(--idea-olive);
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.idea-admin-status-radio__label {
+  font-size: .86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.idea-admin-status-radio__desc {
+  font-size: .74rem;
+  color: var(--idea-muted);
+  margin-left: auto;
+}
+
+details.idea-admin-collapsible {
+  border: 1px solid rgba(205,191,170,.45);
+  border-radius: var(--idea-admin-radius-panel);
+  background: var(--idea-surface);
+  box-shadow: var(--idea-shadow-card);
+  overflow: hidden;
+}
+details.idea-admin-collapsible > summary {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .72rem 1rem;
+  border-bottom: 1px solid transparent;
+  background: var(--idea-surface-soft);
+  font-size: .9rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: background .13s;
+}
+details.idea-admin-collapsible > summary::-webkit-details-marker { display: none; }
+details.idea-admin-collapsible[open] > summary {
+  border-bottom-color: rgba(205,191,170,.4);
+}
+details.idea-admin-collapsible > summary .idea-admin-collapsible__caret {
+  margin-left: auto;
+  transition: transform .2s;
+}
+details.idea-admin-collapsible[open] > summary .idea-admin-collapsible__caret {
+  transform: rotate(180deg);
+}
+details.idea-admin-collapsible > .idea-admin-panel__body {
+  display: grid;
+  gap: .72rem;
+  padding: .9rem 1rem;
+}
+
+.idea-admin-kbd {
+  display: inline-flex;
+  align-items: center;
+  padding: .1rem .35rem;
+  border: 1px solid rgba(205,191,170,.6);
+  border-radius: 4px;
+  background: var(--idea-surface-soft);
+  color: var(--idea-muted);
+  font-size: .7rem;
+  font-family: monospace;
+  white-space: nowrap;
+}
+</style>
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /* ── Live char-count for productName ── */
+  var nameInput = document.getElementById('product_name');
+  var nameCount = document.getElementById('product-name-count');
+  if (nameInput && nameCount) {
+    function updateCount() {
+      var n = nameInput.value.length;
+      var max = 128;
+      nameCount.textContent = n + ' / ' + max;
+      nameCount.classList.toggle('idea-admin-charcount--warn', n > max * 0.85);
+    }
+    nameInput.addEventListener('input', updateCount);
+    updateCount();
+  }
+
+  /* ── Ctrl/Cmd+Enter submits the form ── */
+  var form = document.getElementById('idea-product-form');
+  if (form) {
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        form.requestSubmit ? form.requestSubmit() : form.submit();
+      }
+    });
+  }
+
+  /* ── Sidebar nav accordion ── */
+  document.querySelectorAll('.idea-admin-sidenav__link[aria-expanded]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      var targetId = btn.getAttribute('aria-controls');
+      var target = targetId ? document.getElementById(targetId) : null;
+      btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      if (target) { target.hidden = expanded; }
+    });
+  });
+}());
+</script>
+{% endblock javascript %}
+
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <form method="post" action="/admin/product" id="admin_product_form">
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">基本情報</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <label class="col-3 col-form-label required" for="productCode">商品コード</label>
-                                <div class="col">
-                                    <input class="form-control" type="text" id="productCode" name="productCode" required maxlength="64" autocomplete="off">
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label class="col-3 col-form-label required" for="productName">商品名</label>
-                                <div class="col">
-                                    <input class="form-control" type="text" id="productName" name="productName" required maxlength="255">
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label class="col-3 col-form-label required" for="price02">販売価格</label>
-                                <div class="col">
-                                    <input class="form-control" type="number" id="price02" name="price02" required min="0" step="1">
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label class="col-3 col-form-label" for="stock">在庫数</label>
-                                <div class="col">
-                                    <input class="form-control" type="number" id="stock" name="stock" min="0" step="1" placeholder="空欄で無制限">
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label class="col-3 col-form-label" for="productStatus">公開状態</label>
-                                <div class="col">
-                                    <select class="form-select" id="productStatus" name="productStatus">
-                                        {% for value, label in productStatusOptions %}
-                                            <option value="{{ value }}" {{ value == 1 ? 'selected' : '' }}>{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+{# ── Page header ── #}
+<div class="idea-admin-page-header">
+  <h1 class="idea-admin-page-title">
+    <i class="fa fa-plus-circle" aria-hidden="true"></i>
+    商品登録
+  </h1>
+  <span class="idea-admin-page-subtitle">新しい商品を追加します</span>
+</div>
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">説明・管理情報</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <label class="col-3 col-form-label" for="description">説明</label>
-                                <div class="col">
-                                    <textarea class="form-control" id="description" name="description" rows="5"></textarea>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label class="col-3 col-form-label" for="searchWord">検索ワード</label>
-                                <div class="col">
-                                    <input class="form-control" type="text" id="searchWord" name="searchWord">
-                                </div>
-                            </div>
-                            <div class="row mb-0">
-                                <label class="col-3 col-form-label" for="note">管理メモ</label>
-                                <div class="col">
-                                    <textarea class="form-control" id="note" name="note" rows="3"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+{# ── Main form ── #}
+<form
+  id="idea-product-form"
+  method="post"
+  action="/admin/product"
+  novalidate
+  aria-label="商品登録フォーム"
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
-                    <div class="c-conversionArea">
-                        <div class="c-conversionArea__container">
-                            <div class="row justify-content-between align-items-center">
-                                <div class="col-6">
-                                    <a class="c-baseLink" href="/admin/product-list">
-                                        <i class="fa fa-backward" aria-hidden="true"></i>
-                                        <span>商品一覧</span>
-                                    </a>
-                                </div>
-                                <div class="col-6 text-end">
-                                    <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
+  <div class="idea-admin-layout">
+
+    {# ════════════════════════════════ Primary column ════════════════════════════════ #}
+    <div class="idea-admin-primary">
+
+      {# ── Section: 基本情報 ── #}
+      <section class="idea-admin-panel" aria-labelledby="section-identity">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-identity">基本情報</h3>
+          <span class="idea-admin-panel__hint">商品を識別する必須項目です</span>
         </div>
+        <div class="idea-admin-panel__body">
+
+          {# productName #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="product_name">商品名</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              <input
+                type="text"
+                id="product_name"
+                name="productName"
+                maxlength="128"
+                autocomplete="off"
+                aria-required="true"
+                aria-describedby="product-name-count"
+              >
+              <span id="product-name-count" class="idea-admin-charcount" aria-live="polite">0 / 128</span>
+            </div>
+          </div>
+
+          {# productCode #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="product_code">商品コード</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              <input
+                type="text"
+                id="product_code"
+                name="productCode"
+                maxlength="64"
+                autocomplete="off"
+                aria-required="true"
+                placeholder="例: sample-001"
+              >
+              <span class="idea-admin-field-hint">
+                在庫・カート・受注で商品を識別するSKU。ASCII英数字・ハイフン推奨。
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# ── Section: 価格・在庫 ── #}
+      <section class="idea-admin-panel" aria-labelledby="section-pricing">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-pricing">価格・在庫</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          {# price02 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="product_price02">販売価格</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              <input
+                type="number"
+                id="product_price02"
+                name="price02"
+                min="0"
+                max="999999999"
+                step="1"
+                aria-required="true"
+                style="max-width:14rem;"
+              >
+              <span class="idea-admin-field-hint">税抜価格（円）。0以上の整数で入力してください。</span>
+            </div>
+          </div>
+
+          {# stock #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="product_stock">在庫数</label>
+            </div>
+            <div class="idea-admin-field__input">
+              <input
+                type="number"
+                id="product_stock"
+                name="stock"
+                min="0"
+                max="2147483647"
+                step="1"
+                placeholder="空欄で在庫無制限"
+                style="max-width:14rem;"
+              >
+              <span class="idea-admin-field-hint">
+                空欄にすると在庫無制限として扱われます。数値を入力すると引き当て管理が有効になります。
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# ── Section: 商品説明 ── #}
+      <section class="idea-admin-panel" aria-labelledby="section-description">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-description">商品説明</h3>
+          <span class="idea-admin-panel__hint">フロントの商品詳細ページに掲載されます</span>
+        </div>
+        <div class="idea-admin-panel__body">
+          <textarea
+            id="product_description_detail"
+            name="description"
+            rows="7"
+            aria-label="商品説明"
+            placeholder="商品の特徴、素材、サイズ感などを記述します…"
+          ></textarea>
+        </div>
+      </section>
+
+      {# ── Section: 詳細情報（折りたたみ） ── #}
+      <details class="idea-admin-collapsible" id="detail-section">
+        <summary>
+          <i class="fa fa-tag" aria-hidden="true"></i>
+          詳細情報
+          <span class="idea-admin-collapsible__caret">
+            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+          </span>
+        </summary>
+        <div class="idea-admin-panel__body">
+
+          {# searchWord #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="product_search_word">検索ワード</label>
+            </div>
+            <div class="idea-admin-field__input">
+              <input
+                type="text"
+                id="product_search_word"
+                name="searchWord"
+                placeholder="スペース区切りで複数入力"
+              >
+              <span class="idea-admin-field-hint">
+                フロントの商品検索でヒットさせる追加キーワードを入力します。
+              </span>
+            </div>
+          </div>
+
+          {# note #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="product_note">管理メモ</label>
+            </div>
+            <div class="idea-admin-field__input">
+              <textarea
+                id="product_note"
+                name="note"
+                rows="4"
+                placeholder="社内向けの備考。フロントには表示されません。"
+              ></textarea>
+            </div>
+          </div>
+
+        </div>
+      </details>
+
+    </div>{# /idea-admin-primary #}
+
+    {# ════════════════════════════════ Side column ════════════════════════════════ #}
+    <div class="idea-admin-side">
+
+      {# ── Panel: 公開設定 ── #}
+      <section class="idea-admin-panel" aria-labelledby="section-status">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-status">公開設定</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <fieldset style="border:none;padding:0;margin:0;">
+            <legend class="idea-admin-field-hint" style="margin-bottom:.6rem;">
+              登録後にいつでも変更できます
+            </legend>
+            <div class="idea-admin-status-radio" role="radiogroup" aria-label="公開ステータス">
+              {% for value, label in productStatusOptions %}
+                <label class="idea-admin-status-radio__item">
+                  <input
+                    type="radio"
+                    name="productStatus"
+                    value="{{ value }}"
+                    {{ loop.first ? 'checked' : '' }}
+                    aria-label="{{ label }}"
+                  >
+                  {% if value == 1 %}
+                    <span class="idea-admin-badge idea-admin-badge--public">{{ label }}</span>
+                    <span class="idea-admin-status-radio__desc">フロントに表示</span>
+                  {% elseif value == 2 %}
+                    <span class="idea-admin-badge idea-admin-badge--private">{{ label }}</span>
+                    <span class="idea-admin-status-radio__desc">フロントに非表示</span>
+                  {% else %}
+                    <span class="idea-admin-badge idea-admin-badge--discontinued">{{ label }}</span>
+                    <span class="idea-admin-status-radio__desc">論理削除</span>
+                  {% endif %}
+                </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+        </div>
+      </section>
+
+      {# ── Panel: ヒント ── #}
+      <aside class="idea-admin-panel" aria-label="入力ガイド">
+        <div class="idea-admin-panel__head">
+          <h3>入力ガイド</h3>
+        </div>
+        <div class="idea-admin-panel__body" style="gap:.55rem;">
+          <p class="idea-admin-field-hint" style="margin:0;">
+            <strong style="display:block;margin-bottom:.2rem;color:var(--idea-ink);">必須フィールド</strong>
+            商品名・商品コード・販売価格の3項目は登録に必須です。
+          </p>
+          <p class="idea-admin-field-hint" style="margin:0;">
+            <strong style="display:block;margin-bottom:.2rem;color:var(--idea-ink);">在庫無制限</strong>
+            在庫数を空欄にすると在庫無制限として登録されます。
+          </p>
+          <p class="idea-admin-field-hint" style="margin:0;">
+            <strong style="display:block;margin-bottom:.2rem;color:var(--idea-ink);">登録後の作業</strong>
+            画像・カテゴリ・規格（サイズ/カラー）は登録後の編集画面で追加できます。
+          </p>
+          <p class="idea-admin-field-hint" style="margin:0;">
+            <span class="idea-admin-kbd">Ctrl</span>
+            <span style="color:var(--idea-muted);margin:0 .15rem;">+</span>
+            <span class="idea-admin-kbd">Enter</span>
+            でフォームを送信できます。
+          </p>
+        </div>
+      </aside>
+
+    </div>{# /idea-admin-side #}
+
+  </div>{# /idea-admin-layout #}
+
+  {# ── Bottom action toolbar ── #}
+  <div class="idea-admin-toolbar" role="toolbar" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/product-list" rel="goProductList">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        商品一覧に戻る
+      </a>
     </div>
-{% endblock %}
+    <div class="idea-admin-toolbar__actions">
+      <button type="submit" class="idea-admin-action idea-admin-action--primary">
+        <i class="fa fa-check" aria-hidden="true"></i>
+        登録する
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{% endblock main %}

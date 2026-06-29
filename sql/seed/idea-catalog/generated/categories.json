@@ -1,0 +1,162 @@
+[
+    {
+        "id": "cat-storage",
+        "slug": "storage",
+        "name": "収納",
+        "room": "整える",
+        "description": "しまうものと見せるものの居場所をつくる。",
+        "image": "/assets/idea-store/images/category/real/entry-storage.png"
+    },
+    {
+        "id": "cat-kitchen",
+        "slug": "kitchen",
+        "name": "台所",
+        "room": "料理する",
+        "description": "毎日の手順を少し静かにする道具。",
+        "image": "/assets/idea-store/images/category/real/entry-kitchen.png"
+    },
+    {
+        "id": "cat-furniture",
+        "slug": "furniture",
+        "name": "家具",
+        "room": "住まう",
+        "description": "小さな部屋にも大きな時間にも馴染む家具。",
+        "image": "/assets/idea-store/images/category/real/entry-furniture.png"
+    },
+    {
+        "id": "cat-lighting",
+        "slug": "lighting",
+        "name": "照明",
+        "room": "灯す",
+        "description": "夜の読書と食卓に、やわらかな明かりを。",
+        "image": "/assets/idea-store/images/category/real/entry-lighting.png"
+    },
+    {
+        "id": "cat-fabric",
+        "slug": "fabric",
+        "name": "布とファブリック",
+        "room": "触れる",
+        "description": "季節と気分を変える布もの。",
+        "image": "/assets/idea-store/images/category/real/entry-fabric.png"
+    },
+    {
+        "id": "cat-desk",
+        "slug": "desk",
+        "name": "デスク用品",
+        "room": "働く",
+        "description": "仕事机を整え、自分の集中を支える。",
+        "image": "/assets/idea-store/images/category/real/entry-desk.png"
+    },
+    {
+        "id": "cat-books",
+        "slug": "books",
+        "name": "本と雑誌",
+        "room": "読む",
+        "description": "暮らしの見方を少し変える読みもの。",
+        "image": "/assets/idea-store/images/category/real/entry-books.png"
+    },
+    {
+        "id": "cat-music",
+        "slug": "music",
+        "name": "音楽",
+        "room": "聴く",
+        "description": "部屋の空気を変える音と道具。",
+        "image": "/assets/idea-store/images/category/real/entry-music.png"
+    },
+    {
+        "id": "cat-craft",
+        "slug": "craft",
+        "name": "工作の道具",
+        "room": "つくる",
+        "description": "直す、組む、試すための手の道具。",
+        "image": "/assets/idea-store/images/category/real/entry-craft.png"
+    },
+    {
+        "id": "cat-cleaning",
+        "slug": "cleaning",
+        "name": "掃除とケア",
+        "room": "手入れする",
+        "description": "長く使うための、日々の手入れ。",
+        "image": "/assets/idea-store/images/category/real/entry-cleaning.png"
+    },
+    {
+        "id": "cat-bath",
+        "slug": "bath",
+        "name": "バス・ランドリー",
+        "room": "洗う",
+        "description": "水まわりを軽やかに整える。",
+        "image": "/assets/idea-store/images/category/real/entry-bath.png"
+    },
+    {
+        "id": "cat-coffee",
+        "slug": "coffee",
+        "name": "コーヒーとお茶",
+        "room": "休む",
+        "description": "一杯の時間を丁寧にする器具。",
+        "image": "/assets/idea-store/images/category/real/entry-coffee.png"
+    },
+    {
+        "id": "cat-garden",
+        "slug": "garden",
+        "name": "植物と庭",
+        "room": "育てる",
+        "description": "窓辺とベランダに小さな緑を。",
+        "image": "/assets/idea-store/images/category/real/entry-garden.png"
+    },
+    {
+        "id": "cat-pet",
+        "slug": "pet",
+        "name": "ペットと暮らす",
+        "room": "ともに暮らす",
+        "description": "人にも動物にも心地よい道具。",
+        "image": "/assets/idea-store/images/category/real/entry-pet.png"
+    },
+    {
+        "id": "cat-outdoor",
+        "slug": "outdoor",
+        "name": "外遊び",
+        "room": "出かける",
+        "description": "週末の外時間を身軽にする。",
+        "image": "/assets/idea-store/images/category/real/entry-outdoor.png"
+    },
+    {
+        "id": "cat-gift",
+        "slug": "gift",
+        "name": "贈る日用品",
+        "room": "贈る",
+        "description": "気負わず渡せて、長く使えるもの。",
+        "image": "/assets/idea-store/images/category/real/entry-gift.png"
+    },
+    {
+        "id": "cat-tableware",
+        "slug": "tableware",
+        "name": "器と食卓",
+        "room": "食べる",
+        "description": "ふだんの食卓を穏やかにする器。",
+        "image": "/assets/idea-store/images/category/real/entry-tableware.png"
+    },
+    {
+        "id": "cat-stationery",
+        "slug": "stationery",
+        "name": "文具",
+        "room": "書く",
+        "description": "手を動かす時間のための紙と道具。",
+        "image": "/assets/idea-store/images/category/real/entry-stationery.png"
+    },
+    {
+        "id": "cat-audio",
+        "slug": "audio",
+        "name": "オーディオ小物",
+        "room": "聴く",
+        "description": "音楽の居場所を整える小物。",
+        "image": "/assets/idea-store/images/category/real/entry-audio.png"
+    },
+    {
+        "id": "cat-kids",
+        "slug": "kids",
+        "name": "子どもと学び",
+        "room": "育つ",
+        "description": "遊びながら考える、家の中の小さな道具。",
+        "image": "/assets/idea-store/images/category/real/entry-kids.png"
+    }
+]

@@ -1,128 +1,154 @@
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}複数配送先の指定 | IDEA STORE{% endblock %}
+{% block content %}
 {#
-  BeMart Shopping shipping-multiple page — EC-CUBE
-  goShoppingShippingMultiple.
+  BeMart — 複数配送先指定ページ (goShoppingShippingMultiple).
 
-  PORT of EC-CUBE 4.3 default-theme `Shopping/shipping_multiple.twig`
-  (src/Eccube/Resource/template/default/Shopping/shipping_multiple.twig).
+  IdeaStore クリーンルーム再構築。構築入力:
+    (a) src/Resource/Page/Shopping/ShippingMultiple.php (#[Link] rel/href/method)
+    (b) var/json_schema/get-shopping-shipping-multiple.json (cartItems / addresses 形状)
+    (c) IdeaStore 設計言語 (idea-* 語彙)
 
-  DATA page (per-item address-assignment list) — see
-  var/templates/README.md. Markup skeleton, the `ec-role` /
-  `ec-pageHeader` / `ec-AddAddress` / `ec-AddAddress__info` /
-  `ec-AddAddress__new` / `ec-AddAddress__add` / `ec-AddAddress__item` /
-  `ec-AddAddress__select` / `ec-AddAddress__actions` classes and the
-  block structure are kept verbatim from EC-CUBE.
+  機能チェックリスト（EC-CUBE テンプレ一瞥の結果、DOM 構造は写さない）:
+    [x] 各カート商品に配送先を選択するセレクトボックスを表示
+    [x] 「新規お届け先を追加する」リンク → /shopping/shipping-multiple-edit
+    [x] CSRF トークン (csrfToken)
+    [x] POST /shopping/shipping-multiple (doSelectShippingAddress)
+    [x] 戻る → /shopping (goShopping)
+    [x] cartItems / addresses が空の場合のフォールバック表示
 
-  The `{% block javascript %}` — the add-row / delete-row jQuery
-  cloning the multi-destination assignment UI — is ported verbatim
-  (static client-side behaviour, no data binding).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `form._token` — Symfony CSRF widget; kept as the hidden `_token`
-     input bound to the body's `csrfToken` (null in the html context).
-   - `price` filter — BeMartTwigExtension JPY filter.
-
-  MISSING BODY FIELD follow-up: the current pre-order's cart items
-  (`OrderItems`) and the customer's registered addresses. The body's
-  `cartItems` / `addresses` lists are empty (a Wave-future TODO — see
-  src/Resource/Page/Shopping/ShippingMultiple.php). With no items the
-  `{% for %}` loop emits nothing — exactly the empty `ec-AddAddress`
-  skeleton EC-CUBE renders for an empty order. Surfacing the
-  cart-item × address allocation is a dedicated vertical-slice, tracked
-  in the enrichment backlog.
+  POST フィールド構造 (Resource.onPost 引数 $allocations):
+    allocations[{idx}][productClassId] = <int>
+    allocations[{idx}][addressId]      = <string>
+    allocations[{idx}][quantity]       = <int>
 #}
-{% extends 'base.html.twig' %}
 
-{% set body_class = 'other_page' %}
-{% set route = 'shopping-shipping-multiple' %}
-{% set title = 'お届け先の複数指定' %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span>
+  <a href="/cart">カート</a><span>/</span>
+  <a href="/shopping">ご注文手続き</a><span>/</span>
+  <span>複数配送先</span>
+</nav>
 
-{% block javascript %}
-<script>
-$(function() {
-    $('.add').click(function() {
-        var data = $(this).data();
-        var idx = data.idx;
-        var itemIdx = 0;
-        var item = $('#item' + idx);
-        var row = $('#item' + idx + '-0');
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-shipping-multiple-title">
+  <div>
+    <p class="idea-eyebrow">Multi-destination shipping</p>
+    <h1 id="idea-shipping-multiple-title" class="idea-title idea-title--compact">複数配送先の指定</h1>
+    <p class="idea-muted">各商品のお届け先を個別に選んでください。新しいお届け先は下のリンクから追加できます。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Shipping destinations</span>
+    <strong>{{ cartItems|default([])|length }} 商品</strong>
+    <small>IDEA STORE</small>
+  </div>
+</section>
 
-        // 既存のお届け先のrowをコピーして雛形とする
-        var addrow = $(row).clone();
+<div class="idea-container idea-checkout-progress" aria-label="購入ステップ">
+  <span><b>1</b>カート</span>
+  <span><b>2</b>ご注文手続き</span>
+  <span class="is-active"><b>3</b>配送先</span>
+  <span><b>4</b>確認</span>
+  <span><b>5</b>完了</span>
+</div>
 
-        // 追加する要素のIndexを決定
-        item.find('.shipping_item').each(function() {
-            itemIdx = $(this).attr('data-itemidx');
-        });
-        itemIdx = 1 + parseInt(itemIdx);
+{% set cartItemList  = cartItems|default([]) %}
+{% set addressList   = addresses|default([]) %}
+{% set hasItems      = cartItemList|length > 0 %}
+{% set hasAddresses  = addressList|length > 0 %}
 
-        // 行のID設定
-        addrow.attr('id', 'item' + idx + '-' + itemIdx);
-        addrow.attr('data-itemidx', itemIdx);
+{# ── 新規お届け先を追加する ───────────────────── #}
+{# rel=goShoppingShippingMultipleEdit → /shopping/shipping-multiple-edit #}
+<div class="idea-container idea-section--tight">
+  <a class="idea-button idea-button--light"
+     href="/shopping/shipping-multiple-edit"
+     rel="goShoppingShippingMultipleEdit">
+    + 新規お届け先を追加する
+  </a>
+</div>
 
-        // お届け先セレクトボックスのIDとNAME設定
-        addrow.find('select').attr('name', 'form[shipping_multiple][' + idx + '][shipping][' + itemIdx + '][customer_address]');
-        addrow.find('select').attr('id', 'form_shipping_multiple_' + idx + '_shipping_' + itemIdx + '_customer_address');
+{% if hasItems %}
+<form id="shipping-multiple-form"
+      method="post"
+      action="/shopping/shipping-multiple"
+      class="idea-container idea-section">
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
-        // 数量のINPUTのIDとNAME設定
-        addrow.find('input').attr('name', 'form[shipping_multiple][' + idx + '][shipping][' + itemIdx + '][quantity]');
-        addrow.find('input').attr('id', 'form_shipping_multiple_' + idx + '_shipping_' + itemIdx + '_quantity');
+  <div class="idea-checkout-main" aria-label="商品ごとの配送先選択">
 
-        // その他、divやbuttonのID設定
-        addrow.find('[id*="multiple_list__shipping_address"]').attr('id', 'multiple_list__shipping_address--' + idx + '_' + itemIdx + '');
-        addrow.find('[id*="multiple_list__shipping_quantity"]').attr('id', 'multiple_list__shipping_quantity--' + idx + '_' + itemIdx + '');
-        addrow.find('button').each(function() {
-            $(this).attr('id', 'button__delete--' + idx + '_' + itemIdx + '');
-            $(this).attr('data-itemidx', idx + '-' + itemIdx);
-            $(this).data('itemidx', idx + '-' + itemIdx);
-            $(this).removeAttr('style');
-        });
-
-        $(item).append($(addrow));
-    });
-
-    $(document).on('click', '.delete', function() {
-        var data = $(this).data();
-        $('#item' + data.itemidx).remove();
-    });
-
-});
-</script>
-{% endblock javascript %}
-
-{% block main %}
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1>お届け先の複数指定</h1>
+    {% for item in cartItemList %}
+      {% set idx = loop.index0 %}
+      <section class="idea-checkout-panel idea-allocation-row"
+               aria-label="{{ item.productName|default('商品') }}">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Item {{ loop.index }}</p>
+            <h2 class="idea-section-title" style="font-size:clamp(1rem,2vw,1.35rem);">
+              {{ item.productName|default('') }}
+            </h2>
+            {% if item.totalPrice is defined %}
+              <p class="idea-muted">小計：¥{{ item.totalPrice|number_format }}</p>
+            {% endif %}
+          </div>
         </div>
-    </div>
 
-    <div class="ec-AddAddress">
-        <form id="shipping-multiple-form" method="post" action="/shopping/shipping-multiple">
-            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-            <div class="ec-AddAddress__info">
-                <p>各商品のお届け先を選択してください。</p>
-            </div>
+        <div class="idea-form-grid idea-form-grid--two">
+          <input type="hidden"
+                 name="allocations[{{ idx }}][productClassId]"
+                 value="{{ item.productClassId|default('') }}">
 
-            <div class="ec-AddAddress__new"><a href="/shopping/shipping-multiple-edit" class="ec-inlineBtn">新規お届け先を追加する</a></div>
+          <label class="idea-field">
+            お届け先
+            <select name="allocations[{{ idx }}][addressId]"
+                    id="allocation-address-{{ idx }}"
+                    aria-label="{{ item.productName|default('商品') }} のお届け先">
+              <option value="">-- お届け先を選択 --</option>
+              {% for addr in addressList %}
+                <option value="{{ addr.addressId|default('') }}">
+                  {{ addr.name01|default('') }} {{ addr.name02|default('') }}
+                  〒{{ addr.postalCode|default('') }}
+                  {{ addr.addr01|default('') }}{{ addr.addr02|default('') }}
+                </option>
+              {% endfor %}
+            </select>
+          </label>
 
-            {% for orderItem in cartItems %}
-                {% set idx = loop.index0 %}
-                <div id="multiple_list__item_box--{{ idx }}" class="ec-AddAddress__add">
-                    <div class="ec-AddAddress__item">
-                        <div class="ec-AddAddress__itemtContent">
-                            <div class="ec-AddAddress__itemtTitle">{{ orderItem.productName }}
-                            </div>
-                            <div class="ec-AddAddress__itemtPrice">小計：{{ orderItem.totalPrice|price }}</div>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+          <label class="idea-field">
+            数量
+            <input type="number"
+                   name="allocations[{{ idx }}][quantity]"
+                   id="allocation-qty-{{ idx }}"
+                   value="{{ item.quantity|default(1) }}"
+                   min="1"
+                   max="{{ item.quantity|default(1) }}"
+                   aria-label="{{ item.productName|default('商品') }} の数量">
+          </label>
+        </div>
+      </section>
+    {% endfor %}
 
-            <div class="ec-AddAddress__actions">
-                <button id="button__confirm" type="submit" class="ec-blockBtn--action">選択したお届け先に送る</button>
-                <a class="ec-blockBtn--cancel" href="/shopping">戻る</a>
-            </div>
-        </form>
-    </div>
+  </div>
+
+  <div class="idea-form-actions">
+    {# rel=doSelectShippingAddress → POST /shopping/shipping-multiple #}
+    <button type="submit" class="idea-button">お届け先を確定する</button>
+    {# rel=goShopping → /shopping #}
+    <a class="idea-link" href="/shopping">ご注文手続きに戻る</a>
+  </div>
+</form>
+
+{% else %}
+
+{# cartItems が空（Wave-future: カート × 住所割当は未実装） #}
+<section class="idea-container idea-section">
+  <div class="idea-empty">
+    <p class="idea-eyebrow">No items</p>
+    <h2 class="idea-section-title" style="font-size:clamp(1.2rem,2.5vw,1.8rem);">
+      配送対象の商品がありません
+    </h2>
+    <p class="idea-muted">カートに商品を追加してから、複数配送先の設定をお試しください。</p>
+    <a class="idea-button" href="/shopping">ご注文手続きに戻る</a>
+  </div>
+</section>
+
+{% endif %}
 {% endblock %}

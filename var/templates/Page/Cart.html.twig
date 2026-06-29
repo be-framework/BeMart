@@ -1,215 +1,161 @@
-{#
-  BeMart Cart page — EC-CUBE goCart.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}カート | IDEA STORE{% endblock %}
+{% block content %}
+{% set displayCarts = carts|default([])|filter(cart => cart.items|default([])|length > 0) %}
+{% set progress = [
+  { label: 'カート',      state: 'is-active' },
+  { label: 'ログイン',    state: '' },
+  { label: 'お届け先',    state: '' },
+  { label: 'ご注文確認',  state: '' },
+  { label: '完了',        state: '' }
+] %}
 
-  PORT of EC-CUBE 4.3 default-theme `Cart/index.twig`
-  (src/Eccube/Resource/template/default/Cart/index.twig).
+<nav class="idea-container idea-breadcrumb" aria-label="現在地">
+  <a href="/">ホーム</a><span>/</span><span>カート</span>
+</nav>
 
-  Markup skeleton, `ec-cartRole` / `ec-progress` / `ec-cartRow` classes
-  and structure are kept verbatim from EC-CUBE. Only the cart data is
-  rebound to the Cart resource body (src/Resource/Page/Cart.php):
-    cartCount, totalPrice, deliveryFeeTotal,
-    carts[] { cartKey, saleTypeId, saleTypeName, totalPrice,
-              deliveryFeeTotal,
-              items[] { productClassId, productId, productCode,
-                        productName, mainImage,
-                        classCategoryName1, className1,
-                        classCategoryName2, className2,
-                        quantity, price } }
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-cart-heading">
+  <div>
+    <p class="idea-eyebrow">Shopping cart</p>
+    <h1 id="idea-cart-heading" class="idea-title idea-title--compact">
+      <span class="idea-title-line">選んだイデアを、</span>
+      <span class="idea-title-line">暮らしへ。</span>
+    </h1>
+    <p class="idea-muted">数量を確認してレジへ進んでください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>{{ displayCarts|length > 0 ? 'Ready' : 'Empty' }}</span>
+    <strong>¥{{ totalPrice|default(0)|number_format }}</strong>
+    <small>{{ displayCarts|length }} カートグループ</small>
+  </div>
+</section>
 
-  The cart row reproduces EC-CUBE's `ec-cartRow`: product thumbnail,
-  product-detail link on the name, the two variation axes, and the
-  remove/up/down operation links keyed on productClassId — these are
-  derived from the corrected ALPS `CartItem` descriptor, which is a
-  faithful projection of EC-CUBE's cart screen (not a thin Entity).
+<nav class="idea-container idea-checkout-progress" aria-label="購入ステップ">
+  {% for step in progress %}
+    <span class="{{ step.state }}"><b>{{ loop.index }}</b>{{ step.label }}</span>
+  {% endfor %}
+</nav>
 
-  Fields EC-CUBE renders that BeMart's body still does not carry are
-  OMITTED (never invented) and enumerated as explained residual in
-  tests/Resource/CartHtmlRenderTest.php. Notable omissions:
-   - `app.session.flashbag` error blocks — request-flash, no BeMart equiv.
-   - delivery-fee-free progress block — depends on BaseInfo thresholds.
-   - CSRF anchor tokens on the up/down/remove links.
-  See var/templates/README.md for the port + residual-diff method.
-#}
-{% extends 'base.html.twig' %}
+<section class="idea-container idea-section idea-checkout-layout">
+  <div class="idea-checkout-main">
 
-{% set body_class = 'cart_page' %}
-{% set route = 'cart' %}
-{% set title = 'ショッピングカート' %}
+    {% if displayCarts|length > 0 %}
 
-{% block main %}
-
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1>ショッピングカート</h1>
+      {% if displayCarts|length > 1 %}
+        <div class="idea-checkout-panel" role="alert">
+          <p class="idea-muted">販売種別が異なる商品があるため、カートが分かれています。それぞれ個別にお手続きください。</p>
         </div>
-    </div>
+      {% endif %}
 
-    <div class="ec-cartRole">
-        <div class="ec-cartRole__progress">
-            <ul class="ec-progress">
-                {% set step = 1 %}
-                <li class="ec-progress__item is-complete">
-                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                    </div>
-                    <div class="ec-progress__label">カートの商品
-                    </div>
-                </li>
-                <li class="ec-progress__item">
-                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                    </div>
-                    <div class="ec-progress__label">お客様情報
-                    </div>
-                </li>
-                <li class="ec-progress__item">
-                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                    </div>
-                    <div class="ec-progress__label">ご注文手続き
-                    </div>
-                </li>
-                <li class="ec-progress__item">
-                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                    </div>
-                    <div class="ec-progress__label">ご注文内容確認
-                    </div>
-                </li>
-                <li class="ec-progress__item">
-                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                    </div>
-                    <div class="ec-progress__label">完了
-                    </div>
-                </li>
-            </ul>
-        </div>
-        {% set displayCarts = carts|filter(cart => cart.items|length > 0) %}
-        {% if displayCarts|length > 0 %}
-            <div class="ec-cartRole__totalText">
-                <p>
-                    商品の合計金額は「<strong>{{ totalPrice|price }}</strong>」です。
-                </p>
+      {% for cart in displayCarts %}
+        <article class="idea-checkout-panel idea-cart-panel">
+          <div class="idea-panel-head">
+            <div>
+              <p class="idea-eyebrow">{{ cart.saleTypeName|default('通常販売') }}</p>
+              <h2 class="idea-section-title">カートの商品</h2>
             </div>
-            {% if displayCarts|length > 1 %}
-                <div class="ec-cartRole__error">
-                    <div class="ec-alert-warning">
-                        <div class="ec-alert-warning__inner">
-                            <div class="ec-alert-warning__inner__item">
-                                <div class="ec-alert-warning__text">
-                                    同時購入できない商品のカートを分けました。お手数ですが別々で注文してください。
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <span class="idea-panel-total">¥{{ cart.totalPrice|default(0)|number_format }}</span>
+          </div>
+
+          <div class="idea-cart-list">
+            {% for item in cart.items|default([]) %}
+              {% set qty = item.quantity|default(1) %}
+              {% set unitPrice = item.price|default(0) %}
+              {% set image = item.mainImage|default('/assets/idea-store/images/product/no-image.svg') %}
+              {% if image starts with 'idea-store/' %}
+                {% set image = '/save_image/' ~ image %}
+              {% elseif image starts with 'save_image/' or image starts with 'assets/' %}
+                {% set image = '/' ~ image %}
+              {% endif %}
+
+              <article class="idea-cart-item">
+                <a class="idea-cart-item__image" href="/products/detail/{{ item.productCode }}">
+                  <img src="{{ image }}" alt="{{ item.productName|default(item.productCode) }}" loading="lazy">
+                </a>
+
+                <div class="idea-cart-item__body">
+                  <p class="idea-card-kicker">{{ item.productCode }}</p>
+                  <h3>
+                    <a href="/products/detail/{{ item.productCode }}">{{ item.productName|default(item.productCode) }}</a>
+                  </h3>
+                  {% if item.classCategoryName1|default('') %}
+                    <p class="idea-muted">{{ item.className1|default('規格') }}：{{ item.classCategoryName1 }}</p>
+                  {% endif %}
+                  {% if item.classCategoryName2|default('') %}
+                    <p class="idea-muted">{{ item.className2|default('規格') }}：{{ item.classCategoryName2 }}</p>
+                  {% endif %}
+                  <p class="idea-cart-item__price">¥{{ unitPrice|number_format }} × {{ qty|number_format }}</p>
                 </div>
-            {% endif %}
 
-            <div id="form_cart" class="ec-cartRole">
-
-                {% for cart in displayCarts %}
-                    {% set cartKey = cart.cartKey %}
-                    <div class="ec-cartRole__cart">
-                        <div class="ec-cartTable">
-                            <ol class="ec-cartHeader">
-                                <li class="ec-cartHeader__label">削除</li>
-                                <li class="ec-cartHeader__label">商品内容</li>
-                                <li class="ec-cartHeader__label">数量</li>
-                                <li class="ec-cartHeader__label">小計</li>
-                            </ol>
-                            {% for item in cart.items %}
-                                <ul class="ec-cartRow">
-                                    <li class="ec-cartRow__delColumn">
-                                        <form method="post" action="/cart/item" class="ec-cartRow__operationForm">
-                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('cart')) }}">
-                                            <input type="hidden" name="productCode" value="{{ item.productCode }}">
-                                            <input type="hidden" name="operation" value="remove">
-                                            <button type="submit" class="ec-icon" data-message="カートから商品を削除してもよろしいですか?">
-                                                <img src="{{ asset('assets/icon/cross.svg') }}" alt="delete">
-                                            </button>
-                                        </form>
-                                    </li>
-                                    <li class="ec-cartRow__contentColumn">
-                                        <div class="ec-cartRow__img">
-                                            <a target="_blank" href="/product?productCode={{ item.productCode }}">
-                                                <img src="{{ asset(item.mainImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ item.productName }}"/>
-                                            </a>
-                                        </div>
-                                        <div class="ec-cartRow__summary">
-                                            <div class="ec-cartRow__name">
-                                                <a target="_blank" href="/product?productCode={{ item.productCode }}">{{ item.productName }}</a>
-                                                {% if item.classCategoryName1 %}
-                                                    <br>{{ item.className1 }}：{{ item.classCategoryName1 }}
-                                                {% endif %}
-                                                {% if item.classCategoryName2 %}
-                                                    <br>{{ item.className2 }}：{{ item.classCategoryName2 }}
-                                                {% endif %}
-                                            </div>
-                                            <div class="ec-cartRow__unitPrice">{{ item.price|price }}</div>
-                                            <div class="ec-cartRow__sutbtotalSP">小計：{{ (item.price * item.quantity)|price }}</div>
-                                        </div>
-                                    </li>
-                                    <li class="ec-cartRow__amountColumn">
-                                        <div class="ec-cartRow__amount">{{ item.quantity|number_format }}</div>
-                                        <div class="ec-cartRow__amountSP">数量：{{ item.quantity|number_format }}</div>
-                                        <div class="ec-cartRow__amountUpDown">
-                                            {% if item.quantity > 1 %}
-                                                <form method="post" action="/cart/item" class="ec-cartRow__amountDownForm">
-                                                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('cart')) }}">
-                                                    <input type="hidden" name="productCode" value="{{ item.productCode }}">
-                                                    <input type="hidden" name="operation" value="down">
-                                                    <input type="hidden" name="quantity" value="{{ item.quantity - 1 }}">
-                                                    <button type="submit" class="ec-cartRow__amountDownButton load-overlay" data-confirm="false">
-                                                        <span class="ec-cartRow__amountDownButton__icon"><img src="{{ asset('assets/icon/minus-dark.svg') }}" alt="reduce"></span>
-                                                    </button>
-                                                </form>
-                                            {% else %}
-                                                <div class="ec-cartRow__amountDownButtonDisabled">
-                                                    <span class="ec-cartRow__amountDownButton__icon"><img src="{{ asset('assets/icon/minus.svg') }}" alt="reduce"></span>
-                                                </div>
-                                            {% endif %}
-                                            <form method="post" action="/cart/item" class="ec-cartRow__amountUpForm">
-                                                <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('cart')) }}">
-                                                <input type="hidden" name="productCode" value="{{ item.productCode }}">
-                                                <input type="hidden" name="operation" value="up">
-                                                <input type="hidden" name="quantity" value="{{ item.quantity + 1 }}">
-                                                <button type="submit" class="ec-cartRow__amountUpButton load-overlay" data-confirm="false">
-                                                    <span class="ec-cartRow__amountUpButton__icon"><img src="{{ asset('assets/icon/plus-dark.svg') }}" alt="increase"></span>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </li>
-                                    <li class="ec-cartRow__subtotalColumn">
-                                        <div class="ec-cartRow__sutbtotal">{{ (item.price * item.quantity)|price }}</div>
-                                    </li>
-                                </ul>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="ec-cartRole__progress">
-                    </div>
-                    <div class="ec-cartRole__actions">
-                        <div class="ec-cartRole__total">合計：<span class="ec-cartRole__totalAmount">{{ cart.totalPrice|price }}</span>
-                        </div>
-                        <a class="ec-blockBtn--action goCheckoutEntry" rel="goCheckoutEntry" href="/shopping">レジに進む</a>
-                        {% if loop.last %}
-                            <a class="ec-blockBtn--cancel" href="/">お買い物を続ける</a>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="ec-role">
-                <div class="ec-off3Grid">
-                    <div class="ec-off3Grid__cell">
-                        <div class="ec-alert-warning">
-                            <div class="ec-alert-warning__inner">
-                                <div class="ec-alert-warning__inner__item">
-                                    <div class="ec-alert-warning__icon"><img src="{{ asset('assets/icon/exclamation-white.svg') }}"></div>
-                                    <div class="ec-alert-warning__text">現在カート内に商品はございません。</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="idea-cart-item__controls" aria-label="{{ item.productName|default(item.productCode) }} の数量操作">
+                  <div class="idea-quantity-actions">
+                    <form method="post" action="/cart/item">
+                      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                      <input type="hidden" name="productCode" value="{{ item.productCode }}">
+                      <input type="hidden" name="operation" value="down">
+                      <input type="hidden" name="quantity" value="{{ qty - 1 }}">
+                      <button type="submit" aria-label="数量を減らす"{% if qty <= 1 %} disabled{% endif %}>−</button>
+                    </form>
+                    <span>{{ qty|number_format }}</span>
+                    <form method="post" action="/cart/item">
+                      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                      <input type="hidden" name="productCode" value="{{ item.productCode }}">
+                      <input type="hidden" name="operation" value="up">
+                      <input type="hidden" name="quantity" value="{{ qty + 1 }}">
+                      <button type="submit" aria-label="数量を増やす">＋</button>
+                    </form>
+                  </div>
+                  <strong>¥{{ (unitPrice * qty)|number_format }}</strong>
+                  <form method="post" action="/cart/item">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                    <input type="hidden" name="productCode" value="{{ item.productCode }}">
+                    <input type="hidden" name="operation" value="remove">
+                    <button class="idea-text-button" type="submit">削除</button>
+                  </form>
                 </div>
-            </div>
-        {% endif %}
-    </div>
+              </article>
+            {% endfor %}
+          </div>
 
+          <div class="idea-form-actions">
+            <a class="idea-button" rel="goCheckoutEntry" href="/shopping">レジに進む</a>
+          </div>
+        </article>
+      {% endfor %}
+
+    {% else %}
+      <div class="idea-empty">
+        <p class="idea-eyebrow">Your cart is empty</p>
+        <h2 class="idea-section-title">カートに商品がありません</h2>
+        <p class="idea-muted">気になる商品を見つけてカートに追加してください。</p>
+        <a class="idea-button" href="/products">商品を探す</a>
+      </div>
+    {% endif %}
+
+  </div>
+
+  <aside class="idea-summary-panel" aria-label="注文概要">
+    <p class="idea-eyebrow">Order summary</p>
+    <dl>
+      <div>
+        <dt>商品合計</dt>
+        <dd>¥{{ totalPrice|default(0)|number_format }}</dd>
+      </div>
+      <div>
+        <dt>送料</dt>
+        <dd>¥{{ deliveryFeeTotal|default(0)|number_format }}</dd>
+      </div>
+      <div class="idea-summary-total">
+        <dt>合計</dt>
+        <dd>¥{{ (totalPrice|default(0) + deliveryFeeTotal|default(0))|number_format }}</dd>
+      </div>
+    </dl>
+    <a class="idea-button idea-button--wide{% if displayCarts|length == 0 %} idea-button--disabled{% endif %}"
+       rel="goCheckoutEntry"
+       href="{% if displayCarts|length > 0 %}/shopping{% else %}/products{% endif %}">
+      {% if displayCarts|length > 0 %}レジに進む{% else %}買い物を続ける{% endif %}
+    </a>
+    <a class="idea-link idea-summary-link" href="/products">カタログに戻る</a>
+  </aside>
+</section>
 {% endblock %}

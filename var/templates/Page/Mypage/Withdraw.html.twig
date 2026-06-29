@@ -1,67 +1,83 @@
-{#
-  BeMart withdrawal-confirm page — EC-CUBE doWithdrawCustomer.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}退会手続き | IDEA STORE{% endblock %}
 
-  PORT of EC-CUBE 4.3 default-theme `Mypage/withdraw.twig`
-  (src/Eccube/Resource/template/default/Mypage/withdraw.twig).
+{% block content %}
 
-  Markup skeleton, `ec-mypageRole` / `ec-withdrawRole` / `ec-off3Grid` /
-  `ec-off4Grid` / `ec-withdrawRole__title` / `ec-withdrawRole__description`
-  classes and the block structure are kept verbatim from EC-CUBE. Only
-  the dynamic bindings are rebound to the Withdraw resource body
-  (src/Resource/Page/Mypage/Withdraw.php):
-    transitionId, fields, submitTo, csrfToken,
-    customerId, email, name01, name02
+<nav class="idea-container idea-breadcrumb" aria-label="パンくずリスト">
+  <a href="/">Home</a><span>/</span>
+  <a href="/mypage">マイページ</a><span>/</span>
+  <span>退会手続き</span>
+</nav>
 
-  Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
-
-  This is a confirm screen — it has NO form FIELDS, only a submit button
-  and a CSRF hidden token. EC-CUBE's withdraw.twig emits the token via
-  `{{ form_widget(form._token) }}` (the Symfony CSRF widget); BeMart has
-  no CSRF widget, so the hidden `_token` input is authored plainly with
-  the body's `csrfToken` value (null in the html context — the
-  EventListener mirrors the live token in for the POST). Because withdraw
-  carries no editable fields, no AbstractForm is needed (the form-page
-  recipe's `<Name>Form` exists for screens that render `<input>` fields;
-  a confirm page does not). EC-CUBE-runtime only — enumerated as residual.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'mypage' %}
-{% set route = 'mypage-withdraw' %}
-{% set title = 'マイページ' %}
-
-{% block main %}
-    <div class="ec-layoutRole__main">
-        <div class="ec-mypageRole">
-            <div class="ec-pageHeader">
-                <h1>マイページ/退会手続き</h1>
-            </div>
-            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'withdraw', name01: name01|default(''), name02: name02|default('') } %}
-        </div>
-        <div class="ec-withdrawRole">
-            <form method="post" action="/mypage/withdraw">
-                <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                <div class="ec-off3Grid">
-                    <div class="ec-off3Grid__cell">
-                        <div style="font-size:100px;text-align:center;">
-                            <div class="ec-icon"><img src="{{ asset('assets/icon/exclamation.svg') }}" alt=""></div>
-                        </div>
-                        <p class="ec-withdrawRole__title">退会手続きの前にご確認ください
-                        </p>
-                        <p class="ec-withdrawRole__description">退会手続きが完了した時点で、現在保存されている購入履歴やお届け先等の情報は、すべて削除されますのでご注意ください。
-                        </p>
-                    </div>
-                </div>
-                <div class="ec-off4Grid">
-                    <div class="ec-off4Grid__cell">
-                        <button type="submit" class="ec-blockBtn--cancel" name="mode"
-                                value="confirm">退会手続きへ</button>
-                    </div>
-                </div>
-            </form>
-        </div>
+<section class="idea-container" style="padding-top:clamp(1.4rem,3vw,2.5rem);">
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2rem;align-items:start;">
+    <div>
+      <p class="idea-eyebrow">Account withdrawal</p>
+      <h1 class="idea-title idea-title--compact">退会手続き</h1>
+      {% if name01 is not empty %}
+        <p class="idea-muted">{{ name01 }}{{ name02 is not empty ? ' ' ~ name02 }} さん、以下の内容をご確認ください。</p>
+      {% endif %}
     </div>
+    <nav style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end;padding-top:.5rem;" aria-label="マイページメニュー">
+      <a href="/mypage"         style="font-size:.86rem;font-weight:700;color:var(--idea-muted);">注文履歴</a>
+      <a href="/mypage/favorite-list" style="font-size:.86rem;font-weight:700;color:var(--idea-muted);">お気に入り</a>
+      <a href="/mypage/change"  style="font-size:.86rem;font-weight:700;color:var(--idea-muted);">会員情報の編集</a>
+      <a href="/mypage/address-list" style="font-size:.86rem;font-weight:700;color:var(--idea-muted);">お届け先</a>
+      <a href="/mypage/withdraw" style="font-size:.86rem;font-weight:900;color:var(--idea-ink);">退会手続き</a>
+    </nav>
+  </div>
+</section>
+
+<section class="idea-container idea-section idea-section--tight">
+  <div class="idea-checkout-main" style="max-width:620px;">
+
+    <div class="idea-checkout-panel idea-withdraw-notice" role="alert">
+      <div class="idea-panel-head">
+        <div>
+          <p class="idea-eyebrow">Important</p>
+          <h2 class="idea-section-title">退会前にご確認ください</h2>
+        </div>
+      </div>
+      <p class="idea-muted">退会手続きが完了すると、購入履歴・お届け先・お気に入りを含むすべてのアカウント情報が削除されます。この操作は取り消せません。</p>
+    </div>
+
+    {% if email is not empty %}
+      <div class="idea-checkout-panel idea-withdraw-account" aria-label="対象アカウント">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Target account</p>
+            <h2 class="idea-section-title">対象アカウント</h2>
+          </div>
+        </div>
+        <dl class="idea-spec-list">
+          {% if name01 is not empty %}
+            <div class="idea-spec-row">
+              <dt>お名前</dt>
+              <dd>{{ name01 }}{% if name02 is not empty %} {{ name02 }}{% endif %}</dd>
+            </div>
+          {% endif %}
+          <div class="idea-spec-row">
+            <dt>メールアドレス</dt>
+            <dd>{{ email }}</dd>
+          </div>
+        </dl>
+      </div>
+    {% endif %}
+
+    <form class="idea-withdraw-form" method="post" action="/mypage/withdraw">
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <div class="idea-form-actions">
+        <button type="submit" class="idea-button idea-button--withdraw" aria-describedby="idea-withdraw-warning">
+          退会手続きへ進む
+        </button>
+        <a class="idea-link" href="/mypage">マイページへ戻る</a>
+      </div>
+      <p id="idea-withdraw-warning" class="idea-muted" style="margin-top:.75rem;font-size:.82rem;">
+        ボタンを押すと退会確認画面へ進みます。この時点では退会は完了しません。
+      </p>
+    </form>
+
+  </div>
+</section>
+
 {% endblock %}

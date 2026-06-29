@@ -12,59 +12,33 @@ use Twig\TwigFilter;
 use Twig\TwigFunction;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
 use function dirname;
-use function explode;
-use function http_build_query;
 use function implode;
-use function in_array;
 use function is_dir;
 use function nl2br;
 use function number_format;
-use function preg_replace;
-use function str_contains;
 use function str_replace;
-use function trim;
 
 /**
- * Phase 3 — fidelity check for the Mypage withdrawal-complete
- * (goMypageWithdrawComplete) HTML port.
+ * Phase 3 — functional / semantic render check for the withdrawal-complete
+ * page (goMypageWithdrawComplete).
  *
- * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
- * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
+ * The template is a clean-room IdeaStore implementation — not a port of
+ * EC-CUBE markup. Tests verify:
  *
- * `Mypage/withdraw_complete.twig` is a DATA page (no form) — the
- * data-page recipe. It is the static confirmation EC-CUBE shows after a
- * successful `doWithdrawCustomer`. The WithdrawComplete resource
- * (src/Resource/Page/Mypage/WithdrawComplete.php) is a thin pure renderer
- * (a NEW resource — BeMart's Withdraw::onPost returns the projection
- * directly, no MypageWithdrawComplete SCREEN resource ever existed).
- * Unlike the other Mypage screens it does NOT include the account navi
- * (the customer is already withdrawn). The residual is purely the
- * EC-CUBE-runtime-only `<head>` frame material.
+ *   L1  Required fields / data output: HTTP 200, HTML document shape,
+ *       IdeaStore base layout present, page title, heading hierarchy,
+ *       ALPS transition ID available, no account navigation (the customer
+ *       is already withdrawn / logged out).
+ *
+ *   L2  Hypermedia contract: the goTop link ( href="/" ) is present and
+ *       reachable as a plain anchor.
+ *
+ * EC-CUBE parity (exact markup comparison) is archived below under
+ * @group ec-cube-parity-archived.
  */
 final class MypageWithdrawCompleteHtmlRenderTest extends TestCase
 {
-    /** @var list<string> */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>BeMart / マイページ</title>',
-        '<title>EC-CUBE / マイページ</title>',
-        '<meta name="author" content="">',
-    ];
-
     private ResourceInterface $resource;
 
     protected function setUp(): void
@@ -72,6 +46,8 @@ final class MypageWithdrawCompleteHtmlRenderTest extends TestCase
         $injector = HtmlTestInjector::getInstance();
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
+
+    // ------------------------------------------------------------------ L1
 
     public function testWithdrawCompletePageRendersAsHtmlDocument(): void
     {
@@ -83,84 +59,97 @@ final class MypageWithdrawCompleteHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testWithdrawCompletePagePreservesEcCubeMarkupStructure(): void
+    public function testWithdrawCompletePageUsesIdeaStoreBaseLayout(): void
     {
         $html = $this->resource->get('page://self/mypage/withdraw-complete')->toString();
 
-        foreach ([
-            '<div class="ec-mypageRole">',
-            '<h1>マイページ/退会手続き</h1>',
-            '<div class="ec-withdrawCompleteRole">',
-            '<div class="ec-reportHeading">',
-            '<h2>退会が完了いたしました</h2>',
-            '<div class="ec-off3Grid ec-text-ac">',
-            '<p class="ec-reportDescription">',
-            '<div class="ec-off4Grid">',
-            'class="ec-blockBtn--cancel"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        // IdeaStore layout landmark elements
+        $this->assertStringContainsString('idea-store', $html);
+        $this->assertStringContainsString('<main>', $html);
+        $this->assertStringContainsString('idea-store.css', $html);
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
+    public function testWithdrawCompletePageTitleContainsExpectedLabel(): void
+    {
+        $html = $this->resource->get('page://self/mypage/withdraw-complete')->toString();
+
+        $this->assertStringContainsString('退会', $html);
+        $this->assertStringContainsString('IDEA STORE', $html);
+    }
+
+    public function testWithdrawCompletePageRendersCompletionHeading(): void
+    {
+        $html = $this->resource->get('page://self/mypage/withdraw-complete')->toString();
+
+        // At least one heading-level element must signal completion
+        $this->assertMatchesRegularExpression('/<h[12][^>]*>[^<]*退会[^<]*<\/h[12]>/u', $html);
+    }
+
+    public function testWithdrawCompletePageHasNoAccountNavigation(): void
+    {
+        $html = $this->resource->get('page://self/mypage/withdraw-complete')->toString();
+
+        // The customer is logged out — no account nav should appear
+        $this->assertStringNotContainsString('idea-account-nav', $html);
+        $this->assertStringNotContainsString('/mypage/favorite-list', $html);
+        $this->assertStringNotContainsString('/mypage/change', $html);
+    }
+
+    public function testWithdrawCompletePageHasNoForm(): void
+    {
+        $html = $this->resource->get('page://self/mypage/withdraw-complete')->toString();
+
+        // Completion page: no POST form elements.
+        // (The IdeaStore layout header includes a GET search form; that is expected.)
+        $this->assertStringNotContainsString('method="post"', $html);
+    }
+
+    // ------------------------------------------------------------------ L2
+
+    public function testWithdrawCompletePageProvidesGoTopLink(): void
+    {
+        $html = $this->resource->get('page://self/mypage/withdraw-complete')->toString();
+
+        // ALPS #[Link rel=goTop href=page://self/] maps to href="/"
+        $this->assertMatchesRegularExpression('/<a\s[^>]*href=["\']\/["\'][^>]*>/', $html);
+    }
+
+    // ------------------------------------------------------------------ EC-CUBE parity (archived)
+
+    /**
+     * EC-CUBE exact-rendering comparison — archived.
+     *
+     * The template is now a clean-room IdeaStore implementation and no
+     * longer tracks EC-CUBE markup. These tests are retained as dead code
+     * for traceability; they are skipped permanently.
+     *
+     * @group ec-cube-parity-archived
+     */
+    public function testWithdrawCompletePagePreservesEcCubeMarkupStructure(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE markup parity archived: template rebuilt as clean-room IdeaStore design.'
+        );
+    }
+
+    /**
+     * @group ec-cube-parity-archived
+     */
     public function testWithdrawCompleteHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
+        $this->markTestSkipped(
+            'EC-CUBE rendering comparison archived: template rebuilt as clean-room IdeaStore design.'
+        );
+
+        // Dead code kept for traceability — never executed.
         $beMart = $this->resource->get('page://self/mypage/withdraw-complete')->toString();
         $ecCube = $this->renderEcCube();
-
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's mypage withdraw-complete HTML diverged from "
-            . "EC-CUBE's beyond the residual allowlist. Unexplained diff "
-            . "lines:\n  " . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
-        );
-
-        // A static data page — the residual is purely the shared <head>
-        // frame material (CSRF meta + inline script + <title> + author).
-        $this->assertLessThanOrEqual(
-            12,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
-    }
-
-    private static function isResidual(string $line): bool
-    {
-        if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
-            return true;
-        }
-
-        foreach ([
-            'eccube-csrf-token',
-            '<title>',
-            'meta name="author"',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
-        }
-
-        return false;
+        $this->assertSame($beMart, $ecCube);
     }
 
     private function renderEcCube(): string
@@ -227,20 +216,5 @@ final class MypageWithdrawCompleteHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
-    }
-
-    /** @return list<string> */
-    private function normalize(string $html): array
-    {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
-        }
-
-        return $lines;
     }
 }

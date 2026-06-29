@@ -7,61 +7,31 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use PHPUnit\Framework\TestCase;
-use Twig\Environment;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
-use function dirname;
-use function explode;
-use function http_build_query;
-use function implode;
-use function is_dir;
-use function preg_replace;
 use function str_contains;
-use function str_replace;
-use function trim;
 
 /**
- * Phase 3 — fidelity check for the Shopping error (goShoppingError) HTML
- * port.
+ * Semantic render test for the Shopping error (goShoppingError) page.
  *
- * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
- * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
+ * Verifies L1 (required data output) and L2 (navigation affordances) against
+ * the IdeaStore design-language template. EC-CUBE markup parity tests have
+ * been retired — the template is a clean-room rebuild, not a port of EC-CUBE.
  *
- * `Shopping/shopping_error.twig` is a DATA page. It renders a fixed
- * error surface + a back-to-cart button, with one `{{ include('Shopping/
- * alert.twig', ...) }}` that surfaces the underlying error reason from
- * `app.session.flashbag`. The Error resource
- * (src/Resource/Page/Shopping/Error.php) is a Wave 3H pure renderer with
- * no flashbag transport, so this test feeds EC-CUBE's shopping_error.twig
- * an EMPTY flashbag — the alert partial then emits nothing, exactly the
- * empty alert region BeMart's port renders. The residual is the
- * genuinely EC-CUBE-runtime-only `<head>` frame material.
+ * Resource contract (src/Resource/Page/Shopping/Error.php):
+ *   GET page://self/shopping/error — pure renderer, no form fields, no CSRF.
+ *   #[Link(rel: 'goCart', href: 'page://self/cart')] — sole outbound transition.
+ *
+ * L1 — Required field output
+ *   • HTML document structure present (doctype, html[lang=ja], body)
+ *   • Page title contains "購入手続きエラー" and "IDEA STORE"
+ *   • Page heading communicates an error state
+ *
+ * L2 — Navigation affordances (link href / rel)
+ *   • goCart link (rel="goCart") points to "/cart" — ALPS #goCart transition
  */
 final class ShoppingErrorHtmlRenderTest extends TestCase
 {
-    /** @var list<string> */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>BeMart / 購入エラー</title>',
-        '<title>EC-CUBE / 購入エラー</title>',
-        '<meta name="author" content="">',
-    ];
-
     private ResourceInterface $resource;
 
     protected function setUp(): void
@@ -70,176 +40,96 @@ final class ShoppingErrorHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testShoppingErrorRendersAsHtmlDocument(): void
+    // ── L0 — HTTP contract ───────────────────────────────────────────────
+
+    public function testRendersHtmlDocumentWithOkStatus(): void
     {
         $ro = $this->resource->get('page://self/shopping/error');
 
         $this->assertSame(Code::OK, $ro->code);
 
         $html = $ro->toString();
-
+        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
         $this->assertStringContainsString('</body>', $html);
-
-        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testShoppingErrorPreservesEcCubeMarkupStructure(): void
+    // ── L1 — Required field output ───────────────────────────────────────
+
+    public function testPageTitleIdentifiesErrorAndBrand(): void
     {
         $html = $this->resource->get('page://self/shopping/error')->toString();
 
-        foreach ([
-            '<div class="ec-role">',
-            '<div class="ec-pageHeader">',
-            '<h1>購入エラー</h1>',
-            '<div class="ec-off3Grid">',
-            'class="ec-off3Grid__cell"',
-            '<div class="ec-off4Grid">',
-            'class="ec-blockBtn--cancel"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        $this->assertStringContainsString('購入手続きエラー', $html);
+        $this->assertStringContainsString('IDEA STORE', $html);
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
-    public function testShoppingErrorHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    public function testPageHeadingCommunicatesErrorState(): void
     {
-        $beMart = $this->resource->get('page://self/shopping/error')->toString();
-        $ecCube = $this->renderEcCube();
+        $html = $this->resource->get('page://self/shopping/error')->toString();
 
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
+        // The page must carry an h1 that communicates purchase failure.
+        $this->assertStringContainsString('<h1', $html);
+        $this->assertStringContainsString('購入手続き', $html);
+    }
 
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
+    public function testNoUnrenderedTwigExpressionsPresent(): void
+    {
+        $html = $this->resource->get('page://self/shopping/error')->toString();
 
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
+        $this->assertStringNotContainsString('{{', $html);
+        $this->assertStringNotContainsString('undefined', $html);
+    }
 
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's Shopping error HTML diverged from EC-CUBE's beyond "
-            . "the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
-        );
+    // ── L2 — Navigation affordances ──────────────────────────────────────
 
-        $this->assertLessThan(
-            14,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
+    public function testGoCartLinkIsPresentWithCorrectHref(): void
+    {
+        $html = $this->resource->get('page://self/shopping/error')->toString();
+
+        // rel="goCart" href="/cart" — ALPS #goCart transition declared in
+        // src/Resource/Page/Shopping/Error.php via #[Link(rel:'goCart', href:'page://self/cart')]
+        $this->assertStringContainsString('rel="goCart"', $html);
+        $this->assertTrue(
+            str_contains($html, 'href="/cart" rel="goCart"')
+            || str_contains($html, 'rel="goCart" href="/cart"'),
+            'goCart link must point to "/cart"',
         );
     }
 
-    private static function isResidual(string $line): bool
+    // ── Archived: EC-CUBE markup parity (clean-room rebuild) ─────────────
+
+    /**
+     * @group ec-cube-parity-archived
+     */
+    public function testShoppingErrorRendersAsHtmlDocument(): void
     {
-        foreach (self::RESIDUAL_ALLOWLIST as $allowed) {
-            if ($line === $allowed) {
-                return true;
-            }
-        }
-
-        foreach ([
-            'eccube-csrf-token',
-            '<title>',
-            'meta name="author"',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
-        }
-
-        return false;
+        $this->markTestSkipped(
+            'EC-CUBE markup parity retired: template is a clean-room IdeaStore rebuild.'
+            . ' Structural assertions have been replaced by L0/L1/L2 semantic tests.',
+        );
     }
 
     /**
-     * Render EC-CUBE 4.3's real Shopping/shopping_error.twig +
-     * default_frame.twig from the gitignored clone, with EC-CUBE's Twig
-     * API stubbed and an EMPTY flashbag.
+     * @group ec-cube-parity-archived
      */
-    private function renderEcCube(): string
+    public function testShoppingErrorPreservesEcCubeMarkupStructure(): void
     {
-        $ecCubeTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/default';
-        if (! is_dir($ecCubeTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
-
-        $twig = new Environment(new EcCubeStubLoader($ecCubeTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-        $this->registerEcCubeStubs($twig);
-
-        return $twig->render('Shopping/shopping_error.twig', [
-            'eccube_config' => ['locale' => 'ja'],
-            'Page' => new EcCubeStub([
-                'meta_tags' => '', 'description' => '', 'author' => '',
-                'keyword' => '', 'meta_robots' => '',
-            ]),
-            'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
-                'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
-                'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
-                'ColumnNum' => 1,
-            ]),
-            'app' => new EcCubeStub(['session' => new EcCubeStub([
-                'flashbag' => new EcCubeFlashBag(),
-            ]), 'request' => new EcCubeStub(['_route' => 'shopping_error'])]),
-            'subtitle' => '購入エラー',
-            'title' => '購入エラー',
-        ]);
+        $this->markTestSkipped(
+            'EC-CUBE markup parity retired: template is a clean-room IdeaStore rebuild.'
+            . ' Structural assertions have been replaced by L1/L2 semantic tests.',
+        );
     }
 
-    private function registerEcCubeStubs(Environment $twig): void
+    /**
+     * @group ec-cube-parity-archived
+     */
+    public function testShoppingErrorHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
-        $trans = static function (string $key, array $params = []): string {
-            $messages = EcCubeStub::jaMessages();
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('nl2br', static fn (string $s): string => nl2br((string) $s)));
-        $twig->addFilter(new TwigFilter('number_format', static fn ($n): string => number_format((float) $n)));
-        $twig->addFilter(new TwigFilter('price', static function ($n): string {
-            $f = new \NumberFormatter('ja_JP', \NumberFormatter::CURRENCY);
-
-            return (string) $f->formatCurrency((float) ($n ?? 0), 'JPY');
-        }));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
-    }
-
-    /** @return list<string> */
-    private function normalize(string $html): array
-    {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
-        }
-
-        return $lines;
+        $this->markTestSkipped(
+            'EC-CUBE reference rendering comparison retired: template is a clean-room IdeaStore rebuild.'
+            . ' Archived under @group ec-cube-parity-archived.',
+        );
     }
 }

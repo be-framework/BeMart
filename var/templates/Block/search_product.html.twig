@@ -1,33 +1,51 @@
 {#
-  BeMart storefront Block widget — product search.
+  BeMart storefront Block — header product search widget.
 
-  PORT/SIMPLIFIED of EC-CUBE 4.3 default-theme `Block/search_product.twig`.
+  Self-contained include; no extends. Rendered inside the shared frame header
+  region (Block/header.html.twig or equivalent).
 
-  In EC-CUBE's default layout, the top page reaches Product/list through
-  the header search block: submitting the search form with no keyword
-  performs an all-products search and navigates to `/products`.
-  BeMart does not yet carry EC-CUBE's Symfony FormView or category tree in
-  the shared frame, so this block keeps the same route-level affordance
-  with static markup only.
+  Data contract: src/Resource/Page/Products.php
+    GET page://self/products
+      params : name (keyword, string|null), category_id (string|null, values 1-6)
+      #[Link] : goProduct → /product
+               goCart    → /cart
+               goTop     → /
+
+  Category IDs are fixed in Products::categoryName() (ids 1-6).
+  Form method is GET; action is /products.
+
+  IdeaStore vocabulary: idea-catalog-search, idea-chip-row.
+  No ec-* classes.
 #}
-<div class="ec-headerSearch">
-    <form method="get" action="/products">
-        <div class="ec-headerSearch__category">
-            <div class="ec-select ec-select_search">
-                <select name="category_id" id="category_id">
-                    <option value="">全ての商品</option>
-                </select>
-            </div>
-        </div>
-        <div class="ec-headerSearch__keyword">
-            <div class="ec-input">
-                <input type="search" name="name" maxlength="50" placeholder="キーワードを入力">
-                <button class="ec-headerSearch__keywordBtn" type="submit" aria-label="商品を検索">
-                    <div class="ec-icon">
-                        <img src="{{ asset('assets/icon/search-dark.svg') }}" alt="">
-                    </div>
-                </button>
-            </div>
-        </div>
-    </form>
+<div class="idea-catalog-search" role="search" aria-label="商品を検索">
+  <form action="/products" method="get">
+    <div class="idea-form-grid idea-form-grid--two">
+      <div class="idea-field">
+        <label for="idea-search-category" class="idea-eyebrow">カテゴリ</label>
+        <select id="idea-search-category" name="category_id" aria-label="カテゴリを選択">
+          <option value="">すべての商品</option>
+          <option value="1">ジェラート</option>
+          <option value="2">新入荷</option>
+          <option value="3">彩のデザート</option>
+          <option value="4">CUBE</option>
+          <option value="5">アイスサンド</option>
+          <option value="6">フルーツ</option>
+        </select>
+      </div>
+      <div class="idea-field">
+        <label for="idea-search-keyword" class="idea-eyebrow">キーワード</label>
+        <input
+          id="idea-search-keyword"
+          type="search"
+          name="name"
+          maxlength="50"
+          placeholder="キーワードで絞り込む"
+          aria-label="商品名で検索"
+        >
+      </div>
+    </div>
+    <div class="idea-form-actions">
+      <button class="idea-button" type="submit">検索</button>
+    </div>
+  </form>
 </div>

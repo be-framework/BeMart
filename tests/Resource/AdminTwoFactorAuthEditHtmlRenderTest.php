@@ -13,13 +13,11 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 
 /**
- * Phase 3 — HTML render check for the admin 2段階認証設定 Tier-2 page.
+ * HTML render smoke test — admin 二要素認証デバイス設定 (TwoFactorAuthEdit).
  *
- * Render-smoke standard: the page renders a full admin-frame HTML
- * document through {@see HtmlModule} with the 2FA setup form body
- * supplied by {@see \MyVendor\BeMart\Resource\Page\Admin\TwoFactorAuthEdit}.
- * The EC-CUBE residual-diff fidelity check is a follow-up gated on the
- * EC-CUBE 4.3 reference clone (`tools/ec-cube-source/`).
+ * L1: required data fields present in rendered output.
+ * L2: action / method / link href + rel semantics.
+ * Frame: idea-admin-shell landmark structure.
  */
 final class AdminTwoFactorAuthEditHtmlRenderTest extends TestCase
 {
@@ -44,7 +42,8 @@ final class AdminTwoFactorAuthEditHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testTwoFactorAuthEditRendersAsHtmlDocument(): void
+    /** GET returns 200 and emits a well-formed HTML document. */
+    public function testGetReturnsOkWithHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/admin/two-factor-auth-edit');
 
@@ -54,24 +53,65 @@ final class AdminTwoFactorAuthEditHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
         $this->assertStringContainsString('</body>', $html);
-
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testTwoFactorAuthEditPreservesEcCubeAdminMarkupStructure(): void
+    /**
+     * L1 — required data: device token input, hidden authKey input.
+     * The form renders both fields from AdminTwoFactorAuthForm.
+     */
+    public function testL1RequiredFormFieldsPresent(): void
     {
         $html = $this->resource->get('page://self/admin/two-factor-auth-edit')->toString();
 
-        foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-contentsArea">',
-            'id="qrcode"',
-            'id="memberInfo"',
-            '2段階認証',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        // deviceToken text input (id set by AdminTwoFactorAuthForm)
+        $this->assertStringContainsString('id="admin_two_factor_auth_device_token"', $html);
+        $this->assertStringContainsString('name="deviceToken"', $html);
+
+        // authKey hidden input
+        $this->assertStringContainsString('id="admin_two_factor_auth_auth_key"', $html);
+        $this->assertStringContainsString('name="authKey"', $html);
+        $this->assertStringContainsString('type="hidden"', $html);
+
+        // CSRF hidden input
+        $this->assertStringContainsString('name="csrfToken"', $html);
+    }
+
+    /**
+     * L2 — action / method: form posts to the correct endpoint.
+     * TwoFactorAuthEdit has no onPost in this resource; the form action
+     * targets /admin/two-factor-auth-edit and uses POST.
+     */
+    public function testL2FormActionAndMethod(): void
+    {
+        $html = $this->resource->get('page://self/admin/two-factor-auth-edit')->toString();
+
+        $this->assertStringContainsString('action="/admin/two-factor-auth-edit"', $html);
+        $this->assertStringContainsString('method="post"', $html);
+    }
+
+    /**
+     * L2 — back link href + rel (goAdminHome).
+     */
+    public function testL2BackLinkGoAdminHome(): void
+    {
+        $html = $this->resource->get('page://self/admin/two-factor-auth-edit')->toString();
+
+        $this->assertMatchesRegularExpression(
+            '#href="/admin/index"[^>]*rel="goAdminHome"|rel="goAdminHome"[^>]*href="/admin/index"#',
+            $html,
+        );
+    }
+
+    /**
+     * Frame landmark — idea-admin-shell / idea-admin-content present.
+     */
+    public function testFrameLandmarksPresent(): void
+    {
+        $html = $this->resource->get('page://self/admin/two-factor-auth-edit')->toString();
+
+        $this->assertStringContainsString('class="idea-admin-shell"', $html);
+        $this->assertStringContainsString('class="idea-admin-content"', $html);
     }
 }

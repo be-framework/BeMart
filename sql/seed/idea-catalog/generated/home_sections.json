@@ -1,0 +1,883 @@
+{
+    "hero": {
+        "title": "暮らしのイデアを、見つけよう。",
+        "subtitle": "住まいと、自分時間を心地よく。",
+        "image": "/assets/idea-store/images/hero/hero-leaf-d.png"
+    },
+    "categories": [
+        {
+            "id": "cat-storage",
+            "slug": "storage",
+            "name": "収納",
+            "room": "整える",
+            "description": "しまうものと見せるものの居場所をつくる。",
+            "image": "/assets/idea-store/images/category/real/entry-storage.png"
+        },
+        {
+            "id": "cat-kitchen",
+            "slug": "kitchen",
+            "name": "台所",
+            "room": "料理する",
+            "description": "毎日の手順を少し静かにする道具。",
+            "image": "/assets/idea-store/images/category/real/entry-kitchen.png"
+        },
+        {
+            "id": "cat-furniture",
+            "slug": "furniture",
+            "name": "家具",
+            "room": "住まう",
+            "description": "小さな部屋にも大きな時間にも馴染む家具。",
+            "image": "/assets/idea-store/images/category/real/entry-furniture.png"
+        },
+        {
+            "id": "cat-lighting",
+            "slug": "lighting",
+            "name": "照明",
+            "room": "灯す",
+            "description": "夜の読書と食卓に、やわらかな明かりを。",
+            "image": "/assets/idea-store/images/category/real/entry-lighting.png"
+        },
+        {
+            "id": "cat-fabric",
+            "slug": "fabric",
+            "name": "布とファブリック",
+            "room": "触れる",
+            "description": "季節と気分を変える布もの。",
+            "image": "/assets/idea-store/images/category/real/entry-fabric.png"
+        },
+        {
+            "id": "cat-desk",
+            "slug": "desk",
+            "name": "デスク用品",
+            "room": "働く",
+            "description": "仕事机を整え、自分の集中を支える。",
+            "image": "/assets/idea-store/images/category/real/entry-desk.png"
+        },
+        {
+            "id": "cat-books",
+            "slug": "books",
+            "name": "本と雑誌",
+            "room": "読む",
+            "description": "暮らしの見方を少し変える読みもの。",
+            "image": "/assets/idea-store/images/category/real/entry-books.png"
+        },
+        {
+            "id": "cat-music",
+            "slug": "music",
+            "name": "音楽",
+            "room": "聴く",
+            "description": "部屋の空気を変える音と道具。",
+            "image": "/assets/idea-store/images/category/real/entry-music.png"
+        },
+        {
+            "id": "cat-craft",
+            "slug": "craft",
+            "name": "工作の道具",
+            "room": "つくる",
+            "description": "直す、組む、試すための手の道具。",
+            "image": "/assets/idea-store/images/category/real/entry-craft.png"
+        },
+        {
+            "id": "cat-cleaning",
+            "slug": "cleaning",
+            "name": "掃除とケア",
+            "room": "手入れする",
+            "description": "長く使うための、日々の手入れ。",
+            "image": "/assets/idea-store/images/category/real/entry-cleaning.png"
+        },
+        {
+            "id": "cat-bath",
+            "slug": "bath",
+            "name": "バス・ランドリー",
+            "room": "洗う",
+            "description": "水まわりを軽やかに整える。",
+            "image": "/assets/idea-store/images/category/real/entry-bath.png"
+        },
+        {
+            "id": "cat-coffee",
+            "slug": "coffee",
+            "name": "コーヒーとお茶",
+            "room": "休む",
+            "description": "一杯の時間を丁寧にする器具。",
+            "image": "/assets/idea-store/images/category/real/entry-coffee.png"
+        },
+        {
+            "id": "cat-garden",
+            "slug": "garden",
+            "name": "植物と庭",
+            "room": "育てる",
+            "description": "窓辺とベランダに小さな緑を。",
+            "image": "/assets/idea-store/images/category/real/entry-garden.png"
+        },
+        {
+            "id": "cat-pet",
+            "slug": "pet",
+            "name": "ペットと暮らす",
+            "room": "ともに暮らす",
+            "description": "人にも動物にも心地よい道具。",
+            "image": "/assets/idea-store/images/category/real/entry-pet.png"
+        },
+        {
+            "id": "cat-outdoor",
+            "slug": "outdoor",
+            "name": "外遊び",
+            "room": "出かける",
+            "description": "週末の外時間を身軽にする。",
+            "image": "/assets/idea-store/images/category/real/entry-outdoor.png"
+        },
+        {
+            "id": "cat-gift",
+            "slug": "gift",
+            "name": "贈る日用品",
+            "room": "贈る",
+            "description": "気負わず渡せて、長く使えるもの。",
+            "image": "/assets/idea-store/images/category/real/entry-gift.png"
+        },
+        {
+            "id": "cat-tableware",
+            "slug": "tableware",
+            "name": "器と食卓",
+            "room": "食べる",
+            "description": "ふだんの食卓を穏やかにする器。",
+            "image": "/assets/idea-store/images/category/real/entry-tableware.png"
+        },
+        {
+            "id": "cat-stationery",
+            "slug": "stationery",
+            "name": "文具",
+            "room": "書く",
+            "description": "手を動かす時間のための紙と道具。",
+            "image": "/assets/idea-store/images/category/real/entry-stationery.png"
+        },
+        {
+            "id": "cat-audio",
+            "slug": "audio",
+            "name": "オーディオ小物",
+            "room": "聴く",
+            "description": "音楽の居場所を整える小物。",
+            "image": "/assets/idea-store/images/category/real/entry-audio.png"
+        },
+        {
+            "id": "cat-kids",
+            "slug": "kids",
+            "name": "子どもと学び",
+            "room": "育つ",
+            "description": "遊びながら考える、家の中の小さな道具。",
+            "image": "/assets/idea-store/images/category/real/entry-kids.png"
+        }
+    ],
+    "editorials": [
+        {
+            "id": "edit-morning",
+            "title": "朝を整える",
+            "lead": "一日のはじまりを軽くする、台所と身支度の道具。",
+            "image": "/assets/idea-store/images/editorial/editorial-01.svg"
+        },
+        {
+            "id": "edit-desk",
+            "title": "仕事机を整える",
+            "lead": "集中を邪魔しない、静かな収納と文具。",
+            "image": "/assets/idea-store/images/editorial/editorial-02.svg"
+        },
+        {
+            "id": "edit-small-room",
+            "title": "小さな部屋で暮らす",
+            "lead": "しまう、畳む、兼ねる。余白をつくる家具。",
+            "image": "/assets/idea-store/images/editorial/editorial-03.svg"
+        },
+        {
+            "id": "edit-reading",
+            "title": "読む時間",
+            "lead": "灯り、椅子、音。ページをめくるための場所づくり。",
+            "image": "/assets/idea-store/images/editorial/editorial-04.svg"
+        },
+        {
+            "id": "edit-craft",
+            "title": "週末につくる",
+            "lead": "直して、組んで、試す。手を動かす道具。",
+            "image": "/assets/idea-store/images/editorial/editorial-05.svg"
+        }
+    ],
+    "newProducts": [
+        {
+            "id": "idea-000001",
+            "productId": "idea-000001",
+            "productCode": "IDEA000001",
+            "name": "白磁と竹の玄関スタンド",
+            "productName": "白磁と竹の玄関スタンド",
+            "categoryId": "cat-storage",
+            "categorySlug": "storage",
+            "categoryName": "収納",
+            "shortDescription": "玄関まわりの鍵や小物を静かに整える白磁と竹のスタンド。",
+            "description": "マットな白磁の浅いトレーに、竹の仕切りを合わせた玄関用スタンドです。鍵、ペン、ケアブラシの居場所をひとつにまとめ、帰宅後の動作を穏やかに整えます。",
+            "price": 7750,
+            "price02": 7750,
+            "image": "/assets/idea-store/images/product/real/product-001.png",
+            "material": "白磁、竹",
+            "color": "サンドベージュ",
+            "size": "W220 × D155 × H120 mm",
+            "origin": "チェコ",
+            "stock": 29,
+            "status": "visible",
+            "tags": [
+                "storage",
+                "白磁",
+                "サンドベージュ",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 2,
+            "relatedProductIds": [
+                "idea-000008",
+                "idea-000020",
+                "idea-000032"
+            ]
+        },
+        {
+            "id": "idea-000002",
+            "productId": "idea-000002",
+            "productCode": "IDEA000002",
+            "name": "オークの朝支度トレー",
+            "productName": "オークの朝支度トレー",
+            "categoryId": "cat-kitchen",
+            "categorySlug": "kitchen",
+            "categoryName": "台所",
+            "shortDescription": "朝の器と布をひとまとめに置ける、オーク材の浅いトレー。",
+            "description": "自然な木目のオーク材を薄く仕上げた、朝の支度のためのトレーです。マグ、布巾、小さなメモをまとめて置けるサイズで、台所から食卓まで静かに馴染みます。",
+            "price": 5600,
+            "price02": 5600,
+            "image": "/assets/idea-store/images/product/real/product-002.png",
+            "material": "オーク材、綿、再生紙",
+            "color": "ナチュラル",
+            "size": "W300 × D210 × H35 mm",
+            "origin": "エストニア",
+            "stock": 46,
+            "status": "visible",
+            "tags": [
+                "kitchen",
+                "オーク材",
+                "ナチュラル",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 3,
+            "relatedProductIds": [
+                "idea-000009",
+                "idea-000021",
+                "idea-000033"
+            ]
+        },
+        {
+            "id": "idea-000003",
+            "productId": "idea-000003",
+            "productCode": "IDEA000003",
+            "name": "真鍮の家具ケアブラシ",
+            "productName": "真鍮の家具ケアブラシ",
+            "categoryId": "cat-furniture",
+            "categorySlug": "furniture",
+            "categoryName": "家具",
+            "shortDescription": "家具の溝や布地の手入れに使う、小さな真鍮のケアブラシ。",
+            "description": "家具の角や布地の縫い目にたまりやすい埃を払うための、手のひらサイズのケアブラシです。真鍮の落ち着いた光と濃い毛先が、道具としての存在感を控えめに残します。",
+            "price": 3450,
+            "price02": 3450,
+            "image": "/assets/idea-store/images/product/real/product-003.png",
+            "material": "真鍮、天然毛、ステンレス",
+            "color": "墨",
+            "size": "W145 × D42 × H32 mm",
+            "origin": "タイ",
+            "stock": 63,
+            "status": "visible",
+            "tags": [
+                "furniture",
+                "真鍮",
+                "墨",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 4,
+            "relatedProductIds": [
+                "idea-000010",
+                "idea-000022",
+                "idea-000034"
+            ]
+        },
+        {
+            "id": "idea-000004",
+            "productId": "idea-000004",
+            "productCode": "IDEA000004",
+            "name": "灰青ガラスのティーライトホルダー",
+            "productName": "灰青ガラスのティーライトホルダー",
+            "categoryId": "cat-lighting",
+            "categorySlug": "lighting",
+            "categoryName": "照明",
+            "shortDescription": "読書のそばに小さく置ける、灰青ガラスのティーライトホルダー。",
+            "description": "透明感を抑えた灰青の耐熱ガラスに、クリーム色のティーライトを合わせました。夜の読書や食卓に、気負わない小さな明かりを足します。",
+            "price": 1300,
+            "price02": 1300,
+            "image": "/assets/idea-store/images/product/real/product-004.png",
+            "material": "耐熱ガラス、植物性ワックス",
+            "color": "灰青",
+            "size": "W72 × D72 × H45 mm",
+            "origin": "フィンランド",
+            "stock": 80,
+            "status": "visible",
+            "tags": [
+                "lighting",
+                "耐熱ガラス",
+                "灰青",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 1,
+            "relatedProductIds": [
+                "idea-000011",
+                "idea-000023",
+                "idea-000035"
+            ]
+        },
+        {
+            "id": "idea-000005",
+            "productId": "idea-000005",
+            "productCode": "IDEA000005",
+            "name": "焦茶竹のファブリックボックス",
+            "productName": "焦茶竹のファブリックボックス",
+            "categoryId": "cat-fabric",
+            "categorySlug": "fabric",
+            "categoryName": "布とファブリック",
+            "shortDescription": "布ものを見せながら整える、焦茶竹と帆布の収納ボックス。",
+            "description": "焦茶に染めた竹の細い桟と、生成りの帆布内袋を組み合わせたファブリックボックスです。タオルや季節の布をすっきり収め、棚に置いても落ち着いた佇まいです。",
+            "price": 8150,
+            "price02": 8150,
+            "image": "/assets/idea-store/images/product/real/product-005.png",
+            "material": "竹、帆布、リネン",
+            "color": "焦茶",
+            "size": "W360 × D260 × H180 mm",
+            "origin": "台湾",
+            "stock": 17,
+            "status": "visible",
+            "tags": [
+                "fabric",
+                "竹",
+                "焦茶",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 3,
+            "relatedProductIds": [
+                "idea-000012",
+                "idea-000024",
+                "idea-000036"
+            ]
+        },
+        {
+            "id": "idea-000006",
+            "productId": "idea-000006",
+            "productCode": "IDEA000006",
+            "name": "ガラスとリネンのデスクスタンド",
+            "productName": "ガラスとリネンのデスクスタンド",
+            "categoryId": "cat-desk",
+            "categorySlug": "desk",
+            "categoryName": "デスク用品",
+            "shortDescription": "ペンや道具を静かに立てる、フロストガラスとリネンのデスクスタンド。",
+            "description": "半透明のフロストガラスに、オリーブ色のリネンを巻いたデスクスタンドです。筆記具を少量だけ置くことを前提に、机上の余白を保ちながら手元を整えます。",
+            "price": 6000,
+            "price02": 6000,
+            "image": "/assets/idea-store/images/product/real/product-006.png",
+            "material": "フロストガラス、リネン、木",
+            "color": "オリーブ",
+            "size": "W105 × D105 × H115 mm",
+            "origin": "韓国",
+            "stock": 34,
+            "status": "visible",
+            "tags": [
+                "desk",
+                "フロストガラス",
+                "オリーブ",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 2,
+            "relatedProductIds": [
+                "idea-000013",
+                "idea-000025",
+                "idea-000037"
+            ]
+        },
+        {
+            "id": "idea-000007",
+            "productId": "idea-000007",
+            "productCode": "IDEA000007",
+            "name": "白いスチールのブックエンド",
+            "productName": "白いスチールのブックエンド",
+            "categoryId": "cat-books",
+            "categorySlug": "books",
+            "categoryName": "本と雑誌",
+            "shortDescription": "本と雑誌をまっすぐ支える、白い粉体塗装スチールのブックエンド。",
+            "description": "薄い白のスチール板を、余計な装飾なしで仕上げたブックエンドです。数冊の本や雑誌を静かに支え、机や棚の線を整えます。",
+            "price": 3850,
+            "price02": 3850,
+            "image": "/assets/idea-store/images/product/real/product-007.png",
+            "material": "粉体塗装スチール",
+            "color": "白",
+            "size": "W120 × D145 × H170 mm",
+            "origin": "スペイン",
+            "stock": 51,
+            "status": "visible",
+            "tags": [
+                "books",
+                "粉体塗装スチール",
+                "白",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 3,
+            "relatedProductIds": [
+                "idea-000014",
+                "idea-000026",
+                "idea-000038"
+            ]
+        },
+        {
+            "id": "idea-000008",
+            "productId": "idea-000008",
+            "productCode": "IDEA000008",
+            "name": "真鍮のレコードブラシ",
+            "productName": "真鍮のレコードブラシ",
+            "categoryId": "cat-music",
+            "categorySlug": "music",
+            "categoryName": "音楽",
+            "shortDescription": "レコードを聴く前のひと手間を整える、小さな真鍮ブラシ。",
+            "description": "真鍮の細い持ち手と柔らかな毛先で、レコード盤の埃をさっと払うブラシです。生成りのリネンスリーブ付きで、音楽の時間の前後に自然に使えます。",
+            "price": 1700,
+            "price02": 1700,
+            "image": "/assets/idea-store/images/product/real/product-008.png",
+            "material": "真鍮、カーボン毛、リネン",
+            "color": "生成り",
+            "size": "W125 × D32 × H28 mm",
+            "origin": "スウェーデン",
+            "stock": 68,
+            "status": "visible",
+            "tags": [
+                "music",
+                "真鍮",
+                "生成り",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 4,
+            "relatedProductIds": [
+                "idea-000015",
+                "idea-000027",
+                "idea-000039"
+            ]
+        },
+        {
+            "id": "idea-000009",
+            "productId": "idea-000009",
+            "productCode": "IDEA000009",
+            "name": "帆布の工具ロール",
+            "productName": "帆布の工具ロール",
+            "categoryId": "cat-craft",
+            "categorySlug": "craft",
+            "categoryName": "工作の道具",
+            "shortDescription": "小さな手工具を持ち運びやすく収める、帆布の工具ロール。",
+            "description": "厚手のサンドベージュ帆布で仕立てた工具ロールです。木の定規、千枚通し、ドライバーなど小さな道具を分類して収め、直す・組む時間を落ち着いて始められます。",
+            "price": 8550,
+            "price02": 8550,
+            "image": "/assets/idea-store/images/product/real/product-009.png",
+            "material": "帆布、ウォルナット、真鍮",
+            "color": "サンドベージュ",
+            "size": "W410 × D280 mm",
+            "origin": "ベトナム",
+            "stock": 85,
+            "status": "visible",
+            "tags": [
+                "craft",
+                "帆布",
+                "サンドベージュ",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 1,
+            "relatedProductIds": [
+                "idea-000016",
+                "idea-000028",
+                "idea-000040"
+            ]
+        },
+        {
+            "id": "idea-000010",
+            "productId": "idea-000010",
+            "productCode": "IDEA000010",
+            "name": "藍色のオーク掃除ボックス",
+            "productName": "藍色のオーク掃除ボックス",
+            "categoryId": "cat-cleaning",
+            "categorySlug": "cleaning",
+            "categoryName": "掃除とケア",
+            "shortDescription": "布とブラシの居場所をつくる、藍色の掃除ケアボックス。",
+            "description": "深い藍色の本体に、ナチュラルなオーク材のふた兼ハンドルを合わせた掃除ケア用ボックスです。布巾や小さなブラシをひとまとめにし、見える場所に置ける道具にしました。",
+            "price": 6400,
+            "price02": 6400,
+            "image": "/assets/idea-store/images/product/real/product-010.png",
+            "material": "オーク材、塗装スチール、綿",
+            "color": "藍色",
+            "size": "W260 × D180 × H150 mm",
+            "origin": "デンマーク",
+            "stock": 22,
+            "status": "visible",
+            "tags": [
+                "cleaning",
+                "オーク材",
+                "藍色",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 3,
+            "relatedProductIds": [
+                "idea-000017",
+                "idea-000029",
+                "idea-000041"
+            ]
+        },
+        {
+            "id": "idea-000011",
+            "productId": "idea-000011",
+            "productCode": "IDEA000011",
+            "name": "麻混ランドリーバスケット",
+            "productName": "麻混ランドリーバスケット",
+            "categoryId": "cat-bath",
+            "categorySlug": "bath",
+            "categoryName": "バス・ランドリー",
+            "shortDescription": "脱衣所の布ものを軽くまとめる、麻混キャンバスのランドリーバスケット。",
+            "description": "通気のよい麻混キャンバスに竹の細いフレームと綿ロープの持ち手を合わせたランドリーバスケットです。洗う前の布ものを見せすぎず、浴室まわりの余白を保ちます。",
+            "price": 7200,
+            "price02": 7200,
+            "image": "/assets/idea-store/images/product/real/product-011.png",
+            "material": "麻混キャンバス、竹、綿ロープ",
+            "color": "生成り",
+            "size": "W360 × D300 × H420 mm",
+            "origin": "インドネシア",
+            "stock": 39,
+            "status": "visible",
+            "tags": [
+                "bath",
+                "麻混キャンバス",
+                "生成り",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 2,
+            "relatedProductIds": [
+                "idea-000018",
+                "idea-000030",
+                "idea-000042"
+            ]
+        },
+        {
+            "id": "idea-000012",
+            "productId": "idea-000012",
+            "productCode": "IDEA000012",
+            "name": "耐熱ガラスと桜材のコーヒードリッパー",
+            "productName": "耐熱ガラスと桜材のコーヒードリッパー",
+            "categoryId": "cat-coffee",
+            "categorySlug": "coffee",
+            "categoryName": "コーヒーとお茶",
+            "shortDescription": "一杯分の時間を静かに整える、桜材台座のコーヒードリッパー。",
+            "description": "透明な耐熱ガラスのドリッパーに、桜材の小さな台座を合わせました。紙フィルターの白と木の色がやわらかく重なり、朝の一杯を落ち着いて始められます。",
+            "price": 6800,
+            "price02": 6800,
+            "image": "/assets/idea-store/images/product/real/product-012.png",
+            "material": "耐熱ガラス、桜材、ステンレス",
+            "color": "ナチュラル",
+            "size": "W135 × D135 × H165 mm",
+            "origin": "ドイツ",
+            "stock": 56,
+            "status": "visible",
+            "tags": [
+                "coffee",
+                "耐熱ガラス",
+                "ナチュラル",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 3,
+            "relatedProductIds": [
+                "idea-000019",
+                "idea-000031",
+                "idea-000043"
+            ]
+        },
+        {
+            "id": "idea-000013",
+            "productId": "idea-000013",
+            "productCode": "IDEA000013",
+            "name": "素焼きハーブポット",
+            "productName": "素焼きハーブポット",
+            "categoryId": "cat-garden",
+            "categorySlug": "garden",
+            "categoryName": "植物と庭",
+            "shortDescription": "窓辺のハーブを小さく育てる、素焼きの鉢と受け皿。",
+            "description": "水分をほどよく逃がす素焼き陶器のハーブポットです。低い受け皿付きで、台所の窓辺やベランダの一角に無理なく置けます。",
+            "price": 2400,
+            "price02": 2400,
+            "image": "/assets/idea-store/images/product/real/product-013.png",
+            "material": "素焼き陶器、受け皿",
+            "color": "テラコッタ",
+            "size": "W145 × D145 × H120 mm",
+            "origin": "リトアニア",
+            "stock": 73,
+            "status": "visible",
+            "tags": [
+                "garden",
+                "素焼き陶器",
+                "テラコッタ",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 4,
+            "relatedProductIds": [
+                "idea-000020",
+                "idea-000032",
+                "idea-000044"
+            ]
+        },
+        {
+            "id": "idea-000014",
+            "productId": "idea-000014",
+            "productCode": "IDEA000014",
+            "name": "オークのペットボウル台",
+            "productName": "オークのペットボウル台",
+            "categoryId": "cat-pet",
+            "categorySlug": "pet",
+            "categoryName": "ペットと暮らす",
+            "shortDescription": "床に置いても静かに馴染む、オーク材のペットボウル台。",
+            "description": "丸みを残したオーク材の台に、取り外して洗えるステンレスボウルを合わせました。食事の場所を整えながら、リビングの家具とも自然に馴染みます。",
+            "price": 5900,
+            "price02": 5900,
+            "image": "/assets/idea-store/images/product/real/product-014.png",
+            "material": "オーク材、ステンレス",
+            "color": "ナチュラル",
+            "size": "W320 × D180 × H95 mm",
+            "origin": "イタリア",
+            "stock": 90,
+            "status": "visible",
+            "tags": [
+                "pet",
+                "オーク材",
+                "ナチュラル",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 1,
+            "relatedProductIds": [
+                "idea-000021",
+                "idea-000033",
+                "idea-000045"
+            ]
+        },
+        {
+            "id": "idea-000015",
+            "productId": "idea-000015",
+            "productCode": "IDEA000015",
+            "name": "生成帆布のピクニックマット",
+            "productName": "生成帆布のピクニックマット",
+            "categoryId": "cat-outdoor",
+            "categorySlug": "outdoor",
+            "categoryName": "外遊び",
+            "shortDescription": "週末の外時間を軽く支える、生成帆布のピクニックマット。",
+            "description": "厚手の生成帆布にリネンの裏地を合わせたピクニックマットです。くるりと巻いて牛革ベルトで留められ、家の中ではブランケットのようにも使えます。",
+            "price": 8400,
+            "price02": 8400,
+            "image": "/assets/idea-store/images/product/real/product-015.png",
+            "material": "綿帆布、リネン、牛革",
+            "color": "生成り",
+            "size": "W1450 × D950 mm",
+            "origin": "ポルトガル",
+            "stock": 27,
+            "status": "visible",
+            "tags": [
+                "outdoor",
+                "綿帆布",
+                "生成り",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 3,
+            "relatedProductIds": [
+                "idea-000022",
+                "idea-000034",
+                "idea-000046"
+            ]
+        },
+        {
+            "id": "idea-000016",
+            "productId": "idea-000016",
+            "productCode": "IDEA000016",
+            "name": "白磁のギフト小皿セット",
+            "productName": "白磁のギフト小皿セット",
+            "categoryId": "cat-gift",
+            "categorySlug": "gift",
+            "categoryName": "贈る日用品",
+            "shortDescription": "気負わず渡せる、白磁の小皿三枚セット。",
+            "description": "釉薬の表情を控えめに残した白磁の小皿を三枚組にしました。無地の再生紙箱に収まり、菓子皿やアクセサリートレーとしても使えます。",
+            "price": 3600,
+            "price02": 3600,
+            "image": "/assets/idea-store/images/product/real/product-016.png",
+            "material": "白磁、再生紙",
+            "color": "白",
+            "size": "W95 × D95 × H18 mm / 3枚",
+            "origin": "日本",
+            "stock": 44,
+            "status": "visible",
+            "tags": [
+                "gift",
+                "白磁",
+                "白",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 2,
+            "relatedProductIds": [
+                "idea-000023",
+                "idea-000035",
+                "idea-000047"
+            ]
+        },
+        {
+            "id": "idea-000017",
+            "productId": "idea-000017",
+            "productCode": "IDEA000017",
+            "name": "灰釉の平皿",
+            "productName": "灰釉の平皿",
+            "categoryId": "cat-tableware",
+            "categorySlug": "tableware",
+            "categoryName": "器と食卓",
+            "shortDescription": "毎日の食卓に陰影を足す、灰釉の平皿。",
+            "description": "柔らかな灰釉をかけた、少し深さのある平皿です。パン、惣菜、果物を受け止める余白があり、普段の食卓を落ち着いた表情にします。",
+            "price": 4200,
+            "price02": 4200,
+            "image": "/assets/idea-store/images/product/real/product-017.png",
+            "material": "陶器、灰釉",
+            "color": "灰釉",
+            "size": "W235 × D235 × H28 mm",
+            "origin": "チェコ",
+            "stock": 61,
+            "status": "visible",
+            "tags": [
+                "tableware",
+                "陶器",
+                "灰釉",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 3,
+            "relatedProductIds": [
+                "idea-000024",
+                "idea-000036",
+                "idea-000048"
+            ]
+        },
+        {
+            "id": "idea-000018",
+            "productId": "idea-000018",
+            "productCode": "IDEA000018",
+            "name": "真鍮のカードスタンド",
+            "productName": "真鍮のカードスタンド",
+            "categoryId": "cat-stationery",
+            "categorySlug": "stationery",
+            "categoryName": "文具",
+            "shortDescription": "机上の小さな紙片を立てる、真鍮とコルクのカードスタンド。",
+            "description": "無垢の真鍮に細い溝を入れ、底面にコルクを貼ったカードスタンドです。名刺や無地カードを一枚だけ立て、机上の視線を整えます。",
+            "price": 2100,
+            "price02": 2100,
+            "image": "/assets/idea-store/images/product/real/product-018.png",
+            "material": "真鍮、コルク",
+            "color": "真鍮",
+            "size": "W90 × D28 × H20 mm",
+            "origin": "エストニア",
+            "stock": 78,
+            "status": "visible",
+            "tags": [
+                "stationery",
+                "真鍮",
+                "真鍮",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 4,
+            "relatedProductIds": [
+                "idea-000025",
+                "idea-000037",
+                "idea-000049"
+            ]
+        },
+        {
+            "id": "idea-000019",
+            "productId": "idea-000019",
+            "productCode": "IDEA000019",
+            "name": "ウォルナットのケーブルドック",
+            "productName": "ウォルナットのケーブルドック",
+            "categoryId": "cat-audio",
+            "categorySlug": "audio",
+            "categoryName": "オーディオ小物",
+            "shortDescription": "イヤホンと小さなケーブルを整える、ウォルナットのドック。",
+            "description": "ウォルナット材を浅く削り、フェルトの底と真鍮のピンを合わせたケーブルドックです。充電ケーブルやイヤホンを見える場所に置いても散らかりにくくします。",
+            "price": 4800,
+            "price02": 4800,
+            "image": "/assets/idea-store/images/product/real/product-019.png",
+            "material": "ウォルナット、フェルト、真鍮",
+            "color": "ウォルナット",
+            "size": "W180 × D92 × H48 mm",
+            "origin": "タイ",
+            "stock": 15,
+            "status": "visible",
+            "tags": [
+                "audio",
+                "ウォルナット",
+                "ウォルナット",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 1,
+            "relatedProductIds": [
+                "idea-000026",
+                "idea-000038",
+                "idea-000050"
+            ]
+        },
+        {
+            "id": "idea-000020",
+            "productId": "idea-000020",
+            "productCode": "IDEA000020",
+            "name": "ブナの積み木トレー",
+            "productName": "ブナの積み木トレー",
+            "categoryId": "cat-kids",
+            "categorySlug": "kids",
+            "categoryName": "子どもと学び",
+            "shortDescription": "遊び終わりまで自然に整う、ブナ材の積み木トレー。",
+            "description": "蜜蝋で仕上げたブナ材の浅いトレーと、角を丸めた小さな積み木のセットです。色や文字を足さず、形を並べる時間を静かに楽しめます。",
+            "price": 5200,
+            "price02": 5200,
+            "image": "/assets/idea-store/images/product/real/product-020.png",
+            "material": "ブナ材、蜜蝋仕上げ",
+            "color": "ナチュラル",
+            "size": "W260 × D180 × H45 mm",
+            "origin": "フィンランド",
+            "stock": 32,
+            "status": "visible",
+            "tags": [
+                "kids",
+                "ブナ材",
+                "ナチュラル",
+                "木漏れ日",
+                "自然光"
+            ],
+            "skuCount": 3,
+            "relatedProductIds": [
+                "idea-000027",
+                "idea-000039",
+                "idea-000051"
+            ]
+        }
+    ]
+}

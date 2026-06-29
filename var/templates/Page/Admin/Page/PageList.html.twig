@@ -1,140 +1,304 @@
-{#
-  BeMart admin Page list — EC-CUBE goPageList.
-
-  PORT of EC-CUBE 4.3 admin-theme `Content/page.twig`
-  (src/Eccube/Resource/template/admin/Content/page.twig).
-
-  DATA/LIST page. Extends the admin frame (`admin-base.html.twig`). The
-  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
-  from EC-CUBE; only the dynamic bindings are rebound to the PageList
-  resource body (src/Resource/Page/Admin/Page/PageList.php — body carries
-  `count` + `pages`, a list of {pageId, pageName, pageUrl, pageFileName,
-  pageEditType}).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `{% for Page in Pages %}` -> the resource body's `pages` list.
-   - `router.routecollection.get(Page.url).path` -> Symfony router lookup
-     (the route-name column). BeMart has no Symfony router, so the
-     ルーティング名 cell shows the bare `pageUrl` (EC-CUBE's `{% else %}`
-     branch). Enumerated as residual.
-   - `Page.layouts` (the per-page PC/Mobile layout join) -> NOT carried by
-     the AdminPageListFetched projection (the page->layout join was out of
-     the Wave 9 CMS slice). The レイアウト名 column renders empty, not
-     invented. Enumerated as residual — MISSING-BODY-FIELD: `pages[].layouts`.
-   - `Page.edit_type` -> the body carries `pageEditType` (2 = system /
-     EDIT_TYPE_DEFAULT, 0 = EDIT_TYPE_USER). The delete affordance shows
-     only for user pages (`pageEditType == 0`).
-   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
-     CSRF widget. OMITTED. EC-CUBE-runtime only — enumerated as residual.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-page-page-list' %}
 {% set title = 'ページ管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
+{#
+  CONTRACT (src/Resource/Page/Admin/Page/PageList.php):
+    GET  body: count (int), pages[] { pageId, pageName, pageUrl, pageFileName, pageEditType }
+    POST /admin/page/page-list  fields: pageName, pageUrl, pageFileName  + csrfToken
+    LINK goPage   → GET  /admin/page/page?pageId=…
+    LINK doDeletePage → DELETE /admin/page/page?pageId=…  (pageEditType 0 only)
+  pageEditType: 0=user (edit+delete), 1=preview, 2=system-locked, 3=system-content-editable
+#}
+
 {% block javascript %}
-    <script>
-        // searchWordの実行
-        $('#search-page').on('input', function() {
-            searchWord($(this).val(), $('table.table tbody tr'));
+<script>
+(function () {
+    /* ── Quick filter ── */
+    var filterInput = document.getElementById('page-filter');
+    if (filterInput) {
+        filterInput.addEventListener('input', function () {
+            var q = this.value.toLowerCase();
+            document.querySelectorAll('tbody tr[data-page-id]').forEach(function (tr) {
+                tr.hidden = q !== '' && !tr.textContent.toLowerCase().includes(q);
+            });
         });
-    </script>
+    }
+
+    /* ── "Create page" inline panel toggle ── */
+    var createToggle = document.getElementById('create-toggle');
+    var createPanel  = document.getElementById('create-panel');
+    if (createToggle && createPanel) {
+        createToggle.addEventListener('click', function () {
+            var open = createPanel.hidden === false;
+            createPanel.hidden = open;
+            createToggle.setAttribute('aria-expanded', String(!open));
+            if (!open) {
+                createPanel.querySelector('input[name="pageName"]').focus();
+            }
+        });
+    }
+
+    /* ── Delete confirmation dialogs ── */
+    document.querySelectorAll('.idea-admin-delete-trigger').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id = btn.dataset.pageId;
+            var dlg = document.getElementById('del-dlg-' + id);
+            if (dlg) { dlg.hidden = false; }
+        });
+    });
+    document.querySelectorAll('.idea-admin-delete-cancel').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id = btn.dataset.pageId;
+            var dlg = document.getElementById('del-dlg-' + id);
+            if (dlg) { dlg.hidden = true; }
+        });
+    });
+}());
+</script>
 {% endblock javascript %}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="row justify-content-between mb-2">
-                    <div class="col-9">
-                        <a class="btn btn-ec-regular" href="/admin/page/page">
-                            新規作成
-                        </a>
-                    </div>
-                    <div class="col-3">
-                        <div class="row">
-                            <div class="col">
-                                <div class="input-group mb-3">
-                                    <div class="input-group-text">
-                                        <span id="basic-addon1"><i class="fa fa-search"></i></span>
-                                    </div>
-                                    <input id="search-page" class="form-control" type="search" aria-label="Search">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-body p-0">
-                        <table class="table table-sm">
-                            <thead>
-                            <th class="border-0 pt-2 pb-2 ps-3">ページ名</th>
-                            <th class="border-0 pt-2 pb-2 ps-3">ルーティング名</th>
-                            <th class="border-0 pt-2 pb-2 ps-3">URL</th>
-                            <th class="border-0 pt-2 pb-2 ps-3">ファイル名</th>
-                            <th class="border-0 pt-2 pb-2">レイアウト名</th>
-                            <th class="border-0 pt-2 pb-2 pe-3"></th>
-                            </thead>
-                            {% for Page in pages %}
-                                <tr id="ex-page-{{ Page.pageId }}">
-                                    <td class="align-middle ps-3">
-                                        <a href="/admin/page/page?pageId={{ Page.pageId }}">{{ Page.pageName }}</a>
-                                    </td>
-                                    <td class="align-middle ps-3 text-break">
-                                        {{ Page.pageUrl }}
-                                    </td>
-                                    <td class="align-middle ps-3 text-break">
-                                        {{ Page.pageUrl }}
-                                    </td>
-                                    <td class="align-middle ps-3 text-break">
-                                        {% if Page.pageFileName %}{{ Page.pageFileName }}.twig{% endif %}
-                                    </td>
-                                    {# TODO レイアウトの数にかかわらず高さを揃えたい #}
-                                    <td class="align-middle pb-4 text-nowrap">
-                                    </td>
-                                    <td class="align-middle pe-3">
-                                        <div class="row justify-content-end">
-                                            {% if Page.pageEditType == 0 %}
-                                                <div class="col-auto text-center" data-bs-toggle="tooltip" data-bs-placement="top" title="削除">
-                                                    <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#delete_{{ Page.pageId }}">
-                                                        <i class="fa fa-close fa-lg text-secondary" aria-hidden="true"></i>
-                                                    </a>
-                                                </div>
-                                                <div class="modal fade" id="delete_{{ Page.pageId }}" tabindex="-1" role="dialog"
-                                                     aria-labelledby="delete_{{ Page.pageId }}" aria-hidden="true">
-                                                    <div class="modal-dialog" role="document">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title fw-bold">削除します</h5>
-                                                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close">
 
-                                                                </button>
-                                                            </div>
-                                                            <div class="modal-body text-start">
-                                                                <p class="text-start">この操作はあとから取り消すことができません。「{{ Page.pageName }}」を削除してよろしいですか？</p>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                                                <a class="btn btn-ec-delete" href="/admin/page/page?pageId={{ Page.pageId }}&_method=delete"
-                                                                         data-confirm="false">削除</a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
+{# ── Summary KPI ── #}
+{%- set user_count = 0 %}
+{%- set sys_count = 0 %}
+{%- for page in pages %}
+    {%- if page.pageEditType == 0 %}
+        {%- set user_count = user_count + 1 %}
+    {%- elseif page.pageEditType >= 2 %}
+        {%- set sys_count = sys_count + 1 %}
+    {%- endif %}
+{%- endfor %}
+<div class="idea-admin-kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));margin-bottom:1rem;">
+    <div class="idea-admin-kpi">
+        <div class="idea-admin-kpi__label">登録ページ数</div>
+        <div class="idea-admin-kpi__value">{{ count }}</div>
+    </div>
+    <div class="idea-admin-kpi">
+        <div class="idea-admin-kpi__label">ユーザーページ</div>
+        <div class="idea-admin-kpi__value">{{ user_count }}</div>
+    </div>
+    <div class="idea-admin-kpi">
+        <div class="idea-admin-kpi__label">システムページ</div>
+        <div class="idea-admin-kpi__value">{{ sys_count }}</div>
+    </div>
+</div>
+
+{# ── Toolbar ── #}
+<div class="idea-admin-list-toolbar">
+    <div class="idea-admin-list-toolbar__left">
+        <button type="button"
+                id="create-toggle"
+                class="idea-admin-action idea-admin-action--primary"
+                aria-expanded="false"
+                aria-controls="create-panel">
+            <i class="fa fa-plus" aria-hidden="true"></i>
+            新規ページ作成
+        </button>
+    </div>
+    <div class="idea-admin-list-toolbar__right">
+        <input id="page-filter"
+               type="search"
+               class="idea-admin-search-bar"
+               placeholder="ページを絞り込む..."
+               aria-label="ページを絞り込む"
+               style="min-width:min(18rem,100%);min-height:2.4rem;border:1px solid var(--idea-stone);border-radius:var(--idea-admin-radius-input);background:var(--idea-surface);color:var(--idea-ink);font:inherit;font-size:.88rem;padding:.42rem .75rem;outline:none;">
+    </div>
+</div>
+
+{# ── Create panel (hidden until toggled) ── #}
+<div id="create-panel" class="idea-admin-panel" style="margin-bottom:1rem;" hidden>
+    <div class="idea-admin-panel__head">
+        <h3>新規ページ作成</h3>
+        <p class="idea-admin-panel__hint">ページ名・URLスラッグ・テンプレートファイル名を入力して登録します</p>
+    </div>
+    <form method="post" action="/admin/page/page-list">
+        <input type="hidden" name="csrfToken" value="{{ csrf_token|default('') }}">
+        <div class="idea-admin-panel__body">
+            <div class="idea-admin-field">
+                <div class="idea-admin-field__label">
+                    <label for="new_pageName">ページ名 <span class="idea-admin-required">必須</span></label>
+                </div>
+                <div class="idea-admin-field__input">
+                    <input type="text" id="new_pageName" name="pageName"
+                           placeholder="例: 会社概要" autocomplete="off">
+                    <span class="idea-admin-error" role="alert"></span>
+                </div>
+            </div>
+            <div class="idea-admin-field">
+                <div class="idea-admin-field__label">
+                    <label for="new_pageUrl">URL スラッグ <span class="idea-admin-required">必須</span></label>
+                    <span class="idea-admin-panel__hint">Symfonyルート名</span>
+                </div>
+                <div class="idea-admin-field__input">
+                    <input type="text" id="new_pageUrl" name="pageUrl"
+                           placeholder="例: company" autocomplete="off">
+                    <span class="idea-admin-error" role="alert"></span>
+                </div>
+            </div>
+            <div class="idea-admin-field">
+                <div class="idea-admin-field__label">
+                    <label for="new_pageFileName">テンプレートファイル名 <span class="idea-admin-required">必須</span></label>
+                    <span class="idea-admin-panel__hint">.twig 拡張子は不要</span>
+                </div>
+                <div class="idea-admin-field__input">
+                    <input type="text" id="new_pageFileName" name="pageFileName"
+                           placeholder="例: company" autocomplete="off">
+                    <span class="idea-admin-error" role="alert"></span>
                 </div>
             </div>
         </div>
+        <div style="display:flex;align-items:center;gap:.65rem;justify-content:flex-end;padding:.75rem 1rem;border-top:1px solid rgba(205,191,170,.4);background:var(--idea-surface-soft);">
+            <button type="button"
+                    class="idea-admin-action"
+                    onclick="document.getElementById('create-panel').hidden=true;document.getElementById('create-toggle').setAttribute('aria-expanded','false');">
+                キャンセル
+            </button>
+            <button type="submit" class="idea-admin-action idea-admin-action--primary">
+                <i class="fa fa-check" aria-hidden="true"></i>
+                作成
+            </button>
+        </div>
+    </form>
+</div>
+
+{# ── Page table ── #}
+{% if pages|length > 0 %}
+
+<div class="idea-admin-table-wrap">
+    <table class="idea-admin-table">
+        <thead>
+            <tr>
+                <th>ページ名</th>
+                <th>URL スラッグ</th>
+                <th>ファイル名</th>
+                <th>種別</th>
+                <th class="idea-admin-table__actions"></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for page in pages %}
+            <tr id="ex-page-{{ page.pageId }}" data-page-id="{{ page.pageId }}">
+
+                <td>
+                    <a href="/admin/page/page?pageId={{ page.pageId }}"
+                       rel="goPage"
+                       style="font-weight:700;color:var(--idea-ink);text-decoration:none;">
+                        {{ page.pageName }}
+                    </a>
+                </td>
+
+                <td style="font-family:monospace;font-size:.82rem;color:var(--idea-muted);">
+                    {{ page.pageUrl }}
+                </td>
+
+                <td style="font-family:monospace;font-size:.82rem;color:var(--idea-muted);">
+                    {% if page.pageFileName %}{{ page.pageFileName }}.twig{% endif %}
+                </td>
+
+                <td>
+                    {% if page.pageEditType == 0 %}
+                        <span class="idea-admin-badge idea-admin-badge--public">ユーザー</span>
+                    {% elseif page.pageEditType == 1 %}
+                        <span class="idea-admin-badge idea-admin-badge--private">プレビュー</span>
+                    {% elseif page.pageEditType == 3 %}
+                        <span class="idea-admin-badge idea-admin-badge--private">システム(編集可)</span>
+                    {% else %}
+                        <span class="idea-admin-badge idea-admin-badge--discontinued">システム(固定)</span>
+                    {% endif %}
+                </td>
+
+                <td class="idea-admin-table__actions">
+                    <a class="idea-admin-icon-btn"
+                       href="/admin/page/page?pageId={{ page.pageId }}"
+                       rel="goPage"
+                       title="編集">
+                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                    </a>
+                    {% if page.pageEditType == 0 %}
+                    <button type="button"
+                            class="idea-admin-icon-btn idea-admin-delete-trigger"
+                            data-page-id="{{ page.pageId }}"
+                            title="削除"
+                            style="color:#a9472e;border-color:rgba(169,71,46,.3);">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                    {% endif %}
+                </td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">{{ count }} ページ</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+{% else %}
+
+<div class="idea-admin-empty">
+    <i class="fa fa-file-alt fa-2x" aria-hidden="true"></i>
+    <p class="idea-admin-empty__title">ページが登録されていません</p>
+    <p>「新規ページ作成」ボタンから最初のページを作成してください</p>
+</div>
+
+{% endif %}
+
+{# ── Delete confirmation dialogs (one per user-page) ── #}
+{% for page in pages %}
+{% if page.pageEditType == 0 %}
+<div id="del-dlg-{{ page.pageId }}"
+     class="idea-admin-dialog-backdrop"
+     hidden
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="del-dlg-label-{{ page.pageId }}">
+    <div class="idea-admin-dialog">
+        <div class="idea-admin-dialog__head">
+            <h5 id="del-dlg-label-{{ page.pageId }}" class="idea-admin-dialog__title">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                ページを削除しますか？
+            </h5>
+            <button type="button"
+                    class="idea-admin-text-btn idea-admin-delete-cancel"
+                    data-page-id="{{ page.pageId }}"
+                    aria-label="閉じる">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="idea-admin-dialog__body">
+            <p>「<strong>{{ page.pageName }}</strong>」を削除します。この操作は取り消せません。</p>
+        </div>
+        <div class="idea-admin-dialog__foot">
+            <button type="button"
+                    class="idea-admin-action idea-admin-delete-cancel"
+                    data-page-id="{{ page.pageId }}">
+                キャンセル
+            </button>
+            <form method="post"
+                  action="/admin/page/page"
+                  data-delete-url="/admin/page/page?pageId={{ page.pageId }}&_method=delete"
+                  style="display:inline;">
+                <input type="hidden" name="_method" value="delete">
+                <input type="hidden" name="pageId" value="{{ page.pageId }}">
+                <input type="hidden" name="csrfToken" value="{{ csrf_token|default('') }}">
+                <button type="submit"
+                        class="idea-admin-action idea-admin-action--destructive"
+                        rel="doDeletePage">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    削除
+                </button>
+            </form>
+        </div>
     </div>
+</div>
+{% endif %}
+{% endfor %}
 
 {% endblock %}

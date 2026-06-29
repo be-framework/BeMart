@@ -1,107 +1,87 @@
-{#
-  BeMart Shopping login page — EC-CUBE goShoppingLogin.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}購入入口 | IDEA STORE{% endblock %}
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><a href="/cart">カート</a><span>/</span><span>購入入口</span>
+</nav>
 
-  PORT of EC-CUBE 4.3 default-theme `Shopping/login.twig`
-  (src/Eccube/Resource/template/default/Shopping/login.twig).
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-shopping-login-heading">
+  <div>
+    <p class="idea-eyebrow">Checkout entrance</p>
+    <h1 id="idea-shopping-login-heading" class="idea-title idea-title--compact">購入方法を選ぶ</h1>
+    <p class="idea-muted">会員ログインまたはゲスト購入を選んで、ご注文手続きへお進みください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Secure checkout</span>
+    <strong>Login / Guest</strong>
+    <small>IDEA STORE</small>
+  </div>
+</section>
 
-  FORM page (Ray.WebFormModule) — see var/templates/README.md. Markup
-  skeleton, the `ec-role` / `ec-pageHeader` / `ec-grid3` / `ec-login` /
-  `ec-grid2` / `ec-guest` classes and the block structure are kept
-  verbatim from EC-CUBE.
+<div class="idea-container idea-checkout-progress" aria-label="購入ステップ">
+  <span><b>1</b>カート</span>
+  <span class="is-active"><b>2</b>購入入口</span>
+  <span><b>3</b>配送先</span>
+  <span><b>4</b>確認</span>
+  <span><b>5</b>完了</span>
+</div>
 
-  EC-CUBE's `shopping_login` route reuses `CustomerLoginType` — the same
-  Symfony form type the standalone `goLogin` page uses — so the Shopping
-  Login resource exposes the same `LoginForm` (an AbstractForm) as
-  `body.form`. The inputs are rendered through it:
+<section class="idea-container idea-section idea-auth-choice" aria-label="購入方法の選択">
+  <article class="idea-checkout-panel idea-auth-panel">
+    <p class="idea-eyebrow">Member checkout</p>
+    <h2 class="idea-section-title">会員の方</h2>
+    <p class="idea-muted">メールアドレスとパスワードでログインすると、登録済みの配送先情報を使って手続きへ進めます。</p>
 
-    {{ form.input('email')|raw }}   <- real <input> w/ id/attrs
-    {{ form.input('password')|raw }}
+    {% if message is defined and message %}
+      <p class="idea-form-error" role="alert">{{ message }}</p>
+    {% endif %}
 
-  The field names / ids / attributes in LoginForm::init() are ported
-  from EC-CUBE's `CustomerLoginType` + the template's `form_widget`
-  `attr` options. The render-diff test stubs EC-CUBE's `form_widget` to
-  delegate to the SAME LoginForm so the inputs diff to ZERO. Validation
-  authority stays with the Be Becoming chain — the form is a
-  field-definition + renderer.
+    {# rel=doLogin → page://self/login POST #}
+    <form class="idea-auth-form"
+          name="shopping_login"
+          id="shopping_login"
+          method="post"
+          action="/login"
+          novalidate>
+      <input type="hidden" name="_target_path" value="/shopping">
+      <input type="hidden" name="_failure_path" value="/shopping/login">
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `csrf_token('authenticate')` — EC-CUBE per-request CSRF widget; the
-     hidden `_csrf_token` input is kept (structure) bound to the body's
-     `csrfToken` (null in the html context). EC-CUBE-runtime only.
-   - `is_granted('IS_AUTHENTICATED_REMEMBERED')` — EC-CUBE auth-state
-     runtime. The guest-purchase grid cell renders only for a
-     not-already-remembered visitor; BeMart's html context has no auth
-     state, so the cell is rendered unconditionally (the common
-     anonymous-checkout case — the page IS the unauthenticated branch).
-   - `BaseInfo.option_remember_me` — the remember-me checkbox depends on
-     a BaseInfo flag the body does not carry, so it is OMITTED (never
-     invented), recorded as a residual in the render test.
-   - `error` — Symfony's authentication-error object. Form-level
-     messages render from the body's `message` instead.
-#}
-{% extends 'base.html.twig' %}
+      <label class="idea-field">メールアドレス
+        {% if form is defined %}
+          {{ form.input('email')|raw }}
+          <span class="idea-form-error">{{ form.error('email') }}</span>
+        {% else %}
+          <input type="text" name="email" id="email" autocomplete="email" placeholder="メールアドレス">
+        {% endif %}
+      </label>
 
-{% set body_class = 'cart_page' %}
-{% set route = 'shopping-login' %}
-{% set title = 'ログイン' %}
+      <label class="idea-field">パスワード
+        {% if form is defined %}
+          {{ form.input('password')|raw }}
+          <span class="idea-form-error">{{ form.error('password') }}</span>
+        {% else %}
+          <input type="password" name="password" id="password" autocomplete="current-password" placeholder="パスワード">
+        {% endif %}
+      </label>
 
-{% block main %}
+      <button class="idea-button idea-button--wide" type="submit">ログインして進む</button>
 
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1>ログイン</h1>
-        </div>
-    </div>
+      <div class="idea-auth-links">
+        {# rel=goCustomerRegistration → page://self/entry #}
+        <a class="idea-link" href="/entry">新規会員登録</a>
+        <a class="idea-link" href="/forgot-password">パスワードをお忘れの方</a>
+      </div>
+    </form>
+  </article>
 
-    <div class="ec-role">
-        <div class="ec-grid3">
-
-            <div class="ec-grid3__cell2">
-                <form name="shopping_login" id="shopping_login" method="post" action="/login">
-                    <input type="hidden" name="_target_path" value="/shopping" />
-                    <input type="hidden" name="_failure_path" value="/shopping/login" />
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                    <div class="ec-login">
-                        <div class="ec-login__icon">
-                            <div class="ec-icon"><img src="{{ asset('assets/icon/user.svg') }}" alt=""></div>
-                        </div>
-                        <div class="ec-login__input">
-                            <div class="ec-input">
-                                {{ form.input('email')|raw }}
-                                {{ form.input('password')|raw }}
-                            </div>
-                        </div>
-                        {% if message is defined and message %}
-                            <p class="ec-errorMessage">{{ message }}</p>
-                        {% endif %}
-                        <div class="ec-grid2">
-                            <div class="ec-grid2__cell">
-                                <div class="ec-login__actions">
-                                    <button type="submit" class="ec-blockBtn--cancel">ログイン</button>
-                                </div>
-                            </div>
-                            <div class="ec-grid2__cell">
-                                <div class="ec-login__link"><a class="ec-link" href="/forgot-password">ログイン情報をお忘れですか？</a>
-                                </div>
-                                <div class="ec-login__link"><a class="ec-link" href="/entry">新規会員登録</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <div class="ec-grid3__cell">
-                <div class="ec-guest">
-                    <div class="ec-guest__inner">
-                        <p>会員登録をせずに購入手続きをされたい方は、下記よりお進みください。</p>
-                        <div class="ec-guest__actions"><a class="ec-blockBtn--cancel" href="/shopping/non-member">ゲスト購入</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
+  <article class="idea-checkout-panel idea-auth-panel">
+    <p class="idea-eyebrow">Guest checkout</p>
+    <h2 class="idea-section-title">ゲスト購入</h2>
+    <p class="idea-muted">会員登録なしで購入できます。お届け先と連絡先を入力して、そのままご注文手続きへ進んでください。</p>
+    {# rel=goShoppingNonMember → page://self/shopping/non-member #}
+    <a class="idea-button idea-button--wide" href="/shopping/non-member">ゲスト購入へ進む</a>
+    <a class="idea-link idea-summary-link" href="/cart">カートに戻る</a>
+  </article>
+</section>
 {% endblock %}

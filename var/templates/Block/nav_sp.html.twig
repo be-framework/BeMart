@@ -1,10 +1,255 @@
 {#
-  EC-CUBE default-theme Block/nav_sp.twig port.
+  BeMart — Block/nav_sp.html.twig
 
-  This is the hamburger affordance that opens the drawer menu on small
-  screens. The drawer body itself is populated in base.html.twig with
-  login_sp + category_nav_sp so it contains real navigable links.
+  Mobile navigation toggle affordance.
+  Self-contained: no extends, no EC-CUBE runtime, no FontAwesome.
+
+  Rendered only by CSS at ≤900 px (the breakpoint at which .idea-nav and
+  .idea-search disappear from .idea-header). Above that breakpoint the
+  element is hidden via the scoped <style> block below so it does not
+  duplicate the desktop header controls.
+
+  Data contract (read-only links):
+    /products          — goProductList  (Index.php #[Link])
+    /cart              — goCart         (Index.php #[Link])
+    /login             — goLogin        (Index.php #[Link])
+    /entry             — goCustomerRegistration  (Index.php #[Link])
+    /mypage            — goMypage       (Index.php #[Link])
+    /products (search) — action from #[Link] goProductList, method GET, param name
 #}
-<div class="ec-headerNavSP">
-    <i class="fas fa-bars"></i>
+
+<style>
+  .idea-nav-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--idea-stone);
+    border-radius: var(--idea-radius-md, 18px);
+    background: rgba(255, 253, 248, 0.72);
+    cursor: pointer;
+    color: var(--idea-ink);
+    list-style: none;
+  }
+  .idea-nav-toggle svg { pointer-events: none; }
+  @media (max-width: 900px) {
+    .idea-nav-toggle { display: inline-flex; }
+  }
+
+  .idea-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .idea-drawer[open] {
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .idea-drawer__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(41, 37, 31, 0.42);
+    backdrop-filter: blur(2px);
+  }
+  .idea-drawer__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: min(82vw, 22rem);
+    height: 100%;
+    background: var(--idea-surface, #fffaf0);
+    border-left: 1px solid var(--idea-stone);
+    padding: 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform .24s ease;
+  }
+  .idea-drawer[open] .idea-drawer__panel {
+    transform: translateX(0);
+  }
+  .idea-drawer__close {
+    align-self: flex-end;
+    background: transparent;
+    border: 1px solid var(--idea-stone);
+    border-radius: 999px;
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--idea-ink);
+  }
+  .idea-drawer__search {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--idea-stone);
+    border-radius: 999px;
+    background: rgba(255, 253, 248, 0.9);
+    overflow: hidden;
+  }
+  .idea-drawer__search input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    padding: .6rem .9rem;
+    color: var(--idea-ink);
+    font: inherit;
+    outline: none;
+    min-width: 0;
+  }
+  .idea-drawer__search button {
+    border: 0;
+    background: transparent;
+    padding: .6rem .75rem;
+    cursor: pointer;
+    color: var(--idea-muted);
+    display: inline-flex;
+    align-items: center;
+  }
+  .idea-drawer__nav {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+  }
+  .idea-drawer__nav-label {
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--idea-olive);
+    font-weight: 800;
+    padding: .2rem 0 .5rem;
+    border-bottom: 1px solid var(--idea-stone);
+    margin-bottom: .35rem;
+  }
+  .idea-drawer__nav a {
+    display: block;
+    padding: .62rem .5rem;
+    border-bottom: 1px solid rgba(205, 191, 170, .35);
+    color: var(--idea-ink);
+    font-size: .96rem;
+    text-decoration: none;
+  }
+  .idea-drawer__nav a:hover { color: var(--idea-olive); }
+  .idea-drawer__account {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    margin-top: auto;
+  }
+  .idea-drawer__account a {
+    display: block;
+    text-align: center;
+    padding: .7rem 1rem;
+    border-radius: 999px;
+    font-size: .88rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-decoration: none;
+  }
+  .idea-drawer__account a:first-child {
+    background: var(--idea-ink);
+    color: var(--idea-surface);
+    border: 1px solid var(--idea-ink);
+  }
+  .idea-drawer__account a:first-child:hover { background: var(--idea-olive); border-color: var(--idea-olive); }
+  .idea-drawer__account a:last-child {
+    border: 1px solid var(--idea-stone);
+    color: var(--idea-ink);
+  }
+  .idea-drawer__account a:last-child:hover { border-color: var(--idea-olive); color: var(--idea-olive); }
+</style>
+
+{# Hamburger toggle — visible only at ≤900 px #}
+<button
+  class="idea-nav-toggle"
+  type="button"
+  aria-label="メニューを開く"
+  aria-controls="idea-mobile-drawer"
+  aria-expanded="false"
+  onclick="
+    var d = document.getElementById('idea-mobile-drawer');
+    var open = d.hasAttribute('open');
+    if (open) { d.removeAttribute('open'); this.setAttribute('aria-expanded','false'); }
+    else { d.setAttribute('open',''); this.setAttribute('aria-expanded','true'); }
+  "
+>
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <rect y="3" width="20" height="2" rx="1" fill="currentColor"/>
+    <rect y="9" width="20" height="2" rx="1" fill="currentColor"/>
+    <rect y="15" width="20" height="2" rx="1" fill="currentColor"/>
+  </svg>
+</button>
+
+{# Mobile drawer panel — self-contained, triggered by the button above #}
+<div id="idea-mobile-drawer" class="idea-drawer" role="dialog" aria-modal="true" aria-label="モバイルナビゲーション">
+  <div
+    class="idea-drawer__overlay"
+    aria-hidden="true"
+    onclick="
+      var d = document.getElementById('idea-mobile-drawer');
+      d.removeAttribute('open');
+      var btn = document.querySelector('[aria-controls=idea-mobile-drawer]');
+      if (btn) btn.setAttribute('aria-expanded','false');
+    "
+  ></div>
+  <div class="idea-drawer__panel">
+    <button
+      class="idea-drawer__close"
+      type="button"
+      aria-label="メニューを閉じる"
+      onclick="
+        var d = document.getElementById('idea-mobile-drawer');
+        d.removeAttribute('open');
+        var btn = document.querySelector('[aria-controls=idea-mobile-drawer]');
+        if (btn) btn.setAttribute('aria-expanded','false');
+      "
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <line x1="1" y1="1" x2="13" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="13" y1="1" x2="1" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <form class="idea-drawer__search" action="/products" method="get" role="search">
+      <input type="search" name="name" maxlength="50" placeholder="商品を探す" aria-label="商品を検索">
+      <button type="submit" aria-label="検索">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="10.5" y1="10.5" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </form>
+
+    <nav class="idea-drawer__nav" aria-label="商品カテゴリ">
+      <p class="idea-drawer__nav-label">カテゴリ</p>
+      <a href="/products" rel="goProductList">すべての商品</a>
+      <a href="/products?category_id=2">新入荷</a>
+      <a href="/products?category_id=1">ジェラート</a>
+      <a href="/products?category_id=3">彩のデザート</a>
+      <a href="/products?category_id=4">CUBE</a>
+      <a href="/products?category_id=5">アイスサンド</a>
+      <a href="/products?category_id=6">フルーツ</a>
+    </nav>
+
+    <nav class="idea-drawer__nav" aria-label="お客様サポート">
+      <p class="idea-drawer__nav-label">サポート</p>
+      <a href="/cart" rel="goCart">カートを見る</a>
+      <a href="/mypage" rel="goMypage">マイページ</a>
+      <a href="/contact">お問い合わせ</a>
+      <a href="/help/guide">ご利用ガイド</a>
+      <a href="/help/about">ショップについて</a>
+    </nav>
+
+    <div class="idea-drawer__account">
+      <a href="/entry" rel="goCustomerRegistration">会員登録</a>
+      <a href="/login" rel="goLogin">ログイン</a>
+    </div>
+  </div>
 </div>

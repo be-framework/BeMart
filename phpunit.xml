@@ -35,10 +35,11 @@
             -->
             <group>stateful-sql-covered</group>
             <group>ec-cube-reference</group>
+            <group>ec-cube-parity-archived</group>
         </exclude>
     </groups>
     <php>
-        <env name="DATABASE_URL" value="mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&amp;serverVersion=mariadb-10.11.14"/>
+        <env name="DATABASE_URL" value="mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&amp;serverVersion=8.0.0"/>
     </php>
     <source>
         <include>

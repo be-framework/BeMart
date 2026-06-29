@@ -1,167 +1,147 @@
-{#
-  BeMart address add/edit page — EC-CUBE お届け先情報編集.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}お届け先の編集 | IDEA STORE{% endblock %}
+{% block content %}
 
-  PORT of EC-CUBE 4.3 default-theme `Mypage/delivery_edit.twig`
-  (src/Eccube/Resource/template/default/Mypage/delivery_edit.twig).
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span>
+  <a href="/mypage">マイページ</a><span>/</span>
+  <a href="/mypage/address-list">お届け先の管理</a><span>/</span>
+  <span>{{ addressId is not null ? '編集' : '新規追加' }}</span>
+</nav>
 
-  Markup skeleton, `ec-mypageRole` / `ec-editRole` / `ec-off1Grid` /
-  `ec-borderedDefs` / `ec-halfInput` / `ec-zipInput` / `ec-select` /
-  `ec-input` / `ec-telInput` / `ec-RegisterRole__actions` classes + the
-  <dl>/<dt>/<dd> definition-list structure are kept verbatim from
-  EC-CUBE.
+<section class="idea-container idea-checkout-hero idea-checkout-hero--address" aria-labelledby="idea-address-title">
+  <div>
+    <p class="idea-eyebrow">Shipping address</p>
+    <h1 id="idea-address-title" class="idea-title idea-title--compact">
+      {{ addressId is not null ? 'お届け先を編集' : 'お届け先を追加' }}
+    </h1>
+    <p class="idea-muted">お名前・住所・電話番号を入力してください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>{{ addressId is not null ? 'Edit address' : 'New address' }}</span>
+    <strong>IDEA STORE</strong>
+    <small>Delivery book</small>
+  </div>
+</section>
 
-  Phase 3 — FORM page (Ray.WebFormModule). The Address resource exposes
-  a real `AddressForm` (an AbstractForm) as `body.form`; the inputs are
-  rendered through it:
+<section class="idea-container idea-section idea-account-layout">
 
-    {{ form.input('name01')|raw }}   <- real <input> w/ name/attrs/value
-    {{ form.error('name01') }}       <- inline Be-domain error, if any
+  <nav class="idea-account-nav" aria-label="マイページメニュー">
+    <p class="idea-eyebrow">Account menu</p>
+    <ul class="idea-account-nav__list">
+      <li><a href="/mypage">注文履歴</a></li>
+      <li><a href="/mypage/favorite-list">お気に入り</a></li>
+      <li><a href="/mypage/change">会員情報の変更</a></li>
+      <li class="is-active"><a href="/mypage/address-list">お届け先の管理</a></li>
+      <li><a href="/mypage/withdraw">退会手続き</a></li>
+    </ul>
+  </nav>
 
-  EC-CUBE renders the same inputs through the Symfony FormView
-  (`form_widget(form.name.name01)`); Ray.WebFormModule is BeMart's
-  BEAR-idiomatic equivalent. The field names / placeholders in
-  AddressForm::init() are ported from EC-CUBE's `CustomerAddressType`
-  leaf fields + the template's `form_widget` `attr` options. The
-  render-diff test stubs EC-CUBE's `form_widget` / `form_label` to
-  delegate to the SAME AddressForm so the inputs + labels diff to ZERO.
+  <div class="idea-account-main">
 
-  Validation authority stays with the Be Framework Becoming chain — the
-  form is a field-definition + renderer.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `form._token` — Symfony CSRF widget; BeMart has no CSRF widget, the
-     hidden token is kept with the body's `csrfToken` (null in the html
-     context — the EventListener mirrors the live token in).
-   - `has_errors(...)` — request-validation runtime; resolves false on a
-     fresh form, so the conditional ` error` class never appears.
-   - The `{% for f in form|filter(...) %}` entity-extension auto-render
-     loop is OMITTED — a core install has no such extensions, so it
-     emits nothing on either side.
-   - `pref` renders as the bare empty `<select>`: the prefecture option
-     set is EC-CUBE master data (`mtb_pref`) the resource body does not
-     carry. Enumerated as an EC-CUBE-runtime residual.
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'mypage' %}
-{% set route = 'mypage-address' %}
-{% set title = 'マイページ' %}
-
-{% block javascript %}
-    <script src="//yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
-{% endblock javascript %}
-
-{% block main %}
-    <div class="ec-layoutRole__main">
-        <div class="ec-mypageRole">
-            <div class="ec-pageHeader">
-                <h1>マイページ/お届け先一覧</h1>
-            </div>
-            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'delivery', name01: name01|default(''), name02: name02|default('') } %}
+    <div class="idea-checkout-panel">
+      <div class="idea-panel-head">
+        <div>
+          <p class="idea-eyebrow">{{ addressId is not null ? 'Update address' : 'Add address' }}</p>
+          <h2 class="idea-section-title">
+            {{ addressId is not null ? 'お届け先の変更' : '新しいお届け先' }}
+          </h2>
         </div>
-        <div class="ec-mypageRole">
-            <form method="post" action="?" novalidate class="h-adr">
-                <div class="ec-editRole">
-                    <div class="ec-off1Grid">
-                        <div class="ec-off1Grid__cell">
+        <a class="idea-link" href="/mypage/address-list">一覧に戻る</a>
+      </div>
 
-                            <span class="p-country-name" style="display:none;">Japan</span>
-                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                            <div class="ec-borderedDefs">
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">お名前</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-halfInput">
-                                            {{ form.input('name01')|raw }}
-                                            {{ form.input('name02')|raw }}
-                                            {{ form.error('name01') }}
-                                            {{ form.error('name02') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">お名前(カナ)</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-halfInput">
-                                            {{ form.input('kana01')|raw }}
-                                            {{ form.input('kana02')|raw }}
-                                            {{ form.error('kana01') }}
-                                            {{ form.error('kana02') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">会社名</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-halfInput">
-                                            {{ form.input('companyName')|raw }}
-                                            {{ form.error('companyName') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">住所</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-zipInput"><span>〒</span>
-                                            {{ form.input('postalCode')|raw }}
-                                            <div class="ec-zipInputHelp">
-                                                <div class="ec-zipInputHelp__icon">
-                                                    <div class="ec-icon"><img
-                                                                src="{{ asset('assets/icon/question-white.svg') }}" alt="">
-                                                    </div>
-                                                </div><a href="https://www.post.japanpost.jp/zipcode/" target="_blank"><span>郵便番号検索</span></a>
-                                            </div>
-                                            {{ form.error('postalCode') }}
-                                        </div>
+      <form
+        method="post"
+        action="{{ submitTo.href|replace({'page://self': ''}) }}"
+        novalidate
+        class="h-adr idea-address-form"
+      >
+        <span class="p-country-name" aria-hidden="true">Japan</span>
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        {% if addressId is not null %}
+          <input type="hidden" name="addressId" value="{{ addressId }}">
+          <input type="hidden" name="_method" value="PUT">
+        {% endif %}
 
-                                        <div class="ec-select">
-                                            {{ form.input('pref')|raw }}
-                                            {{ form.error('pref') }}
-                                        </div>
-                                        <div class="ec-input">
-                                            {{ form.input('addr01')|raw }}
-                                            {{ form.error('addr01') }}
-                                        </div>
-                                        <div class="ec-input">
-                                            {{ form.input('addr02')|raw }}
-                                            {{ form.error('addr02') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                                <dl>
-                                    <dt>
-                                        <label class="ec-label">電話番号</label>
-                                    </dt>
-                                    <dd>
-                                        <div class="ec-telInput">
-                                            {{ form.input('phoneNumber')|raw }}
-                                            {{ form.error('phoneNumber') }}
-                                        </div>
-                                    </dd>
-                                </dl>
-                            </div>
+        <div class="idea-form-grid">
 
-                        </div>
-                    </div>
-                    <div class="ec-RegisterRole__actions">
-                        <div class="ec-off4Grid">
-                            <div class="ec-off4Grid__cell">
-                                <button type="submit"
-                                        class="ec-blockBtn--cancel">登録する</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
+          <div class="idea-form-grid--two idea-form-grid">
+            <label class="idea-field">
+              <span>姓<abbr class="idea-required" title="必須">*</abbr></span>
+              {{ form.input('name01')|raw }}
+              <p class="idea-form-error">{{ form.error('name01') }}</p>
+            </label>
+            <label class="idea-field">
+              <span>名<abbr class="idea-required" title="必須">*</abbr></span>
+              {{ form.input('name02')|raw }}
+              <p class="idea-form-error">{{ form.error('name02') }}</p>
+            </label>
+          </div>
+
+          <div class="idea-form-grid--two idea-form-grid">
+            <label class="idea-field">
+              <span>セイ</span>
+              {{ form.input('kana01')|raw }}
+              <p class="idea-form-error">{{ form.error('kana01') }}</p>
+            </label>
+            <label class="idea-field">
+              <span>メイ</span>
+              {{ form.input('kana02')|raw }}
+              <p class="idea-form-error">{{ form.error('kana02') }}</p>
+            </label>
+          </div>
+
+          <label class="idea-field idea-field--full">
+            <span>会社名</span>
+            {{ form.input('companyName')|raw }}
+            <p class="idea-form-error">{{ form.error('companyName') }}</p>
+          </label>
+
+          <label class="idea-field">
+            <span>郵便番号<abbr class="idea-required" title="必須">*</abbr></span>
+            <span class="idea-postal-wrap">
+              <span class="idea-postal-mark" aria-hidden="true">〒</span>
+              {{ form.input('postalCode')|raw }}
+            </span>
+            <p class="idea-form-error">{{ form.error('postalCode') }}</p>
+          </label>
+
+          <label class="idea-field">
+            <span>都道府県<abbr class="idea-required" title="必須">*</abbr></span>
+            {{ form.input('pref')|raw }}
+            <p class="idea-form-error">{{ form.error('pref') }}</p>
+          </label>
+
+          <label class="idea-field idea-field--full">
+            <span>市区町村名<abbr class="idea-required" title="必須">*</abbr></span>
+            {{ form.input('addr01')|raw }}
+            <p class="idea-form-error">{{ form.error('addr01') }}</p>
+          </label>
+
+          <label class="idea-field idea-field--full">
+            <span>番地・建物名</span>
+            {{ form.input('addr02')|raw }}
+            <p class="idea-form-error">{{ form.error('addr02') }}</p>
+          </label>
+
+          <label class="idea-field">
+            <span>電話番号</span>
+            {{ form.input('phoneNumber')|raw }}
+            <p class="idea-form-error">{{ form.error('phoneNumber') }}</p>
+          </label>
+
         </div>
+
+        <div class="idea-form-actions">
+          <button type="submit" class="idea-button">
+            {{ addressId is not null ? '変更を保存する' : 'お届け先を登録する' }}
+          </button>
+          <a class="idea-link" href="/mypage/address-list">キャンセル</a>
+        </div>
+      </form>
     </div>
+
+  </div>
+
+</section>
 {% endblock %}

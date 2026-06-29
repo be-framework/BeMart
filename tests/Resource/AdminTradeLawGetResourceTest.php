@@ -62,7 +62,7 @@ final class AdminTradeLawGetResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($this->storage->item()->body, $ro->body['tradeLawBody']);
-        $this->assertStringContainsString('株式会社EC-CUBE', $ro->body['tradeLawBody']);
+        $this->assertStringContainsString('株式会社BeMart', $ro->body['tradeLawBody']);
         $this->assertInstanceOf(AdminTradeLawForm::class, $ro->body['form']);
         $this->assertCount(3, $ro->body['tradeLawRows']);
         $this->assertSame('販売業者', $ro->body['tradeLawRows'][0]['name']);

@@ -1,136 +1,257 @@
 {#
-  BeMart admin product editor — EC-CUBE admin-theme `Product/product.twig`.
+  BeMart admin Product editor — clean-room build.
 
-  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Product/product.twig`
-  — the ~932-line multi-tab 商品登録 / 商品編集 screen. It extends the
-  admin frame (`admin-base.html.twig`), not the storefront frame.
+  DATA CONTRACT (src/Resource/Page/Admin/Product.php onGet):
+    productCode          string   — primary key; absent on new-product path
+    productName          string
+    price02              int
+    stock                int|null — null = unlimited
+    productStatus        int      — 1=公開 / 2=非公開 / 3=廃止
+    description          string|null
+    searchWord           string|null
+    note                 string|null
+    mainImage            string|null
+    categoryNames        string[]
+    tagNames             string[]
+    classNames           string[]
+    csrfToken            string
+    productStatusOptions array<int,string>
 
-  Tier-2 port note: EC-CUBE's editor wires a product-image collection
-  (drag-drop upload), a category multi-select tree, a tag collection,
-  the class-category drag-drop matrix and a related-products panel.
-  The Be projection ({@see \MyVendor\BeMart\Be\Final\AdminProductFetched})
-  keeps a flat product header (the dtb_product columns the admin
-  product-management transitions exercise), so the port renders the
-  editable header panels — basic info, pricing/stock, the detail
-  description and the admin memo. The class-category matrix edits live
-  on the sibling `product_class` page; the image / category / tag
-  collections are EC-CUBE-runtime fragments dropped as enumerated
-  residuals.
+  FORM CONTRACT (src/Form/AdminProductEditForm.php):
+    fields: productName, productCode, price02, stock,
+            productStatus (select), description, note, searchWord
 
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
-     AdminProductEditForm leaf fields (Ray.WebFormModule).
-   - `price` filter -> JPY NumberFormatter.
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+  ACTIONS (derived from resource method routing):
+    POST   /admin/product         — doCreateProduct (new)
+    PUT    /admin/product         — doUpdateProduct (edit, via _method=put)
+    DELETE /admin/product         — doDeleteProduct (via separate confirm)
+
+  CSRF: csrfToken from resource body; field name "csrfToken" (CsrfToken service).
+
+  IdeaStore admin design vocabulary (idea-admin-*):
+    idea-admin-layout       two-column editor shell (main col + side panel)
+    idea-admin-panel        collapsible card section
+    idea-admin-panel__head  section header row
+    idea-admin-panel__body  section content area
+    idea-admin-field        label + input row
+    idea-admin-field__label field label cell
+    idea-admin-field__input field input cell
+    idea-admin-required     required badge
+    idea-admin-toolbar      action bar anchored at the bottom
+    idea-admin-toolbar__back back-nav link
+    idea-admin-toolbar__actions submit group
+    idea-admin-badge        status chip (public/private/discontinued)
+    idea-admin-meta         read-only metadata strip (image, categories, tags)
 #}
 {% extends 'admin-base.html.twig' %}
 
+{% set isEdit = productCode is defined and productCode is not empty %}
 {% set route = 'admin-product-edit' %}
-{% set title = productCode ? '商品編集' : '商品登録' %}
+{% set title = isEdit ? '商品編集' : '商品登録' %}
 {% set sub_title = '商品管理' %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ productCode ? '/admin/product?_method=put' : '/admin/product' }}" id="product_form" name="form1" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="productCode" value="{{ productCode|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
+<form
+  id="idea-product-form"
+  role="form"
+  method="post"
+  action="{{ isEdit ? '/admin/product?_method=put' : '/admin/product' }}"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="productCode" value="{{ productCode|default('') }}">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">基本情報</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3"><span>商品名</span><span class="badge bg-primary ms-1">必須</span></div>
-                                <div class="col">
-                                    {{ form.input('productName')|raw }}
-                                    {% if form.error('productName') %}<span class="invalid-feedback d-block">{{ form.error('productName') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>商品コード</span></div>
-                                <div class="col">{{ form.input('productCode')|raw }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>公開ステータス</span></div>
-                                <div class="col">{{ form.input('productStatus')|raw }}</div>
-                            </div>
-                        </div>
-                    </div>
+  <div class="idea-admin-layout">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">商品説明</span>
-                        </div>
-                        <div class="card-body">
-                            {{ form.input('description')|raw }}
-                        </div>
-                    </div>
+    {# ── Primary column ───────────────────────────────────────────── #}
+    <div class="idea-admin-primary">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">検索ワード</span>
-                        </div>
-                        <div class="card-body">
-                            {{ form.input('searchWord')|raw }}
-                        </div>
-                    </div>
-
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">管理用メモ</span>
-                        </div>
-                        <div class="card-body">
-                            {{ form.input('note')|raw }}
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="c-contentsArea__secondaryCol">
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header">
-                        <span class="card-title">価格・在庫</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="row mb-2">
-                            <div class="col-5"><span>販売価格</span></div>
-                            <div class="col-7">{{ form.input('price02')|raw }}</div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-5"><span>在庫数</span></div>
-                            <div class="col-7">{{ form.input('stock')|raw }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      {# Section: 基本情報 #}
+      <section class="idea-admin-panel" aria-labelledby="section-basic">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-basic">基本情報</h3>
         </div>
+        <div class="idea-admin-panel__body">
 
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/product-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>商品一覧へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="product_name">商品名</label>
+              <span class="idea-admin-required">必須</span>
             </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('productName')|raw }}
+              {% if form.error('productName') %}
+                <span class="idea-admin-error">{{ form.error('productName') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="product_code">商品コード</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('productCode')|raw }}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="product_status">公開ステータス</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('productStatus')|raw }}
+            </div>
+          </div>
+
         </div>
-    </form>
+      </section>
+
+      {# Section: 商品説明 #}
+      <section class="idea-admin-panel" aria-labelledby="section-description">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-description">商品説明</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          {{ form.input('description')|raw }}
+        </div>
+      </section>
+
+      {# Section: 検索ワード #}
+      <section class="idea-admin-panel" aria-labelledby="section-search-word">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-search-word">検索ワード</h3>
+          <p class="idea-admin-panel__hint">スペース区切りで複数指定できます。</p>
+        </div>
+        <div class="idea-admin-panel__body">
+          {{ form.input('searchWord')|raw }}
+        </div>
+      </section>
+
+      {# Section: 管理用メモ #}
+      <section class="idea-admin-panel" aria-labelledby="section-note">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-note">管理用メモ</h3>
+          <p class="idea-admin-panel__hint">フロントには表示されません。</p>
+        </div>
+        <div class="idea-admin-panel__body">
+          {{ form.input('note')|raw }}
+        </div>
+      </section>
+
+    </div>
+
+    {# ── Side panel ────────────────────────────────────────────────── #}
+    <aside class="idea-admin-side" aria-label="価格・在庫・メタ情報">
+
+      {# Section: 価格・在庫 #}
+      <section class="idea-admin-panel" aria-labelledby="section-pricing">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-pricing">価格・在庫</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="product_price02">販売価格</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('price02')|raw }}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="product_stock">在庫数</label>
+              <span class="idea-admin-panel__hint">空欄で無制限</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('stock')|raw }}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# Section: メタ情報 (read-only — populated by resource body) #}
+      {% if isEdit %}
+      <section class="idea-admin-panel" aria-labelledby="section-meta">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-meta">商品メタ</h3>
+        </div>
+        <div class="idea-admin-panel__body idea-admin-meta">
+
+          {% if mainImage is defined and mainImage is not empty %}
+          <div class="idea-admin-meta__image">
+            <img
+              src="/save_image/{{ mainImage }}"
+              alt="{{ productName|default('商品画像') }}"
+            >
+          </div>
+          {% endif %}
+
+          <dl class="idea-admin-meta__list">
+            {% if categoryNames is defined and categoryNames is not empty %}
+            <div>
+              <dt>カテゴリ</dt>
+              <dd>{{ categoryNames|join(' / ') }}</dd>
+            </div>
+            {% endif %}
+            {% if tagNames is defined and tagNames is not empty %}
+            <div>
+              <dt>タグ</dt>
+              <dd>{{ tagNames|join(', ') }}</dd>
+            </div>
+            {% endif %}
+            {% if classNames is defined and classNames is not empty %}
+            <div>
+              <dt>規格</dt>
+              <dd>{{ classNames|join(', ') }}</dd>
+            </div>
+            {% endif %}
+          </dl>
+
+          <a
+            class="idea-admin-meta__link"
+            href="/admin/product-class?productCode={{ productCode|default('') }}"
+          >規格編集</a>
+
+        </div>
+      </section>
+      {% endif %}
+
+    </aside>
+
+  </div>
+
+  {# ── Action toolbar ────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/product-list" rel="goProductList">商品一覧に戻る</a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      {% if isEdit %}
+        <a
+          class="idea-admin-action"
+          href="/admin/product-copy?productCode={{ productCode }}"
+          rel="doCopyProduct"
+        >複製</a>
+        <a
+          class="idea-admin-action idea-admin-action--destructive"
+          href="/admin/product?productCode={{ productCode }}&amp;_method=delete"
+          rel="doDeleteProduct"
+          data-confirm="この商品を削除してよろしいですか？"
+        >削除</a>
+      {% endif %}
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        {{ isEdit ? '保存' : '登録' }}
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{% if message is defined and message %}
+  <p class="idea-admin-notice" role="alert">{{ message }}</p>
+{% endif %}
 {% endblock %}

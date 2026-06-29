@@ -1,194 +1,521 @@
-{#
-  BeMart admin mail-template editor — EC-CUBE Setting/Shop/mail.twig.
-#}
 {% extends 'admin-base.html.twig' %}
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/MailTemplate.php onGet):
+    form            AdminMailTemplateForm — pre-filled renderer (HTML context only)
+    mailTemplates   list<{mailTemplateId, mailTemplateName, fileName, mailSubject, isDeletable}>
+    id              int|null  — currently selected mailTemplateId (null = no selection)
+    Mail            {id, file_name, isDeletable}  — selected template meta
+    count           int       — total template count
+    csrfToken       string    — CSRF token
+
+  FORM CONTRACT (src/Form/AdminMailTemplateForm.php):
+    mailTemplateId  hidden    — selected template id
+    template        select    — template picker (managed by resource; not used for navigation here)
+    name            text      required — template display name
+    file_name       text      — Twig file path; read-only when Mail.id exists
+    mail_subject    text      required — mail subject line
+    tpl_data        textarea  — plain-text body
+    html_tpl_data   textarea  — HTML body
+
+  TRANSITIONS (src/Resource/Page/Admin/MailTemplate.php #[Link]):
+    POST   /admin/mail-template                                  doUpdateMailTemplate
+    POST   /admin/mail-template/create                           doCreateMailTemplate (Phase 2)
+    DELETE /admin/mail-template?mailTemplateId=…&_method=delete  doDeleteMailTemplate (isDeletable only)
+    GET    /admin/order/send-mail                                goOrderMail
+    GET    /admin/payment/payment-list                           goPaymentList
+
+  UX DESIGN:
+    Zone 1  — template roster table: all templates as scannable rows with click-to-edit links
+    Zone 2  — edit panel (only when id is not null): subject + tabbed body editors
+    Zone 3  — action toolbar: back-nav + save (always visible when editing)
+    Dialogs — native <dialog> element for delete confirm and HTML preview
+
+  idea-admin vocabulary:
+    idea-admin-layout / idea-admin-primary / idea-admin-side
+    idea-admin-panel / idea-admin-panel__head / idea-admin-panel__body
+    idea-admin-field / idea-admin-field__label / idea-admin-field__input
+    idea-admin-required / idea-admin-error
+    idea-admin-table-wrap / idea-admin-table / idea-admin-table__actions
+    idea-admin-toolbar / idea-admin-toolbar__back / idea-admin-toolbar__actions
+    idea-admin-action / idea-admin-action--primary / idea-admin-action--destructive
+    idea-admin-badge / idea-admin-spec-list / idea-admin-spec-row
+    idea-admin-empty
+#}
 
 {% set route = 'admin-mail-template' %}
 {% set title = 'メール設定' %}
 {% set sub_title = '店舗設定' %}
 
 {% block stylesheet %}
-    <style>
-        .ui-resizable-se {
-            right: -3px;
-            bottom: -3px;
-        }
-    </style>
+<style>
+/* ── Tab switcher ─────────────────────────────────────────────────────── */
+.idea-admin-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(205, 191, 170, .45);
+  margin-bottom: 0;
+}
+.idea-admin-tabs__tab {
+  padding: .5rem 1rem;
+  font-size: .84rem;
+  font-weight: 700;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--idea-muted);
+  cursor: pointer;
+  transition: color .14s, border-color .14s;
+  margin-bottom: -1px;
+}
+.idea-admin-tabs__tab:hover { color: var(--idea-ink); }
+.idea-admin-tabs__tab[aria-selected="true"] {
+  color: var(--idea-olive);
+  border-bottom-color: var(--idea-olive);
+}
+.idea-admin-tab-panel { display: none; padding-top: .75rem; }
+.idea-admin-tab-panel[aria-hidden="false"] { display: block; }
+
+/* ── Code textareas (tpl_data / html_tpl_data) ────────────────────────── */
+#mail_tpl_data,
+#mail_html_tpl_data {
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace;
+  font-size: .875rem;
+  line-height: 1.6;
+  min-height: 280px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Template roster row highlight (currently selected) ───────────────── */
+.idea-admin-table tbody tr.is-selected {
+  background: rgba(82, 107, 85, .08);
+}
+</style>
 {% endblock %}
 
 {% block javascript %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var template = document.getElementById('mail_template');
-            if (template) {
-                template.addEventListener('change', function() {
-                    var id = this.value;
-                    if (id) {
-                        location.href = '/admin/mail-template?mailTemplateId=' + encodeURIComponent(id);
-                    } else {
-                        location.href = '/admin/mail-template';
-                    }
-                });
-            }
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
-            var form = document.getElementById('form1');
-            if (form) {
-                form.addEventListener('submit', function() {
-                    var tplData = document.getElementById('mail_tpl_data');
-                    var htmlTplData = document.getElementById('mail_html_tpl_data');
-                    var editor = document.getElementById('editor');
-                    var htmlEditor = document.getElementById('html_editor');
-                    if (tplData && editor) {
-                        tplData.value = editor.textContent || '';
-                    }
-                    if (htmlTplData && htmlEditor) {
-                        htmlTplData.value = htmlEditor.textContent || '';
-                    }
-                });
-            }
+  /* ── Tab switching ───────────────────────────────────────────────── */
+  document.querySelectorAll('[role="tablist"]').forEach(function (tablist) {
+    tablist.querySelectorAll('[role="tab"]').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var panelId = tab.getAttribute('aria-controls');
+        tablist.querySelectorAll('[role="tab"]').forEach(function (t) {
+          t.setAttribute('aria-selected', 'false');
         });
-    </script>
+        tab.setAttribute('aria-selected', 'true');
+        var container = tablist.closest('.idea-admin-panel__body');
+        if (!container) return;
+        container.querySelectorAll('.idea-admin-tab-panel').forEach(function (p) {
+          p.setAttribute('aria-hidden', p.id === panelId ? 'false' : 'true');
+        });
+      });
+    });
+  });
+
+  /* ── Delete confirmation dialog ──────────────────────────────────── */
+  var deleteDialog = document.getElementById('delete-confirm-dialog');
+  if (deleteDialog) {
+    document.getElementById('delete-trigger').addEventListener('click', function () {
+      deleteDialog.showModal();
+    });
+    document.getElementById('delete-cancel').addEventListener('click', function () {
+      deleteDialog.close();
+    });
+  }
+
+  /* ── HTML preview dialog ─────────────────────────────────────────── */
+  var previewDialog = document.getElementById('html-preview-dialog');
+  if (previewDialog) {
+    document.getElementById('preview-btn').addEventListener('click', function () {
+      var src = document.getElementById('mail_html_tpl_data').value;
+      document.getElementById('preview-frame').srcdoc = src;
+      previewDialog.showModal();
+    });
+    document.getElementById('preview-close').addEventListener('click', function () {
+      previewDialog.close();
+    });
+  }
+
+});
+</script>
 {% endblock %}
 
 {% block main %}
-    <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="/admin/mail-template">
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        {{ form.input('mailTemplateId')|raw }}
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header"><span class="card-title">テンプレート編集</span></div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-2">
-                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="既存のメールテンプレートを選択してください。以下に内容が表示されます。">
-                                        <span>テンプレート</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                    </div>
-                                </div>
-                                {% if Mail.isDeletable %}
-                                    <div class="col-8">
-                                        {{ form.input('template')|raw }}
-                                        {% if form.error('template') %}{{ form.error('template') }}{% endif %}
-                                    </div>
-                                    <div class="col-2">
-                                        <button type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="btn btn-ec-delete">削除</button>
-                                    </div>
-                                {% else %}
-                                    <div class="col-10">
-                                        {{ form.input('template')|raw }}
-                                        {% if form.error('template') %}{{ form.error('template') }}{% endif %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-2"><span>テンプレート名</span><span class="badge bg-primary ms-1">必須</span></div>
-                                <div class="col-10">
-                                    {{ form.input('name')|raw }}
-                                    {% if form.error('name') %}{{ form.error('name') }}{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-2"><span>ファイル名</span><span class="badge bg-primary ms-1">必須</span></div>
-                                <div class="col-10">
-                                    {% if Mail.id %}
-                                        {{ Mail.file_name }}
-                                    {% else %}
-                                        <div class="row">
-                                            <div class="col-1 pe-0 align-middle"><span class="align-middle">Mail/</span></div>
-                                            <div class="col-7 ps-0">
-                                                {{ form.input('file_name')|raw }}
-                                            </div>
-                                            <div class="col-4 ps-0">.twig</div>
-                                        </div>
-                                        {% if form.error('file_name') %}{{ form.error('file_name') }}{% endif %}
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-2"><span>件名</span><span class="badge bg-primary ms-1">必須</span></div>
-                                <div class="col-10">
-                                    {{ form.input('mail_subject')|raw }}
-                                    {% if form.error('mail_subject') %}{{ form.error('mail_subject') }}{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-2"><span>テキスト</span><span class="badge bg-primary ms-1">必須</span></div>
-                                <div class="col-10">
-                                    <div id="editor" style="height: 480px" class="form-control"></div>
-                                    <div style="display: none">{{ form.input('tpl_data')|raw }}</div>
-                                    {% if form.error('tpl_data') %}{{ form.error('tpl_data') }}{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-2">
-                                    <span>HTML</span>
-                                    <div class="btn-group" role="group">
-                                        <button type="button" id="preview_button" class="btn w-100 text-nowrap btn-ec-regular" data-bs-toggle="modal" data-bs-target="#htmlPreviewModal">プレビュー</button>
-                                    </div>
-                                </div>
-                                <div class="col-10">
-                                    <div id="html_editor" style="height: 480px" class="form-control"></div>
-                                    <div style="display: none">{{ form.input('html_tpl_data')|raw }}</div>
-                                    {% if form.error('html_tpl_data') %}{{ form.error('html_tpl_data') }}{% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="c-conversionArea" id="aside_column">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem"></div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
 
-    <div class="modal fade" id="htmlPreviewModal" tabindex="-1" role="dialog" aria-labelledby="htmlPreviewModal" aria-hidden="true" data-bs-keyboard="false" data-bs-backdrop="static">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">プレビュー</h5>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="bg-light p-4 bg-ec-formGray" id="viewEmail" style="word-wrap: break-word; word-break:break-all"></div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">閉じる</button>
-                </div>
-            </div>
-        </div>
+{# ═══════════════════════════════════════════════════════════════════════
+   Zone 1 — Template roster
+   All templates shown as a table; clicking a name navigates to its edit view.
+   ═══════════════════════════════════════════════════════════════════════ #}
+<section class="idea-admin-panel" aria-labelledby="section-roster">
+  <div class="idea-admin-panel__head">
+    <h3 id="section-roster">
+      <i class="fa fa-envelope-open-text" aria-hidden="true"></i>
+      メールテンプレート一覧
+    </h3>
+    <span class="idea-admin-count" style="margin-left:auto;">{{ count }}件</span>
+    <a rel="doCreateMailTemplate" href="/admin/mail-template/create" class="idea-admin-action" style="margin-left:1rem;">
+      <i class="fa fa-plus" aria-hidden="true"></i>
+      新規作成
+    </a>
+  </div>
+  <div class="idea-admin-panel__body" style="padding:0;">
+
+    {% if count %}
+    <div class="idea-admin-table-wrap" style="border:none;box-shadow:none;border-radius:0;">
+      <table class="idea-admin-table" aria-label="メールテンプレート一覧">
+        <thead>
+          <tr>
+            <th scope="col">テンプレート名</th>
+            <th scope="col">件名</th>
+            <th scope="col">ファイル</th>
+            <th scope="col" class="idea-admin-table__actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tpl in mailTemplates %}
+          <tr
+            id="tpl-row-{{ tpl.mailTemplateId }}"
+            {% if id is not null and id == tpl.mailTemplateId %}class="is-selected"{% endif %}
+          >
+            <td>
+              <a
+                class="idea-admin-meta__link"
+                href="/admin/mail-template?mailTemplateId={{ tpl.mailTemplateId }}"
+              >{{ tpl.mailTemplateName }}</a>
+            </td>
+            <td style="color:var(--idea-muted);font-size:.84rem;">{{ tpl.mailSubject }}</td>
+            <td style="font-family:ui-monospace,monospace;font-size:.78rem;color:var(--idea-muted);">{{ tpl.fileName }}</td>
+            <td class="idea-admin-table__actions">
+              {% if tpl.isDeletable ?? false %}
+                <span class="idea-admin-badge">削除可</span>
+              {% else %}
+                <span class="idea-admin-badge idea-admin-badge--private">保護</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    {% if Mail.isDeletable %}
-        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModal" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold">削除してもよろしいですか？</h5>
-                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body text-start">
-                        <p class="text-start">メールテンプレートを削除します。</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                        <a class="btn btn-ec-delete" href="/admin/mail-template?mailTemplateId={{ Mail.id }}&_method=delete" data-confirm="false">削除</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+    {% else %}
+    <div class="idea-admin-empty">
+      <i class="fa fa-envelope fa-2x" aria-hidden="true"></i>
+      <p class="idea-admin-empty__title">メールテンプレートがありません</p>
+    </div>
     {% endif %}
+
+  </div>
+</section>
+
+{# ═══════════════════════════════════════════════════════════════════════
+   Zone 1b — Template-selector navigation form (always visible).
+   Affordances: action="/admin/mail-template", csrfToken, mailTemplateId.
+   Used by HttpSqlAdminMailTemplateFormTest to assert form contract.
+   ═══════════════════════════════════════════════════════════════════════ #}
+<section class="idea-admin-panel" aria-labelledby="section-select" style="margin-top:.75rem;">
+  <div class="idea-admin-panel__head">
+    <h3 id="section-select">
+      <i class="fa fa-list" aria-hidden="true"></i>
+      テンプレート選択
+    </h3>
+  </div>
+  <div class="idea-admin-panel__body">
+    <form
+      id="form1"
+      method="post"
+      action="/admin/mail-template"
+    >
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <div class="idea-admin-field">
+        <div class="idea-admin-field__label">
+          <label for="mail_template">テンプレート</label>
+        </div>
+        <div class="idea-admin-field__input" style="display:flex;gap:.5rem;align-items:flex-start;">
+          {{ form.input('template')|raw }}
+          <button class="idea-admin-action idea-admin-action--primary" type="submit">
+            <i class="fa fa-pen" aria-hidden="true"></i>
+            編集
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+{# ═══════════════════════════════════════════════════════════════════════
+   Zone 2 — Edit panel (only when a template is selected)
+   ═══════════════════════════════════════════════════════════════════════ #}
+{% if id is not null %}
+
+<form
+  id="mail-template-form"
+  method="post"
+  action="/admin/mail-template"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  {{ form.input('mailTemplateId')|raw }}
+
+  <div class="idea-admin-layout">
+
+    {# ── Primary: edit fields ──────────────────────────────────────── #}
+    <div class="idea-admin-primary">
+
+      <section class="idea-admin-panel" aria-labelledby="section-edit">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-edit">
+            <i class="fa fa-pen-to-square" aria-hidden="true"></i>
+            テンプレート編集
+          </h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          {# name — required #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="mail_name">テンプレート名</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('name')|raw }}
+              <span class="idea-admin-error">{{ form.error('name') }}</span>
+            </div>
+          </div>
+
+          {# file_name — read-only when editing an existing template #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label>ファイル名</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {% if Mail.id %}
+                <code style="font-size:.88rem;">{{ Mail.file_name }}</code>
+              {% else %}
+                <span style="font-family:ui-monospace,monospace;font-size:.88rem;">Mail/</span>
+                {{ form.input('file_name')|raw }}
+                <span style="font-family:ui-monospace,monospace;font-size:.88rem;">.twig</span>
+                <span class="idea-admin-error">{{ form.error('file_name') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# mail_subject — required #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="mail_mail_subject">件名</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('mail_subject')|raw }}
+              <span class="idea-admin-error">{{ form.error('mail_subject') }}</span>
+            </div>
+          </div>
+
+          {# Body editors — tabbed (text / HTML) #}
+          <div class="idea-admin-field" style="display:block;">
+            <div style="margin-bottom:.5rem;font-size:.84rem;font-weight:700;">本文</div>
+
+            <div role="tablist" aria-label="本文形式" class="idea-admin-tabs">
+              <button
+                id="tab-text"
+                role="tab"
+                aria-selected="true"
+                aria-controls="tabpanel-text"
+                class="idea-admin-tabs__tab"
+                type="button"
+              >テキスト</button>
+              <button
+                id="tab-html"
+                role="tab"
+                aria-selected="false"
+                aria-controls="tabpanel-html"
+                class="idea-admin-tabs__tab"
+                type="button"
+              >HTML</button>
+            </div>
+
+            <div
+              id="tabpanel-text"
+              role="tabpanel"
+              aria-labelledby="tab-text"
+              aria-hidden="false"
+              class="idea-admin-tab-panel"
+            >
+              {{ form.input('tpl_data')|raw }}
+              <span class="idea-admin-error">{{ form.error('tpl_data') }}</span>
+            </div>
+
+            <div
+              id="tabpanel-html"
+              role="tabpanel"
+              aria-labelledby="tab-html"
+              aria-hidden="true"
+              class="idea-admin-tab-panel"
+            >
+              <div style="display:flex;justify-content:flex-end;margin-bottom:.4rem;">
+                <button
+                  id="preview-btn"
+                  class="idea-admin-action"
+                  type="button"
+                  aria-haspopup="dialog"
+                  aria-controls="html-preview-dialog"
+                >
+                  <i class="fa fa-eye" aria-hidden="true"></i>
+                  プレビュー
+                </button>
+              </div>
+              {{ form.input('html_tpl_data')|raw }}
+              <span class="idea-admin-error">{{ form.error('html_tpl_data') }}</span>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+
+    {# ── Side: meta + delete affordance ───────────────────────────── #}
+    <aside class="idea-admin-side" aria-label="テンプレート情報">
+      <section class="idea-admin-panel" aria-labelledby="section-meta">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-meta">情報</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          <dl class="idea-admin-spec-list">
+            <div class="idea-admin-spec-row">
+              <dt>ID</dt>
+              <dd>{{ id }}</dd>
+            </div>
+            <div class="idea-admin-spec-row">
+              <dt>ファイル</dt>
+              <dd><code style="font-size:.8rem;">{{ Mail.file_name }}</code></dd>
+            </div>
+            <div class="idea-admin-spec-row">
+              <dt>削除</dt>
+              <dd>
+                {% if Mail.isDeletable %}
+                  <span class="idea-admin-badge">可能</span>
+                {% else %}
+                  <span class="idea-admin-badge idea-admin-badge--private">保護済み</span>
+                {% endif %}
+              </dd>
+            </div>
+          </dl>
+
+          {% if Mail.isDeletable %}
+          <div style="margin-top:1rem;">
+            <button
+              id="delete-trigger"
+              class="idea-admin-action idea-admin-action--destructive"
+              type="button"
+              aria-haspopup="dialog"
+              aria-controls="delete-confirm-dialog"
+            >
+              <i class="fa fa-trash" aria-hidden="true"></i>
+              削除
+            </button>
+          </div>
+          {% endif %}
+
+        </div>
+      </section>
+    </aside>
+
+  </div>
+
+  {# ── Action toolbar ──────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/payment/payment-list" rel="goPaymentList">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        支払方法設定
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-floppy-disk" aria-hidden="true"></i>
+        保存
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{# ── HTML preview dialog ──────────────────────────────────────────────── #}
+<dialog
+  id="html-preview-dialog"
+  aria-labelledby="html-preview-title"
+  style="width:min(800px,92vw);max-height:90vh;padding:0;border:1px solid rgba(205,191,170,.55);border-radius:12px;box-shadow:0 8px 32px rgba(41,37,31,.18);"
+>
+  <div class="idea-admin-dialog__head">
+    <h4 id="html-preview-title" class="idea-admin-dialog__title">HTMLプレビュー</h4>
+    <button id="preview-close" class="idea-admin-action" type="button">閉じる</button>
+  </div>
+  <div class="idea-admin-dialog__body" style="padding:.75rem;overflow:auto;">
+    <iframe
+      id="preview-frame"
+      srcdoc=""
+      title="メール HTML プレビュー"
+      style="width:100%;min-height:320px;border:none;"
+    ></iframe>
+  </div>
+</dialog>
+
+{# ── Delete confirmation dialog ───────────────────────────────────────── #}
+{% if Mail is defined and Mail.isDeletable %}
+<dialog
+  id="delete-confirm-dialog"
+  aria-labelledby="delete-confirm-title"
+  style="width:min(460px,92vw);padding:0;border:1px solid rgba(205,191,170,.55);border-radius:12px;box-shadow:0 8px 32px rgba(41,37,31,.18);"
+>
+  <div class="idea-admin-dialog__head">
+    <h4 id="delete-confirm-title" class="idea-admin-dialog__title">
+      <i class="fa fa-triangle-exclamation" aria-hidden="true"></i>
+      テンプレートの削除
+    </h4>
+  </div>
+  <div class="idea-admin-dialog__body">
+    <p>このメールテンプレートを削除します。この操作は取り消せません。</p>
+  </div>
+  <div class="idea-admin-dialog__foot">
+    <button id="delete-cancel" class="idea-admin-action" type="button">キャンセル</button>
+    <a
+      class="idea-admin-action idea-admin-action--destructive"
+      href="/admin/mail-template?mailTemplateId={{ Mail.id }}&_method=delete"
+      rel="doDeleteMailTemplate"
+    >
+      <i class="fa fa-trash" aria-hidden="true"></i>
+      削除する
+    </a>
+  </div>
+</dialog>
+{% endif %}
+
+{% else %}
+
+{# ── No selection prompt ──────────────────────────────────────────────── #}
+<div class="idea-admin-empty" style="margin-top:.5rem;">
+  <i class="fa fa-hand-pointer fa-2x" aria-hidden="true"></i>
+  <p class="idea-admin-empty__title">テンプレートを選択してください</p>
+  <p style="font-size:.84rem;">上の一覧からテンプレート名をクリックすると編集できます。</p>
+</div>
+
+{# ── Toolbar (back-nav only; no save when no template selected) ─────── #}
+<div class="idea-admin-toolbar" role="navigation" aria-label="ページナビゲーション">
+  <div class="idea-admin-toolbar__back">
+    <a href="/admin/payment/payment-list" rel="goPaymentList">
+      <i class="fa fa-arrow-left" aria-hidden="true"></i>
+      支払方法設定
+    </a>
+  </div>
+</div>
+
+{% endif %}
+
 {% endblock %}

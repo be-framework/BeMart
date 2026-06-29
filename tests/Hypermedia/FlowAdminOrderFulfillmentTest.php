@@ -435,7 +435,12 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
     #[Depends('testSendsOrderMail')]
     public function testExportsOrderPdf(ResourceObject $response): ResourceObject
     {
-        $this->follow($response, 'goExportOrderPdf', ['orderNo' => self::$orderNo]);
+        // PDF export is not supported in this build (GPL renderer removed).
+        // The link still exists in the ALPS profile; the resource returns 501.
+        $pdfHref = $this->linkHref($response, 'goExportOrderPdf');
+        $pdfResponse = $this->resource->get($pdfHref, ['orderNo' => self::$orderNo]);
+        $this->assertSame(501, $pdfResponse->code);
+        $this->assertStringContainsString('納品書PDF出力はこのビルドでは利用できません', $pdfResponse->body['message']);
 
         return $response;
     }

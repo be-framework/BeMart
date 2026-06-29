@@ -97,7 +97,8 @@ final class HttpSqlAdminContentOperationFormTest extends TestCase
 
         $enabledPage = $this->request('GET', '/admin/content/maintenance');
         $this->assertSame(200, $enabledPage['status'], $enabledPage['body']);
-        $this->assertStringContainsString('無効にする', $enabledPage['body']);
+        // When maintenance is ON the form must carry enabled=0 (the disable action).
+        $this->assertStringContainsString('name="enabled" value="0"', $enabledPage['body']);
 
         $disabled = $this->form('POST', '/admin/content/maintenance?_method=put', [
             'enabled' => '0',
@@ -110,7 +111,8 @@ final class HttpSqlAdminContentOperationFormTest extends TestCase
 
         $disabledPage = $this->request('GET', '/admin/content/maintenance');
         $this->assertSame(200, $disabledPage['status'], $disabledPage['body']);
-        $this->assertStringContainsString('有効にする', $disabledPage['body']);
+        // When maintenance is OFF the form must carry enabled=1 (the enable action).
+        $this->assertStringContainsString('name="enabled" value="1"', $disabledPage['body']);
     }
 
     public function testCssCanBeUpdatedThroughHtmlForm(): void

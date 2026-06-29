@@ -1,108 +1,207 @@
 {#
-  BeMart admin カスタマイズCSS編集 — EC-CUBE goCss.
+  BeMart admin — Customize CSS editor
+  idea-admin clean-room build (not a port of EC-CUBE css.twig).
 
-  PORT of EC-CUBE 4.3 admin-theme `Content/css.twig`
-  (src/Eccube/Resource/template/admin/Content/css.twig).
+  DATA CONTRACT (src/Resource/Page/Admin/Content/Css.php onGet):
+    form         AdminCssForm  — pre-filled renderer; field: css (textarea, id=form_css)
+    csrfToken    string        — CSRF token from CsrfToken service
 
-  FORM/CRUD page. Extends the admin frame (`admin-base.html.twig`). The
-  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
-  from EC-CUBE; only the dynamic bindings are rebound.
+  ACTION CONTRACT (onPut → doUpdateContentCss):
+    method: POST  action: /admin/content/css?_method=put
+    fields: css (textarea content), csrfToken, mode=content_operation_form
+    on success: 303 redirect to /admin/content/css
 
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md): the
-  Css resource (src/Resource/Page/Admin/Content/Css.php — a thin HTML
-  renderer, see its port header) exposes an
-  {@see \MyVendor\BeMart\Form\AdminCssForm} as `body['form']`. The CSS
-  textarea renders through that real form object:
-    {{ form.input('css')|raw }}     <- real <textarea> w/ id `form_css`
-  `AdminCssForm::init()` ports the field name / id from EC-CUBE's inline
-  `CssController` form (block prefix `form`).
+  LINK: rel=doUpdateContentCss  href=page://self/admin/content/css  method=put
 
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
-   - `form_widget(form._token)` -> BeMart `csrfToken` hidden input.
-   - `has_errors(form.css)` -> always-false here (no domain error on a
-     fresh GET); the `is-invalid` class is omitted.
-   - the ACE editor shell is kept; the hidden textarea carries the
-     EC-CUBE-compatible customize asset boundary readback.
+  idea-admin vocabulary:
+    idea-admin-shell / idea-admin-content (shell landmark, injected by base)
+    idea-admin-page-header / idea-admin-page-title / idea-admin-page-subtitle
+    idea-admin-notice            — info strip
+    idea-admin-panel             — editor card
+    idea-admin-panel__head       — panel header
+    idea-admin-panel__body       — panel content
+    idea-admin-error             — inline validation message
+    idea-admin-toolbar           — fixed bottom save bar
+    idea-admin-toolbar__back     — back navigation
+    idea-admin-toolbar__actions  — primary action cluster
+    idea-admin-action            — button affordance
+    idea-admin-action--primary   — primary CTA (save)
+
+  Per-page additions (block stylesheet):
+    idea-admin-css-editor        — full-height textarea wrapper
+    idea-admin-css-charcount     — live character counter in toolbar
 #}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-content-css' %}
-{% set title = 'CSS管理' %}
+{% set title = 'カスタマイズCSS' %}
 {% set sub_title = 'コンテンツ管理' %}
 
 {% block stylesheet %}
-    <style>
-        .ui-resizable-se {
-            right: -3px;
-            bottom: -3px;
-        }
-    </style>
+<style>
+.idea-admin-css-editor {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+.idea-admin-css-editor textarea {
+  width: 100%;
+  min-height: 480px;
+  height: clamp(480px, 55vh, 720px);
+  resize: vertical;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: #1e1c18;
+  color: #e8dcc8;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", ui-monospace, "Courier New", monospace;
+  font-size: .87rem;
+  line-height: 1.65;
+  padding: .85rem 1rem;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  tab-size: 2;
+  caret-color: var(--idea-wood);
+}
+.idea-admin-css-editor textarea:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .18);
+}
+.idea-admin-css-charcount {
+  font-size: .8rem;
+  color: var(--idea-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.idea-admin-css-hint {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .78rem;
+  color: var(--idea-muted);
+}
+</style>
 {% endblock %}
 
 {% block main %}
-    <form id="content_css_form" method="post" action="/admin/content/css?_method=put">
-        <input type="hidden" id="form__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="mode" value="content_operation_form">
+<form
+  id="content_css_form"
+  method="post"
+  action="/admin/content/css?_method=put"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="mode" value="content_operation_form">
 
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <!-- ページ設定 -->
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8"><span class="card-title">CSS設定</span></div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#pageDetail" aria-expanded="false" aria-controls="pageDetail">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="pageDetail">
-                            <div class="card-body">
-                                <!-- コード -->
-                                <div class="row mb-2">
-                                    <div class="col-2">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="カスタマイズ用CSSファイルを編集します。CSSで記述します。">
-                                            <span>コード</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col-10">
-                                        <div id="editor" style="height: 480px" class="form-control"></div>
-                                        <div style="display: none">{{ form.input('css')|raw }}</div>
-                                        {% if form.error('css') %}<span class="invalid-feedback d-block">{{ form.error('css') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  {# ── Info strip ───────────────────────────────────────────────────────── #}
+  <div class="idea-admin-notice idea-admin-notice--info" role="note">
+    <i class="fa fa-info-circle" aria-hidden="true"></i>
+    <span>
+      ここで記述したCSSはストアフロントの全ページに追加されます。
+      既存のテーマスタイルを上書きするカスタマイズが可能です。
+    </span>
+  </div>
+
+  {# ── Error notice ─────────────────────────────────────────────────────── #}
+  {% if message is defined and message %}
+  <div class="idea-admin-notice idea-admin-notice--error" role="alert">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    {{ message }}
+  </div>
+  {% endif %}
+
+  {# ── Editor panel ─────────────────────────────────────────────────────── #}
+  <div class="idea-admin-panel" style="max-width: var(--idea-admin-content-max);">
+    <div class="idea-admin-panel__head">
+      <h3>CSSコード</h3>
+      <p class="idea-admin-panel__hint">
+        有効なCSS構文を入力してください。
+        保存するとすぐにストアフロントへ反映されます。
+      </p>
+    </div>
+    <div class="idea-admin-panel__body">
+      <div class="idea-admin-css-editor">
+        {{ form.input('css')|raw }}
+        <div class="idea-admin-css-hint">
+          <i class="fa fa-keyboard-o" aria-hidden="true"></i>
+          <span id="css-charcount" class="idea-admin-css-charcount"></span>
+          <span aria-hidden="true">&nbsp;·&nbsp;</span>
+          <kbd style="font-size:.75rem;background:var(--idea-surface-soft);border:1px solid var(--idea-stone);border-radius:4px;padding:.1rem .35rem;">Ctrl</kbd>
+          <kbd style="font-size:.75rem;background:var(--idea-surface-soft);border:1px solid var(--idea-stone);border-radius:4px;padding:.1rem .35rem;">S</kbd>
+          <span>で保存</span>
         </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/page/page-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>CSS管理</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button id="save-button" class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+        {% if form.error('css') %}
+        <div class="idea-admin-error" role="alert">{{ form.error('css') }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ── Fixed bottom toolbar ─────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="toolbar" aria-label="ページアクション">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/content/js" rel="goContentJs">
+        <i class="fa fa-file-code-o" aria-hidden="true"></i>
+        JavaScript管理へ
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button
+        id="css-save-btn"
+        class="idea-admin-action idea-admin-action--primary"
+        type="submit"
+      >
+        <i class="fa fa-save" aria-hidden="true"></i>
+        保存する
+      </button>
+    </div>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  var textarea = document.getElementById('form_css');
+  var countEl  = document.getElementById('css-charcount');
+  var saveBtn  = document.getElementById('css-save-btn');
+  var form     = document.getElementById('content_css_form');
+
+  function updateCount() {
+    if (!textarea || !countEl) return;
+    var n = textarea.value.length;
+    countEl.textContent = n.toLocaleString('ja-JP') + ' 文字';
+  }
+
+  if (textarea) {
+    textarea.addEventListener('input', updateCount);
+    updateCount();
+
+    /* Indent with Tab key (2 spaces) */
+    textarea.addEventListener('keydown', function (e) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        var start = textarea.selectionStart;
+        var end   = textarea.selectionEnd;
+        textarea.value =
+          textarea.value.slice(0, start) + '  ' + textarea.value.slice(end);
+        textarea.selectionStart = textarea.selectionEnd = start + 2;
+        updateCount();
+      }
+    });
+  }
+
+  /* Ctrl+S / Cmd+S → submit */
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      if (form && saveBtn && !saveBtn.disabled) {
+        form.submit();
+      }
+    }
+  });
+})();
+</script>
 {% endblock %}

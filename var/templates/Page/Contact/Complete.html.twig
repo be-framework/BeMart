@@ -1,46 +1,46 @@
-{#
-  BeMart Contact-complete page — EC-CUBE goContactComplete.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}お問い合わせ完了 | IDEA STORE{% endblock %}
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><a href="/contact">お問い合わせ</a><span>/</span><span>完了</span>
+</nav>
 
-  PORT of EC-CUBE 4.3 default-theme `Contact/complete.twig`
-  (src/Eccube/Resource/template/default/Contact/complete.twig).
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-contact-complete-title">
+  <div>
+    <p class="idea-eyebrow">Inquiry sent</p>
+    <h1 id="idea-contact-complete-title" class="idea-title idea-title--compact">お問い合わせを受け付けました</h1>
+    <p class="idea-muted">内容を確認のうえ、担当者よりご連絡差し上げます。確認メールをお送りしましたのでご確認ください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Inquiry</span>
+    <strong>IDEA STORE</strong>
+    <small>受付完了</small>
+  </div>
+</section>
 
-  DATA page (no form) — the data-page recipe (see var/templates/
-  README.md). EC-CUBE shows this static confirmation after a successful
-  `doSubmitContact`. Markup skeleton, `ec-role` / `ec-pageHeader` /
-  `ec-contactCompleteRole` / `ec-reportHeading` / `ec-off3Grid` /
-  `ec-text-ac` / `ec-reportDescription` / `ec-off4Grid` classes + the
-  block structure are kept verbatim from EC-CUBE.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml. The
-     `front.contact.complete_message__body` value is a single-line YAML
-     literal; EC-CUBE prints it raw (no `nl2br`), so the port substitutes
-     the literal verbatim.
-   - `canonical-url 'homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'other_page' %}
-{% set route = 'contact-complete' %}
-{% set title = 'お問い合わせ(完了)' %}
-
-{% block main %}
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1>お問い合わせ(完了)</h1>
-        </div>
+<section class="idea-container idea-section idea-section--tight">
+  <div class="idea-checkout-panel" role="region" aria-label="受付情報">
+    <div class="idea-panel-head">
+      <div>
+        <p class="idea-eyebrow">Receipt</p>
+        <h2 class="idea-section-title">受付完了</h2>
+      </div>
     </div>
-    <div class="ec-contactCompleteRole">
-        <div class="ec-reportHeading">
-            <h2>お問い合わせ内容の送信が完了いたしました</h2>
-        </div>
-        <div class="ec-off3Grid ec-text-ac">
-            <div class="ec-off3Grid__cell">
-                <p class="ec-reportDescription">万一、ご確認メールが届かない場合は、トラブルの可能性もありますので大変お手数ではございますがもう一度お問い合わせいただくか、お電話にてお問い合わせくださいませ。</p>
-            </div>
-        </div>
-        <div class="ec-off4Grid">
-            <div class="ec-off4Grid__cell"><a class="ec-blockBtn--cancel" href="/">トップページへ</a></div>
-        </div>
+
+    <p>お問い合わせありがとうございます。内容を確認のうえ、折り返しご連絡いたします。</p>
+
+    {% if ticketId is defined and ticketId %}
+    <dl class="idea-spec-list" aria-label="受付番号">
+      <div class="idea-spec-row">
+        <dt>受付番号</dt>
+        <dd><strong>{{ ticketId }}</strong></dd>
+      </div>
+    </dl>
+    {% endif %}
+
+    <div class="idea-form-actions" style="margin-top: 2rem;">
+      <a class="idea-button" href="/" rel="goTop">トップページへ戻る</a>
     </div>
+  </div>
+</section>
 {% endblock %}

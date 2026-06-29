@@ -1,295 +1,397 @@
-{#
-  BeMart admin CSV config — EC-CUBE Setting/Shop/csv.twig.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-csv-config' %}
-{% set title = 'CSV出力項目設定' %}
+{% set title = 'CSV出力設定' %}
 {% set sub_title = '店舗設定' %}
 
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/CsvConfig.php onGet):
+    form             object — AdminCsvConfigForm (csvType select, csvOutput/csvNotOutput multiselect)
+    csvType          int    — 1=商品 2=会員 3=受注 4=配送
+    csrfToken        string
+    outputColumns    array<string,string>  — {columnKey: label}  currently enabled
+    notOutputColumns array<string,string>  — {columnKey: label}  currently disabled
+
+  POST CONTRACT (onPost):
+    csvType                       int
+    csrfToken                     string
+    columns[N][columnName]        string  — field key
+    columns[N][enabled]           0|1     — 1=output
+    columns[N][sortNo]            int     — 1-based position
+
+  LINKS:
+    doUpdateCsv   POST page://self/admin/csv-config
+    goTop         GET  page://self/admin
+    goExportProduct GET page://self/admin/product-csv
+
+  DESIGN: idea-admin-* vocabulary (public/assets/idea-store/css/idea-admin.css)
+  Per-page additions in block stylesheet: idea-admin-col-* namespace.
+  JS: vanilla only, no jQuery/Bootstrap/EC-CUBE bundles.
+  Drag-and-drop single-pane: all columns in one sortable list, toggle
+  enabled/disabled inline. Superior to dual-listbox: all columns always
+  visible, order changed by drag rather than repeated button clicks.
+#}
+
+{% block stylesheet %}
+<style>
+/* ── CSV column editor extras (idea-admin-col-* namespace) ──────────────── */
+
+.idea-admin-col-type-bar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.idea-admin-col-type-bar label {
+  font-size: .84rem;
+  font-weight: 700;
+  color: var(--idea-muted);
+  white-space: nowrap;
+}
+.idea-admin-col-type-bar select {
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: var(--idea-surface);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: .88rem;
+  padding: .42rem .7rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.idea-admin-col-type-bar select:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .15);
+}
+
+/* Column list */
+.idea-admin-col-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: .45rem;
+}
+
+.idea-admin-col-row {
+  display: grid;
+  grid-template-columns: 1.8rem 1fr auto;
+  align-items: center;
+  gap: .6rem;
+  padding: .6rem .75rem;
+  background: var(--idea-surface);
+  border: 1px solid rgba(205, 191, 170, .5);
+  border-radius: var(--idea-admin-radius-input);
+  cursor: grab;
+  transition: background .12s, border-color .12s, box-shadow .12s, opacity .15s;
+  user-select: none;
+}
+.idea-admin-col-row:active { cursor: grabbing; }
+.idea-admin-col-row.is-dragging {
+  box-shadow: 0 8px 24px rgba(41, 37, 31, .14);
+  border-color: var(--idea-stone-2);
+  z-index: 10;
+  opacity: .88;
+}
+.idea-admin-col-row.is-over {
+  border-color: var(--idea-olive);
+  background: rgba(82, 107, 85, .06);
+}
+.idea-admin-col-row.is-disabled {
+  opacity: .5;
+  background: var(--idea-surface-soft);
+}
+
+/* Drag handle */
+.idea-admin-col-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--idea-stone-2);
+  font-size: .85rem;
+  cursor: grab;
+}
+.idea-admin-col-handle:active { cursor: grabbing; }
+
+/* Column label */
+.idea-admin-col-label {
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--idea-ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Toggle switch */
+.idea-admin-col-toggle {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.idea-admin-col-toggle input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.idea-admin-col-toggle-track {
+  width: 2.2rem;
+  height: 1.2rem;
+  border-radius: 999px;
+  background: rgba(205, 191, 170, .6);
+  border: 1px solid var(--idea-stone);
+  position: relative;
+  cursor: pointer;
+  transition: background .18s, border-color .18s;
+  flex: 0 0 auto;
+}
+.idea-admin-col-toggle input:checked + .idea-admin-col-toggle-track {
+  background: var(--idea-olive);
+  border-color: var(--idea-olive);
+}
+.idea-admin-col-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: .1rem;
+  left: .1rem;
+  width: .88rem;
+  height: .88rem;
+  border-radius: 50%;
+  background: var(--idea-surface);
+  box-shadow: 0 1px 3px rgba(41, 37, 31, .18);
+  transition: transform .18s;
+}
+.idea-admin-col-toggle input:checked + .idea-admin-col-toggle-track::after {
+  transform: translateX(.95rem);
+}
+
+/* Hint bar below list */
+.idea-admin-col-hint {
+  margin-top: .7rem;
+  font-size: .78rem;
+  color: var(--idea-muted);
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+</style>
+{% endblock %}
+
 {% block javascript %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function byId(id) {
-                return document.getElementById(id);
-            }
+<script>
+(function () {
+  'use strict';
 
-            function moveSelected(fromId, toId) {
-                var from = byId(fromId);
-                var to = byId(toId);
-                if (!from || !to) {
-                    return;
-                }
+  /* ── CSV type switcher ────────────────────────────────────────────────── */
+  var typeSelect = document.getElementById('csv-type-select');
+  if (typeSelect) {
+    typeSelect.addEventListener('change', function () {
+      location.href = '/admin/csv-config?csvType=' + encodeURIComponent(this.value);
+    });
+  }
 
-                Array.prototype.slice.call(from.selectedOptions).forEach(function(option) {
-                    option.selected = false;
-                    to.appendChild(option);
-                });
-            }
+  /* ── Drag-and-drop sortable list ──────────────────────────────────────── */
+  var list = document.getElementById('col-sortable-list');
+  if (!list) { return; }
 
-            function moveAll(fromId, toId) {
-                var from = byId(fromId);
-                var to = byId(toId);
-                if (!from || !to) {
-                    return;
-                }
+  var dragged = null;
 
-                Array.prototype.slice.call(from.options).forEach(function(option) {
-                    option.selected = false;
-                    to.appendChild(option);
-                });
-            }
+  function getRows() {
+    return Array.prototype.slice.call(list.querySelectorAll('.idea-admin-col-row[data-col]'));
+  }
 
-            function bind(id, callback) {
-                var element = byId(id);
-                if (element) {
-                    element.addEventListener('click', callback);
-                }
-            }
+  list.addEventListener('dragstart', function (e) {
+    var row = e.target.closest('.idea-admin-col-row[data-col]');
+    if (!row) { return; }
+    dragged = row;
+    row.classList.add('is-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
 
-            bind('add', function() { moveSelected('csv-not-output', 'csv-output'); });
-            bind('add-all', function() { moveAll('csv-not-output', 'csv-output'); });
-            bind('remove', function() { moveSelected('csv-output', 'csv-not-output'); });
-            bind('remove-all', function() { moveAll('csv-output', 'csv-not-output'); });
+  list.addEventListener('dragend', function () {
+    if (dragged) { dragged.classList.remove('is-dragging'); }
+    dragged = null;
+    getRows().forEach(function (r) { r.classList.remove('is-over'); });
+  });
 
-            Array.prototype.slice.call(document.querySelectorAll('.move')).forEach(function(button) {
-                button.addEventListener('click', function() {
-                    var output = byId('csv-output');
-                    if (!output) {
-                        return;
-                    }
+  list.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    var row = e.target.closest('.idea-admin-col-row[data-col]');
+    if (!row || row === dragged) { return; }
+    getRows().forEach(function (r) { r.classList.remove('is-over'); });
+    row.classList.add('is-over');
+  });
 
-                    var selected = Array.prototype.slice.call(output.selectedOptions);
-                    if (selected.length === 0) {
-                        return;
-                    }
+  list.addEventListener('dragleave', function (e) {
+    var row = e.target.closest('.idea-admin-col-row[data-col]');
+    if (row) { row.classList.remove('is-over'); }
+  });
 
-                    if (button.dataset.value === 'up') {
-                        selected.forEach(function(option) {
-                            if (option.previousElementSibling) {
-                                output.insertBefore(option, option.previousElementSibling);
-                            }
-                        });
-                    } else {
-                        selected.reverse().forEach(function(option) {
-                            if (option.nextElementSibling) {
-                                output.insertBefore(option.nextElementSibling, option);
-                            }
-                        });
-                    }
-                });
-            });
+  list.addEventListener('drop', function (e) {
+    e.preventDefault();
+    var target = e.target.closest('.idea-admin-col-row[data-col]');
+    if (!target || !dragged || target === dragged) { return; }
+    /* Insert dragged before target */
+    list.insertBefore(dragged, target);
+    target.classList.remove('is-over');
+    updateHiddenFields();
+  });
 
-            Array.prototype.slice.call(document.querySelectorAll('.move-most')).forEach(function(button) {
-                button.addEventListener('click', function() {
-                    var output = byId('csv-output');
-                    if (!output) {
-                        return;
-                    }
+  /* ── Toggle: grey out row when disabled ─────────────────────────────── */
+  list.addEventListener('change', function (e) {
+    var cb = e.target;
+    if (cb.type !== 'checkbox') { return; }
+    var row = cb.closest('.idea-admin-col-row[data-col]');
+    if (!row) { return; }
+    if (cb.checked) {
+      row.classList.remove('is-disabled');
+    } else {
+      row.classList.add('is-disabled');
+    }
+    updateHiddenFields();
+  });
 
-                    var selected = Array.prototype.slice.call(output.selectedOptions);
-                    if (selected.length === 0) {
-                        return;
-                    }
+  /* ── Build hidden columns[] fields on submit ─────────────────────────── */
+  function updateHiddenFields() {
+    var container = document.getElementById('col-hidden-fields');
+    if (!container) { return; }
+    container.innerHTML = '';
+    getRows().forEach(function (row, index) {
+      var col = row.dataset.col;
+      var cb  = row.querySelector('input[type="checkbox"]');
+      var enabled = cb && cb.checked ? '1' : '0';
+      addHidden(container, 'columns[' + index + '][columnName]', col);
+      addHidden(container, 'columns[' + index + '][enabled]',    enabled);
+      addHidden(container, 'columns[' + index + '][sortNo]',     String(index + 1));
+    });
+  }
 
-                    if (button.dataset.value === 'top') {
-                        selected.reverse().forEach(function(option) {
-                            output.insertBefore(option, output.firstChild);
-                        });
-                    } else {
-                        selected.forEach(function(option) {
-                            output.appendChild(option);
-                        });
-                    }
-                });
-            });
+  function addHidden(container, name, value) {
+    var input = document.createElement('input');
+    input.type  = 'hidden';
+    input.name  = name;
+    input.value = value;
+    container.appendChild(input);
+  }
 
-            var csvType = byId('csv-type');
-            if (csvType) {
-                csvType.addEventListener('change', function() {
-                    var csvType = this.value;
-                    location.href = '/admin/csv-config?csvType=' + encodeURIComponent(csvType);
-                });
-            }
+  var form = document.getElementById('csv-config-form');
+  if (form) {
+    form.addEventListener('submit', function () {
+      updateHiddenFields();
+    });
+  }
 
-            var form = byId('csv-form');
-            if (form) {
-                form.addEventListener('submit', function() {
-                    selectAllOptions('csv-not-output');
-                    selectAllOptions('csv-output');
-                    var existing = byId('csv-columns');
-                    if (existing) {
-                        existing.remove();
-                    }
-
-                    var columns = document.createElement('div');
-                    columns.id = 'csv-columns';
-                    columns.hidden = true;
-                    var sortNo = 0;
-                    appendColumns(columns, 'csv-output', sortNo, true);
-                    sortNo += optionCount('csv-output');
-                    appendColumns(columns, 'csv-not-output', sortNo, false);
-                    form.appendChild(columns);
-                });
-            }
-
-            function selectAllOptions(selectId) {
-                var select = byId(selectId);
-                if (!select) {
-                    return;
-                }
-
-                Array.prototype.slice.call(select.options).forEach(function(option) {
-                    option.selected = true;
-                });
-            }
-
-            function optionCount(selectId) {
-                var select = byId(selectId);
-                return select ? select.options.length : 0;
-            }
-
-            function appendColumns(container, selectId, offset, enabled) {
-                var select = byId(selectId);
-                if (!select) {
-                    return;
-                }
-
-                Array.prototype.slice.call(select.options).forEach(function(option, index) {
-                    appendColumn(container, offset + index, option.value, enabled);
-                });
-            }
-
-            function appendColumn(container, index, columnName, enabled) {
-                appendHidden(container, 'columns[' + index + '][columnName]', columnName);
-                appendHidden(container, 'columns[' + index + '][enabled]', enabled ? '1' : '0');
-                appendHidden(container, 'columns[' + index + '][sortNo]', String(index + 1));
-            }
-
-            function appendHidden(container, name, value) {
-                var input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = name;
-                input.value = value;
-                container.appendChild(input);
-            }
-        });
-    </script>
+  /* Initialise hidden fields on load so a plain submit without drag works */
+  updateHiddenFields();
+}());
+</script>
 {% endblock %}
 
 {% block main %}
-    <form id="csv-form" method="post" action="/admin/csv-config">
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="各種のデータをCSVで出力できます。出力したい項目をこちらで設定することが可能です。">
-                                <span>CSV出力項目</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-4 justify-content-between">
-                                <div class="col-2">
-                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="設定したいCSVの種類を指定してください。">
-                                        <span>CSV種別</span>
-                                        <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    {{ form.input('csvType')|raw }}
-                                </div>
-                                <div class="col"></div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-4">
-                                    <div class="mb-3">
-                                        <label for="csv-not-output">出力しない項目</label>
-                                        {{ form.input('csvNotOutput')|raw }}
-                                    </div>
-                                </div>
-                                <div class="col-2 align-self-center">
-                                    <div class="row mb-2">
-                                        <div class="col text-center"><span>操作項目</span></div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col text-center">
-                                            <div class="btn btn-ec-regular w-100" id="add"><i class="fa fa-arrow-right" aria-hidden="true"></i><span>&nbsp;出力</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col text-center">
-                                            <div class="btn btn-ec-regular w-100" id="remove"><i class="fa fa-arrow-left" aria-hidden="true"></i><span>&nbsp;解除</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col text-center">
-                                            <div class="btn btn-ec-regular w-100" id="add-all"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i><span>&nbsp;すべて出力</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col text-center">
-                                            <div class="btn btn-ec-regular w-100" id="remove-all"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i><span>&nbsp;すべて解除</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="mb-3">
-                                        <label for="csv-output">出力する項目</label>
-                                        {{ form.input('csvOutput')|raw }}
-                                    </div>
-                                </div>
-                                <div class="col-2 align-self-center">
-                                    <div class="row mb-2">
-                                        <div class="col text-center"><span>項目順序</span></div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col text-center">
-                                            <div class="btn btn-ec-regular w-100 move" data-value="up"><i class="fa fa-arrow-up" aria-hidden="true"></i><span>&nbsp;ひとつ上へ</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col text-center">
-                                            <div class="btn btn-ec-regular w-100 move" data-value="down"><i class="fa fa-arrow-down" aria-hidden="true"></i><span>&nbsp;ひとつ下へ</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col text-center">
-                                            <div class="btn btn-ec-regular w-100 move-most" data-value="top"><i class="fa fa-arrow-circle-up" aria-hidden="true"></i><span>&nbsp;一番上へ</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col text-center">
-                                            <div class="btn btn-ec-regular w-100 move-most" data-value="bottom"><i class="fa fa-arrow-circle-down" aria-hidden="true"></i><span>&nbsp;一番下へ</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <p></p>
-                            任意の項目を押して選択してから［項目操作］ボタンで移動し、CSV出力する項目を設定してください。<br>
-                            出力する項目の順序は［項目順序］ボタンで変更することができます。<br>
-                            複数の項目を選択する場合はctrlキー（Macの場合はcommandキー）を押しながら項目を押します。shiftキーを押しながら選択すると範囲選択ができます。
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem"></div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+
+{# ── CSV type selector ──────────────────────────────────────────────────── #}
+<div class="idea-admin-col-type-bar">
+  <label for="csv-type-select">CSV 種別</label>
+  <select id="csv-type-select" aria-label="CSV 種別を選択">
+    <option value="1"{% if csvType == 1 %} selected{% endif %}>商品 CSV</option>
+    <option value="2"{% if csvType == 2 %} selected{% endif %}>会員 CSV</option>
+    <option value="3"{% if csvType == 3 %} selected{% endif %}>受注 CSV</option>
+    <option value="4"{% if csvType == 4 %} selected{% endif %}>配送 CSV</option>
+  </select>
+</div>
+
+{# ── Main form ──────────────────────────────────────────────────────────── #}
+<form id="csv-config-form" method="post" action="/admin/csv-config" novalidate>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csvType"   value="{{ csvType|default(3) }}">
+
+  {# Hidden fields are written by JS on submit (or on each drag/toggle) #}
+  <div id="col-hidden-fields" aria-hidden="true"></div>
+
+  <div class="idea-admin-panel">
+    <div class="idea-admin-panel__head">
+      <h3>
+        <i class="fa fa-table fa-fw" aria-hidden="true"></i>
+        出力カラム設定
+      </h3>
+      <p class="idea-admin-panel__hint">ドラッグで並べ替え、トグルで出力のオン/オフ</p>
+    </div>
+    <div class="idea-admin-panel__body">
+
+      {# Build a combined ordered list: enabled columns first (sorted by existing order), then disabled #}
+      <ul id="col-sortable-list" class="idea-admin-col-list" aria-label="CSV 出力カラム一覧">
+
+        {# Enabled columns (output) #}
+        {% for key, label in outputColumns %}
+          <li class="idea-admin-col-row"
+              data-col="{{ key|e }}"
+              draggable="true"
+              aria-label="{{ label|e }}">
+            <span class="idea-admin-col-handle" aria-hidden="true">
+              <i class="fa fa-grip-vertical"></i>
+            </span>
+            <span class="idea-admin-col-label">{{ label }}</span>
+            <label class="idea-admin-col-toggle" title="出力する">
+              <input type="checkbox" checked aria-label="{{ label|e }} を出力する">
+              <span class="idea-admin-col-toggle-track"></span>
+            </label>
+          </li>
+        {% endfor %}
+
+        {# Disabled columns (not output) #}
+        {% for key, label in notOutputColumns %}
+          <li class="idea-admin-col-row is-disabled"
+              data-col="{{ key|e }}"
+              draggable="true"
+              aria-label="{{ label|e }}（出力しない）">
+            <span class="idea-admin-col-handle" aria-hidden="true">
+              <i class="fa fa-grip-vertical"></i>
+            </span>
+            <span class="idea-admin-col-label">{{ label }}</span>
+            <label class="idea-admin-col-toggle" title="出力しない">
+              <input type="checkbox" aria-label="{{ label|e }} を出力する">
+              <span class="idea-admin-col-toggle-track"></span>
+            </label>
+          </li>
+        {% endfor %}
+
+      </ul>
+
+      <p class="idea-admin-col-hint">
+        <i class="fa fa-info-circle" aria-hidden="true"></i>
+        行をドラッグして出力順を変更できます。トグルをオンにしたカラムのみ CSV に出力されます。
+      </p>
+
+    </div>{# /.idea-admin-panel__body #}
+  </div>{# /.idea-admin-panel #}
+
+  {# ── Bottom toolbar ──────────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin" rel="goTop">
+        <i class="fa fa-chevron-left fa-fw" aria-hidden="true"></i>
+        ダッシュボードに戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <a href="/admin/product-csv" rel="goExportProduct" class="idea-admin-action">
+        <i class="fa fa-download fa-fw" aria-hidden="true"></i>
+        商品 CSV 出力
+      </a>
+      <button type="submit" class="idea-admin-action idea-admin-action--primary">
+        <i class="fa fa-save fa-fw" aria-hidden="true"></i>
+        保存
+      </button>
+    </div>
+  </div>
+
+</form>
+
 {% endblock %}

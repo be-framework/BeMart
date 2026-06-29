@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}IDEA STORE{% endblock %}</title>
+  <meta name="description" content="暮らしのイデアを、見つけよう。住まいと、自分時間を心地よく。">
+  <link rel="icon" href="/assets/idea-store/logo/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/idea-store/css/idea-store.css">
+</head>
+<body class="idea-store">
+  {% include 'IdeaStore/component/header.html.twig' %}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  {% include 'IdeaStore/component/footer.html.twig' %}
+</body>
+</html>
