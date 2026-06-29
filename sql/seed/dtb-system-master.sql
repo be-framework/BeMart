@@ -1,9 +1,9 @@
--- EC-CUBE system master rows required after schema + mtb_* initialization.
+-- System master rows required after schema + mtb_* initialization.
 --
 -- These dtb_* rows are application configuration masters, not Web-created
 -- business data such as products, customers, carts, orders, shippings, or
--- favorites. They provide the stock admin affordance targets that EC-CUBE
--- expects to exist in a freshly installed shop.
+-- favorites. They provide the stock admin affordance targets that a freshly
+-- installed shop requires.
 
 INSERT INTO `dtb_member`
     (`id`, `work_id`, `authority_id`, `creator_id`, `name`, `department`, `login_id`, `password`, `salt`, `sort_no`, `two_factor_auth_key`, `two_factor_auth_enabled`, `create_date`, `update_date`, `login_date`, `discriminator_type`)
