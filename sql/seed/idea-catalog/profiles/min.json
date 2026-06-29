@@ -1,0 +1,9 @@
+{
+  "profile": "min",
+  "productCount": 120,
+  "reviewCount": 500,
+  "categoryCount": 20,
+  "skuMin": 1,
+  "skuMax": 4,
+  "seed": 20260609
+}

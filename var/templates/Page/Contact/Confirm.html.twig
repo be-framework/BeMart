@@ -1,118 +1,62 @@
-{#
-  BeMart Contact-confirm page — EC-CUBE goContactConfirm.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}お問い合わせ内容の確認 | IDEA STORE{% endblock %}
 
-  PORT of EC-CUBE 4.3 default-theme `Contact/confirm.twig`
-  (src/Eccube/Resource/template/default/Contact/confirm.twig).
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><a href="/contact">お問い合わせ</a><span>/</span><span>確認</span>
+</nav>
 
-  FORM page (Ray.WebFormModule — the form-page recipe, see
-  var/templates/README.md). The inquiry-confirm screen re-shows the
-  submitted inquiry as plain text AND carries it forward as HIDDEN inputs
-  so the final "送信する" submit re-posts the inquiry to
-  `doSubmitContact`. Markup skeleton, `ec-contactConfirmRole` /
-  `ec-pageHeader` / `ec-off1Grid` / `ec-borderedDefs` /
-  `ec-RegisterRole__actions` / `ec-off4Grid` classes + the <dl>/<dt>/<dd>
-  definition-list structure are kept verbatim from EC-CUBE.
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-contact-confirm-title">
+  <div>
+    <p class="idea-eyebrow">Confirm your inquiry</p>
+    <h1 id="idea-contact-confirm-title" class="idea-title idea-title--compact">お問い合わせ内容の確認</h1>
+    <p class="idea-muted">以下の内容でよろしければ「送信する」を押してください。修正する場合は「戻る」を押してください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Inquiry review</span>
+    <strong>IDEA STORE</strong>
+    <small>内容を確認してから送信してください</small>
+  </div>
+</section>
 
-  The hidden carriers are rendered through a real `ContactConfirmForm`
-  (an AbstractForm whose every field is declared `hidden`) exposed by the
-  Confirm resource as `body.form`:
+<section class="idea-container idea-section">
+  <form class="idea-checkout-panel" method="post" action="/contact" novalidate>
+    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
-    {{ form.input('contactEmail')|raw }}   <- real <input type="hidden">
-
-  EC-CUBE renders the same hidden inputs through the Symfony FormView
-  (`form_widget(form.email, { type : 'hidden' })`); the render-diff test
-  stubs EC-CUBE's `form_widget` to delegate to the SAME ContactConfirmForm
-  so the hidden inputs diff to ZERO.
-
-  MISSING-FIELD NOTE — EC-CUBE's contact-confirm screen re-shows MORE
-  fields than BeMart's Contact resource carries. EC-CUBE re-shows name /
-  kana / address (postal_code / pref / addr01 / addr02) / phone_number /
-  email / contents; BeMart's `SubmitContactInput` (and the ALPS
-  `ContactForm` descriptor) model ONLY contactName01 / contactName02 /
-  contactEmail / contactContents. Per the Phase-3 recipe a template wave
-  does NOT enrich the Input/ALPS — the kana / address / phone <dl> rows
-  are therefore OMITTED from this port (never invented) and enumerated as
-  an EC-CUBE-only missing-body-field residual in the render test. Flagged
-  for a follow-up vertical-slice enrichment.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `form_label` — Symfony FormView <label>; BeMart authors the plain
-     `<label class="ec-label">ja</label>` carrying the same label text.
-   - `form.<field>.vars.data` — the submitted value re-shown as plain
-     text. The Confirm resource is a thin pure renderer with no submitted
-     payload, so the body carries no field values and the value cells
-     render empty. MISSING BODY FIELD residual — flagged for a follow-up
-     vertical slice.
-   - `form._token` — Symfony CSRF widget; kept as a hidden input with an
-     empty value (BeMart's html context has no CSRF widget).
-   - the entity-extension `{% for f in form|filter(...) %}` loop is
-     OMITTED (a core install has no entity extensions — emits nothing).
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'other_page' %}
-{% set route = 'contact-confirm' %}
-{% set title = 'お問い合わせ' %}
-
-{% block main %}
-    <div class="ec-contactConfirmRole">
-        <div class="ec-pageHeader">
-            <h1>お問い合わせ</h1>
-        </div>
-        <div class="ec-off1Grid">
-            <div class="ec-off1Grid__cell">
-                <form method="post" action="/contact" class="h-adr">
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                    <p>{{ "内容によっては回答をさしあげるのにお時間をいただくこともございます。\nまた、休業日は翌営業日以降の対応となりますのでご了承ください。\n"|nl2br }}</p>
-                    <div class="ec-borderedDefs">
-                        <dl>
-                            <dt>
-                                <label class="ec-label">お名前</label>
-                            </dt>
-                            <dd>
-                                {{ contactName01|default('') }} {{ contactName02|default('') }}
-                                {{ form.input('contactName01')|raw }}
-                                {{ form.input('contactName02')|raw }}
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                <label class="ec-label">メールアドレス</label>
-                            </dt>
-                            <dd>
-                                {{ contactEmail|default('') }}
-                                {{ form.input('contactEmail')|raw }}
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                <label class="ec-label">お問い合わせ内容</label>
-                            </dt>
-                            <dd>
-                                {{ contactContents|default('')|nl2br }}
-                                {{ form.input('contactContents')|raw }}
-                            </dd>
-                        </dl>
-                    </div>
-                    <div class="ec-RegisterRole__actions">
-                        <div class="ec-off4Grid">
-                            <div class="ec-off4Grid__cell">
-                                <button type="submit"
-                                        class="ec-blockBtn--action"
-                                        name="mode"
-                                        value="complete">送信する
-                                </button>
-                                <button type="submit"
-                                        class="ec-blockBtn--cancel"
-                                        name="mode"
-                                        value="back">戻る
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <div class="idea-panel-head">
+      <div>
+        <p class="idea-eyebrow">Your details</p>
+        <h2 class="idea-section-title">お問い合わせ内容</h2>
+      </div>
     </div>
+
+    <dl class="idea-info-list">
+      <div>
+        <dt>お名前</dt>
+        <dd>{{ contactName01|default('') }}{% if contactName02|default('') %} {{ contactName02 }}{% endif %}</dd>
+      </div>
+      <div>
+        <dt>メールアドレス</dt>
+        <dd>{{ contactEmail|default('') }}</dd>
+      </div>
+      <div>
+        <dt>お問い合わせ内容</dt>
+        <dd>{{ contactContents|default('')|nl2br }}</dd>
+      </div>
+    </dl>
+
+    {# Hidden carriers: forward submitted values to doSubmitContact #}
+    {% if form is defined %}
+      {{ form.input('contactName01')|raw }}
+      {{ form.input('contactName02')|raw }}
+      {{ form.input('contactEmail')|raw }}
+      {{ form.input('contactContents')|raw }}
+    {% endif %}
+
+    <div class="idea-form-actions">
+      <button class="idea-button idea-button--wide" type="submit" name="mode" value="complete">送信する</button>
+      <button class="idea-button idea-button--wide idea-button--light" type="submit" name="mode" value="back">戻る</button>
+    </div>
+  </form>
+</section>
 {% endblock %}

@@ -85,10 +85,10 @@ final class AdminBaseInfoGetResourceSqlTest extends AbstractResourceSqlTestCase
         // so we can assert against the SAME constants the Fake-backed
         // sibling sees via `$this->storage->item()`. The two suites
         // therefore observe the same body shape on a first read.
-        $this->assertSame('EC-CUBE SHOP', $ro->body['shopName']);
-        $this->assertSame('株式会社EC-CUBE', $ro->body['companyName']);
+        $this->assertSame('BeMart', $ro->body['shopName']);
+        $this->assertSame('株式会社BeMart', $ro->body['companyName']);
         $this->assertSame(27, $ro->body['pref']);
-        $this->assertSame('ようこそ、EC-CUBE SHOP へ。', $ro->body['shopMessage']);
+        $this->assertSame('ようこそ、BeMart へ。', $ro->body['shopMessage']);
         // changed flag (write-only field) MUST NOT leak into the read body.
         $this->assertArrayNotHasKey('changed', $ro->body);
     }

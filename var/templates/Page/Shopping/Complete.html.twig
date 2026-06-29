@@ -1,109 +1,60 @@
-{#
-  BeMart Shopping complete page — EC-CUBE goShoppingComplete.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}ご注文完了 | IDEA STORE{% endblock %}
+{% block content %}
 
-  PORT of EC-CUBE 4.3 default-theme `Shopping/complete.twig`
-  (src/Eccube/Resource/template/default/Shopping/complete.twig).
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><a href="/cart">Cart</a><span>/</span><span>Complete</span>
+</nav>
 
-  DATA page (see var/templates/README.md). Markup skeleton, the
-  `ec-role` / `ec-cartRole` / `ec-progress` / `ec-cartCompleteRole` /
-  `ec-reportHeading` / `ec-off3Grid` / `ec-off4Grid` classes and the
-  block structure are kept verbatim from EC-CUBE.
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-complete-title">
+  <div>
+    <p class="idea-eyebrow">Order placed</p>
+    <h1 id="idea-complete-title" class="idea-title idea-title--compact">ご注文ありがとう<br>ございます。</h1>
+    <p class="idea-muted">ご注文を承りました。確認メールをお送りしていますのでご確認ください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Order status</span>
+    <strong>完了</strong>
+    {% if orderNo is defined and orderNo %}
+      <small>No. {{ orderNo }}</small>
+    {% else %}
+      <small>Completed</small>
+    {% endif %}
+  </div>
+</section>
 
-  Phase 3 ENRICHMENT — the Complete resource
-  (src/Resource/Page/Shopping/Complete.php) resolves the finalized order
-  by the `orderNo` the post-checkout redirect carries, so the body now
-  exposes `orderNo` and `completeMessage`. The `{% if Order.id %}`
-  order-number block and the `Order.complete_message` block are wired to
-  those body fields (see var/templates/README.md).
+<section class="idea-container idea-checkout-progress" aria-label="購入ステップ">
+  <span><b>1</b>カート</span>
+  <span><b>2</b>購入入口</span>
+  <span><b>3</b>ご注文手続き</span>
+  <span><b>4</b>内容確認</span>
+  <span class="is-active"><b>5</b>完了</span>
+</section>
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `is_granted('ROLE_USER')` — EC-CUBE auth-state runtime. The
-     customer-info progress step is shown only for anonymous purchases;
-     BeMart's html context has no auth state, so the step is OMITTED
-     (the member-checkout path, where it does not render either). The
-     step numbering ({{ step }}) advances accordingly — identical to
-     EC-CUBE's member-checkout output.
-   - `Order.id` — EC-CUBE gates the order-number block on the order
-     entity existing; BeMart's body carries `orderNo` directly, so the
-     port gates on `orderNo` being non-empty instead (an empty string
-     for a direct visit / unknown order — the block stays empty, exactly
-     as EC-CUBE renders it for a missing Order).
-   - `Order.complete_message` — the per-order custom complete message.
-     BeMart's finalized-order header carries no plugin-appended message
-     (CheckoutCompleted produces an empty string in Pilot 5), so the
-     body's `completeMessage` is `''` and the block renders empty,
-     matching EC-CUBE's plugin-less output.
-
-  MISSING BODY FIELD follow-ups:
-   - `hasNextCart` — whether a second cart remains. Absent from the
-     body; the port renders the `goTop` branch (the common case — no
-     remaining cart), recorded as a residual in the render test.
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'cart_page' %}
-{% set route = 'shopping-complete' %}
-{% set title = 'ご注文完了' %}
-
-{% block main %}
-<div class="ec-role">
-    <div class="ec-pageHeader">
-        <h1>ご注文完了</h1>
+<section class="idea-container idea-section" aria-labelledby="idea-complete-message-heading">
+  <div class="idea-checkout-panel" style="max-width: 48rem; margin: 0 auto;">
+    <div class="idea-panel-head">
+      <div>
+        <p class="idea-eyebrow">Next steps</p>
+        <h2 id="idea-complete-message-heading" class="idea-section-title">お手続きが完了しました</h2>
+      </div>
     </div>
-</div>
 
-<div class="ec-cartRole">
-    <div class="ec-cartRole__progress">
-        <ul class="ec-progress">
-            {% set step = 1 %}
-            <li class="ec-progress__item">
-                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                </div>
-                <div class="ec-progress__label">カートの商品
-                </div>
-            </li>
-            <li class="ec-progress__item">
-                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                </div>
-                <div class="ec-progress__label">ご注文手続き
-                </div>
-            </li>
-            <li class="ec-progress__item">
-                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                </div>
-                <div class="ec-progress__label">ご注文内容確認
-                </div>
-            </li>
-            <li class="ec-progress__item  is-complete">
-                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                </div>
-                <div class="ec-progress__label">完了
-                </div>
-            </li>
-        </ul>
+    <div class="idea-info-list" style="margin-bottom: 1.5rem;">
+      <p>ご注文内容の確認メールをお届けしています。メールが届かない場合は、迷惑メールフォルダをご確認いただくか、お問い合わせページよりご連絡ください。</p>
+      {% if orderNo is defined and orderNo %}
+        <p><strong>注文番号：{{ orderNo }}</strong></p>
+      {% endif %}
+      {% if completeMessage is defined and completeMessage %}
+        <p>{{ completeMessage|nl2br }}</p>
+      {% endif %}
     </div>
-</div>
 
-<div class="ec-cartCompleteRole">
-    <div class="ec-reportHeading">
-        <h2>ご注文ありがとうございました</h2>
+    <div class="idea-actions" style="flex-wrap: wrap; gap: 1rem;">
+      <a class="idea-button" href="/" rel="goTop">トップページへ</a>
+      <a class="idea-button idea-button--light" href="/mypage" rel="goMypage">注文履歴を確認する</a>
     </div>
-    <div class="ec-off3Grid ec-text-ac">
-        <div class="ec-off3Grid__cell">
-            <p class="ec-reportDescription">
-                {{ "ただいま、ご注文の確認メールをお送りさせていただきました。\n万一、ご確認メールが届かない場合は、トラブルの可能性もありますので大変お手数ではございますがお問い合わせくださいますようお願いいたします。\n"|nl2br }}
-            </p>
-            {% if orderNo is defined and orderNo %}
-            <p class="ec-reportDescription">ご注文番号：{{ orderNo }}</p>
-            {% endif %}
-            {% if completeMessage is defined and completeMessage %}
-            <p class="ec-reportDescription">{{ completeMessage|nl2br }}</p>
-            {% endif %}
-        </div>
-    </div>
-    <div class="ec-off4Grid">
-        <div class="ec-off4Grid__cell"><a class="ec-blockBtn--cancel" href="/">トップページへ</a></div>
-    </div>
-</div>
+  </div>
+</section>
+
 {% endblock %}

@@ -1,63 +1,234 @@
 {#
-  BeMart admin shipping-notification mail confirmation.
+  BeMart admin — 出荷通知メール送信確認 (doSendShippingNotifyMail)
 
-  This page is the canonical BEAR Resource-path screen for
-  `/admin/order/shipping-notify-mail`.  It intentionally keeps the
-  contract narrow: the GET displays the order keyed by orderNo, and the
-  POST sends the shipping notification through the BeMart mail boundary.
+  DATA CONTRACT (src/Resource/Page/Admin/Order/ShippingNotifyMail.php):
+
+    GET response body:
+      orderNo    string|null — 注文番号 (hidden input + display)
+      customerId string|null — 会員ID (null = ゲスト購入)
+      message    string      — 画面確認メッセージ
+      csrfToken  string|null — CSRF token (Twig 補完可)
+      submitTo   {method: "POST", href: string} — POST 送信先
+
+    POST response body (ShippingNotifyMailSent):
+      orderNo        string|null — 処理済み注文番号
+      customerId     string|null — 会員ID
+      trackingNumber string|null — 配送追跡番号 (未設定なら null)
+      message        string|null — 完了メッセージ
+
+  ACTIONS (#[Link] on ShippingNotifyMail resource):
+    POST /admin/order/shipping-notify-mail  — doSendShippingNotifyMail (unsafe)
+         fields: orderNo (hidden), csrfToken (hidden)
+    GET  /admin/order                       — goOrder (back link)
+
+  FORM: no AdminOrderMailForm needed — only hidden fields on POST.
+  CSRF: csrfToken from resource body; CsrfProtected on onPost.
+
+  UX rationale (clean-room, no EC-CUBE mirror):
+  - Narrow centered card: this is a single irreversible action;
+    wide editor layout would add noise. Max 520 px keeps focus.
+  - Spec list (idea-admin-spec-list / idea-admin-spec-row) for
+    order identity — lets the admin verify before sending.
+  - POST result rendered as an info notice + updated spec list with
+    trackingNumber row. The submit form is hidden after success.
+  - "送信" button uses idea-admin-action--primary with a mail icon.
+    Consequential but not destructive (idempotency: ALPS unsafe, fresh
+    mail each time — stated as intentional by design). No confirmation
+    modal needed because GET already IS the confirmation step.
+  - idea-admin-toolbar carries the back link + primary action,
+    consistent with other editor pages.
+
+  idea-admin vocabulary used:
+    idea-admin-confirm-card  (per-page, narrow centred shell)
+    idea-admin-panel / idea-admin-panel__head / idea-admin-panel__body
+    idea-admin-spec-list / idea-admin-spec-row
+    idea-admin-notice / idea-admin-notice--info
+    idea-admin-action / idea-admin-action--primary
+    idea-admin-toolbar / idea-admin-toolbar__back / idea-admin-toolbar__actions
+    idea-admin-badge / idea-admin-badge--public / idea-admin-badge--private
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-order-shipping-notify-mail' %}
-{% set title = '出荷通知メール' %}
+{% set route     = 'admin-order-shipping-notify-mail' %}
+{% set title     = '出荷通知メール送信' %}
 {% set sub_title = '受注管理' %}
 
+{# Detect POST-result rendering: trackingNumber key is only present after POST. #}
+{% set isSent = trackingNumber is defined %}
+
+{% block stylesheet %}
+<style>
+/* ── narrow centred confirmation card ──────────────────────────── */
+.idea-admin-confirm-card {
+  max-width: 520px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+}
+
+/* ── intent callout inside the panel ──────────────────────────── */
+.idea-admin-confirm-intent {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .85rem 1rem;
+  border-radius: var(--idea-admin-radius-input, 8px);
+  background: rgba(82, 107, 85, .08);
+  border: 1px solid rgba(82, 107, 85, .22);
+  margin-bottom: .25rem;
+}
+.idea-admin-confirm-intent__icon {
+  flex-shrink: 0;
+  font-size: 1.15rem;
+  color: var(--idea-olive, #526b55);
+  margin-top: .05rem;
+}
+.idea-admin-confirm-intent__body {
+  font-size: .88rem;
+  color: var(--idea-ink, #29251f);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ── tracking number display ───────────────────────────────────── */
+.idea-admin-tracking {
+  font-family: "SF Mono", "Fira Mono", "Consolas", monospace;
+  font-size: .84rem;
+  letter-spacing: .03em;
+  color: var(--idea-ink);
+}
+</style>
+{% endblock %}
+
 {% block main %}
-    <form role="form" method="post" action="/admin/order/shipping-notify-mail" id="shipping_notify_mail_form" name="form1" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_shipping_notify_mail')) }}">
-        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">出荷通知メール送信</span>
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-4">{{ message|default('出荷通知メールを送信します。よろしいですか？') }}</p>
-                            <div class="row mb-2">
-                                <div class="col-3 fw-bold">注文番号</div>
-                                <div class="col">{{ orderNo|default('') }}</div>
-                            </div>
-                            <div class="row mb-0">
-                                <div class="col-3 fw-bold">会員ID</div>
-                                <div class="col">{{ customerId|default('') ?: 'ゲスト購入' }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="idea-admin-confirm-card">
+
+  {# ── POST result: success notice ─────────────────────────────── #}
+  {% if isSent %}
+  <div class="idea-admin-notice idea-admin-notice--info" role="status" aria-live="polite">
+    <i class="fa fa-circle-check" aria-hidden="true"></i>
+    {{ message|default('出荷通知メールを送信しました。') }}
+  </div>
+  {% endif %}
+
+  {# ── Order identity panel ────────────────────────────────────── #}
+  <section class="idea-admin-panel" aria-labelledby="panel-order-identity">
+    <div class="idea-admin-panel__head">
+      <h3 id="panel-order-identity">
+        <i class="fa fa-box fa-fw" aria-hidden="true"></i>
+        対象注文
+      </h3>
+    </div>
+    <div class="idea-admin-panel__body">
+
+      {# Pre-send confirmation intent #}
+      {% if not isSent %}
+      <p class="idea-admin-confirm-intent">
+        <span class="idea-admin-confirm-intent__icon">
+          <i class="fa fa-envelope-open-text" aria-hidden="true"></i>
+        </span>
+        <span class="idea-admin-confirm-intent__body">
+          {{ message|default('この注文に出荷通知メールを送信します。内容を確認して「送信」を押してください。') }}
+        </span>
+      </p>
+      {% endif %}
+
+      <dl class="idea-admin-spec-list">
+
+        <div class="idea-admin-spec-row">
+          <dt>注文番号</dt>
+          <dd>
+            {% if orderNo %}
+              <a
+                href="/admin/order?orderNo={{ orderNo|url_encode }}"
+                rel="goOrder"
+                style="font-family: 'SF Mono','Fira Mono','Consolas',monospace;font-size:.84rem;"
+              >{{ orderNo }}</a>
+            {% else %}
+              <span style="color:var(--idea-muted);">—</span>
+            {% endif %}
+          </dd>
         </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/order?orderNo={{ orderNo|default('')|url_encode }}">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>受注詳細へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">出荷通知メールを送信</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+        <div class="idea-admin-spec-row">
+          <dt>会員</dt>
+          <dd>
+            {% if customerId %}
+              <span class="idea-admin-badge idea-admin-badge--public">
+                <i class="fa fa-user fa-fw" aria-hidden="true"></i>
+                {{ customerId }}
+              </span>
+            {% else %}
+              <span class="idea-admin-badge idea-admin-badge--private">
+                <i class="fa fa-user-slash fa-fw" aria-hidden="true"></i>
+                ゲスト購入
+              </span>
+            {% endif %}
+          </dd>
         </div>
-    </form>
+
+        {# Tracking number — only visible on POST result #}
+        {% if isSent %}
+        <div class="idea-admin-spec-row">
+          <dt>追跡番号</dt>
+          <dd>
+            {% if trackingNumber %}
+              <span class="idea-admin-tracking">{{ trackingNumber }}</span>
+            {% else %}
+              <span style="color:var(--idea-muted);font-size:.84rem;">未設定</span>
+            {% endif %}
+          </dd>
+        </div>
+        {% endif %}
+
+      </dl>
+    </div>
+  </section>
+
+  {# ── Send form — hidden after POST result ────────────────────── #}
+  {% if not isSent %}
+  <form
+    id="shipping_notify_mail_form"
+    method="post"
+    action="/admin/order/shipping-notify-mail"
+    novalidate
+    aria-label="出荷通知メール送信フォーム"
+  >
+    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+    <input type="hidden" name="orderNo"   value="{{ orderNo|default('') }}">
+    {#
+      No additional visible fields: the resource's onPost signature
+      consumes only `orderNo`. All other data lives in the Be domain
+      (ShippingNotifyMailSent reads the order + tracking from storage).
+    #}
+  </form>
+  {% endif %}
+
+</div>{# /.idea-admin-confirm-card #}
+
+{# ── Fixed bottom toolbar ────────────────────────────────────────── #}
+<div class="idea-admin-toolbar" role="toolbar" aria-label="ページ操作">
+  <div class="idea-admin-toolbar__back">
+    <a
+      href="/admin/order{% if orderNo %}?orderNo={{ orderNo|url_encode }}{% endif %}"
+      rel="goOrder"
+    >
+      <i class="fa fa-angle-left" aria-hidden="true"></i>
+      受注詳細へ戻る
+    </a>
+  </div>
+
+  {% if not isSent %}
+  <div class="idea-admin-toolbar__actions">
+    <button
+      type="submit"
+      form="shipping_notify_mail_form"
+      class="idea-admin-action idea-admin-action--primary"
+    >
+      <i class="fa fa-paper-plane" aria-hidden="true"></i>
+      出荷通知メールを送信
+    </button>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

@@ -1,35 +1,19 @@
 {#
-  BeMart storefront Block widget — logo.
+  BeMart storefront Block widget — site logo / wordmark.
 
-  PORT of EC-CUBE 4.3 default-theme `Block/logo.twig`
-  (src/Eccube/Resource/template/default/Block/logo.twig).
+  Standalone brand-mark partial. No extends. Included from the layout frame
+  alongside other header blocks (header, category_nav_pc).
 
-  EC-CUBE composes the storefront frame's HEADER region from operator-
-  configurable Block widgets (dtb_block / dtb_block_position). ALPS does
-  not model Block — it is pure presentation — so the honest reference is
-  EC-CUBE's own default-theme Block template. This file keeps EC-CUBE's
-  markup skeleton and `ec-*` class names verbatim.
+  Data contract: purely static. Reads only `shop_name` from the frame
+  context (set by the page resource; defaults to 'BeMart').
+  No domain resource, no form, no link traversal required.
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `canonical-url 'homepage')`     -> BeMartTwigExtension `canonical-url )` -> `/`.
-   - `BaseInfo.shop_name`  -> the frame's `shop_name` variable, which
-     defaults to `BeMart` (the storefront frame carries no BaseInfo
-     entity; every page leaves `shop_name` unset, so the default applies).
-
-  This widget is PURELY STATIC — it needs no domain data, only the shop
-  name already available to the frame. It is therefore portable directly,
-  unlike the cart / category / login widgets which need un-modelled data.
+  IdeaStore classes used:
+    idea-logo-link  — wraps the home anchor (inline-flex, flex: 0 0 auto)
+    idea-wordmark   — text-based brand name (no SVG asset dependency)
 #}
-<div class="ec-headerRole">
-    <div class="ec-headerRole__title">
-        <div class="ec-headerTitle">
-            <div class="ec-headerTitle__title">
-                <h1>
-                    <a href="/">
-                        {{ shop_name|default('BeMart') }}
-                    </a>
-                </h1>
-            </div>
-        </div>
-    </div>
+<div class="idea-logo">
+  <a href="/" class="idea-logo-link" aria-label="{{ shop_name|default('BeMart') }} ホーム">
+    <span class="idea-wordmark">{{ shop_name|default('BeMart') }}</span>
+  </a>
 </div>

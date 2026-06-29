@@ -1,226 +1,413 @@
 {#
-  BeMart admin Member edit — EC-CUBE goMember (メンバー登録/編集).
+  BeMart admin Member editor — idea-admin clean-room build.
 
-  PORT of EC-CUBE 4.3 admin-theme `Setting/System/member_edit.twig`
-  (src/Eccube/Resource/template/admin/Setting/System/member_edit.twig).
+  DATA CONTRACT (src/Resource/Page/Admin/Member.php onGet):
+    adminId     string   — opaque admin identifier
+    loginId     string   — login identifier (used as resource key)
+    name        string   — display name
+    authority   int      — 0=システム管理者 / 1=店舗オーナー
+    work        int      — 0=非稼働 / 1=稼働
+    sortNo      int      — display order
+    csrfToken   string   — CSRF token
+    form        AdminMemberForm — pre-filled renderer (HTML context only)
+    message     string?  — top-level error message on rejection
+    errors      object?  — field errors map on rejection
 
-  Setting/System section, FORM/CRUD page. It extends the admin frame
-  (`admin-base.html.twig`), not the storefront `base.html.twig`. The
-  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
-  from EC-CUBE; only the dynamic bindings are rebound.
+  FORM CONTRACT (src/Form/AdminMemberForm.php):
+    name             text      required (create + edit)
+    loginId          text      required (create only — immutable after creation)
+    password         password  required (create only)
+    passwordConfirm  password  required (create only)
+    authority        select    0=システム管理者 / 1=店舗オーナー
+      field ids: admin_member_name, admin_member_loginId,
+                 admin_member_password, admin_member_passwordConfirm,
+                 admin_member_authority
 
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md):
-  the Member resource (src/Resource/Page/Admin/Member.php) exposes an
-  {@see \MyVendor\BeMart\Form\AdminMemberForm} as `body['form']`,
-  pre-filled with the persisted row. The inputs render through that real
-  form object:
+  ACTIONS (#[Link] on Member resource):
+    POST   /admin/member                           — doCreateMember (create)
+    PUT    /admin/member?_method=put               — doUpdateMember (edit, name only)
+    DELETE /admin/member?loginId=…&_method=delete  — doDeleteMember (edit)
+  Back: goMemberList → /admin/member-list
 
-    {{ form.input('name')|raw }}        <- real <input> w/ id/attrs/value
-    {{ form.error('name') }}            <- inline Be-domain error, if any
+  CSRF: csrfToken from resource body; field name "csrfToken".
+  _method tunnel: hidden input in form action query.
+  mode: name="mode" value="member_form" — signals browser-form path in resource.
 
-  EC-CUBE renders the same inputs through the Symfony FormView
-  (`form_widget(form.name)`); Ray.WebFormModule is BeMart's
-  BEAR-idiomatic equivalent. `AdminMemberForm::init()` ports the field
-  names / ids / attributes from EC-CUBE's `MemberType` (block prefix
-  `/admin/member`).
+  MODES:
+    Create (loginId empty) — single-column focused form:
+      sections: アカウント情報, パスワード, 権限
+    Edit (loginId set) — two-column layout:
+      overview strip (adminId, current status, role, sort order)
+      primary: 名前 edit form
+      side:    権限 badge (read-only) + 状態 metadata + delete danger zone
 
-  VALIDATION AUTHORITY STAYS WITH the Be Framework Becoming chain — the
-  form is a field-definition + renderer.
+  idea-admin vocabulary:
+    idea-admin-layout / idea-admin-primary / idea-admin-side
+    idea-admin-panel / idea-admin-panel__head / idea-admin-panel__body
+    idea-admin-field / idea-admin-field__label / idea-admin-field__input
+    idea-admin-required / idea-admin-error / idea-admin-notice
+    idea-admin-badge (--public / --private / --discontinued)
+    idea-admin-spec-list / idea-admin-spec-row
+    idea-admin-action (--primary / --destructive)
+    idea-admin-toolbar / idea-admin-toolbar__back / idea-admin-toolbar__actions
+    idea-admin-kpi-grid / idea-admin-kpi
 
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - `form_widget(form.Authority)` (権限 entity select) -> BeMart renders
-     the EC-CUBE mtb_authority options for create. Existing member edits
-     keep authority read-only here; role flips use `/admin/authority-role`
-     so the privilege-escalation guard remains observable.
-   - `form_widget(form.Work)` (稼働 radio) -> likewise `work` is a bare
-     int (mtb_work id) with no option set; the control is omitted. The
-     稼働 row renders without an input. FLAGGED missing-body-field.
-   - `form.department` -> NOT carried by the MemberFetched projection
-     (dtb_member.department out of the Wave 8 slice); the input renders
-     empty. FLAGGED missing-body-field.
-   - The `auto_render` entity-extension loop + `{% form_theme %}` ->
-     Symfony form-theme / EC-CUBE entity-extension runtime. Dropped.
+  Per-page additions (idea-admin-* scoped, block stylesheet):
+    idea-admin-create-wrap   centered narrow shell for create mode
+    idea-admin-danger-zone   destructive-action section with red border accent
 #}
 {% extends 'admin-base.html.twig' %}
 
+{% set isEdit = loginId is defined and loginId is not empty %}
 {% set route = 'admin-member' %}
-{% set title = 'メンバー登録' %}
+{% set title = isEdit ? 'メンバー編集' : 'メンバー登録' %}
 {% set sub_title = 'システム設定' %}
 
+{% block stylesheet %}
+<style>
+/* ── per-page additions (idea-admin-* scoped) ── */
+.idea-admin-create-wrap {
+  max-width: 560px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+}
+.idea-admin-danger-zone {
+  border: 1px solid rgba(169, 71, 46, .30);
+  border-radius: var(--idea-admin-radius-panel, 12px);
+  background: rgba(169, 71, 46, .04);
+  padding: .9rem 1rem;
+  display: grid;
+  gap: .65rem;
+}
+.idea-admin-danger-zone__label {
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #a9472e;
+  margin: 0;
+}
+.idea-admin-danger-zone__body {
+  font-size: .82rem;
+  color: var(--idea-muted, #6f675c);
+  margin: 0;
+}
+</style>
+{% endblock stylesheet %}
+
 {% block main %}
-    {% set is_edit = loginId is defined and loginId %}
-    <form name="member_form" role="form" id="member_form" method="post" action="{% if is_edit %}/admin/member?_method=put{% else %}/admin/member{% endif %}" novalidate>
-        <input type="hidden" id="member__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="mode" value="member_form">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8"><span class="card-title">メンバー登録</span></div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#memberInfo" aria-expanded="false" aria-controls="memberInfo">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="memberInfo">
-                            <div class="card-body">
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>名前</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        <div class="row">
-                                            <div class="col">
-                                                {{ form.input('name')|raw }}
-                                            </div>
-                                            {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>所属</span>
-                                    </div>
-                                    <div class="col">
-                                        <div class="row">
-                                            <div class="col">
-                                                {{ form.input('department')|raw }}
-                                            </div>
-                                            {% if form.error('department') %}<span class="invalid-feedback d-block">{{ form.error('department') }}</span>{% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>ログインID</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        <div class="row">
-                                            <div class="col">
-                                                {{ form.input('loginId')|raw }}
-                                            </div>
-                                            {% if form.error('loginId') %}<span class="invalid-feedback d-block">{{ form.error('loginId') }}</span>{% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                                {% if not is_edit %}
-                                    <div class="row mb-2">
-                                        <div class="col-3">
-                                            <span>パスワード</span>
-                                            <span class="badge bg-primary ms-1">必須</span>
-                                        </div>
-                                        <div class="col">
-                                            <div class="row">
-                                                <div class="col">
-                                                    {{ form.input('password')|raw }}
-                                                </div>
-                                                {% if form.error('password') %}<span class="invalid-feedback d-block">{{ form.error('password') }}</span>{% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-3">
-                                            <span>パスワード(確認)</span>
-                                            <span class="badge bg-primary ms-1">必須</span>
-                                        </div>
-                                        <div class="col">
-                                            <div class="row">
-                                                <div class="col">
-                                                    {{ form.input('passwordConfirm')|raw }}
-                                                </div>
-                                                {% if form.error('passwordConfirm') %}<span class="invalid-feedback d-block">{{ form.error('passwordConfirm') }}</span>{% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="権限管理で設定した権限を選択できます。">
-                                            <span>権限</span>
-                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        <div class="row">
-                                            <div class="col">
-                                                {% if is_edit %}
-                                                    {{ authority is same as(0) ? 'システム管理者' : '店舗オーナー' }}
-                                                {% else %}
-                                                    {{ form.input('authority')|raw }}
-                                                {% endif %}
-                                            </div>
-                                            {% if form.error('authority') %}<span class="invalid-feedback d-block">{{ form.error('authority') }}</span>{% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="一時的に非稼働にすることが可能です。必要ない場合はメンバー一覧より削除してください。">
-                                            <span>稼働</span>
-                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="有効にすると2段階認証でのログインが必要になります。2段階認証のデバイス設定をしていない状態でログインした場合、設定後にログインできるようになります。">
-                                            <span>2段階認証</span>
-                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        {{ form.input('twoFactorAuthEnabled')|raw }}
-                                        {% if form.error('twoFactorAuthEnabled') %}<span class="invalid-feedback d-block">{{ form.error('twoFactorAuthEnabled') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink"
-                               href="/admin/member-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>メンバー管理</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button class="btn btn-ec-conversion px-5"
-                                        type="submit">{% if is_edit %}登録{% else %}登録{% endif %}</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+{# ── Page-level error notice ──────────────────────────────────────── #}
+{% if message is defined and message %}
+<div class="idea-admin-notice idea-admin-notice--error" role="alert">
+  <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+  {{ message }}
+</div>
+{% endif %}
 
-    {% if message is defined and message %}
-        <p class="ec-errorMessage">{{ message }}</p>
-    {% endif %}
+{# ════════════════════════════════════════════════════════════════════
+   CREATE MODE — single-column focused form
+   ════════════════════════════════════════════════════════════════════ #}
+{% if not isEdit %}
+
+<form
+  id="member_form"
+  role="form"
+  method="post"
+  action="/admin/member"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="mode" value="member_form">
+
+  <div class="idea-admin-create-wrap">
+
+    {# Section: アカウント情報 #}
+    <section class="idea-admin-panel" aria-labelledby="section-account">
+      <div class="idea-admin-panel__head">
+        <h3 id="section-account">アカウント情報</h3>
+      </div>
+      <div class="idea-admin-panel__body">
+
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label for="admin_member_name">表示名</label>
+            <span class="idea-admin-required">必須</span>
+          </div>
+          <div class="idea-admin-field__input">
+            {{ form.input('name')|raw }}
+            {% if form.error('name') %}
+            <span class="idea-admin-error" role="alert">{{ form.error('name') }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label for="admin_member_loginId">ログインID</label>
+            <span class="idea-admin-required">必須</span>
+          </div>
+          <div class="idea-admin-field__input">
+            {{ form.input('loginId')|raw }}
+            {% if form.error('loginId') %}
+            <span class="idea-admin-error" role="alert">{{ form.error('loginId') }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label for="admin_member_authority">権限</label>
+            <span class="idea-admin-required">必須</span>
+          </div>
+          <div class="idea-admin-field__input">
+            {{ form.input('authority')|raw }}
+            {% if form.error('authority') %}
+            <span class="idea-admin-error" role="alert">{{ form.error('authority') }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    {# Section: パスワード (create only) #}
+    <section class="idea-admin-panel" aria-labelledby="section-password">
+      <div class="idea-admin-panel__head">
+        <h3 id="section-password">パスワード</h3>
+      </div>
+      <div class="idea-admin-panel__body">
+
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label for="admin_member_password">パスワード</label>
+            <span class="idea-admin-required">必須</span>
+          </div>
+          <div class="idea-admin-field__input">
+            {{ form.input('password')|raw }}
+            {% if form.error('password') %}
+            <span class="idea-admin-error" role="alert">{{ form.error('password') }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label for="admin_member_passwordConfirm">確認用</label>
+            <span class="idea-admin-required">必須</span>
+          </div>
+          <div class="idea-admin-field__input">
+            {{ form.input('passwordConfirm')|raw }}
+            {% if form.error('passwordConfirm') %}
+            <span class="idea-admin-error" role="alert">{{ form.error('passwordConfirm') }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>{# .idea-admin-create-wrap #}
+
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/member-list">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        メンバー一覧
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-user-plus" aria-hidden="true"></i>
+        登録
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{# ════════════════════════════════════════════════════════════════════
+   EDIT MODE — two-column layout with identity overview
+   ════════════════════════════════════════════════════════════════════ #}
+{% else %}
+
+{# Overview KPI strip — read-only identity at a glance #}
+<div class="idea-admin-kpi-grid" aria-label="管理者サマリ">
+  <div class="idea-admin-kpi">
+    <div class="idea-admin-kpi__label">ログインID</div>
+    <div class="idea-admin-kpi__value" style="font-size:1rem;word-break:break-all;">{{ loginId }}</div>
+  </div>
+  <div class="idea-admin-kpi">
+    <div class="idea-admin-kpi__label">権限</div>
+    <div class="idea-admin-kpi__value" style="font-size:1rem;">
+      {% if authority is same as(0) %}
+        <span class="idea-admin-badge idea-admin-badge--public">システム管理者</span>
+      {% else %}
+        <span class="idea-admin-badge idea-admin-badge--private">店舗オーナー</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="idea-admin-kpi">
+    <div class="idea-admin-kpi__label">稼働状態</div>
+    <div class="idea-admin-kpi__value" style="font-size:1rem;">
+      {% if work is same as(1) %}
+        <span class="idea-admin-badge idea-admin-badge--public">稼働</span>
+      {% else %}
+        <span class="idea-admin-badge idea-admin-badge--discontinued">非稼働</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="idea-admin-kpi">
+    <div class="idea-admin-kpi__label">表示順</div>
+    <div class="idea-admin-kpi__value">{{ sortNo }}</div>
+  </div>
+</div>
+
+<form
+  id="member_form"
+  role="form"
+  method="post"
+  action="/admin/member?_method=put"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="mode" value="member_form">
+  <input type="hidden" name="loginId" value="{{ loginId }}">
+
+  <div class="idea-admin-layout">
+
+    {# ── Primary column ────────────────────────────────────────────── #}
+    <div class="idea-admin-primary">
+
+      {# Section: 表示名 (the only mutable field on PUT) #}
+      <section class="idea-admin-panel" aria-labelledby="section-name">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-name">表示名</h3>
+          <p class="idea-admin-panel__hint">管理画面上に表示される名前。</p>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_member_name">名前</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('name')|raw }}
+              {% if form.error('name') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('name') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+
+    {# ── Side panel ────────────────────────────────────────────────── #}
+    <aside class="idea-admin-side" aria-label="権限・削除">
+
+      {# Section: 権限 (read-only on edit — role changes via dedicated flow) #}
+      <section class="idea-admin-panel" aria-labelledby="section-authority">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-authority">権限</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <dl class="idea-admin-spec-list">
+            <div class="idea-admin-spec-row">
+              <dt>ロール</dt>
+              <dd>
+                {% if authority is same as(0) %}
+                  <span class="idea-admin-badge idea-admin-badge--public">システム管理者</span>
+                {% else %}
+                  <span class="idea-admin-badge idea-admin-badge--private">店舗オーナー</span>
+                {% endif %}
+              </dd>
+            </div>
+            <div class="idea-admin-spec-row">
+              <dt>管理者ID</dt>
+              <dd style="font-size:.76rem;word-break:break-all;color:var(--idea-muted);">{{ adminId }}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      {# Section: 削除 — danger zone #}
+      <section class="idea-admin-panel" aria-labelledby="section-danger">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-danger" style="color:#a9472e;">削除</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <div class="idea-admin-danger-zone">
+            <p class="idea-admin-danger-zone__label">危険な操作</p>
+            <p class="idea-admin-danger-zone__body">
+              このメンバーを削除すると元に戻せません。
+            </p>
+            <button
+              class="idea-admin-action idea-admin-action--destructive"
+              type="button"
+              id="member-delete-btn"
+            >
+              <i class="fa fa-trash" aria-hidden="true"></i>
+              削除
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </aside>
+
+  </div>
+
+  {# ── Action toolbar ────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/member-list">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        メンバー一覧
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-save" aria-hidden="true"></i>
+        保存
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{# Delete affordance — separate form; submitted via JS confirm dialog #}
+<form
+  id="member-delete-form"
+  method="post"
+  action="/admin/member?loginId={{ loginId|url_encode }}&_method=delete"
+  aria-hidden="true"
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="loginId" value="{{ loginId }}">
+  <input type="hidden" name="mode" value="member_form">
+</form>
+
+{% endif %}{# isEdit #}
+
 {% endblock %}
+
+{% block javascript %}
+{% if isEdit %}
+<script>
+(function () {
+  'use strict';
+  var btn = document.getElementById('member-delete-btn');
+  if (!btn) { return; }
+  btn.addEventListener('click', function () {
+    if (window.confirm('「{{ name|escape('js') }}」を削除してもよいですか？この操作は取り消せません。')) {
+      document.getElementById('member-delete-form').submit();
+    }
+  });
+}());
+</script>
+{% endif %}
+{% endblock javascript %}

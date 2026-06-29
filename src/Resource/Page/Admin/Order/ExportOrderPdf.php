@@ -11,6 +11,7 @@ use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
+use MyVendor\BeMart\Be\Exception\OrderPdfNotSupportedException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderPdfExported;
 use MyVendor\BeMart\Be\Input\AdminExportOrderPdfInput;
@@ -66,9 +67,16 @@ class ExportOrderPdf extends ResourceObject
             return $this;
         }
 
-        $final = ($this->becoming)(new AdminExportOrderPdfInput(
-            orderNos: $normalizedOrderNos,
-        ));
+        try {
+            $final = ($this->becoming)(new AdminExportOrderPdfInput(
+                orderNos: $normalizedOrderNos,
+            ));
+        } catch (OrderPdfNotSupportedException) {
+            $this->code = 501;
+            $this->body = ['message' => '納品書PDF出力はこのビルドでは利用できません。'];
+
+            return $this;
+        }
 
         assert($final instanceof AdminOrderPdfExported);
 

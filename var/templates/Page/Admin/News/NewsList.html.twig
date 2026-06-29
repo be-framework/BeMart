@@ -1,132 +1,262 @@
-{#
-  BeMart admin News list — EC-CUBE goNewsList.
-
-  PORT of EC-CUBE 4.3 admin-theme `Content/news.twig`
-  (src/Eccube/Resource/template/admin/Content/news.twig).
-
-  This is the admin pilot's DATA/LIST page. It extends the admin frame
-  (`admin-base.html.twig`, the port of EC-CUBE's admin
-  `default_frame.twig`), not the storefront `base.html.twig`. The markup
-  skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim from
-  EC-CUBE; only the dynamic bindings are rebound to the NewsList resource
-  body (src/Resource/Page/Admin/News/NewsList.php — body carries
-  `count` + `news`, a list of {newsId, newsTitle, newsDescription,
-  newsUrl, publishDate, linkMethod}).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `{% for News in pagination %}` -> the resource body's `news` list.
-     EC-CUBE's `pagination` is a KnpPaginator object; BeMart's list
-     endpoint returns the full collection (no server-side paging in
-     scope), so the `pagination.paginationData.pageCount` pager block is
-     OMITTED — the body carries no paging metadata. Enumerated as
-     residual.
-   - `News.visible` (公開 / 非公開 display-status) -> NOT carried by the
-     AdminNewsListFetched projection (EC-CUBE's dtb_news.visible was out
-     of the Wave 9 CMS slice). The display-status column is OMITTED, not
-     invented. Enumerated as residual.
-   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
-     CSRF widget. OMITTED exactly as the storefront ports omit it.
-     EC-CUBE-runtime only — enumerated as residual.
-   - `publishDate|date_sec` -> EC-CUBE's date filter. The body stores
-     `publishDate` as an ISO-8601 string; rendered as-is (BeMart has no
-     date_sec filter — the value is already a stable string).
-#}
 {% extends 'admin-base.html.twig' %}
 
+{#
+  BeMart admin News list — clean-room idea-admin rebuild.
+
+  DATA CONTRACT (src/Resource/Page/Admin/News/NewsList.php onGet):
+    count  integer — total number of news items
+    news   array   — list of {newsId, newsTitle, newsDescription,
+                              newsUrl, publishDate, linkMethod}
+      newsId          string       — opaque identifier (e.g. "nw-welcome")
+      newsTitle       string       — headline (maxLength 32)
+      newsDescription string|null — body text (maxLength 2000)
+      newsUrl         string|null — optional link target (maxLength 2048)
+      publishDate     string       — ISO-8601 datetime
+      linkMethod      bool         — false=same window, true=target="_blank"
+
+  ACTIONS (from resource #[Link] annotations):
+    doCreateNews  POST   /admin/news/news-list
+    goNews        GET    /admin/news/news?newsId=<id>     (edit)
+    doUpdateNews  PUT    /admin/news/news?newsId=<id>&_method=put
+    doDeleteNews  DELETE /admin/news/news?newsId=<id>&_method=delete
+
+  idea-admin vocabulary used:
+    idea-admin-kpi           summary count card
+    idea-admin-list-toolbar  top bar: count + primary CTA
+    idea-admin-count         muted item count label
+    idea-admin-table-wrap    responsive table container
+    idea-admin-table         data table
+    idea-admin-badge         status / attribute chips
+    idea-admin-action        action buttons
+    idea-admin-icon-btn      compact icon button (edit / delete)
+    idea-admin-empty         empty state placeholder
+    idea-admin-dialog-*      vanilla-JS confirm dialog
+#}
+
 {% set route = 'admin-news-news-list' %}
-{% set title = '新着情報管理' %}
+{% set title = '新着情報' %}
 {% set sub_title = 'コンテンツ管理' %}
 
 {% block stylesheet %}
-    <style type="text/css">
-        li.list-group-item {
-            z-index: inherit !important;
-        }
-    </style>
+<style>
+.idea-admin-news-url-cell {
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .8rem;
+  color: var(--idea-muted);
+}
+.idea-admin-news-url-cell a {
+  color: var(--idea-olive);
+  text-decoration: none;
+}
+.idea-admin-news-url-cell a:hover {
+  text-decoration: underline;
+}
+.idea-admin-news-date {
+  white-space: nowrap;
+  font-size: .82rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--idea-muted);
+}
+</style>
 {% endblock %}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="d-block mb-3">
-                    <a id="addNew" class="btn btn-ec-regular"
-                       href="/admin/news/news">新規作成</a>
-                </div>
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-body p-0">
-                        <ul class="list-group list-group-flush mb-4 sortable-container">
-                            <li class="list-group-item">
-                                <div class="row justify-content-around">
-                                    <div class="col-2"><strong>公開日時</strong>
-                                    </div>
-                                    <div class="col"><strong>タイトル</strong></div>
-                                </div>
-                            </li>
-                            {% for News in news %}
-                                <li class="list-group-item sortable-item" data-id="{{ News.newsId }}">
-                                    <div class="row justify-content-around">
-                                        <div class="col-2 d-flex align-items-center">
-                                            <span>{{ News.publishDate }}</span></div>
-                                        <div class="col d-flex align-items-center"><a
-                                                    href="/admin/news/news?newsId={{ News.newsId }}">{{ News.newsTitle }}</a>
-                                        </div>
-                                        <div class="col-2">
-                                            <div class="row">
-                                                <div class="col px-0 text-center">
-                                                    <a class="btn btn-ec-actionIcon"
-                                                       href="/admin/news/news?newsId={{ News.newsId }}"
-                                                       data-bs-toggle="tooltip" data-bs-placement="top"
-                                                       title="編集">
-                                                        <i class="fa fa-pencil fa-lg text-secondary"></i>
-                                                    </a>
-                                                </div>
-                                                <div class="col ps-0 text-center" data-bs-toggle="tooltip"
-                                                     data-bs-placement="top" title="削除">
-                                                    <a class="btn btn-ec-actionIcon" data-bs-toggle="modal"
-                                                       data-bs-target="#delete_{{ News.newsId }}">
-                                                        <i class="fa fa-close fa-lg text-secondary"
-                                                           aria-hidden="true"></i>
-                                                    </a>
-                                                    <div class="modal fade" id="delete_{{ News.newsId }}" tabindex="-1"
-                                                         role="dialog"
-                                                         aria-labelledby="delete_{{ News.newsId }}" aria-hidden="true">
-                                                        <div class="modal-dialog" role="document">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title fw-bold">削除します</h5>
-                                                                    <button class="btn-close" type="button"
-                                                                            data-bs-dismiss="modal"
-                                                                            aria-label="Close">
-                                                                    </button>
-                                                                </div>
-                                                                <div class="modal-body text-start">
-                                                                    <p class="text-start">この操作はあとから取り消すことができません。「{{ News.newsTitle }}」を削除してよろしいですか？</p>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button class="btn btn-ec-sub" type="button"
-                                                                            data-bs-dismiss="modal">キャンセル</button>
-                                                                    <a class="btn btn-ec-delete"
-                                                                       href="/admin/news/news?newsId={{ News.newsId }}&_method=delete"
 
-                                                                       data-confirm="false">削除</a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+{# ── Summary strip ─────────────────────────────────────────────────────── #}
+<div class="idea-admin-kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); margin-bottom: 1.25rem;">
+  <div class="idea-admin-kpi">
+    <div class="idea-admin-kpi__label">記事数</div>
+    <div class="idea-admin-kpi__value">{{ count|default(0) }}</div>
+    <div class="idea-admin-kpi__sub">公開中の新着情報</div>
+  </div>
+</div>
+
+{# ── List toolbar: count label + new-article CTA ───────────────────────── #}
+<div class="idea-admin-list-toolbar">
+  <div class="idea-admin-list-toolbar__left">
+    <span class="idea-admin-count">全 {{ count|default(0) }} 件</span>
+  </div>
+  <div class="idea-admin-list-toolbar__right">
+    <a class="idea-admin-action idea-admin-action--primary"
+       href="/admin/news/news-list"
+       rel="doCreateNews">
+      <i class="fa fa-plus" aria-hidden="true"></i>
+      新規作成
+    </a>
+  </div>
+</div>
+
+{# ── News table ────────────────────────────────────────────────────────── #}
+{% if news is not empty %}
+
+<div class="idea-admin-table-wrap" role="region" aria-label="新着情報一覧">
+  <table class="idea-admin-table">
+    <thead>
+      <tr>
+        <th>公開日時</th>
+        <th>タイトル</th>
+        <th>リンク先</th>
+        <th>開き方</th>
+        <th class="idea-admin-table__actions">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in news %}
+      <tr data-news-id="{{ item.newsId }}">
+
+        {# 公開日時 #}
+        <td class="idea-admin-news-date">
+          {{ item.publishDate|slice(0, 10) }}
+        </td>
+
+        {# タイトル — links to the edit page #}
+        <td>
+          <a href="/admin/news/news?newsId={{ item.newsId|url_encode }}"
+             rel="goNews"
+             style="font-weight: 700; color: var(--idea-ink); text-decoration: none;">
+            {{ item.newsTitle }}
+          </a>
+          {% if item.newsDescription %}
+          <p style="margin: .2rem 0 0; font-size: .77rem; color: var(--idea-muted);
+                     overflow: hidden; display: -webkit-box;
+                     -webkit-line-clamp: 1; -webkit-box-orient: vertical;">
+            {{ item.newsDescription|striptags|slice(0, 80) }}
+          </p>
+          {% endif %}
+        </td>
+
+        {# URL — shown as a clipped link or an empty dash #}
+        <td class="idea-admin-news-url-cell">
+          {% if item.newsUrl %}
+            <a href="{{ item.newsUrl }}"
+               {% if item.linkMethod %}target="_blank" rel="noopener noreferrer"{% endif %}>
+              {{ item.newsUrl }}
+            </a>
+          {% else %}
+            <span style="color: var(--idea-stone);">—</span>
+          {% endif %}
+        </td>
+
+        {# linkMethod badge #}
+        <td>
+          {% if item.linkMethod %}
+            <span class="idea-admin-badge idea-admin-badge--public">別ウィンドウ</span>
+          {% else %}
+            <span class="idea-admin-badge idea-admin-badge--private">同一ウィンドウ</span>
+          {% endif %}
+        </td>
+
+        {# Actions: edit + delete #}
+        <td class="idea-admin-table__actions">
+          <a class="idea-admin-icon-btn"
+             href="/admin/news/news?newsId={{ item.newsId|url_encode }}"
+             rel="goNews"
+             title="編集">
+            <i class="fa fa-pencil" aria-hidden="true"></i>
+          </a>
+          {# Static delete affordance — rel=doDeleteNews is the contract #}
+          <a class="idea-admin-icon-btn"
+             href="/admin/news/news?newsId={{ item.newsId|url_encode }}&_method=delete"
+             rel="doDeleteNews"
+             title="削除"
+             style="color: #a9472e; border-color: rgba(169,71,46,.3);"
+             data-news-id="{{ item.newsId }}"
+             data-news-title="{{ item.newsTitle|e('html_attr') }}"
+             onclick="event.preventDefault(); newsListOpenDelete(this);">
+            <i class="fa fa-trash" aria-hidden="true"></i>
+          </a>
+        </td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="5">{{ count|default(0) }} 件</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+{% else %}
+
+{# ── Empty state ───────────────────────────────────────────────────────── #}
+<div class="idea-admin-empty" role="status">
+  <i class="fa fa-newspaper-o fa-2x" aria-hidden="true"></i>
+  <p class="idea-admin-empty__title">新着情報がありません</p>
+  <p>「新規作成」ボタンから最初の記事を追加してください。</p>
+  <a class="idea-admin-action idea-admin-action--primary"
+     href="/admin/news/news-list"
+     rel="doCreateNews">
+    <i class="fa fa-plus" aria-hidden="true"></i>
+    新規作成
+  </a>
+</div>
+
+{% endif %}
+
+{# ── Delete confirm dialog ─────────────────────────────────────────────── #}
+<div class="idea-admin-dialog-backdrop" id="news-delete-dialog" hidden aria-modal="true" role="dialog"
+     aria-labelledby="news-delete-dialog-title">
+  <div class="idea-admin-dialog">
+    <div class="idea-admin-dialog__head">
+      <h2 class="idea-admin-dialog__title" id="news-delete-dialog-title">記事を削除します</h2>
+      <button class="idea-admin-icon-btn" type="button"
+              onclick="newsListCloseDelete()" aria-label="閉じる">
+        <i class="fa fa-times" aria-hidden="true"></i>
+      </button>
     </div>
+    <div class="idea-admin-dialog__body">
+      <p id="news-delete-dialog-msg">この操作は取り消せません。削除してよろしいですか？</p>
+    </div>
+    <div class="idea-admin-dialog__foot">
+      <button class="idea-admin-action" type="button" onclick="newsListCloseDelete()">キャンセル</button>
+      <form id="news-delete-form" method="post" action="" style="display:inline;">
+        <input type="hidden" name="_method" value="delete">
+        <button class="idea-admin-action idea-admin-action--destructive" type="submit">
+          <i class="fa fa-trash" aria-hidden="true"></i>
+          削除する
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  var dialog = document.getElementById('news-delete-dialog');
+  var form   = document.getElementById('news-delete-form');
+  var msg    = document.getElementById('news-delete-dialog-msg');
+
+  window.newsListOpenDelete = function (btn) {
+    var id    = btn.getAttribute('data-news-id');
+    var title = btn.getAttribute('data-news-title');
+    form.action = '/admin/news/news?newsId=' + encodeURIComponent(id) + '&_method=delete';
+    if (msg) {
+      msg.textContent = '「' + title + '」を削除します。この操作は取り消せません。';
+    }
+    dialog.hidden = false;
+    dialog.focus();
+  };
+
+  window.newsListCloseDelete = function () {
+    dialog.hidden = true;
+  };
+
+  if (dialog) {
+    dialog.addEventListener('click', function (e) {
+      if (e.target === dialog) { newsListCloseDelete(); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (!dialog.hidden && e.key === 'Escape') { newsListCloseDelete(); }
+    });
+  }
+}());
+</script>
 {% endblock %}

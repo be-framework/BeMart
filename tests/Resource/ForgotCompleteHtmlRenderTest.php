@@ -7,61 +7,20 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use PHPUnit\Framework\TestCase;
-use Twig\Environment;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
-use function dirname;
-use function explode;
-use function http_build_query;
-use function implode;
-use function in_array;
-use function is_dir;
-use function preg_replace;
-use function str_contains;
-use function trim;
-
 /**
- * Phase 3 — fidelity check for the ForgotComplete (goForgotComplete)
- * HTML port.
+ * Semantic render test for ForgotComplete (goForgotComplete).
  *
- * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
- * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
+ * Verifies:
+ *   L1 — required fields and data output present in the rendered page.
+ *   L2 — hypermedia links carry correct href and rel attributes.
  *
- * EC-CUBE's `Forgot/complete.twig` is a DATA page (no form) — the
- * data-page recipe. It is a static reset-mail-sent confirmation. The
- * residual is purely the EC-CUBE-runtime-only `<head>` frame material.
+ * EC-CUBE parity diff tests have been retired:
+ * @see testForgotCompleteHtmlMatchesEcCubeRenderingWithinResidualAllowlist
  */
 final class ForgotCompleteHtmlRenderTest extends TestCase
 {
-    /**
-     * EC-CUBE lines with no BeMart counterpart and vice versa. Each entry
-     * is a whitespace-collapsed line; the comment states WHY it is
-     * acceptable.
-     *
-     * @var list<string>
-     */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>BeMart / パスワードの再発行(メール送信)</title>',
-        '<title>EC-CUBE / パスワードの再発行(メール送信)</title>',
-        '<meta name="author" content="">',
-    ];
-
     private ResourceInterface $resource;
 
     protected function setUp(): void
@@ -70,189 +29,94 @@ final class ForgotCompleteHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testForgotCompletePageRendersAsHtmlDocument(): void
+    // ── L0: HTTP contract ───────────────────────────────────────────────────
+
+    public function testResponseIsOkWithHtmlContentType(): void
     {
         $ro = $this->resource->get('page://self/forgot-complete');
 
         $this->assertSame(Code::OK, $ro->code);
-
-        $html = $ro->toString();
-
-        $this->assertStringContainsString('<!doctype html>', $html);
-        $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
-        $this->assertStringContainsString('</body>', $html);
-
+        $ro->toString();
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testForgotCompletePagePreservesEcCubeMarkupStructure(): void
+    // ── L1: required fields / data output ──────────────────────────────────
+
+    public function testRenderedHtmlIsADocument(): void
     {
         $html = $this->resource->get('page://self/forgot-complete')->toString();
 
-        foreach ([
-            '<div class="ec-role">',
-            '<div class="ec-pageHeader">',
-            '<div class="ec-forgetCompleteRole">',
-            '<div class="ec-off3Grid ec-text-ac">',
-            'class="ec-off3Grid__cell"',
-            '<div class="ec-reportHeading">',
-            '<p class="ec-reportDescription">',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        $this->assertStringContainsString('<!doctype html>', $html);
+        $this->assertStringContainsString('<html lang="ja">', $html);
+        $this->assertStringContainsString('</body>', $html);
     }
 
+    public function testPageTitleContainsBrandName(): void
+    {
+        $html = $this->resource->get('page://self/forgot-complete')->toString();
+
+        $this->assertStringContainsString('IDEA STORE', $html);
+    }
+
+    public function testPageHeadingDescribesPasswordResetCompletion(): void
+    {
+        $html = $this->resource->get('page://self/forgot-complete')->toString();
+
+        // The page must communicate that the reset email was sent.
+        $this->assertStringContainsString('パスワード', $html);
+        $this->assertStringContainsString('メール', $html);
+    }
+
+    public function testPageExplainsNextStepForUser(): void
+    {
+        $html = $this->resource->get('page://self/forgot-complete')->toString();
+
+        // User must be told to check their email.
+        $this->assertStringContainsString('メールアドレス', $html);
+    }
+
+    public function testIdeaStoreLayoutIsUsed(): void
+    {
+        $html = $this->resource->get('page://self/forgot-complete')->toString();
+
+        $this->assertStringContainsString('idea-store.css', $html);
+        $this->assertStringContainsString('class="idea-store"', $html);
+    }
+
+    // ── L2: hypermedia — link href and rel ─────────────────────────────────
+
+    public function testGoLoginLinkPointsToLoginPage(): void
+    {
+        $html = $this->resource->get('page://self/forgot-complete')->toString();
+
+        $this->assertStringContainsString('href="/login"', $html);
+        $this->assertStringContainsString('rel="goLogin"', $html);
+    }
+
+    public function testGoTopLinkPointsToRoot(): void
+    {
+        $html = $this->resource->get('page://self/forgot-complete')->toString();
+
+        $this->assertStringContainsString('href="/"', $html);
+        $this->assertStringContainsString('rel="goTop"', $html);
+    }
+
+    // ── Retired: EC-CUBE parity ─────────────────────────────────────────────
+
     /**
-     * The honesty test: diff BeMart's rendered forgot-complete page
-     * against EC-CUBE's own rendering. Every difference must be in the
-     * residual allowlist.
+     * EC-CUBE DOM parity check — retired after IdeaStore rebuild.
+     *
+     * The page was rewritten in the IdeaStore design language (idea-*
+     * classes) as a clean-room implementation. It no longer shares DOM
+     * structure with EC-CUBE's Forgot/complete.twig and therefore cannot
+     * be diffed against it.
+     *
+     * @group ec-cube-parity-archived
      */
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testForgotCompleteHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
-        $beMart = $this->resource->get('page://self/forgot-complete')->toString();
-        $ecCube = $this->renderEcCubeForgotComplete();
-
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's forgot-complete HTML diverged from EC-CUBE's beyond "
-            . "the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
+        $this->markTestSkipped(
+            'EC-CUBE parity diff retired: page rebuilt in IdeaStore design language.'
         );
-
-        // A static data page — the residual is purely the shared <head>
-        // frame material (CSRF meta + inline script + <title> + author).
-        $this->assertLessThanOrEqual(
-            12,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
-    }
-
-    private static function isResidual(string $line): bool
-    {
-        if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
-            return true;
-        }
-
-        foreach ([
-            'eccube-csrf-token',
-            '<title>',
-            'meta name="author"',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Render EC-CUBE 4.3's real Forgot/complete.twig + default_frame.twig
-     * from the gitignored clone, with EC-CUBE's Twig API stubbed.
-     */
-    private function renderEcCubeForgotComplete(): string
-    {
-        $ecCubeTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/default';
-        if (! is_dir($ecCubeTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
-
-        $twig = new Environment(new EcCubeStubLoader($ecCubeTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-        $this->registerEcCubeStubs($twig);
-
-        return $twig->render('Forgot/complete.twig', [
-            'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
-            'eccube_config' => ['locale' => 'ja'],
-            'Page' => new EcCubeStub([
-                'meta_tags' => '',
-                'description' => '',
-                'author' => '',
-                'keyword' => '',
-                'meta_robots' => '',
-            ]),
-            'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
-                'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
-                'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
-                'ColumnNum' => 1,
-            ]),
-            'app' => new EcCubeStub(['session' => new EcCubeStub([
-                'flashbag' => new EcCubeFlashBag(),
-            ]), 'request' => new EcCubeStub(['_route' => 'forgot_complete'])]),
-            'subtitle' => 'パスワードの再発行(メール送信)',
-            'title' => 'パスワードの再発行(メール送信)',
-        ]);
-    }
-
-    private function registerEcCubeStubs(Environment $twig): void
-    {
-        $trans = static function (string $key, array $params = []): string {
-            $messages = EcCubeStub::jaMessages();
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('nl2br', static fn (string $s): string => nl2br($s)));
-        $twig->addFilter(new TwigFilter('number_format', static fn ($n): string => number_format((float) $n)));
-        $twig->addFilter(new TwigFilter('price', static function ($n): string {
-            $f = new \NumberFormatter('ja_JP', \NumberFormatter::CURRENCY);
-
-            return (string) $f->formatCurrency((float) ($n ?? 0), 'JPY');
-        }));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
-    }
-
-    /**
-     * Collapse a rendered HTML document to a list of non-empty,
-     * whitespace-trimmed lines for structural line-diffing.
-     *
-     * @return list<string>
-     */
-    private function normalize(string $html): array
-    {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
-        }
-
-        return $lines;
     }
 }

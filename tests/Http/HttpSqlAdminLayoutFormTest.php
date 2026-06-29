@@ -56,8 +56,11 @@ final class HttpSqlAdminLayoutFormTest extends TestCase
 
         $edit = $this->request('GET', '/admin/layout/layout?layoutId=' . $layoutId);
         $this->assertSame(200, $edit['status'], $edit['body']);
-        $this->assertStringContainsString('id="form1"', $edit['body']);
-        $this->assertStringContainsString('action="/admin/layout/layout?layoutId=' . $layoutId . '&_method=put"', $edit['body']);
+        // L0: form is present and targets the correct PUT endpoint
+        $this->assertStringContainsString('id="layout-editor-form"', $edit['body']);
+        $this->assertStringContainsString('layoutId=' . $layoutId, $edit['body']);
+        $this->assertStringContainsString('_method=put', $edit['body']);
+        // L1: name field renders with the saved value
         $this->assertStringContainsString('name="name"', $edit['body']);
         $this->assertSame(1, preg_match('/name="name"[^>]*value="([^"]+)"/', $edit['body'], $nameMatch), $edit['body']);
         $this->assertNotSame('', $nameMatch[1]);

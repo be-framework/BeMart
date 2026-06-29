@@ -1,26 +1,28 @@
-{#
-  EC-CUBE default-theme Block/header.twig port.
+<header class="idea-header" role="banner">
+  <a href="/" aria-label="{{ shop_name|default('BeMart') }} ホーム" class="idea-logo-link">
+    <span class="idea-wordmark">{{ shop_name|default('BeMart') }}</span>
+  </a>
 
-  This restores the default header sub-navigation structure:
-  search + mobile drawer button on the left, login/register + cart on
-  the right. The child blocks are static first slices but every link is
-  a real BeMart URL.
-#}
-<div class="ec-headerNaviRole">
-    <div class="ec-headerNaviRole__left">
-        <div class="ec-headerNaviRole__search">
-            {{ include('Block/search_product.html.twig') }}
-        </div>
-        <div class="ec-headerRole__navSP">
-            {{ include('Block/nav_sp.html.twig') }}
-        </div>
+  <nav class="idea-nav" aria-label="カテゴリナビゲーション">
+    <a href="/products?category_id=2">新入荷</a>
+    <a href="/products?category_id=1">ジェラート</a>
+    <a href="/products?category_id=3">彩のデザート</a>
+    <a href="/products?category_id=4">CUBE</a>
+    <a href="/products?category_id=5">アイスサンド</a>
+    <a href="/products?category_id=6">フルーツ</a>
+  </nav>
+
+  <div class="idea-header-actions">
+    <form class="idea-search" action="/products" method="get" role="search">
+      <input type="search" name="name" maxlength="50" placeholder="探す" aria-label="商品を検索">
+    </form>
+
+    <div class="idea-header-user">
+      <a href="/entry" class="idea-header-user__link" aria-label="会員登録">登録</a>
+      <a href="/login" class="idea-header-user__link" aria-label="ログイン">ログイン</a>
+      <a href="/mypage" class="idea-header-user__link" aria-label="マイページ">マイページ</a>
     </div>
-    <div class="ec-headerNaviRole__right">
-        <div class="ec-headerNaviRole__nav">
-            {{ include('Block/login.html.twig') }}
-        </div>
-        <div class="ec-headerRole__cart">
-            {{ include('Block/cart.html.twig') }}
-        </div>
-    </div>
-</div>
+
+    <a class="idea-cart-link" href="/cart" aria-label="カートを見る">カート</a>
+  </div>
+</header>

@@ -57,9 +57,8 @@ final class AdminEmptyPageHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<header class="c-headerBar">', $html);
-        $this->assertStringContainsString('<div class="c-mainNavArea">', $html);
-        $this->assertStringContainsString('<div class="c-contentsArea">', $html);
+        $this->assertStringContainsString('idea-admin-shell', $html);
+        $this->assertStringContainsString('idea-admin-content', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
