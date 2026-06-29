@@ -145,6 +145,31 @@ README では詳細化しません。背景は [`docs/methodology/`](docs/method
 
 ## 起動
 
+最短は Docker（自己完結・シード込み）。ホストに直接入れて動かす手順はその下です。
+
+### Docker でワンコマンド起動（推奨）
+
+MySQL 8.0 とアプリを Docker で立ち上げ、初回起動時に IdeaStore のテーマ別カタログ（約 3,000 商品）とデモ会員・デモ管理者を自動投入します。Docker / Docker Compose 以外に必要なものはありません。
+
+```bash
+docker compose up --build      # 初回はビルド + シード。完了後 http://localhost:8080
+```
+
+- ストアフロント: <http://localhost:8080>
+- デモ会員: `login-test@example.com` / `login-test-password-2026`
+- デモ管理者: <http://localhost:8080/admin/login> — `test-admin` / `admin-test-password-2026`（2FA はデモ用に `123456` 固定）
+
+データは名前付きボリュームに残り、次回以降の `up` はシードをスキップします。停止・破棄は次のとおり。
+
+```bash
+docker compose down            # 停止（DB データは保持）
+docker compose down -v         # 停止 + DB ボリュームも削除（次回まっさらに再シード）
+```
+
+> デモ専用構成です。DB はパスワードなし root（ホストにポート公開せず compose 内ネットワーク限定）、管理 2FA はバイパス（`BEMART_DEV_LOGIN=1`）。**本番では使わないでください。**
+
+### ホストで動かす
+
 前提: PHP 8.x / Composer。まず依存をインストールします。
 
 ```bash
