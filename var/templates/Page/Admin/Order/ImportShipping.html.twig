@@ -1,83 +1,459 @@
 {#
-  BeMart admin shipping-CSV upload — EC-CUBE admin-theme
-  `Order/csv_shipping.twig`.
+  BeMart admin — 出荷CSV取込 (doImportShippingCsv)
+  idea-admin clean-room build. No EC-CUBE markup mirrored.
 
-  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Order/csv_shipping.twig`
-  — the 出荷CSV登録 upload screen. It extends the admin frame
-  (`admin-base.html.twig`).
+  RESOURCE CONTRACT
+  =================
+  GET  /admin/order/import-shipping
+    body : {} (empty — no data fields)
+    links: doImportShippingCsv  POST  page://self/admin/order/import-shipping
+           goExportShipping     GET   page://self/admin/order/export-shipping
 
-  Tier-2 port note: EC-CUBE uploads a shipping CSV (tracking numbers
-  filled offline) and parses it. The Be import transition
-  ({@see \MyVendor\BeMart\Resource\Page\Admin\Order\ImportShipping}) is
-  a Phase 2 stub; this page renders the upload form so the screen is
-  faithful. EC-CUBE's `form_widget(form.import_file)` is a Symfony
-  FileType — BeMart has no file-upload form object, so the `<input
-  type="file">` is ported as a plain static input (no value/error
-  binding); enumerated as a residual.
+  POST /admin/order/import-shipping
+    param: csv  string  (raw CSV text, required)
+    csrf : csrfToken hidden field
+    response body:
+      transitionId  string   "doImportShippingCsv"
+      accepted      bool
+      lineCount     int      total lines including header
+      imported      int      rows written (tracking number updated)
+      skipped       int      rows skipped (unknown order number)
+      message       string   human-readable result summary
+    links: goOrderList      page://self/admin/order-list
+           goExportShipping page://self/admin/order/export-shipping
+           goExportCustomer page://self/admin/customer-csv
 
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+  idea-admin vocabulary used
+  ==========================
+    idea-admin-panel / __head / __body
+    idea-admin-field / __label / __input
+    idea-admin-required
+    idea-admin-notice / --error / --info
+    idea-admin-kpi-grid / idea-admin-kpi / --positive / --negative
+    idea-admin-action / --primary
+    idea-admin-toolbar / __back / __actions
+    idea-admin-spec-list / idea-admin-spec-row
+    idea-admin-badge
+    idea-admin-progress / __bar         (upload indicator)
+    idea-admin-import-dropzone          (page-local class, see block stylesheet)
+    idea-admin-import-format-ref        (page-local class)
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-order-import-shipping' %}
-{% set title = '出荷CSV登録' %}
+{% set route     = 'admin-order-import-shipping' %}
+{% set title     = '出荷CSV取込' %}
 {% set sub_title = '受注管理' %}
 
+{% block stylesheet %}
+<style>
+/* ── Drop zone ────────────────────────────────────────────────────── */
+.idea-admin-import-dropzone {
+  position: relative;
+  border: 2px dashed var(--idea-stone);
+  border-radius: var(--idea-admin-radius-panel);
+  padding: 1.4rem 1.2rem .9rem;
+  background: rgba(255, 253, 248, .7);
+  transition: border-color .18s, background .18s;
+  cursor: text;
+}
+.idea-admin-import-dropzone.is-dragover {
+  border-color: var(--idea-olive);
+  background: rgba(82, 107, 85, .06);
+}
+.idea-admin-import-dropzone__hint {
+  position: absolute;
+  top: .5rem;
+  right: .75rem;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--idea-muted);
+  pointer-events: none;
+  text-transform: uppercase;
+}
+.idea-admin-import-dropzone textarea {
+  width: 100%;
+  min-height: 12rem;
+  border: none;
+  background: transparent;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: .82rem;
+  color: var(--idea-ink);
+  resize: vertical;
+  outline: none;
+  padding: 0;
+  display: block;
+}
+
+/* ── CSV format reference table ───────────────────────────────────── */
+.idea-admin-import-format-ref {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: .8rem;
+}
+.idea-admin-import-format-ref thead th {
+  background: var(--idea-surface-soft);
+  color: var(--idea-muted);
+  font-weight: 700;
+  font-size: .74rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  padding: .4rem .7rem;
+  border-bottom: 1px solid rgba(205,191,170,.5);
+  text-align: left;
+}
+.idea-admin-import-format-ref tbody td {
+  padding: .45rem .7rem;
+  border-bottom: 1px solid rgba(205,191,170,.22);
+  vertical-align: top;
+}
+.idea-admin-import-format-ref code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: .8em;
+  background: rgba(205,191,170,.25);
+  border-radius: 4px;
+  padding: .1em .4em;
+}
+
+/* ── Result summary ───────────────────────────────────────────────── */
+.idea-admin-import-result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .85rem;
+}
+@media (max-width: 560px) {
+  .idea-admin-import-result-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Upload state indicator ───────────────────────────────────────── */
+#import-submit-btn[data-loading="true"] {
+  opacity: .65;
+  cursor: wait;
+  pointer-events: none;
+}
+</style>
+{% endblock %}
+
 {% block main %}
-    <form role="form" method="post" action="/admin/order/import-shipping?csv=" id="csv_shipping_form" name="form1" enctype="multipart/form-data" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">CSVファイルアップロード</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>CSVファイル</span>
-                                    <span class="badge bg-primary ms-1">必須</span>
-                                </div>
-                                <div class="col">
-                                    <input type="file" id="csv_shipping_import_file" name="import_file" class="form-control" accept=".csv">
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"></div>
-                                <div class="col">
-                                    <p class="mb-1">出荷CSVの形式に沿ったファイルをアップロードしてください。</p>
-                                    <a href="/admin/order/export-shipping">現在の出荷データをCSVでダウンロード</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+{# ── POST result notice (present after successful submission) ──────── #}
+{% if imported is defined %}
+  {% if accepted %}
+  <div class="idea-admin-notice" role="status" aria-live="polite">
+    <i class="fa fa-check-circle" aria-hidden="true"></i>
+    {{ message|default('取込が完了しました。') }}
+  </div>
+
+  <div class="idea-admin-import-result-grid" style="margin-bottom:1.25rem;">
+    <div class="idea-admin-kpi">
+      <div class="idea-admin-kpi__label">処理行数</div>
+      <div class="idea-admin-kpi__value">{{ lineCount|default(0) }}</div>
+      <div class="idea-admin-kpi__sub">ヘッダ行含む合計</div>
+    </div>
+    <div class="idea-admin-kpi idea-admin-kpi--positive">
+      <div class="idea-admin-kpi__label">更新件数</div>
+      <div class="idea-admin-kpi__value">{{ imported|default(0) }}</div>
+      <div class="idea-admin-kpi__sub">追跡番号を書込み</div>
+    </div>
+    <div class="idea-admin-kpi {% if skipped > 0 %}idea-admin-kpi--negative{% endif %}">
+      <div class="idea-admin-kpi__label">対象外</div>
+      <div class="idea-admin-kpi__value">{{ skipped|default(0) }}</div>
+      <div class="idea-admin-kpi__sub">受注番号不一致など</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:.65rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+    <a class="idea-admin-action idea-admin-action--primary"
+       href="/admin/order-list">
+      <i class="fa fa-list fa-fw" aria-hidden="true"></i>
+      受注一覧を確認
+    </a>
+    <a class="idea-admin-action" href="/admin/order/import-shipping">
+      <i class="fa fa-upload fa-fw" aria-hidden="true"></i>
+      続けて取込む
+    </a>
+  </div>
+
+  {% else %}
+  <div class="idea-admin-notice idea-admin-notice--error" role="alert">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    {{ message|default('取込に失敗しました。') }}
+  </div>
+  {% endif %}
+{% endif %}
+
+{# ── Error notice (validation / auth failure) ─────────────────────── #}
+{% if message is defined and message and imported is not defined %}
+<div class="idea-admin-notice idea-admin-notice--error" role="alert">
+  <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+  {{ message }}
+</div>
+{% endif %}
+
+{# ── Main import form ─────────────────────────────────────────────── #}
+<form
+  id="import-shipping-form"
+  role="form"
+  method="post"
+  action="/admin/order/import-shipping"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+  <div style="display:grid;gap:1rem;max-width:var(--idea-admin-content-max);">
+
+    {# ── Panel: CSV貼り付け / アップロード ──────────────────────── #}
+    <section class="idea-admin-panel" aria-labelledby="panel-upload-head">
+      <div class="idea-admin-panel__head">
+        <h3 id="panel-upload-head">
+          <i class="fa fa-file-csv fa-fw" aria-hidden="true"></i>
+          CSV 取込
+        </h3>
+        <p class="idea-admin-panel__hint">
+          ファイルを選択するか、CSV テキストを直接貼り付けてください。
+        </p>
+      </div>
+      <div class="idea-admin-panel__body">
+
+        {# ── File picker (JS populates textarea) ─── #}
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label for="csv-file-picker">ファイル選択</label>
+          </div>
+          <div class="idea-admin-field__input">
+            <input
+              type="file"
+              id="csv-file-picker"
+              accept=".csv,text/csv,text/plain"
+              style="border:1px solid var(--idea-stone);border-radius:var(--idea-admin-radius-input);padding:.35rem .6rem;font:inherit;font-size:.84rem;background:rgba(255,253,248,.95);width:100%;"
+            >
+            <span style="font-size:.76rem;color:var(--idea-muted);">
+              選択すると下のテキストエリアに内容が読み込まれます。
+            </span>
+          </div>
         </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/order-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>受注一覧へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+        {# ── Textarea (the actual POST field) ────── #}
+        <div class="idea-admin-field" style="align-items:start;">
+          <div class="idea-admin-field__label">
+            <label for="csv-textarea">CSVテキスト</label>
+            <span class="idea-admin-required">必須</span>
+          </div>
+          <div class="idea-admin-field__input">
+            <div class="idea-admin-import-dropzone" id="csv-dropzone">
+              <span class="idea-admin-import-dropzone__hint">ここにドロップ</span>
+              <textarea
+                id="csv-textarea"
+                name="csv"
+                placeholder="受注番号,お問い合わせ番号&#10;00000001,1234567890&#10;00000002,0987654321"
+                required
+                aria-required="true"
+                aria-describedby="csv-format-hint"
+              ></textarea>
             </div>
+            <span id="csv-line-count"
+                  style="font-size:.76rem;color:var(--idea-muted);text-align:right;display:block;"
+                  aria-live="polite"></span>
+          </div>
         </div>
-    </form>
+
+      </div>
+    </section>
+
+    {# ── Panel: フォーマット仕様 ─────────────────────────────────── #}
+    <section class="idea-admin-panel" aria-labelledby="panel-format-head">
+      <div class="idea-admin-panel__head">
+        <h3 id="panel-format-head">
+          <i class="fa fa-table fa-fw" aria-hidden="true"></i>
+          CSV フォーマット
+        </h3>
+        <p class="idea-admin-panel__hint" id="csv-format-hint">
+          1行目はヘッダ行として読み飛ばされます。文字コード UTF-8（BOM なし）推奨。
+        </p>
+      </div>
+      <div class="idea-admin-panel__body" style="padding:.75rem 1rem;">
+        <div class="idea-admin-table-wrap" style="box-shadow:none;border-radius:8px;">
+          <table class="idea-admin-import-format-ref" aria-label="CSVフォーマット仕様">
+            <thead>
+              <tr>
+                <th style="width:5rem;">列</th>
+                <th>フィールド名</th>
+                <th>内容</th>
+                <th>例</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="idea-admin-badge idea-admin-badge--public">1列目</span></td>
+                <td>受注番号</td>
+                <td>更新対象の受注を特定する番号。不一致行はスキップ。</td>
+                <td><code>00000001</code></td>
+              </tr>
+              <tr>
+                <td><span class="idea-admin-badge idea-admin-badge--public">2列目</span></td>
+                <td>お問い合わせ番号</td>
+                <td>配送業者の追跡番号（トラッキング番号）。</td>
+                <td><code>1234567890</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="idea-admin-notice idea-admin-notice--info"
+             style="margin-top:.85rem;margin-bottom:0;">
+          <i class="fa fa-download fa-fw" aria-hidden="true"></i>
+          <span>
+            現在の出荷データをテンプレートとして使えます。
+            <a class="idea-admin-meta__link"
+               href="/admin/order/export-shipping"
+               rel="goExportShipping">
+              出荷CSV をダウンロード
+              <i class="fa fa-external-link-alt fa-fw" aria-hidden="true"></i>
+            </a>
+          </span>
+        </div>
+      </div>
+    </section>
+
+  </div>{# /grid #}
+
+  {# ── Upload progress bar (hidden until submit) ─────────────────── #}
+  <div id="import-progress-wrap" hidden style="margin-top:1rem;">
+    <div class="idea-admin-progress">
+      <div class="idea-admin-progress__bar" id="import-progress-bar" style="width:0%"></div>
+    </div>
+    <p style="font-size:.78rem;color:var(--idea-muted);margin:.35rem 0 0;text-align:center;">
+      取込中...
+    </p>
+  </div>
+
+  {# ── Action toolbar ────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="取込操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/order-list" rel="goOrderList">
+        <i class="fa fa-backward" aria-hidden="true"></i>
+        受注一覧に戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <a class="idea-admin-action" href="/admin/order/export-shipping" rel="goExportShipping">
+        <i class="fa fa-download fa-fw" aria-hidden="true"></i>
+        出荷CSV出力
+      </a>
+      <button
+        id="import-submit-btn"
+        class="idea-admin-action idea-admin-action--primary"
+        type="submit"
+      >
+        <i class="fa fa-upload fa-fw" aria-hidden="true"></i>
+        取込を実行
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /* ── File picker → textarea ───────────────────────────────────────── */
+  var picker   = document.getElementById('csv-file-picker');
+  var textarea = document.getElementById('csv-textarea');
+  var lineCount = document.getElementById('csv-line-count');
+
+  function updateLineCount() {
+    if (!textarea || !lineCount) { return; }
+    var text = textarea.value.trim();
+    if (!text) { lineCount.textContent = ''; return; }
+    var lines = text.split('\n').filter(function (l) { return l.trim() !== ''; });
+    var dataRows = lines.length > 0 ? lines.length - 1 : 0;
+    lineCount.textContent = lines.length + ' 行（ヘッダ除く ' + dataRows + ' 件）';
+  }
+
+  if (picker) {
+    picker.addEventListener('change', function () {
+      var file = picker.files && picker.files[0];
+      if (!file) { return; }
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        if (textarea) {
+          textarea.value = e.target.result || '';
+          textarea.dispatchEvent(new Event('input'));
+          updateLineCount();
+        }
+      };
+      reader.readAsText(file, 'UTF-8');
+    });
+  }
+
+  if (textarea) {
+    textarea.addEventListener('input', updateLineCount);
+  }
+
+  /* ── Drag-and-drop onto the drop zone ─────────────────────────────── */
+  var dropzone = document.getElementById('csv-dropzone');
+  if (dropzone) {
+    dropzone.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      dropzone.classList.add('is-dragover');
+    });
+    dropzone.addEventListener('dragleave', function () {
+      dropzone.classList.remove('is-dragover');
+    });
+    dropzone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      dropzone.classList.remove('is-dragover');
+      var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (!file) { return; }
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        if (textarea) {
+          textarea.value = ev.target.result || '';
+          textarea.dispatchEvent(new Event('input'));
+          updateLineCount();
+        }
+      };
+      reader.readAsText(file, 'UTF-8');
+    });
+  }
+
+  /* ── Submit: show progress animation ─────────────────────────────── */
+  var form       = document.getElementById('import-shipping-form');
+  var submitBtn  = document.getElementById('import-submit-btn');
+  var progressWrap = document.getElementById('import-progress-wrap');
+  var progressBar  = document.getElementById('import-progress-bar');
+
+  if (form && submitBtn) {
+    form.addEventListener('submit', function (e) {
+      var text = textarea ? textarea.value.trim() : '';
+      if (!text) {
+        e.preventDefault();
+        textarea.focus();
+        return;
+      }
+
+      submitBtn.setAttribute('data-loading', 'true');
+      submitBtn.querySelector('i').className = 'fa fa-spinner fa-spin fa-fw';
+
+      if (progressWrap) { progressWrap.hidden = false; }
+
+      /* Animate the progress bar to ~80% while the request is in-flight;
+         the page replaces itself on completion so we never need 100%. */
+      var pct = 0;
+      var iv = setInterval(function () {
+        pct = pct < 75 ? pct + 3 : pct < 80 ? pct + 0.5 : pct;
+        if (progressBar) { progressBar.style.width = pct + '%'; }
+      }, 120);
+
+      /* Cleanup if something interrupts (e.g. back-forward cache) */
+      window.addEventListener('pagehide', function () { clearInterval(iv); });
+    });
+  }
+
+}());
+</script>
 {% endblock %}

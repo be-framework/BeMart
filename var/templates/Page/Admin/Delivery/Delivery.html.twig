@@ -1,71 +1,291 @@
-{#
-  BeMart admin delivery-method editor — EC-CUBE Setting/Shop/delivery_edit.twig.
-#}
 {% extends 'admin-base.html.twig' %}
 
+{#
+  BeMart admin Delivery editor — idea-admin clean-room build.
+
+  DATA CONTRACT (src/Resource/Page/Admin/Delivery/Delivery.php onGet):
+    deliveryId  string|''   — opaque ID; empty string when creating a new record
+    delivery    array|null  — {deliveryId, deliveryName, visible} when editing; null on new
+    form        AdminDeliveryForm — pre-filled renderer (HTML context only)
+
+  FORM CONTRACT (src/Form/AdminDeliveryForm.php):
+    deliveryName  text      required (isNotBlank)  id="delivery_name"
+    visible       checkbox  optional, value "1"    id="delivery_visible"
+
+  ACTIONS (from #[Link] on Delivery resource):
+    PUT    /admin/delivery/delivery?deliveryId=…&_method=put   — doUpdateDelivery (edit)
+    DELETE /admin/delivery/delivery?deliveryId=…&_method=delete — doDeleteDelivery (edit)
+    POST   /admin/delivery/delivery-list                        — doCreateDelivery (new)
+
+  CSRF: csrfToken body field; hidden input name="csrfToken".
+
+  idea-admin vocabulary used:
+    idea-admin-layout        two-column editor shell
+    idea-admin-primary       primary column
+    idea-admin-side          sticky side column
+    idea-admin-panel         card section
+    idea-admin-panel__head   section header
+    idea-admin-panel__body   section body
+    idea-admin-field         label + input row
+    idea-admin-field__label  label cell
+    idea-admin-field__input  input cell
+    idea-admin-required      required badge inline with label
+    idea-admin-error         inline validation error
+    idea-admin-badge         visible/hidden status chip (side panel)
+    idea-admin-spec-list     read-only metadata rows (side panel)
+    idea-admin-spec-row      single metadata row
+    idea-admin-toolbar       fixed bottom action bar
+    idea-admin-toolbar__back back-nav link
+    idea-admin-toolbar__actions save + delete cluster
+    idea-admin-action        button / link affordance
+    idea-admin-dialog-backdrop / idea-admin-dialog  confirm dialog
+#}
+
+{% set isEdit = deliveryId|default('') is not empty %}
 {% set route = 'admin-delivery-delivery' %}
-{% set title = '配送方法設定' %}
+{% set title = isEdit ? '配送方法編集' : '配送方法登録' %}
 {% set sub_title = '店舗設定' %}
-{% set editing = deliveryId|default('') is not empty %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ editing ? '/admin/delivery/delivery?deliveryId=' ~ deliveryId|url_encode ~ '&_method=put' : '/admin/delivery/delivery-list' }}" id="delivery_edit_form" name="form1" novalidate>
+
+<form
+  id="delivery-edit-form"
+  role="form"
+  method="post"
+  action="{{ isEdit
+    ? '/admin/delivery/delivery?deliveryId=' ~ deliveryId|url_encode ~ '&amp;_method=put'
+    : '/admin/delivery/delivery-list' }}"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  {% if isEdit %}
+  <input type="hidden" name="deliveryId" value="{{ deliveryId }}">
+  <input type="hidden" name="_method" value="put">
+  {% endif %}
+
+  {% if message is defined and message %}
+  <div class="idea-admin-notice idea-admin-notice--error" role="alert">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    {{ message }}
+  </div>
+  {% endif %}
+
+  <div class="idea-admin-layout">
+
+    {# ── Primary column ── #}
+    <div class="idea-admin-primary">
+
+      <section class="idea-admin-panel" aria-labelledby="section-delivery-info">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-delivery-info">配送方法情報</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          {# 配送方法名 — required #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="delivery_name">配送方法名</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('deliveryName')|raw }}
+              {% if form.error('deliveryName') %}
+              <span class="idea-admin-error">{{ form.error('deliveryName') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# 表示 — checkbox #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="delivery_visible">表示</label>
+            </div>
+            <div class="idea-admin-field__input idea-admin-field__input--inline">
+              {{ form.input('visible')|raw }}
+              <span class="idea-admin-field__input-hint">チェックを外すと非表示になります</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+
+    {# ── Side panel ── #}
+    <aside class="idea-admin-side" aria-label="ステータス">
+
+      <section class="idea-admin-panel" aria-labelledby="section-delivery-status">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-delivery-status">ステータス</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          {% if isEdit and delivery is not null %}
+          <dl class="idea-admin-spec-list">
+            <div class="idea-admin-spec-row">
+              <dt>ID</dt>
+              <dd><code style="font-size:.78rem; word-break:break-all;">{{ delivery.deliveryId }}</code></dd>
+            </div>
+            <div class="idea-admin-spec-row">
+              <dt>表示状態</dt>
+              <dd>
+                {% if delivery.visible %}
+                  <span class="idea-admin-badge idea-admin-badge--public">表示中</span>
+                {% else %}
+                  <span class="idea-admin-badge idea-admin-badge--private">非表示</span>
+                {% endif %}
+              </dd>
+            </div>
+          </dl>
+          {% else %}
+          <p class="idea-admin-field__input-hint" style="margin:0; font-size:.82rem; color:var(--idea-muted);">
+            登録後に表示されます。
+          </p>
+          {% endif %}
+        </div>
+      </section>
+
+    </aside>
+
+  </div>
+
+  {# ── Action toolbar ── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/delivery/delivery-list">
+        <i class="fa fa-backward" aria-hidden="true"></i>
+        配送方法一覧に戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      {% if isEdit %}
+      <button
+        type="button"
+        class="idea-admin-action idea-admin-action--destructive"
+        id="delivery-delete-trigger"
+        aria-haspopup="dialog"
+      >
+        <i class="fa fa-trash" aria-hidden="true"></i>
+        削除
+      </button>
+      {% endif %}
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-save" aria-hidden="true"></i>
+        {{ isEdit ? '保存' : '登録' }}
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{# ── Delete confirmation dialog (edit mode only) ── #}
+{% if isEdit %}
+<div
+  id="delivery-delete-backdrop"
+  class="idea-admin-dialog-backdrop"
+  hidden
+  role="presentation"
+>
+  <div
+    class="idea-admin-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delivery-delete-dialog-title"
+    aria-describedby="delivery-delete-dialog-desc"
+  >
+    <div class="idea-admin-dialog__head">
+      <h2 class="idea-admin-dialog__title" id="delivery-delete-dialog-title">
+        配送方法を削除しますか？
+      </h2>
+      <button
+        type="button"
+        class="idea-admin-icon-btn"
+        id="delivery-delete-close"
+        aria-label="閉じる"
+      >
+        <i class="fa fa-times" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="idea-admin-dialog__body" id="delivery-delete-dialog-desc">
+      <p style="margin:0;">
+        <strong>{{ delivery.deliveryName|default('この配送方法') }}</strong> を削除します。
+        この操作は取り消せません。
+      </p>
+    </div>
+    <div class="idea-admin-dialog__foot">
+      <button type="button" class="idea-admin-action" id="delivery-delete-cancel">
+        キャンセル
+      </button>
+      <form
+        id="delivery-delete-form"
+        method="post"
+        action="/admin/delivery/delivery?deliveryId={{ deliveryId|url_encode }}&amp;_method=delete"
+        rel="doDeleteDelivery"
+        style="display:inline;"
+      >
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="deliveryId" value="{{ deliveryId|default('') }}">
-        {% if editing %}
-            <input type="hidden" name="_method" value="put">
-        {% endif %}
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">配送方法</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>配送業者名</span>
-                                    <span class="badge bg-primary ms-1">必須</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('deliveryName')|raw }}
-                                    {% if form.error('deliveryName') %}<span class="invalid-feedback d-block">{{ form.error('deliveryName') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>有効・無効</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('visible')|raw }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/delivery/delivery-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>配送方法設定一覧へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+        <input type="hidden" name="_method" value="delete">
+        <input type="hidden" name="deliveryId" value="{{ deliveryId }}">
+        <button type="submit" class="idea-admin-action idea-admin-action--destructive">
+          <i class="fa fa-trash" aria-hidden="true"></i>
+          削除する
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block stylesheet %}
+<style>
+.idea-admin-field__input--inline {
+  flex-direction: row;
+  align-items: center;
+  gap: .6rem;
+}
+.idea-admin-field__input-hint {
+  font-size: .78rem;
+  color: var(--idea-muted);
+}
+</style>
+{% endblock %}
+
+{% block javascript %}
+{% if isEdit %}
+<script>
+(function () {
+  var backdrop  = document.getElementById('delivery-delete-backdrop');
+  var trigger   = document.getElementById('delivery-delete-trigger');
+  var closeBtn  = document.getElementById('delivery-delete-close');
+  var cancelBtn = document.getElementById('delivery-delete-cancel');
+
+  function openDialog() {
+    backdrop.hidden = false;
+    closeBtn.focus();
+  }
+
+  function closeDialog() {
+    backdrop.hidden = true;
+    trigger.focus();
+  }
+
+  if (trigger)   trigger.addEventListener('click', openDialog);
+  if (closeBtn)  closeBtn.addEventListener('click', closeDialog);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeDialog);
+
+  // Close on backdrop click
+  if (backdrop) {
+    backdrop.addEventListener('click', function (e) {
+      if (e.target === backdrop) closeDialog();
+    });
+  }
+
+  // Close on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !backdrop.hidden) closeDialog();
+  });
+}());
+</script>
+{% endif %}
 {% endblock %}

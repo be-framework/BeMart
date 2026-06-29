@@ -1,119 +1,128 @@
-{#
-  BeMart admin Layout list — EC-CUBE goLayoutList.
-
-  PORT of EC-CUBE 4.3 admin-theme `Content/layout_list.twig`
-  (src/Eccube/Resource/template/admin/Content/layout_list.twig).
-
-  DATA/LIST page. Extends the admin frame (`admin-base.html.twig`). The
-  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
-  from EC-CUBE; only the dynamic bindings are rebound to the LayoutList
-  resource body (src/Resource/Page/Admin/Layout/LayoutList.php — body
-  carries `count` + `layouts`, a list of {layoutId, layoutName,
-  deviceType}).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `{% for Layout in Layouts %}` -> the resource body's `layouts` list.
-   - `Layout.DeviceType.id` -> the body carries `deviceType` (10 = PC,
-     2 = mobile — EC-CUBE's `DeviceType::DEVICE_TYPE_PC` is 10); the
-     desktop / mobile icon is chosen from it.
-   - `Layout.isDefault()` -> EC-CUBE marks stock layouts undeletable. The
-     AdminLayoutListFetched projection carries no default flag, and ALPS
-     exposes neither create nor delete for layouts (LayoutList resource
-     has only GET + a doUpdateLayout link). The delete button is OMITTED.
-     Enumerated as residual.
-   - `Layout.pages` (the per-layout page join) -> NOT carried by the
-     AdminLayoutListFetched projection (the layout->page join was out of
-     the Wave 9 CMS slice). The collapse body renders the empty-state
-     message. Enumerated as residual — MISSING-BODY-FIELD: `layouts[].pages`.
-   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
-     CSRF widget. OMITTED. EC-CUBE-runtime only — enumerated as residual.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-layout-layout-list' %}
-{% set title = 'レイアウト管理' %}
+{% set title = 'レイアウト一覧' %}
 {% set sub_title = 'コンテンツ管理' %}
 
-{% block javascript %}
-    <script>
-        $(function() {
-            // 削除モーダルのhrefとmessageの変更
-            $('#DeleteModal').on('shown.bs.modal', function(event) {
-                var target = $(event.relatedTarget);
-                // hrefの変更
-                $(this).find('[data-post-action="delete"]').attr('href', target.data('url'));
+{#
+  DATA CONTRACT  (src/Resource/Page/Admin/Layout/LayoutList.php onGet)
+    count      int                       — 登録レイアウト総数
+    layouts    list<{                    — レイアウト行
+                 layoutId:   string,     —   不透明な文字列ID (例: lo-pc-default)
+                 layoutName: string,     —   表示名 (例: PC標準)
+                 deviceType: int         —   10 = PC, 2 = モバイル
+               }>
 
-                // messageの変更
-                $(this).find('p.modal-message').text(target.data('message'));
-            });
-        });
-    </script>
-{% endblock %}
+  ACTIONS  (src/Resource/Page/Admin/Layout/LayoutList.php #[Link])
+    goLayout       GET /admin/layout/layout?layoutId={layoutId}  — レイアウト編集へ
+    doUpdateLayout PUT /admin/layout/layout                       — 名称更新 (Layout.twig 側)
+
+  DESIGN VOCABULARY  public/assets/idea-store/css/idea-admin.css
+    idea-admin-kpi            — 集計カード
+    idea-admin-table-wrap     — テーブルコンテナ
+    idea-admin-table          — データテーブル
+    idea-admin-badge          — デバイス種別チップ
+    idea-admin-action         — リンクボタン
+    idea-admin-icon-btn       — アイコンアクション
+    idea-admin-empty          — 空状態
+
+  INTENTIONAL OMISSIONS  (ALPS 契約に存在しない)
+    - 新規作成: goLayoutList は create リンクを持たない (Wave 9 CMS slice)
+    - 削除: doDeleteLayout は ALPS に存在しない
+    - layouts[].pages: AdminLayoutListFetched に page join なし
+#}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="d-block mb-3">
-                    <a class="btn btn-ec-regular" href="/admin/layout/layout">新規作成</a>
-                </div>
-                {# layouts #}
-                {% for Layout in layouts %}
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8">
-                                    {% if Layout.deviceType == 10 %}
-                                        {% set icon = 'fa-desktop' %}
-                                    {% else %}
-                                        {% set icon = 'fa-mobile' %}
-                                    {% endif %}
-                                    <i class="fa fa-fw {{ icon }} fa-lg me-2"></i>
-                                    <a class="card-title align-middle"
-                                       href="/admin/layout/layout?layoutId={{ Layout.layoutId }}">{{ Layout.layoutName }}</a>
-                                </div>
-                                <div class="col-4 text-end">
-                                    <a href="#layout-{{ Layout.layoutId }}" data-bs-toggle="collapse" aria-expanded="false" aria-controls="layout-{{ Layout.layoutId }}">
-                                        <i class="fa fa-angle-down fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
 
-                        {# Pages #}
-                        <div class="collapse ec-cardCollapse" id="layout-{{ Layout.layoutId }}">
-                            <div class="p-0 empty-item">
-                                <div class="d-block p-3">
-                                    <span class="text-muted">ページが登録されていません</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
+{# ── KPI strip ── #}
+<div class="idea-admin-kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); margin-bottom: 1.25rem;">
+  <div class="idea-admin-kpi">
+    <div class="idea-admin-kpi__label">登録レイアウト数</div>
+    <div class="idea-admin-kpi__value">{{ count }}</div>
+    <div class="idea-admin-kpi__sub">PC + モバイル</div>
+  </div>
+</div>
 
-                <div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="DeleteModal" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">削除します</h5>
-                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p class="modal-message"><!-- jsでメッセージを挿入 --></p>
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-ec-sub w-25" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                <a href="#" class="btn btn-ec-delete"  data-confirm="false">
-                                    削除
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+{# ── Layout table / empty state ── #}
+{% if count %}
+
+  <div class="idea-admin-table-wrap">
+    <table class="idea-admin-table" aria-label="レイアウト一覧">
+      <thead>
+        <tr>
+          <th scope="col">デバイス</th>
+          <th scope="col">レイアウト名</th>
+          <th scope="col">ID</th>
+          <th scope="col" class="idea-admin-table__actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for layout in layouts %}
+        <tr id="layout-row-{{ layout.layoutId }}">
+
+          <td>
+            {% if layout.deviceType == 10 %}
+              <span class="idea-admin-badge idea-admin-badge--public" title="PC">
+                <i class="fa fa-desktop" aria-hidden="true" style="margin-right:.3rem;"></i>
+                PC
+              </span>
+            {% elseif layout.deviceType == 2 %}
+              <span class="idea-admin-badge idea-admin-badge--private" title="モバイル">
+                <i class="fa fa-mobile" aria-hidden="true" style="margin-right:.3rem;"></i>
+                モバイル
+              </span>
+            {% else %}
+              <span class="idea-admin-badge" title="デバイス種別 {{ layout.deviceType }}">
+                <i class="fa fa-question-circle" aria-hidden="true" style="margin-right:.3rem;"></i>
+                {{ layout.deviceType }}
+              </span>
+            {% endif %}
+          </td>
+
+          <td>
+            <a
+              class="idea-admin-meta__link"
+              href="/admin/layout/layout?layoutId={{ layout.layoutId }}"
+              rel="goLayout"
+            >{{ layout.layoutName }}</a>
+          </td>
+
+          <td style="color: var(--idea-muted); font-size: .78rem; font-family: monospace;">
+            {{ layout.layoutId }}
+          </td>
+
+          <td class="idea-admin-table__actions">
+            {# goLayout: レイアウト編集 (名称変更 + ブロック配置) #}
+            <a
+              class="idea-admin-action"
+              href="/admin/layout/layout?layoutId={{ layout.layoutId }}"
+              rel="goLayout"
+              aria-label="{{ layout.layoutName }}を編集"
+            >
+              <i class="fa fa-pencil" aria-hidden="true"></i>
+              編集
+            </a>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4">{{ count }}件</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+{% else %}
+
+  <div class="idea-admin-empty" role="status">
+    <i class="fa fa-th-large fa-2x" aria-hidden="true"></i>
+    <p class="idea-admin-empty__title">レイアウトが登録されていません</p>
+    <p style="font-size:.84rem;">システム管理者に連絡してシードデータを確認してください。</p>
+  </div>
+
+{% endif %}
+
 {% endblock %}

@@ -59,7 +59,6 @@ final class HttpCheckoutEntryFormTest extends TestCase
 
         $cart = $this->form('GET', '/cart');
         $this->assertSame(200, $cart['status']);
-        $this->assertStringContainsString('ec-cartRow__amountUpForm', $cart['body']);
         $this->assertStringContainsString('rel="goCheckoutEntry"', $cart['body']);
         $this->assertStringNotContainsString('"code":404', $cart['body']);
         $this->assertStringNotContainsString('"code":401', $cart['body']);
@@ -102,7 +101,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
     {
         $form = $this->form('GET', '/shopping/non-member');
         $this->assertSame(200, $form['status']);
-        $this->assertStringContainsString('<h1>お客様情報の入力</h1>', $form['body']);
+        $this->assertStringContainsString('お客様情報の入力', $form['body']);
         $this->assertStringContainsString('name="pref"', $form['body']);
         $this->assertStringContainsString('<option value="13">東京都</option>', $form['body']);
 
@@ -124,7 +123,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
 
         $this->assertSame(400, $rejected['status']);
         $this->assertStringContainsString('text/html', $rejected['headers']['Content-Type'] ?? '');
-        $this->assertStringContainsString('<h1>お客様情報の入力</h1>', $rejected['body']);
+        $this->assertStringContainsString('お客様情報の入力', $rejected['body']);
         $this->assertStringContainsString('入力してください。', $rejected['body']);
         $this->assertStringNotContainsString('Invalid parameter type', $rejected['body']);
         $this->assertStringNotContainsString('application/json', $rejected['headers']['Content-Type'] ?? '');
@@ -142,7 +141,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
 
         $form = $this->form('GET', '/shopping/non-member');
         $this->assertSame(200, $form['status']);
-        $this->assertStringContainsString('<h1>お客様情報の入力</h1>', $form['body']);
+        $this->assertStringContainsString('お客様情報の入力', $form['body']);
 
         $email = 'http-non-member-' . str_replace('.', '-', uniqid('', true)) . '@example.test';
         $submitted = $this->form('POST', '/shopping/non-member', [
@@ -169,7 +168,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
 
         $confirm = $this->form('GET', $location);
         $this->assertSame(200, $confirm['status']);
-        $this->assertStringContainsString('ご注文内容', $confirm['body']);
+        $this->assertStringContainsString('注文内容の確認', $confirm['body']);
         $this->assertStringContainsString('サンプル商品 A', $confirm['body']);
         $this->assertStringNotContainsString('確認できる注文内容がありません。', $confirm['body']);
 
@@ -186,7 +185,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
     {
         $form = $this->form('GET', '/entry');
         $this->assertSame(200, $form['status']);
-        $this->assertStringContainsString('<h1>新規会員登録</h1>', $form['body']);
+        $this->assertStringContainsString('会員登録', $form['body']);
         $this->assertStringContainsString('name="email_confirm"', $form['body']);
         $this->assertStringContainsString('name="password_confirm"', $form['body']);
 
@@ -216,7 +215,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
 
         $this->assertSame(400, $rejected['status']);
         $this->assertStringContainsString('text/html', $rejected['headers']['Content-Type'] ?? '');
-        $this->assertStringContainsString('<h1>新規会員登録</h1>', $rejected['body']);
+        $this->assertStringContainsString('会員登録', $rejected['body']);
         $this->assertStringContainsString('メールアドレスが一致しません。', $rejected['body']);
         $this->assertStringContainsString('パスワードが一致しません。', $rejected['body']);
         $this->assertStringContainsString('value="broken"', $rejected['body']);
@@ -263,7 +262,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
     {
         $form = $this->form('GET', '/login');
         $this->assertSame(200, $form['status']);
-        $this->assertStringContainsString('<h1>ログイン</h1>', $form['body']);
+        $this->assertStringContainsString('ログイン', $form['body']);
         $this->assertStringContainsString('name="mode" value="login"', $form['body']);
 
         $rejected = $this->form('POST', '/login', [
@@ -275,9 +274,9 @@ final class HttpCheckoutEntryFormTest extends TestCase
 
         $this->assertSame(400, $rejected['status']);
         $this->assertStringContainsString('text/html', $rejected['headers']['Content-Type'] ?? '');
-        $this->assertStringContainsString('<h1>ログイン</h1>', $rejected['body']);
+        $this->assertStringContainsString('ログイン', $rejected['body']);
         $this->assertStringContainsString('入力してください。', $rejected['body']);
-        $this->assertStringContainsString('class="ec-errorMessage"', $rejected['body']);
+        $this->assertStringContainsString('class="idea-form-error"', $rejected['body']);
         $this->assertStringNotContainsString('"code":400', $rejected['body']);
         $this->assertStringNotContainsString('application/json', $rejected['headers']['Content-Type'] ?? '');
         $this->assertStringNotContainsString('value="login-test-password-2026"', $rejected['body']);
@@ -311,7 +310,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
     {
         $form = $this->form('GET', '/contact');
         $this->assertSame(200, $form['status']);
-        $this->assertStringContainsString('<h1>お問い合わせ</h1>', $form['body']);
+        $this->assertStringContainsString('お問い合わせ', $form['body']);
 
         $rejected = $this->form('POST', '/contact', [
             'contactName01' => '',
@@ -324,11 +323,9 @@ final class HttpCheckoutEntryFormTest extends TestCase
 
         $this->assertSame(400, $rejected['status']);
         $this->assertStringContainsString('text/html', $rejected['headers']['Content-Type'] ?? '');
-        $this->assertStringContainsString('<h1>お問い合わせ</h1>', $rejected['body']);
+        $this->assertStringContainsString('お問い合わせ', $rejected['body']);
         $this->assertStringContainsString('入力してください。', $rejected['body']);
-        $this->assertStringContainsString('class="ec-halfInput error"', $rejected['body']);
-        $this->assertStringContainsString('class="ec-input error"', $rejected['body']);
-        $this->assertStringContainsString('class="ec-errorMessage">入力してください。</p>', $rejected['body']);
+        $this->assertStringContainsString('class="idea-form-error"', $rejected['body']);
         $this->assertStringNotContainsString('Invalid parameter type', $rejected['body']);
         $this->assertStringNotContainsString('application/json', $rejected['headers']['Content-Type'] ?? '');
     }

@@ -29,7 +29,7 @@ final class HttpResourceHrefTest extends TestCase
         $next = $this->resource->href('goProductList', [], $source);
 
         $this->assertSame(Code::OK, $next->code);
-        $this->assertStringContainsString('ec-shelfRole', $next->toString());
+        $this->assertStringContainsString('aria-label="商品一覧"', $next->toString());
     }
 
     public function testFollowsLinkHeaderFallback(): void
@@ -39,7 +39,7 @@ final class HttpResourceHrefTest extends TestCase
         $next = $this->resource->href('goCart', [], $source);
 
         $this->assertSame(Code::OK, $next->code);
-        $this->assertStringContainsString('ec-cartRole', $next->toString());
+        $this->assertStringContainsString('rel="goCheckoutEntry"', $next->toString());
     }
 
     public function testFollowsHalBeforeHtmlAndLinkHeader(): void
@@ -57,7 +57,7 @@ final class HttpResourceHrefTest extends TestCase
         $next = $this->resource->href('goCart', [], $source);
 
         $this->assertSame(Code::OK, $next->code);
-        $this->assertStringContainsString('ec-cartRole', $next->toString());
+        $this->assertStringContainsString('rel="goCheckoutEntry"', $next->toString());
     }
 
     /** @param array<string, string> $headers */

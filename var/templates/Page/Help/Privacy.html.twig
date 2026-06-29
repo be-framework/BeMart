@@ -1,42 +1,69 @@
-{#
-  BeMart Help — プライバシーポリシー (EC-CUBE goHelpPrivacy).
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}プライバシーポリシー | IDEA STORE{% endblock %}
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><span>プライバシーポリシー</span>
+</nav>
 
-  PORT of EC-CUBE 4.3 default-theme `Help/privacy.twig`
-  (src/Eccube/Resource/template/default/Help/privacy.twig).
+<section class="idea-container idea-section idea-section--tight" aria-labelledby="idea-privacy-title">
+  <header>
+    <p class="idea-eyebrow">Privacy policy</p>
+    <h1 id="idea-privacy-title" class="idea-title idea-title--compact">プライバシーポリシー</h1>
+    <p class="idea-lead">お客様の個人情報を適切に保護し、安心してご利用いただけるよう努めます。</p>
+  </header>
+</section>
 
-  Markup skeleton, `ec-role` / `ec-pageHeader` / `ec-off1Grid` /
-  `ec-heading-bold` classes and structure are kept verbatim from
-  EC-CUBE. EC-CUBE's `Help/privacy.twig` ships a fixed Japanese prose
-  body (no data binding) — the privacy policy default copy. The
-  Help/Privacy resource (src/Resource/Page/Help/Privacy.php) is a pure
-  renderer; the policy prose is part of the template port, copied
-  verbatim from EC-CUBE's template so the render-diff is zero.
+<section class="idea-container idea-section">
+  {% if staticContent.sections is defined and staticContent.sections|length > 0 %}
+    {% for section in staticContent.sections %}
+    <article class="idea-checkout-panel" aria-labelledby="idea-privacy-section-{{ loop.index }}">
+      {% if section.title is defined and section.title %}
+      <h2 id="idea-privacy-section-{{ loop.index }}" class="idea-section-title">{{ section.title }}</h2>
+      {% endif %}
+      {% if section.body is defined and section.body %}
+      <p class="idea-muted">{{ section.body|nl2br }}</p>
+      {% endif %}
+      {% if section.content is defined and section.content %}
+      <p>{{ section.content|nl2br }}</p>
+      {% endif %}
+    </article>
+    {% endfor %}
+  {% else %}
+  <div class="idea-checkout-panel">
+    <h2 class="idea-section-title">個人情報の定義</h2>
+    <p>個人情報とは、お客様個人に関する情報であって、氏名・住所・電話番号・メールアドレス等、お客様を識別できる情報を指します。他の情報と照合することにより個人を識別できる情報も含まれます。</p>
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'front.privacy.title'|trans }}` -> the ja literal "プライバシーポリシー".
-#}
-{% extends 'base.html.twig' %}
+    <h2 class="idea-section-title">個人情報の収集</h2>
+    <p>当ストアは、会員登録・ご注文・お問い合わせ等の際に、ご利用目的の範囲でお客様の個人情報を収集します。収集する情報は、氏名・住所・電話番号・メールアドレス・ご注文内容等です。</p>
 
-{% set route = 'help-privacy' %}
-{% set title = 'プライバシーポリシー' %}
+    <h2 class="idea-section-title">個人情報の利用目的</h2>
+    <p>収集した個人情報は、以下の目的で利用します。</p>
+    <ul>
+      <li>ご注文の受付・確認・発送・代金請求</li>
+      <li>商品・サービスに関するご案内およびアフターサービス</li>
+      <li>お問い合わせへの対応</li>
+      <li>サービス改善のための分析・統計処理（個人を特定しない形式）</li>
+    </ul>
 
-{% block main %}
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1>プライバシーポリシー</h1>
-        </div>
-        <div class="ec-off1Grid">
-            <div class="ec-off1Grid__cell">
-                <p>
-                    個人情報保護の重要性に鑑み、「個人情報の保護に関する法律」及び本プライバシーポリシーを遵守し、お客さまのプライバシー保護に努めます。
-                </p>
-            </div>
-        </div>
-        <div class="ec-off1Grid">
-            <div class="ec-off1Grid__cell">
-                <div class="ec-heading-bold">個人情報の定義</div>
-                <p>お客さま個人に関する情報(以下「個人情報」といいます)であって、お客さまのお名前、住所、電話番号など当該お客さま個人を識別することができる情報をさします。他の情報と組み合わせて照合することにより個人を識別することができる情報も含まれます。</p>
-            </div>
-        </div>
-    </div>
+    <h2 class="idea-section-title">個人情報の第三者提供</h2>
+    <p>当ストアは、法令に基づく場合を除き、お客様の同意なく個人情報を第三者に提供しません。ただし、配送業者・決済事業者等の業務委託先には、業務遂行に必要な範囲で情報を提供することがあります。</p>
+
+    <h2 class="idea-section-title">個人情報の管理</h2>
+    <p>当ストアは、個人情報への不正アクセス・紛失・破損・改ざん・漏洩等を防止するため、適切なセキュリティ対策を講じます。個人情報を取り扱う業務委託先についても、適切な管理を求めます。</p>
+
+    <h2 class="idea-section-title">開示・訂正・削除の請求</h2>
+    <p>お客様は、当ストアが保有するご自身の個人情報について、開示・訂正・削除をご請求いただけます。ご請求の際は、お問い合わせフォームよりご連絡ください。本人確認の上、合理的な期間内に対応します。</p>
+
+    <h2 class="idea-section-title">Cookieの使用</h2>
+    <p>当ストアは、ご利用状況の把握とサービス改善を目的として、Cookieを使用することがあります。ブラウザの設定によりCookieを無効にすることができますが、一部の機能がご利用いただけなくなる場合があります。</p>
+
+    <h2 class="idea-section-title">プライバシーポリシーの改定</h2>
+    <p>当ストアは、必要に応じて本ポリシーを改定することがあります。改定後のポリシーは本ページへの掲載をもって効力を生じます。重要な変更がある場合は、サイト上でお知らせします。</p>
+  </div>
+  {% endif %}
+
+  <div class="idea-form-actions" style="margin-top: 2rem;">
+    <a class="idea-button" href="/" rel="goTop">トップページへ戻る</a>
+  </div>
+</section>
 {% endblock %}

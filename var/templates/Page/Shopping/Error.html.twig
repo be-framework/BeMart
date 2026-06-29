@@ -1,51 +1,55 @@
-{#
-  BeMart Shopping error page — EC-CUBE goShoppingError.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}購入手続きエラー | IDEA STORE{% endblock %}
+{% block content %}
 
-  PORT of EC-CUBE 4.3 default-theme `Shopping/shopping_error.twig`
-  (src/Eccube/Resource/template/default/Shopping/shopping_error.twig).
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><a href="/cart">Cart</a><span>/</span><span>Error</span>
+</nav>
 
-  DATA page (see var/templates/README.md). Markup skeleton, the
-  `ec-role` / `ec-pageHeader` / `ec-off3Grid` / `ec-off4Grid` /
-  `ec-blockBtn--cancel` classes and the block structure are kept
-  verbatim from EC-CUBE.
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-error-title">
+  <div>
+    <p class="idea-eyebrow">Checkout error</p>
+    <h1 id="idea-error-title" class="idea-title idea-title--compact">購入手続きを<br>完了できませんでした。</h1>
+    <p class="idea-muted">在庫状況・お支払い情報・セッションのいずれかに問題が発生しました。カートに戻って内容を確認してください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Error</span>
+    <strong>手続き中断</strong>
+    <small>購入は完了していません</small>
+  </div>
+</section>
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `{{ include('Shopping/alert.twig', {'error_only': true}) }}` —
-     EC-CUBE's alert partial iterates `app.session.flashbag` to surface
-     the underlying error reason (stock / payment / session). BeMart has
-     no flashbag transport (the Error resource is a Wave 3H pure
-     renderer — see src/Resource/Page/Shopping/Error.php), so the
-     include is OMITTED; with an empty flashbag EC-CUBE's alert partial
-     also emits nothing, so it contributes nothing to the render diff.
-     Surfacing the actual error reason is a MISSING BODY FIELD
-     follow-up (a flashbag-equivalent error transport).
-#}
-{% extends 'base.html.twig' %}
+<section class="idea-container idea-checkout-progress" aria-label="購入ステップ">
+  <span><b>1</b>カート</span>
+  <span><b>2</b>購入入口</span>
+  <span><b>3</b>ご注文手続き</span>
+  <span><b>4</b>内容確認</span>
+  <span><b>5</b>完了</span>
+</section>
 
-{% set body_class = 'cart_page' %}
-{% set route = 'shopping-error' %}
-{% set title = '購入エラー' %}
-
-{% block main %}
-
-<div class="ec-role">
-    <div class="ec-pageHeader">
-        <h1>購入エラー</h1>
+<section class="idea-container idea-section" aria-labelledby="idea-error-detail-heading">
+  <div class="idea-checkout-panel" style="max-width: 48rem; margin: 0 auto;">
+    <div class="idea-panel-head">
+      <div>
+        <p class="idea-eyebrow">What to do next</p>
+        <h2 id="idea-error-detail-heading" class="idea-section-title">カートに戻って再度お試しください</h2>
+      </div>
     </div>
-</div>
 
-<!-- アラートメッセージ -->
-
-<div class="ec-role">
-    <div class="ec-off3Grid">
-        <div class="ec-off3Grid__cell">
-            <div class="ec-off4Grid">
-                <div class="ec-off4Grid__cell">
-                    <a class="ec-blockBtn--cancel" href="/cart">カートに戻る</a>
-                </div>
-            </div>
-        </div>
+    <div class="idea-info-list" style="margin-bottom: 1.5rem;">
+      <p>次のいずれかが原因として考えられます。</p>
+      <ul>
+        <li>選択した商品の在庫がなくなった</li>
+        <li>お支払い情報の確認ができなかった</li>
+        <li>セッションの有効期限が切れた</li>
+      </ul>
+      <p class="idea-muted">問題が解決しない場合は、お問い合わせページよりご連絡ください。</p>
     </div>
-</div>
+
+    <div class="idea-actions">
+      <a class="idea-button" href="/cart" rel="goCart">カートに戻る</a>
+    </div>
+  </div>
+</section>
+
 {% endblock %}

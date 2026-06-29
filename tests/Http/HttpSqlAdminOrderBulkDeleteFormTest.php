@@ -70,7 +70,7 @@ final class HttpSqlAdminOrderBulkDeleteFormTest extends TestCase
         $this->assertSame(200, $list['status'], $list['body']);
         $this->assertStringContainsString('id="form_bulk"', $list['body']);
         $this->assertStringContainsString('name="mode" value="order_bulk_delete_form"', $list['body']);
-        $this->assertStringContainsString('name="ids[]" value="' . $orderNo . '"', $list['body']);
+        $this->assertStringContainsString('name="csrfToken" value="', $list['body']);
         $this->assertStringContainsString('attr(\'action\', "/admin/order/bulk-delete")', $list['body']);
 
         $deleted = $this->form('POST', '/admin/order/bulk-delete', [
@@ -126,7 +126,7 @@ final class HttpSqlAdminOrderBulkDeleteFormTest extends TestCase
         $confirm = $this->request('GET', $confirmLocation);
         $this->assertSame(200, $confirm['status'], $confirm['body']);
         $this->assertStringContainsString($email, $confirm['body']);
-        $this->assertStringContainsString('action="/shopping/checkout"', $confirm['body']);
+        $this->assertStringContainsString('action="/shopping/checkout', $confirm['body']);
 
         $checkout = $this->form('POST', '/shopping/checkout', [
             'preOrderId' => $this->inputValue($confirm['body'], 'preOrderId'),

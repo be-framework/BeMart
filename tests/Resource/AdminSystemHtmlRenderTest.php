@@ -13,13 +13,13 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 
 /**
- * Phase 3 — HTML render check for the admin システム情報 Tier-2 page.
+ * Phase 3 — HTML render verification for the admin システム情報 page.
  *
- * Render-smoke standard: the page renders a full admin-frame HTML
- * document through {@see HtmlModule} with the body shape supplied by
- * {@see \MyVendor\BeMart\Resource\Page\Admin\System}. The EC-CUBE
- * residual-diff fidelity check is a follow-up gated on the EC-CUBE 4.3
- * reference clone (`tools/ec-cube-source/`).
+ * L1: required data fields are present in the rendered output.
+ * L2: action links and hypermedia structure are correct.
+ * Frame: idea-admin-shell landmark is present.
+ *
+ * EC-CUBE parity assertions have been retired; see @group ec-cube-parity-archived.
  */
 final class AdminSystemHtmlRenderTest extends TestCase
 {
@@ -44,34 +44,83 @@ final class AdminSystemHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testSystemRendersAsHtmlDocument(): void
+    // ── L0: HTTP contract ─────────────────────────────────────────────────
+
+    public function testReturnsOkWithHtmlContentType(): void
     {
         $ro = $this->resource->get('page://self/admin/system');
 
         $this->assertSame(Code::OK, $ro->code);
-
-        $html = $ro->toString();
-
-        $this->assertStringContainsString('<!doctype html>', $html);
-        $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
-        $this->assertStringContainsString('</body>', $html);
-
+        $ro->toString();
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testSystemPreservesEcCubeAdminMarkupStructure(): void
+    // ── L1: required data fields present ─────────────────────────────────
+
+    public function testRendersPhpVersionInOutput(): void
     {
         $html = $this->resource->get('page://self/admin/system')->toString();
 
-        foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-contentsArea">',
-            'id="server_info_box__header"',
-            'システム情報',
-            'PHP Version',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
+        $this->assertStringContainsString(PHP_VERSION, $html, 'PHP version must appear in rendered HTML');
+    }
+
+    public function testRendersAllInfoRows(): void
+    {
+        $html = $this->resource->get('page://self/admin/system')->toString();
+
+        foreach (['PHP Version', 'PHP SAPI', 'OS', 'Server', 'Application'] as $label) {
+            $this->assertStringContainsString($label, $html, "info row '{$label}' missing from rendered output");
         }
+    }
+
+    public function testRendersApplicationName(): void
+    {
+        $html = $this->resource->get('page://self/admin/system')->toString();
+
+        $this->assertStringContainsString('BeMart', $html, 'Application name BeMart must be present');
+    }
+
+    // ── L2: idea-admin frame landmark ─────────────────────────────────────
+
+    public function testRendersIdeaAdminShell(): void
+    {
+        $html = $this->resource->get('page://self/admin/system')->toString();
+
+        $this->assertStringContainsString('idea-admin-shell', $html, 'idea-admin-shell landmark is required');
+        $this->assertStringContainsString('idea-admin-content', $html, 'idea-admin-content region is required');
+    }
+
+    public function testRendersPageTitleHeading(): void
+    {
+        $html = $this->resource->get('page://self/admin/system')->toString();
+
+        $this->assertStringContainsString('idea-admin-page-title', $html, 'page title element is required');
+        $this->assertStringContainsString('システム情報', $html, 'page title text must be present');
+    }
+
+    // ── L2: phpinfoEnabled=false hides phpinfo section ────────────────────
+
+    public function testPhpinfoSectionHiddenByDefault(): void
+    {
+        $html = $this->resource->get('page://self/admin/system')->toString();
+
+        $this->assertStringNotContainsString(
+            'PHP 詳細情報',
+            $html,
+            'phpinfo section must not render when phpinfoEnabled is false'
+        );
+    }
+
+    // ── EC-CUBE parity (retired) ──────────────────────────────────────────
+
+    /**
+     * @group ec-cube-parity-archived
+     */
+    public function testEcCubeMarkupStructureRetired(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE markup parity check retired. ' .
+            'BeMart uses the idea-admin design language; EC-CUBE Bootstrap/c-* classes are no longer expected.'
+        );
     }
 }

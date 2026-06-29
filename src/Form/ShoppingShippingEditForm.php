@@ -79,9 +79,9 @@ final class ShoppingShippingEditForm extends AbstractForm
         $this->setField('postalCode', 'text');
         $this->setField('pref', 'select')->setOptions([]);
         $this->setField('addr01', 'text')
-            ->setAttribs(['placeholder' => '市区町村名(例：大阪市北区)']);
+            ->setAttribs(['placeholder' => '市区町村名(例：千代田区)']);
         $this->setField('addr02', 'text')
-            ->setAttribs(['placeholder' => '番地・ビル名(例：西梅田1丁目6-8)']);
+            ->setAttribs(['placeholder' => '番地・ビル名(例：神田1-1-1)']);
 
         // 電話番号.
         $this->setField('phoneNumber', 'text');

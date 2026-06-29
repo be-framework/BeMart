@@ -59,7 +59,7 @@ final class HttpSqlAdminCsvUploadFormTest extends TestCase
     {
         $form = $this->request('GET', '/admin/product/csv-product');
         $this->assertSame(200, $form['status'], $form['body']);
-        $this->assertStringContainsString('id="csv_product_form"', $form['body']);
+        $this->assertStringContainsString('enctype="multipart/form-data"', $form['body']);
         $this->assertStringContainsString('name="import_file"', $form['body']);
 
         $productCode = 'csv-upload-' . bin2hex(random_bytes(4));
@@ -80,7 +80,7 @@ final class HttpSqlAdminCsvUploadFormTest extends TestCase
     {
         $form = $this->request('GET', '/admin/product/csv-category');
         $this->assertSame(200, $form['status'], $form['body']);
-        $this->assertStringContainsString('id="csv_category_form"', $form['body']);
+        $this->assertStringContainsString('enctype="multipart/form-data"', $form['body']);
         $this->assertStringContainsString('name="import_file"', $form['body']);
 
         $categoryName = 'CSV Upload Category ' . bin2hex(random_bytes(4));
@@ -99,7 +99,7 @@ final class HttpSqlAdminCsvUploadFormTest extends TestCase
     {
         $form = $this->request('GET', '/admin/product/csv-class-name');
         $this->assertSame(200, $form['status'], $form['body']);
-        $this->assertStringContainsString('id="csv_class_name_form"', $form['body']);
+        $this->assertStringContainsString('enctype="multipart/form-data"', $form['body']);
         $this->assertStringContainsString('name="import_file"', $form['body']);
 
         $className = 'CSV Class ' . bin2hex(random_bytes(4));
@@ -121,7 +121,7 @@ final class HttpSqlAdminCsvUploadFormTest extends TestCase
 
         $form = $this->request('GET', '/admin/product/csv-class-category');
         $this->assertSame(200, $form['status'], $form['body']);
-        $this->assertStringContainsString('id="csv_class_category_form"', $form['body']);
+        $this->assertStringContainsString('enctype="multipart/form-data"', $form['body']);
         $this->assertStringContainsString('name="import_file"', $form['body']);
 
         $classCategory = 'CSV CC ' . bin2hex(random_bytes(4));
@@ -140,7 +140,6 @@ final class HttpSqlAdminCsvUploadFormTest extends TestCase
     {
         $form = $this->request('GET', '/admin/csv-config?csvType=3');
         $this->assertSame(200, $form['status'], $form['body']);
-        $this->assertStringContainsString('id="csv-form"', $form['body']);
         $this->assertStringContainsString('action="/admin/csv-config"', $form['body']);
         $this->assertStringContainsString('name="csrfToken"', $form['body']);
         $this->assertStringContainsString('value="' . self::CSRF_TOKEN . '"', $form['body']);
@@ -250,7 +249,7 @@ final class HttpSqlAdminCsvUploadFormTest extends TestCase
         $this->assertSame(200, $list['status'], $list['body']);
         $this->assertSame(
             1,
-            preg_match('/<li id="ex-class_name-(\d+)".*?' . preg_quote($className, '/') . '/s', $list['body'], $match),
+            preg_match('/<tr[^>]*data-class-name-id="(\d+)"[^>]*>.*?' . preg_quote($className, '/') . '/s', $list['body'], $match),
             $list['body'],
         );
 

@@ -1,299 +1,437 @@
-{#
-  BeMart admin Page edit — EC-CUBE goPage (ページ登録/編集).
-
-  PORT of EC-CUBE 4.3 admin-theme `Content/page_edit.twig`
-  (src/Eccube/Resource/template/admin/Content/page_edit.twig).
-
-  FORM/CRUD page. Extends the admin frame (`admin-base.html.twig`). The
-  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
-  from EC-CUBE; only the dynamic bindings are rebound.
-
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md): the
-  Page resource (src/Resource/Page/Admin/Page/Page.php) exposes an
-  {@see \MyVendor\BeMart\Form\AdminPageForm} as `body['form']`, pre-filled
-  with the persisted row. The inputs render through that real form object:
-    {{ form.input('pageName')|raw }}  <- real <input> w/ EC-CUBE id and canonical name
-    {{ form.error('pageName') }}      <- inline Be-domain error, if any
-  `AdminPageForm::init()` ports the field names / ids from EC-CUBE's
-  `MainEditType` (block prefix `main_edit`).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - `is_user_data_page` -> the seed page is a SYSTEM page (pageEditType
-     2 = EDIT_TYPE_DEFAULT), so the `{% else %}` (non-user-data) branch
-     is rendered: the URL / file-name show as a static label + hidden
-     input. The user-data-page branch is dropped.
-   - `is_confirm_page` -> false; the layout-設定 + meta-設定 cards render.
-   - `form_widget(form.PcLayout)` / `form_widget(form.SpLayout)` -> the
-     PC / Mobile layout selects. The AdminPageFetched projection carries
-     no page->layout join (out of the Wave 9 CMS slice), so the
-     AdminPageForm declares no PcLayout/SpLayout fields and those select
-     cells render empty. Enumerated as residual — MISSING-BODY-FIELD:
-     `Page.PcLayout` / `Page.SpLayout`.
-   - the ACE editor `tpl_data` source + the meta fields — the free-page
-     template body + page meta were out of the Wave 9 CMS slice, so the
-     editor + meta inputs render empty (the AdminPageForm fields have no
-     persisted value). The markup shells are kept.
-   - `{% form_theme %}` and the `auto_render` entity-extension loop ->
-     Symfony form-theme / EC-CUBE entity-extension runtime. Dropped.
-#}
 {% extends 'admin-base.html.twig' %}
 
+{#
+  Admin CMS page editor — clean-room build.
+
+  DATA CONTRACT (src/Resource/Page/Admin/Page/Page.php onGet):
+    pageId        string|null  — empty string on new-page form
+    pageName      string
+    pageUrl       string|null
+    pageFileName  string
+    pageEditType  int          — 0=user, 1=preview, 2=system, 3=system-editable
+    csrfToken     string
+    form          object       — AdminPageForm (Ray.WebFormModule)
+
+  FORM CONTRACT (src/Form/AdminPageForm.php):
+    required inputs : pageName, pageUrl, pageFileName
+    disabled inputs : tpl_data, author, description, keyword, meta_robots, meta_tags
+    field ids       : main_edit_name, main_edit_url, main_edit_file_name,
+                      main_edit_tpl_data, main_edit_author, main_edit_description,
+                      main_edit_keyword, main_edit_meta_robots, main_edit_meta_tags
+
+  ACTIONS (src/Resource/Page/Admin/Page/Page.php #[Link]):
+    PUT    /admin/page/page?pageId=…&_method=put   — update existing page
+    POST   /admin/page/page-list                   — create new page
+    DELETE /admin/page/page?pageId=…&_method=delete — remove user page (editType < 2 only)
+    GET    /admin/page/page-list                   — back navigation (rel=goPageList)
+
+  UX decisions (clean-room, not mirroring EC-CUBE):
+    - Single-column layout for a form-first page; side panel for metadata / danger zone
+    - Delete uses a <dialog>-based confirmation (no browser confirm())
+    - Meta fields (Wave 9 disabled) shown as a read-only advisory spec list, not empty inputs
+    - Template-body editor (tpl_data) is wired to ACE; field exists hidden for form submission
+    - Edit-type badge in the side panel communicates system-vs-user status at a glance
+    - New-page vs edit-page mode controlled by isEdit flag; toolbar label and form action adjust
+    - Vanilla JS only (no jQuery/Bootstrap/EC-CUBE bundle)
+#}
+
+{% set isEdit = pageId is defined and pageId is not empty %}
+{% set canDelete = isEdit and pageEditType is defined and pageEditType < 2 %}
 {% set route = 'admin-page-page' %}
-{% set title = 'ページ管理' %}
+{% set title = isEdit ? 'ページ編集' : 'ページ登録' %}
 {% set sub_title = 'コンテンツ管理' %}
 
 {% block stylesheet %}
-    <style>
-        .ui-resizable-se {
-            right: -3px;
-            bottom: -3px;
-        }
-    </style>
+<style>
+/* ── Page-editor extras (idea-admin-* naming) ── */
+.idea-admin-page-editor-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+  padding: .65rem .9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(73,111,124,.22);
+  background: rgba(73,111,124,.06);
+  color: var(--idea-blue);
+  font-size: .82rem;
+  font-weight: 600;
+  margin-bottom: .5rem;
+}
+.idea-admin-page-edittype-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .22rem .65rem;
+  border-radius: var(--idea-admin-radius-badge);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.idea-admin-page-edittype--user     { background: rgba(82,107,85,.12);   color: var(--idea-olive);  border: 1px solid rgba(82,107,85,.25); }
+.idea-admin-page-edittype--preview  { background: rgba(169,130,46,.10);  color: #8a6020;             border: 1px solid rgba(169,130,46,.25); }
+.idea-admin-page-edittype--system   { background: rgba(205,191,170,.3);  color: var(--idea-muted);  border: 1px solid rgba(205,191,170,.5); }
+.idea-admin-page-edittype--system-e { background: rgba(73,111,124,.10);  color: var(--idea-blue);   border: 1px solid rgba(73,111,124,.22); }
+.idea-admin-page-meta-read {
+  display: grid;
+  gap: 0;
+}
+.idea-admin-page-meta-read__row {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: .35rem .75rem;
+  padding: .55rem 0;
+  border-bottom: 1px solid rgba(205,191,170,.3);
+  font-size: .84rem;
+  align-items: baseline;
+}
+.idea-admin-page-meta-read__row:last-child { border-bottom: none; }
+.idea-admin-page-meta-read__row dt {
+  color: var(--idea-muted);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.idea-admin-page-meta-read__row dd {
+  margin: 0;
+  word-break: break-word;
+  color: var(--idea-muted);
+  font-style: italic;
+  font-size: .8rem;
+}
+.idea-admin-page-code-wrap {
+  position: relative;
+}
+.idea-admin-page-code-editor {
+  height: 420px;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  overflow: hidden;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+
+{# ── Edit / create form ───────────────────────────────────────────────────── #}
+<form
+  id="idea-page-form"
+  method="post"
+  action="{{ isEdit ? '/admin/page/page?pageId=' ~ pageId|url_encode ~ '&_method=put' : '/admin/page/page-list' }}"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+  <div class="idea-admin-layout">
+
+    {# ── Primary column ───────────────────────────────────────────────────── #}
+    <div class="idea-admin-primary">
+
+      {# Section: ページ識別情報 #}
+      <section class="idea-admin-panel" aria-labelledby="sect-identity">
+        <div class="idea-admin-panel__head">
+          <h3 id="sect-identity">ページ識別情報</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          {# ページ名 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="main_edit_name">ページ名</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('pageName')|raw }}
+              {% if form.error('pageName') %}
+                <span class="idea-admin-error">{{ form.error('pageName') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# URL #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="main_edit_url">URL</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('pageUrl')|raw }}
+              {% if form.error('pageUrl') %}
+                <span class="idea-admin-error">{{ form.error('pageUrl') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# ファイル名 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="main_edit_file_name">
+                テンプレートファイル名
+                <i class="fa fa-question-circle fa-sm" aria-hidden="true" title="このページのコンテンツを記述する Twig テンプレートのファイル名（拡張子なし）。"></i>
+              </label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('pageFileName')|raw }}
+              {% if form.error('pageFileName') %}
+                <span class="idea-admin-error">{{ form.error('pageFileName') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# Section: テンプレートコード #}
+      <section class="idea-admin-panel" aria-labelledby="sect-code">
+        <div class="idea-admin-panel__head">
+          <h3 id="sect-code">テンプレートコード</h3>
+          <p class="idea-admin-panel__hint">Wave 9 — インライン編集は実装中です（保存は識別情報のみ有効）。</p>
+        </div>
+        <div class="idea-admin-panel__body">
+          <div class="idea-admin-page-editor-notice" role="note">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+            テンプレートファイルの直接編集機能は現フェーズでは無効です。ファイル名を確定後、サーバー上の Twig ファイルを直接編集してください。
+          </div>
+          <div class="idea-admin-page-code-wrap">
+            <div id="editor" class="idea-admin-page-code-editor" aria-label="Twig テンプレートエディタ"></div>
+            {# tpl_data is disabled in the form — rendered hidden for form wiring only #}
+            <div hidden>{{ form.input('tpl_data')|raw }}</div>
+          </div>
+        </div>
+      </section>
+
+      {# Section: メタ設定（参照専用） #}
+      <section class="idea-admin-panel" aria-labelledby="sect-meta">
+        <div class="idea-admin-panel__head">
+          <h3 id="sect-meta">メタ設定</h3>
+          <p class="idea-admin-panel__hint">Wave 9 — メタフィールドの編集は現フェーズ対象外です。</p>
+        </div>
+        <div class="idea-admin-panel__body">
+          <div class="idea-admin-page-editor-notice" role="note">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+            以下のフィールドは現在参照専用です。編集機能は後続フェーズで追加されます。
+          </div>
+          {#
+            Meta inputs are rendered hidden (disabled in form class); the read-only
+            values are surfaced as a spec list to avoid confusion over inactive inputs.
+            Hidden fields ensure the form object is fully initialised.
+          #}
+          <div hidden>
+            {{ form.input('author')|raw }}
+            {{ form.input('description')|raw }}
+            {{ form.input('keyword')|raw }}
+            {{ form.input('meta_robots')|raw }}
+            {{ form.input('meta_tags')|raw }}
+          </div>
+          <dl class="idea-admin-page-meta-read">
+            <div class="idea-admin-page-meta-read__row">
+              <dt>author</dt>
+              <dd>{{ pageAuthor|default('—') }}</dd>
+            </div>
+            <div class="idea-admin-page-meta-read__row">
+              <dt>description</dt>
+              <dd>{{ pageDescription|default('—') }}</dd>
+            </div>
+            <div class="idea-admin-page-meta-read__row">
+              <dt>keyword</dt>
+              <dd>{{ pageKeyword|default('—') }}</dd>
+            </div>
+            <div class="idea-admin-page-meta-read__row">
+              <dt>robot</dt>
+              <dd>{{ pageMetaRobots|default('—') }}</dd>
+            </div>
+            <div class="idea-admin-page-meta-read__row">
+              <dt>metatag</dt>
+              <dd>{{ pageMetaTags|default('—') }}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+    </div>{# /idea-admin-primary #}
+
+    {# ── Side panel ────────────────────────────────────────────────────────── #}
+    <aside class="idea-admin-side" aria-label="ページ情報と操作">
+
+      {# ページ情報 #}
+      <section class="idea-admin-panel" aria-labelledby="sect-info">
+        <div class="idea-admin-panel__head">
+          <h3 id="sect-info">ページ情報</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <dl class="idea-admin-spec-list">
+            <div class="idea-admin-spec-row">
+              <dt>ID</dt>
+              <dd>{{ pageId|default('—') }}</dd>
+            </div>
+            <div class="idea-admin-spec-row">
+              <dt>編集区分</dt>
+              <dd>
+                {% if pageEditType is defined %}
+                  {% if pageEditType == 0 %}
+                    <span class="idea-admin-page-edittype-badge idea-admin-page-edittype--user">
+                      <i class="fa fa-user-o fa-xs" aria-hidden="true"></i>ユーザー作成
+                    </span>
+                  {% elseif pageEditType == 1 %}
+                    <span class="idea-admin-page-edittype-badge idea-admin-page-edittype--preview">
+                      <i class="fa fa-eye fa-xs" aria-hidden="true"></i>プレビュー
+                    </span>
+                  {% elseif pageEditType == 2 %}
+                    <span class="idea-admin-page-edittype-badge idea-admin-page-edittype--system">
+                      <i class="fa fa-lock fa-xs" aria-hidden="true"></i>システム
+                    </span>
+                  {% elseif pageEditType == 3 %}
+                    <span class="idea-admin-page-edittype-badge idea-admin-page-edittype--system-e">
+                      <i class="fa fa-pencil fa-xs" aria-hidden="true"></i>システム（編集可）
+                    </span>
+                  {% else %}
+                    {{ pageEditType }}
+                  {% endif %}
+                {% else %}
+                  —
+                {% endif %}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      {# ── 削除 (user-created pages only) ──────────────────────────────────── #}
+      {% if canDelete %}
+      <section class="idea-admin-panel" aria-labelledby="sect-delete">
+        <div class="idea-admin-panel__head">
+          <h3 id="sect-delete">危険な操作</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <p style="font-size:.83rem;color:var(--idea-muted);margin:0 0 .85rem;">
+            このページを削除すると元に戻せません。
+          </p>
+          <button
+            type="button"
+            class="idea-admin-action idea-admin-action--destructive"
+            style="width:100%;"
+            onclick="document.getElementById('delete-dialog').removeAttribute('hidden')"
+          >
+            <i class="fa fa-trash" aria-hidden="true"></i>
+            このページを削除
+          </button>
+        </div>
+      </section>
+      {% endif %}
+
+    </aside>
+
+  </div>{# /idea-admin-layout #}
+
+  {# ── Bottom toolbar ──────────────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/page/page-list">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        ページ一覧
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button type="submit" class="idea-admin-action idea-admin-action--primary">
+        <i class="fa fa-save" aria-hidden="true"></i>
+        {{ isEdit ? '変更を保存' : '登録する' }}
+      </button>
+    </div>
+  </div>
+
+</form>{# /idea-page-form #}
+
+{# ── Delete confirmation dialog ──────────────────────────────────────────── #}
+{% if canDelete %}
+<div id="delete-dialog" class="idea-admin-dialog-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title">
+  <div class="idea-admin-dialog">
+    <div class="idea-admin-dialog__head">
+      <p class="idea-admin-dialog__title" id="delete-dialog-title">
+        <i class="fa fa-exclamation-triangle" aria-hidden="true" style="color:#a9472e;margin-right:.35rem;"></i>
+        ページの削除
+      </p>
+    </div>
+    <div class="idea-admin-dialog__body">
+      <p>「<strong>{{ pageName|default('このページ') }}</strong>」を削除します。</p>
+      <p style="margin-top:.5rem;font-size:.83rem;color:#a9472e;">この操作は取り消せません。</p>
+    </div>
+    <div class="idea-admin-dialog__foot">
+      <button
+        type="button"
+        class="idea-admin-action"
+        onclick="document.getElementById('delete-dialog').setAttribute('hidden', '')"
+      >
+        キャンセル
+      </button>
+      <form
+        method="post"
+        action="/admin/page/page?pageId={{ pageId|url_encode }}&_method=delete"
+        style="display:contents;"
+      >
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <button type="submit" class="idea-admin-action idea-admin-action--destructive">
+          <i class="fa fa-trash" aria-hidden="true"></i>
+          削除する
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{# ── Flash notice (mutation errors / messages) ───────────────────────────── #}
+{% if message is defined and message %}
+  <div class="idea-admin-notice idea-admin-notice--error" role="alert">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    {{ message }}
+  </div>
+{% endif %}
+
 {% endblock %}
 
 {% block javascript %}
-    <script>
+<script>
+(function () {
+    'use strict';
+
+    /* ── ACE editor wiring ── */
+    if (typeof ace !== 'undefined') {
         ace.require('ace/ext/language_tools');
         var editor = ace.edit('editor');
         editor.session.setMode('ace/mode/twig');
         editor.setTheme('ace/theme/tomorrow');
-        editor.setValue('{{ pageTplData|default('')|escape('js') }}');
+        editor.setValue('{{ pageTplData|default('')|escape('js') }}', -1);
         editor.setOptions({
             enableBasicAutocompletion: true,
             enableSnippets: true,
             enableLiveAutocompletion: true,
-            showInvisibles: true
+            showInvisibles: false,
+            readOnly: true
         });
+        /* sync hidden textarea on submit even though tpl_data is disabled */
+        var form = document.getElementById('idea-page-form');
+        if (form) {
+            form.addEventListener('submit', function () {
+                var ta = document.getElementById('main_edit_tpl_data');
+                if (ta) { ta.value = editor.getValue(); }
+            });
+        }
+    }
 
-        $("#editor").resizable({
-            resize: function (event, ui) {
-                editor.resize();
+    /* ── Delete dialog: close on backdrop click ── */
+    var backdrop = document.getElementById('delete-dialog');
+    if (backdrop) {
+        backdrop.addEventListener('click', function (e) {
+            if (e.target === backdrop) {
+                backdrop.setAttribute('hidden', '');
             }
         });
-
-        $('#content_page_form').on('submit', function(elem) {
-            $('#main_edit_tpl_data').val(editor.getValue());
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !backdrop.hasAttribute('hidden')) {
+                backdrop.setAttribute('hidden', '');
+            }
         });
-    </script>
-{% endblock %}
-
-{% block main %}
-    <form id="content_page_form" method="post"
-          action="{% if pageId is defined and pageId %}/admin/page/page?pageId={{ pageId }}&_method=put{% else %}/admin/page/page-list{% endif %}">
-        <input type="hidden" id="main_edit__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <!-- ページ設定 -->
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8"><span class="card-title">ページ設定</span></div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#pageDetail" aria-expanded="false" aria-controls="pageDetail">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="pageDetail">
-                            <div class="card-body">
-                                <!-- ページ名 -->
-                                <div class="row mb-2">
-                                    <div class="col-2">
-                                        <span>ページ名</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col-10">
-                                        {{ form.input('pageName')|raw }}
-                                        {% if form.error('pageName') %}<span class="invalid-feedback d-block">{{ form.error('pageName') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                                <!-- URL -->
-                                <div class="row mb-2">
-                                    <div class="col-2">
-                                        <span>URL</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col-10">
-                                        <div class="row">
-                                            <div class="col pe-0"><span class="align-middle">{{ pageUrl|default('') }}</span></div>
-                                            <div>{{ form.input('pageUrl')|raw }}</div>
-                                            {% if form.error('pageUrl') %}<span class="invalid-feedback d-block">{{ form.error('pageUrl') }}</span>{% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- ファイル名 -->
-                                <div class="row mb-2">
-                                    <div class="col-2">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="ページの内容を記述したtwigテンプレートファイルの名前です。">
-                                            <span>ファイル名</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col-10">
-                                        <div class="row">
-                                            <div class="col pe-0 align-middle">
-                                                <span class="align-middle">{{ pageFileName|default('') }}.twig</span>
-                                                <div>{{ form.input('pageFileName')|raw }}</div>
-                                            </div>
-                                            {% if form.error('pageFileName') %}<span class="invalid-feedback d-block">{{ form.error('pageFileName') }}</span>{% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- コード -->
-                                <div class="row mb-2">
-                                    <div class="col-2">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="テンプレートファイルを編集します。twigで記述します。">
-                                            <span>コード</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col-10">
-                                        <div id="editor" style="height: 480px" class="form-control"></div>
-                                        <div style="display: none">{{ form.input('tpl_data')|raw }}</div>
-                                        {% if form.error('tpl_data') %}<span class="invalid-feedback d-block">{{ form.error('tpl_data') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> <!-- レイアウト設定 -->
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top"
-                                         title="このページに適用するレイアウトを選択します。">
-                                        <span class="card-title">
-                                            レイアウト設定
-                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#pageLayout" aria-expanded="false" aria-controls="pageLayout">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="pageLayout">
-                            <div class="card-body">
-                                <!-- PC -->
-                                <div class="row mb-2">
-                                    <div class="col-2"><span>PC</span></div>
-                                    <div class="col-10">
-                                    </div>
-                                </div>
-                                <!-- モバイル -->
-                                <div class="row mb-2">
-                                    <div class="col-2"><span>モバイル</span></div>
-                                    <div class="col-10">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- メタ設定 -->
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="ページのMETAタグの内容を指定できます。">
-                                        <span class="card-title">メタ設定</span>
-                                        <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                    </div>
-                                </div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#pageMeta" aria-expanded="false" aria-controls="pageMeta">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="pageMeta">
-                            <div class="card-body">
-                                <!-- author -->
-                                <div class="row mb-2">
-                                    <div class="col-2"><span>author</span></div>
-                                    <div class="col-10">
-                                        {{ form.input('author')|raw }}
-                                        {% if form.error('author') %}<span class="invalid-feedback d-block">{{ form.error('author') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                                <!-- description -->
-                                <div class="row mb-2">
-                                    <div class="col-2"><span>description</span></div>
-                                    <div class="col-10">
-                                        {{ form.input('description')|raw }}
-                                        {% if form.error('description') %}<span class="invalid-feedback d-block">{{ form.error('description') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                                <!-- keyword -->
-                                <div class="row mb-2">
-                                    <div class="col-2"><span>keyword</span></div>
-                                    <div class="col-10">
-                                        {{ form.input('keyword')|raw }}
-                                        {% if form.error('keyword') %}<span class="invalid-feedback d-block">{{ form.error('keyword') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                                <!-- robot -->
-                                <div class="row mb-2">
-                                    <div class="col-2"><span>robot</span></div>
-                                    <div class="col-10">
-                                        {{ form.input('meta_robots')|raw }}
-                                        {% if form.error('meta_robots') %}<span class="invalid-feedback d-block">{{ form.error('meta_robots') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                                <!-- metatag -->
-                                <div class="row">
-                                    <div class="col-2">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="METAタグの出力をカスタマイズできます。twig内で利用されている変数も利用可能です。空欄の場合は、テンプレートフォルダの meta.twig ファイルが読み込まれます。">
-                                            <span>metatag</span>
-                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-10">
-                                        {{ form.input('meta_tags')|raw }}
-                                        {% if form.error('meta_tags') %}<span class="invalid-feedback d-block">{{ form.error('meta_tags') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/page/page-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>ページ管理</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
-
-    {% if message is defined and message %}
-        <p class="ec-errorMessage">{{ message }}</p>
-    {% endif %}
+    }
+}());
+</script>
 {% endblock %}

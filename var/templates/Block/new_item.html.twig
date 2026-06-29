@@ -1,41 +1,79 @@
 {#
-  EC-CUBE default-theme Block/new_item.twig first-slice port.
+  Block/new_item.html.twig — 新着商品ブロック (included component, no extends).
 
-  Links are rebound to existing BeMart product codes, not EC-CUBE's
-  numeric product ids.
+  Data contract: src/Resource/Page/Products.php / var/json_schema/get-products.json
+  Variable expected in scope:
+    products[]  — { productCode, productName, name, price02, stock,
+                    mainListImage, categoryNames[], descriptionList }
+  Hypermedia (from #[Link] in Index.php):
+    goProductList → /products
+    goProduct     → /products/detail/{productCode}
+  Design language: IdeaStore (idea-* classes from idea-store.css).
 #}
-<div class="ec-role">
-    <div class="ec-newItemRole">
-        <div class="ec-newItemRole__list">
-            <div class="ec-newItemRole__listItem">
-                <div class="ec-newItemRole__listItemHeading ec-secHeading--tandem">
-                    <span class="ec-secHeading__en">NEW ITEM</span>
-                    <span class="ec-secHeading__line"></span>
-                    <span class="ec-secHeading__ja">新着商品</span>
-                    <a class="ec-inlineBtn--top" href="/products">more</a>
-                </div>
-            </div>
-            <div class="ec-newItemRole__listItem">
-                <a href="/product?productCode=sample-001">
-                    <img src="{{ asset('assets/img/common/no_image_product.png') }}">
-                    <p class="ec-newItemRole__listItemTitle">サンプル商品 A</p>
-                    <p class="ec-newItemRole__listItemPrice">￥1,200(税込)</p>
-                </a>
-            </div>
-            <div class="ec-newItemRole__listItem">
-                <a href="/product?productCode=api-persist-20260522-001">
-                    <img src="{{ asset('assets/img/top/img_item01_01.jpg') }}">
-                    <p class="ec-newItemRole__listItemTitle">彩のジェラートセット</p>
-                    <p class="ec-newItemRole__listItemPrice">￥2,980(税込)</p>
-                </a>
-            </div>
-            <div class="ec-newItemRole__listItem">
-                <a href="/product?productCode=ui-create-20260522-001">
-                    <img src="{{ asset('assets/img/top/img_item02_01.jpg') }}">
-                    <p class="ec-newItemRole__listItemTitle">UI商品登録テスト</p>
-                    <p class="ec-newItemRole__listItemPrice">￥1,980(税込)</p>
-                </a>
-            </div>
-        </div>
+
+{% set newItems = products|default([]) %}
+
+<section class="idea-container idea-section idea-section--tight"
+         aria-labelledby="idea-new-item-heading">
+  <div class="idea-section-head">
+    <div>
+      <p class="idea-eyebrow">New arrivals</p>
+      <h2 id="idea-new-item-heading" class="idea-section-title">新しく届いたもの</h2>
     </div>
-</div>
+    <a class="idea-muted idea-view-all"
+       href="/products"
+       rel="goProductList">すべて見る</a>
+  </div>
+
+  {% if newItems is not empty %}
+    <div class="idea-product-grid idea-product-grid--home">
+      {% for product in newItems|slice(0, 8) %}
+        {% set code        = product.productCode|default(product.id|default('')) %}
+        {% set itemName    = product.productName|default(product.name|default('')) %}
+        {% set image       = product.mainListImage|default('/assets/idea-store/images/product/real/product-001.png') %}
+        {% if image starts with 'idea-store/' %}
+          {% set image = '/save_image/' ~ image %}
+        {% elseif image starts with 'save_image/' or image starts with 'assets/' %}
+          {% set image = '/' ~ image %}
+        {% endif %}
+        {% set category    = product.categoryNames|default([])|first|default('') %}
+        {% set description = product.descriptionList|default('') %}
+        {% set price       = product.price02|default(0) %}
+        {% set stock       = product.stock|default(null) %}
+        <a class="idea-card idea-product-card"
+           href="/products/detail/{{ code }}"
+           rel="goProduct">
+          <span class="idea-product-card-media">
+            <span class="idea-product-badge">NEW</span>
+            <img src="{{ image }}"
+                 alt="{{ itemName }}"
+                 {% if loop.index > 4 %}loading="lazy"{% endif %}>
+          </span>
+          <span class="idea-card-body">
+            {% if category %}
+              <span class="idea-card-kicker">{{ category }}</span>
+            {% endif %}
+            <strong class="idea-card-title">{{ itemName }}</strong>
+            {% if description %}
+              <span class="idea-muted">{{ description }}</span>
+            {% endif %}
+            <span class="idea-card-bottom">
+              <span class="idea-price">¥{{ price|number_format }}</span>
+              <span aria-hidden="true">→</span>
+            </span>
+            <span class="idea-shipping">
+              {%- if stock is not null and stock > 0 -%}
+                在庫あり
+              {%- else -%}
+                入荷待ち
+              {%- endif -%}
+            </span>
+            <span class="idea-card-cta-row" aria-hidden="true">
+              <span class="idea-card-cta idea-card-cta--primary">詳細を見る</span>
+            </span>
+          </span>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>

@@ -24,7 +24,7 @@ use Ray\Di\AbstractModule;
  *  - `dtb_tradelaw` is empty on each test (structure-only schema dump),
  *    so {@see SqlTradeLawStorage::get} returns its installer-default
  *    body. That default is intentionally identical to
- *    TradeLawStorageInterface's constructor seed (contains 株式会社EC-CUBE),
+ *    TradeLawStorageInterface's constructor seed (contains 株式会社BeMart),
  *    so the assertion shape is identical to the Fake-backed sibling.
  *
  * Why mirror exactly: per G-23 the Resource-layer contract MUST stay
@@ -83,7 +83,7 @@ final class AdminTradeLawGetResourceSqlTest extends AbstractResourceSqlTestCase
         // installer-default body TradeLawStorageInterface's constructor
         // encodes, so we observe the same body shape as the Fake-backed
         // sibling on a first read.
-        $this->assertStringContainsString('株式会社EC-CUBE', $ro->body['tradeLawBody']);
+        $this->assertStringContainsString('株式会社BeMart', $ro->body['tradeLawBody']);
         // changed flag (write-only field) MUST NOT leak into the read body.
         $this->assertArrayNotHasKey('changed', $ro->body);
     }

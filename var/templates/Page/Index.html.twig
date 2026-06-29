@@ -1,132 +1,161 @@
+{% extends 'IdeaStore/layout/base.html.twig' %}
+
+{% block title %}暮らしの道具を探す | IDEA STORE{% endblock %}
+
+{% block content %}
 {#
-  BeMart Top page — EC-CUBE goTop.
+  BeMart Top page — goTop (page://self/).
 
-  PORT of EC-CUBE 4.3 default-theme `index.twig`
-  (src/Eccube/Resource/template/default/index.twig).
+  Data contract: src/Resource/Page/Index.php / var/json_schema/get-index.json
+  Links (from #[Link] declarations):
+    goProductList  → /products
+    goCart         → /cart
+    goContactForm  → /contact
+    goCustomerRegistration → /entry
+    goLogin        → /login
+    goMypage       → /mypage
+    goHelpAbout    → /help/about
+    goHelpGuide    → /help/guide
+    goHelpAgreement → /help/agreement
+    goHelpPrivacy  → /help/privacy
+    goHelpTradeLaw → /help/trade-law
 
-  The storefront top page. EC-CUBE's `index.twig` `block main` is a
-  purely-static main-visual slider (three `asset()` image paths, no data
-  binding) — there is no resource body field driving it, so the markup
-  is ported verbatim. The `block stylesheet` / `block javascript` slick
-  styling + init script are kept verbatim too.
-
-  The Index resource body (src/Resource/Page/Index.php) carries only the
-  hypermedia link surface and a `staticContent` = null stub; EC-CUBE's
-  top-page main visual is template-static, so the port renders the same
-  markup with no data residual. Shop message / news / recommended
-  products / category nav are NOT part of EC-CUBE's `index.twig` itself
-  (they are configurable layout blocks), so they are out of scope here
-  the same way they are for EC-CUBE's `index.twig`.
-
-  See var/templates/README.md for the port + residual-diff method.
+  Body: { transitionId, fields: null, submitTo: null, staticContent: null }
+  No form. No user-submitted data. Pure navigation + hero.
 #}
-{% extends 'base.html.twig' %}
 
-{% set body_class = 'front_page' %}
-{% set route = 'index' %}
-
-{% block stylesheet %}
-    <style>
-        .slick-slider {
-            margin-bottom: 30px;
-        }
-
-        .slick-dots {
-            position: absolute;
-            bottom: -45px;
-            display: block;
-            width: 100%;
-            padding: 0;
-            list-style: none;
-            text-align: center;
-        }
-
-        .slick-dots li {
-            position: relative;
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            margin: 0 5px;
-            padding: 0;
-
-            cursor: pointer;
-        }
-
-        .slick-dots li button {
-            font-size: 0;
-            line-height: 0;
-            display: block;
-            width: 20px;
-            height: 20px;
-            padding: 5px;
-            cursor: pointer;
-            color: transparent;
-            border: 0;
-            outline: none;
-            background: transparent;
-        }
-
-        .slick-dots li button:hover,
-        .slick-dots li button:focus {
-            outline: none;
-        }
-
-        .slick-dots li button:hover:before,
-        .slick-dots li button:focus:before {
-            opacity: 1;
-        }
-
-        .slick-dots li button:before {
-            content: " ";
-            line-height: 20px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 12px;
-            height: 12px;
-            text-align: center;
-            opacity: .25;
-            background-color: black;
-            border-radius: 50%;
-
-        }
-
-        .slick-dots li.slick-active button:before {
-            opacity: .75;
-            background-color: black;
-        }
-
-        .slick-dots li button.thumbnail img {
-            width: 0;
-            height: 0;
-        }
-    </style>
-{% endblock %}
-
-{% block javascript %}
-    <script>
-        $(function() {
-            $('.main_visual').slick({
-                dots: true,
-                arrows: false,
-                autoplay: true,
-                speed: 300
-            });
-        });
-    </script>
-{% endblock javascript %}
-
-{% block main %}
-    <div class="ec-sliderRole">
-        <div class="main_visual">
-            <div class="item slick-slide"><img src="{{ asset('assets/img/top/img_hero_pc01.jpg') }}"></div>
-            <div class="item slick-slide"><img src="{{ asset('assets/img/top/img_hero_pc02.jpg') }}"></div>
-            <div class="item slick-slide"><img src="{{ asset('assets/img/top/img_hero_pc03.jpg') }}"></div>
+{# ---------- hero ---------- #}
+<section class="idea-container idea-commerce-hero idea-commerce-hero--cocoon"
+         aria-labelledby="idea-top-heading">
+  <div class="idea-commerce-visual">
+    <div class="idea-hero-image-card">
+      <img src="/assets/idea-store/images/hero/hero-leaf-d.png"
+           alt="日光と葉の影が落ちる静かな部屋に、白磁、木、布の道具が並ぶIDEA STOREの生活シーン">
+      <div class="idea-commerce-copy">
+        <p class="idea-eyebrow">IDEA STORE / イデアストア</p>
+        <h1 id="idea-top-heading" class="idea-title idea-title--commerce">
+          <span>暮らしのイデアを、</span><span>見つけよう。</span>
+        </h1>
+        <p class="idea-lead idea-lead--commerce">
+          住まいと、自分時間を心地よく。日常の道具を、ここから選ぶ。
+        </p>
+        <div class="idea-actions idea-actions--commerce">
+          <a class="idea-button idea-button--hero" href="/products" rel="goProductList">商品を見つける</a>
+          <a class="idea-link idea-link--hero" href="/cart" rel="goCart">カートを見る</a>
         </div>
+      </div>
     </div>
-    {{ include('Block/eyecatch.html.twig') }}
-    {{ include('Block/topic.html.twig') }}
-    {{ include('Block/new_item.html.twig') }}
-    {{ include('Block/category.html.twig') }}
-    {{ include('Block/news.html.twig') }}
+  </div>
+</section>
+
+{# ---------- shop lanes ---------- #}
+<section class="idea-container idea-shop-lanes" aria-label="買い物の入口">
+  <a href="/products?orderby=latest">
+    <span>New arrivals</span>
+    <strong>新しく届いたもの</strong>
+    <small>今週の入荷を見る</small>
+  </a>
+  <a href="/products?name=%E5%8F%B0%E6%89%80">
+    <span>Kitchen tools</span>
+    <strong>台所を整える</strong>
+    <small>毎日の手順を静かに</small>
+  </a>
+  <a href="/products?name=%E5%8F%8E%E7%B4%8D">
+    <span>Storage edit</span>
+    <strong>しまう場所を作る</strong>
+    <small>小物から家具まで</small>
+  </a>
+  <a href="/products?orderby=price_low">
+    <span>Under ¥5,000</span>
+    <strong>手に取りやすい定番</strong>
+    <small>ギフトにも</small>
+  </a>
+</section>
+
+{# ---------- category grid ---------- #}
+{% set ideaCategories = [
+  { name: '収納',          room: '整える',       description: 'しまうものと見せるものの居場所をつくる。',         image: '/assets/idea-store/images/category/real/entry-storage.png',    href: '/products?name=収納' },
+  { name: '台所',          room: '料理する',     description: '毎日の手順を少し静かにする道具。',                 image: '/assets/idea-store/images/category/real/entry-kitchen.png',    href: '/products?name=台所' },
+  { name: '家具',          room: '住まう',       description: '小さな部屋にも大きな時間にも馴染む家具。',         image: '/assets/idea-store/images/category/real/entry-furniture.png',  href: '/products?name=家具' },
+  { name: '照明',          room: '灯す',         description: '夜の読書と食卓に、やわらかな明かりを。',           image: '/assets/idea-store/images/category/real/entry-lighting.png',   href: '/products?name=照明' },
+  { name: '布とファブリック', room: '触れる',    description: '季節と気分を変える布もの。',                       image: '/assets/idea-store/images/category/real/entry-fabric.png',     href: '/products?name=布とファブリック' },
+  { name: 'デスク用品',    room: '働く',         description: '仕事机を整え、自分の集中を支える。',               image: '/assets/idea-store/images/category/real/entry-desk.png',       href: '/products?name=デスク用品' },
+  { name: '本と雑誌',      room: '読む',         description: '暮らしの見方を少し変える読みもの。',               image: '/assets/idea-store/images/category/real/entry-books.png',      href: '/products?name=本と雑誌' },
+  { name: '音楽',          room: '聴く',         description: '部屋の空気を変える音と道具。',                     image: '/assets/idea-store/images/category/real/entry-music.png',      href: '/products?name=音楽' },
+  { name: '工作の道具',    room: 'つくる',       description: '直す、組む、試すための手の道具。',                 image: '/assets/idea-store/images/category/real/entry-craft.png',      href: '/products?name=工作の道具' },
+  { name: '掃除とケア',    room: '手入れする',   description: '長く使うための、日々の手入れ。',                   image: '/assets/idea-store/images/category/real/entry-cleaning.png',   href: '/products?name=掃除とケア' },
+  { name: 'バス・ランドリー', room: '洗う',      description: '水まわりを軽やかに整える。',                       image: '/assets/idea-store/images/category/real/entry-bath.png',       href: '/products?name=バス・ランドリー' },
+  { name: 'コーヒーとお茶', room: '休む',        description: '一杯の時間を丁寧にする器具。',                     image: '/assets/idea-store/images/category/real/entry-coffee.png',     href: '/products?name=コーヒーとお茶' },
+  { name: '植物と庭',      room: '育てる',       description: '窓辺とベランダに小さな緑を。',                     image: '/assets/idea-store/images/category/real/entry-garden.png',     href: '/products?name=植物と庭' },
+  { name: 'ペットと暮らす', room: 'ともに暮らす', description: '人にも動物にも心地よい道具。',                    image: '/assets/idea-store/images/category/real/entry-pet.png',        href: '/products?name=ペットと暮らす' },
+  { name: '外遊び',        room: '出かける',     description: '週末の外時間を身軽にする。',                       image: '/assets/idea-store/images/category/real/entry-outdoor.png',    href: '/products?name=外遊び' },
+  { name: '贈る日用品',    room: '贈る',         description: '気負わず渡せて、長く使えるもの。',                 image: '/assets/idea-store/images/category/real/entry-gift.png',       href: '/products?name=贈る日用品' },
+  { name: '器と食卓',      room: '食べる',       description: 'ふだんの食卓を穏やかにする器。',                   image: '/assets/idea-store/images/category/real/entry-tableware.png',  href: '/products?name=器と食卓' },
+  { name: '文具',          room: '書く',         description: '手を動かす時間のための紙と道具。',                 image: '/assets/idea-store/images/category/real/entry-stationery.png', href: '/products?name=文具' },
+  { name: 'オーディオ小物', room: '聴く',        description: '音楽の居場所を整える小物。',                       image: '/assets/idea-store/images/category/real/entry-audio.png',      href: '/products?name=オーディオ小物' },
+  { name: '子どもと学び',  room: '育つ',         description: '遊びながら考える、家の中の小さな道具。',           image: '/assets/idea-store/images/category/real/entry-kids.png',       href: '/products?name=子どもと学び' }
+] %}
+
+<section class="idea-container idea-section idea-section--tight"
+         aria-labelledby="idea-category-heading">
+  <div class="idea-section-head idea-section-head--center">
+    <p class="idea-eyebrow">Shop by room and rhythm</p>
+    <h2 id="idea-category-heading" class="idea-section-title">暮らしの入口</h2>
+    <a class="idea-muted idea-view-all" href="/products" rel="goProductList">カテゴリ一覧</a>
+  </div>
+  <div class="idea-grid idea-category-grid idea-category-grid--commerce">
+    {% for category in ideaCategories %}
+      <a class="idea-card idea-category-card" href="{{ category.href }}">
+        <img src="{{ category.image }}" alt="{{ category.name }}" loading="lazy">
+        <span class="idea-card-body">
+          <span class="idea-card-kicker">{{ category.room }}</span>
+          <strong class="idea-card-title">{{ category.name }}</strong>
+          <span class="idea-muted">{{ category.description }}</span>
+        </span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+{# ---------- editorial band ---------- #}
+<section class="idea-container idea-section idea-editorial-commerce"
+         aria-labelledby="idea-editorial-heading">
+  <div class="idea-editorial-commerce__copy">
+    <p class="idea-eyebrow">Life edit</p>
+    <h2 id="idea-editorial-heading" class="idea-section-title">
+      買う前から、暮らしの風景が見えること。
+    </h2>
+    <p class="idea-muted">
+      豊富な品数と雑誌のような編集感。その中間にある「選びやすさ」を目指します。
+    </p>
+    <a class="idea-button idea-button--light"
+       href="/products?name=%E5%8F%B0%E6%89%80">台所の特集を見る</a>
+  </div>
+  <div class="idea-editorial-catalog-photo">
+    <img src="/assets/idea-store/images/hero/hero-catalog-dense-b.png"
+         alt="収納、器、本、音楽、工作道具が並ぶIDEA STOREのカタログビジュアル"
+         loading="lazy">
+    <div>
+      <span>Catalog edit</span>
+      <strong>収納から器、本、音楽まで。横断して選べる生活道具。</strong>
+    </div>
+  </div>
+</section>
+
+{# ---------- account / help quick links ---------- #}
+<nav class="idea-container idea-feature-strip"
+     aria-label="アカウントとサポート">
+  <a href="/login" rel="goLogin">ログイン</a>
+  <a href="/entry" rel="goCustomerRegistration">新規登録</a>
+  <a href="/mypage" rel="goMypage">マイページ</a>
+  <a href="/contact" rel="goContactForm">お問い合わせ</a>
+  <a href="/help/guide" rel="goHelpGuide">ご利用ガイド</a>
+  <a href="/help/trade-law" rel="goHelpTradeLaw">特定商取引法</a>
+</nav>
+
+{# ---------- admin access (nofollow, hidden from main flow) ---------- #}
+<div class="idea-container idea-admin-access" aria-label="管理者向け入口">
+  <a href="/admin/login" rel="nofollow">管理者ログイン</a>
+</div>
+
 {% endblock %}

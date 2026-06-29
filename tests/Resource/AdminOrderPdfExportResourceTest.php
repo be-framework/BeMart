@@ -28,31 +28,24 @@ final class AdminOrderPdfExportResourceTest extends TestCase
         $this->resource = $this->buildResource(self::TEST_ADMIN_ID);
     }
 
-    public function testExportOrderPdfReturnsPdfDocument(): void
+    public function testExportOrderPdfReturns501NotImplemented(): void
     {
         $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
             'orderNos' => [self::ORDER_NO],
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame('application/pdf', $ro->headers['Content-Type']);
-        $this->assertSame('attachment; filename="nouhinsyo-No' . self::ORDER_NO . '.pdf"', $ro->headers['Content-Disposition']);
-        $this->assertSame(self::ORDER_NO, $ro->body['orderNo']);
-        $this->assertSame([self::ORDER_NO], $ro->body['orderNos']);
-        $this->assertSame('nouhinsyo-No' . self::ORDER_NO . '.pdf', $ro->body['fileName']);
-        $this->assertStringStartsWith('%PDF-', $ro->body['pdf']);
-        $this->assertStringNotContainsString('PDF STUB', $ro->body['pdf']);
-        $this->assertGreaterThan(1000, $ro->body['size']);
+        $this->assertSame(501, $ro->code);
+        $this->assertStringContainsString('納品書PDF出力はこのビルドでは利用できません', $ro->body['message']);
     }
 
-    public function testExportOrderPdfStillAcceptsLegacyOrderNoParam(): void
+    public function testExportOrderPdfLegacyParamAlsoReturns501(): void
     {
         $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
             'orderNo' => self::ORDER_NO,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
-        $this->assertStringStartsWith('%PDF-', $ro->body['pdf']);
+        $this->assertSame(501, $ro->code);
+        $this->assertStringContainsString('納品書PDF出力はこのビルドでは利用できません', $ro->body['message']);
     }
 
     public function testExportOrderPdfUnknownReturns404(): void

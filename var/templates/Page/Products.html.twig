@@ -1,235 +1,208 @@
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}商品カタログ | IDEA STORE{% endblock %}
+{% block content %}
 {#
-  BeMart Product List page — EC-CUBE goProductList.
+  BeMart 商品一覧ページ — goProductList (page://self/products).
 
-  PORT of EC-CUBE 4.3 default-theme `Product/list.twig`
-  (src/Eccube/Resource/template/default/Product/list.twig).
+  Data contract: src/Resource/Page/Products.php / var/json_schema/get-products.json
+  Links (#[Link] declarations):
+    goProduct → /product
+    goCart    → /cart
+    goTop     → /
 
-  Markup skeleton, `ec-searchnavRole` / `ec-topicpath` / `ec-shelfRole`
-  / `ec-shelfGrid` / `ec-pagerRole` / `ec-modal` classes and structure
-  are kept verbatim from EC-CUBE. Only the dynamic bindings are rebound
-  to the Products resource body (src/Resource/Page/Products.php):
-    transitionId, totalItemCount, products[]
-
-  NOTE — scope. The Products resource is now backed by the storefront
-  catalog query (GetStorefrontProductListInput -> StorefrontProductListFetched):
-  it projects every STATUS_VISIBLE product as `{id, name, price02}`. So
-  this port renders the populated `ec-shelfGrid` branch of EC-CUBE's
-  `Product/list.twig` when `totalItemCount > 0`, and the
-  "お探しの商品は見つかりませんでした" empty-result branch otherwise.
-
-  This is a SIMPLIFIED port (厳密移植 Grade-C, parity with the Cart port):
-  the catalog row carries only the bare name + a single `price02`, with
-  the `/product` link and the placeholder thumbnail. EC-CUBE's row
-  additionally renders a per-item add-cart `<form>` (ProductClass selects
-  + quantity), an `.ec-modal` add-cart dialog, the `disp_number` /
-  `orderby` sort controls and an `.ec-pagerRole` pager — all of which
-  need data the resource body does not carry (ProductClass joins, a
-  Symfony FormView, pagination metadata). Those omissions are the
-  enumerated residuals in ProductsHtmlRenderTest; category / keyword
-  filtering + pagination are deferred to Phase 2.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - the `block javascript` loop emits `eccube.productsClassCategories`
-     keyed by the js-escaped product id; BeMart carries no ProductClass
-     data so each value is an empty object literal.
+  Body:
+    transitionId    — "goProductList"
+    totalItemCount  — int
+    products[]      — { id, productCode, name, productName, price02, stock, stockFind,
+                        descriptionList, mainListImage, categoryNames[], tagNames[] }
+    csrfToken       — string|null (present in body; not needed for GET searches)
+    filters         — { name, nameKeyword, category_id, categoryName,
+                        disp_number, orderby, pageno }
+    pager           — { current, pageCount, previous, next, pages[] }
 #}
-{% extends 'base.html.twig' %}
 
-{% set body_class = 'product_page' %}
-{% set route = 'products' %}
-{% set title = '商品一覧' %}
+{% set activeKeyword = filters.name|default(filters.nameKeyword|default('')) %}
+{% set activeCategoryName = filters.categoryName|default('') %}
+{% set currentPage = pager.current|default(1) %}
+{% set dispNumber = filters.disp_number|default('20') %}
+{% set activeOrderby = filters.orderby|default('') %}
 
-{% block javascript %}
-    <script>
-        eccube.productsClassCategories = {
-            {% for product in products %}
-            "{{ product.id|escape('js') }}": {}{% if loop.last == false %}, {% endif %}
-            {% endfor %}
-        };
+{# Per-category hero copy (the IdeaStore "category landing" experience). When the
+   active keyword matches a category, the catalog shows that category's curated
+   hero instead of a plain search-result heading. #}
+{% set categoryHeroes = {
+  '収納': { eyebrow: 'Storage edit', titleLines: ['しまう場所を、', '暮らしの余白に。'], lead: '玄関、棚、机まわり。出したままでも静かに見える収納の道具を集めました。', image: '/assets/idea-store/images/category/real/entry-storage.png' },
+  '台所': { eyebrow: 'Kitchen tools', titleLines: ['台所の手順を、', '少し静かに。'], lead: '朝の一杯、支度、片づけ。毎日の動きを軽くする器と道具を選びます。', image: '/assets/idea-store/images/category/real/entry-kitchen.png' },
+  '家具': { eyebrow: 'Living with furniture', titleLines: ['小さな部屋にも、', '大きな時間を。'], lead: '椅子、棚、サイドテーブル。部屋の余白をつくる家具と小物の入口です。', image: '/assets/idea-store/images/category/real/entry-furniture.png' },
+  '照明': { eyebrow: 'Lighting edit', titleLines: ['夜をやわらかく、', '読みやすく。'], lead: '読書、食卓、眠る前の時間。光の置き場所から部屋の表情を整えます。', image: '/assets/idea-store/images/category/real/entry-lighting.png' },
+  '布とファブリック': { eyebrow: 'Fabric edit', titleLines: ['触れるものから、', '季節を整える。'], lead: 'リネン、帆布、タオル。肌に触れる素材で、暮らしの温度を変えます。', image: '/assets/idea-store/images/category/real/entry-fabric.png' },
+  'デスク用品': { eyebrow: 'Desk tools', titleLines: ['働く時間に、', '余白をつくる。'], lead: 'ペン、紙、スタンド、トレー。集中するための机まわりを静かに整えます。', image: '/assets/idea-store/images/category/real/entry-desk.png' },
+  '本と雑誌': { eyebrow: 'Reading edit', titleLines: ['読む時間を、', '部屋の景色に。'], lead: '本、雑誌、ブックエンド。読みかけの一冊が似合う場所をつくります。', image: '/assets/idea-store/images/category/real/entry-books.png' },
+  '音楽': { eyebrow: 'Listening edit', titleLines: ['音の居場所を、', '暮らしの中に。'], lead: 'レコード、ブラシ、小さな音の道具。部屋の空気を変える入口です。', image: '/assets/idea-store/images/category/real/entry-music.png' },
+  '工作の道具': { eyebrow: 'Craft tools', titleLines: ['手を動かす時間を、', '整える。'], lead: '工具、紙、布、糸。作る前の机を整え、週末の小さな制作を支えます。', image: '/assets/idea-store/images/category/real/entry-craft.png' },
+  '掃除とケア': { eyebrow: 'Care tools', titleLines: ['手入れの時間も、', '静かな習慣に。'], lead: 'ブラシ、クロス、収納箱。長く使うための日々の手入れを軽くします。', image: '/assets/idea-store/images/category/real/entry-cleaning.png' },
+  'バス・ランドリー': { eyebrow: 'Bath and laundry', titleLines: ['洗う場所に、', '風通しを。'], lead: 'ランドリーバスケット、タオル、洗面まわり。水まわりを軽やかに整えます。', image: '/assets/idea-store/images/category/real/entry-bath.png' },
+  'コーヒーとお茶': { eyebrow: 'Coffee and tea', titleLines: ['一杯の時間を、', '丁寧に。'], lead: 'ドリッパー、茶器、トレー。休む時間の手順を静かに整えます。', image: '/assets/idea-store/images/category/real/entry-coffee.png' },
+  '植物と庭': { eyebrow: 'Plants and garden', titleLines: ['窓辺に、', '小さな緑を。'], lead: '鉢、霧吹き、土まわりの道具。育てる時間を部屋の景色にします。', image: '/assets/idea-store/images/category/real/entry-garden.png' },
+  'ペットと暮らす': { eyebrow: 'Living with pets', titleLines: ['人にも動物にも、', '心地よく。'], lead: 'ボウル台、布もの、収納。暮らしに自然に馴染むペット用品を選びます。', image: '/assets/idea-store/images/category/real/entry-pet.png' },
+  '外遊び': { eyebrow: 'Outdoor edit', titleLines: ['外の時間を、', '身軽に。'], lead: 'ピクニック、散歩、週末の外時間。持ち出しやすく、戻しやすい道具です。', image: '/assets/idea-store/images/category/real/entry-outdoor.png' },
+  '贈る日用品': { eyebrow: 'Gift edit', titleLines: ['気負わず渡せて、', '長く使える。'], lead: '小皿、布、文具。相手の暮らしに静かに残る日用品を集めました。', image: '/assets/idea-store/images/category/real/entry-gift.png' },
+  '器と食卓': { eyebrow: 'Tableware edit', titleLines: ['食卓の余白を、', '器から。'], lead: '皿、カップ、カトラリー。ふだんの食事を少し穏やかにする道具です。', image: '/assets/idea-store/images/category/real/entry-tableware.png' },
+  '文具': { eyebrow: 'Stationery edit', titleLines: ['書く時間を、', '整える。'], lead: '紙、カードスタンド、筆記具。手を動かす時間に集中できる机をつくります。', image: '/assets/idea-store/images/category/real/entry-stationery.png' },
+  'オーディオ小物': { eyebrow: 'Audio objects', titleLines: ['音楽の居場所を、', '小さく整える。'], lead: 'ケーブル、ブラシ、小さな台。聴く前後の所作まで気持ちよく。', image: '/assets/idea-store/images/category/real/entry-audio.png' },
+  '子どもと学び': { eyebrow: 'Kids and learning', titleLines: ['遊びながら、', '考える場所を。'], lead: '積み木、紙、収納。片づけまで含めて、家の中の学びを支えます。', image: '/assets/idea-store/images/category/real/entry-kids.png' }
+} %}
+{% set categoryHero = categoryHeroes[activeKeyword]|default(categoryHeroes[activeCategoryName]|default(null)) %}
 
-        $(function() {
+{# --- breadcrumb --- #}
+<nav class="idea-container idea-breadcrumb" aria-label="現在地">
+  <a href="/" rel="goTop">ホーム</a>
+  <span>/</span>
+  {% if categoryHero %}
+    <a href="/products">カタログ</a>
+    <span>/</span>
+    <span>{{ activeKeyword|default(activeCategoryName) }}</span>
+  {% elseif activeCategoryName %}
+    <a href="/products">カタログ</a>
+    <span>/</span>
+    <span>{{ activeCategoryName }}</span>
+  {% elseif activeKeyword %}
+    <a href="/products">カタログ</a>
+    <span>/</span>
+    <span>「{{ activeKeyword }}」の検索結果</span>
+  {% else %}
+    <span>カタログ</span>
+  {% endif %}
+</nav>
 
-            // 表示件数を変更
-            $('.disp-number').change(function() {
-                var dispNumber = $(this).val();
-                $('#disp_number').val(dispNumber);
-                $('#pageno').val(1);
-                $("#form1").submit();
-            });
-
-            // 並び順を変更
-            $('.order-by').change(function() {
-                var orderBy = $(this).val();
-                $('#orderby').val(orderBy);
-                $('#pageno').val(1);
-                $("#form1").submit();
-            });
-
-            $('.add-cart').on('click', function(e) {
-                var $form = $(this).parents('li').find('form');
-
-                // 個数フォームのチェック
-                var $quantity = $form.parent().find('.quantity');
-                if ($quantity.val() < 1) {
-                    $quantity[0].setCustomValidity('1以上で入力してください。');
-                    setTimeout(function() {
-                        loadingOverlay('hide');
-                    }, 100);
-                    return true;
-                } else {
-                    $quantity[0].setCustomValidity('');
-                }
-                e.preventDefault();
-                $.ajax({
-                    url: $form.attr('action'),
-                    type: $form.attr('method'),
-                    data: $form.serialize(),
-                    dataType: 'json',
-                    beforeSend: function(xhr, settings) {
-                        // Buttonを無効にする
-                        $('.add-cart').prop('disabled', true);
-                    }
-                }).done(function(data) {
-                    // レスポンス内のメッセージをalertで表示
-                    $.each(data.messages, function() {
-                        $('#ec-modal-header').text(this);
-                    });
-
-                    $('.ec-modal').show()
-
-                    // カートブロックを更新する
-                    $.ajax({
-                        url: '/cart',
-                        type: 'GET',
-                        dataType: 'html'
-                    }).done(function(html) {
-                        $('.ec-headerRole__cart').html(html);
-                    });
-                }).fail(function(data) {
-                    alert('カートへの追加に失敗しました。');
-                }).always(function(data) {
-                    // Buttonを有効にする
-                    $('.add-cart').prop('disabled', false);
-                });
-            });
-        });
-
-        $('.ec-modal-wrap').on('click', function(e) {
-            // モーダル内の処理は外側にバブリングさせない
-            e.stopPropagation();
-        });
-        $('.ec-modal-overlay, .ec-modal, .ec-modal-close, .ec-inlineBtn--cancel').on('click', function() {
-            $('.ec-modal').hide()
-        });
-    </script>
-{% endblock %}
-
-{% block main %}
-    <div class="ec-searchnavRole">
-        <form name="form1" id="form1" method="get" action="?">
-            <input type="hidden" id="category_id" name="category_id" value="{{ filters.category_id|default('') }}">
-            <input type="hidden" id="name" name="name" value="{{ filters.name|default('') }}">
-            <input type="hidden" id="pageno" name="pageno" value="{{ filters.pageno|default('1') }}">
-            <input type="hidden" id="disp_number" name="disp_number" value="{{ filters.disp_number|default('20') }}">
-            <input type="hidden" id="orderby" name="orderby" value="{{ filters.orderby|default('') }}">
-        </form>
-        <div class="ec-searchnavRole__topicpath">
-            <ol class="ec-topicpath">
-                <li class="ec-topicpath__item"><a href="/products">全て</a>
-                </li>
-                {% if filters.categoryName|default(null) %}
-                    <li class="ec-topicpath__divider">|</li>
-                    <li class="ec-topicpath__item--active">
-                        <a href="/products?category_id={{ filters.category_id }}">{{ filters.categoryName }}</a>
-                    </li>
-                {% endif %}
-                {% if filters.name|default('') %}
-                    <li class="ec-topicpath__divider">|</li>
-                    <li class="ec-topicpath__item">「{{ filters.name }}」の検索結果</li>
-                {% endif %}
-            </ol>
-        </div>
-        <div class="ec-searchnavRole__infos">
-            <div class="ec-searchnavRole__counter">
-                {% if totalItemCount > 0 %}
-                    <span class="ec-font-bold">{{ totalItemCount }}件</span><span>の商品が見つかりました</span>
-                {% else %}
-                    <span>お探しの商品は見つかりませんでした</span>
-                {% endif %}
-            </div>
-            {% if totalItemCount > 0 %}
-                <div class="ec-searchnavRole__actions">
-                    <div class="ec-select">
-                        <select class="disp-number" aria-label="表示件数">
-                            <option value="20"{% if filters.disp_number == '20' %} selected{% endif %}>20件</option>
-                            <option value="40"{% if filters.disp_number == '40' %} selected{% endif %}>40件</option>
-                            <option value="60"{% if filters.disp_number == '60' %} selected{% endif %}>60件</option>
-                        </select>
-                        <select class="order-by" aria-label="並び順">
-                            <option value=""{% if filters.orderby == '' %} selected{% endif %}>新着順</option>
-                            <option value="price_low"{% if filters.orderby == 'price_low' %} selected{% endif %}>価格が低い順</option>
-                            <option value="price_high"{% if filters.orderby == 'price_high' %} selected{% endif %}>価格が高い順</option>
-                        </select>
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    {% if totalItemCount > 0 %}
-        <div class="ec-shelfRole">
-            <ul class="ec-shelfGrid">
-                {% for product in products %}
-                    <li class="ec-shelfGrid__item">
-                        <a href="/product?productCode={{ product.id }}">
-                            <p class="ec-shelfGrid__item-image">
-                                <img src="{{ asset(product.mainListImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ product.name }}" {% if loop.index > 5 %} loading="lazy"{% endif %}>
-                            </p>
-                            <p>{{ product.name }}</p>
-                            {% if product.categoryNames|default([]) is not empty %}
-                                <p class="ec-shelfGrid__item-category">{{ product.categoryNames|join(' / ') }}</p>
-                            {% endif %}
-                            {% if product.tagNames|default([]) is not empty %}
-                                <p class="ec-shelfGrid__item-tags">{{ product.tagNames|join(' ') }}</p>
-                            {% endif %}
-                            <p class="price02-default">
-                                {{ product.price02|price }}
-                            </p>
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="ec-modal">
-            <div class="ec-modal-overlay">
-                <div class="ec-modal-wrap">
-                    <span class="ec-modal-close"><span class="ec-icon"><img src="{{ asset('assets/icon/cross-dark.svg') }}" alt=""/></span></span>
-                    <div id="ec-modal-header" class="text-center">カートに追加しました。</div>
-                    <div class="ec-modal-box">
-                        <div class="ec-role">
-                            <span class="ec-inlineBtn--cancel">お買い物を続ける</span>
-                            <a href="/cart" class="ec-inlineBtn--action">カートへ進む</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% if pager.pageCount > 1 %}
-            <div class="ec-pagerRole">
-                <ul class="ec-pager">
-                    {% if pager.previous %}
-                        <li class="ec-pager__item"><a href="?category_id={{ filters.category_id }}&name={{ filters.name }}&disp_number={{ filters.disp_number }}&orderby={{ filters.orderby }}&pageno={{ pager.previous }}">前へ</a></li>
-                    {% endif %}
-                    {% for page in pager.pages %}
-                        <li class="ec-pager__item{% if page == pager.current %}--active{% endif %}">
-                            <a href="?category_id={{ filters.category_id }}&name={{ filters.name }}&disp_number={{ filters.disp_number }}&orderby={{ filters.orderby }}&pageno={{ page }}">{{ page }}</a>
-                        </li>
-                    {% endfor %}
-                    {% if pager.next %}
-                        <li class="ec-pager__item"><a href="?category_id={{ filters.category_id }}&name={{ filters.name }}&disp_number={{ filters.disp_number }}&orderby={{ filters.orderby }}&pageno={{ pager.next }}">次へ</a></li>
-                    {% endif %}
-                </ul>
-            </div>
-        {% endif %}
+{# --- catalog hero / search block --- #}
+{% if categoryHero %}
+<section class="idea-container idea-collection-hero idea-collection-hero--visual" aria-labelledby="idea-catalog-heading">
+  <img class="idea-collection-hero-image" src="{{ categoryHero.image }}" alt="{{ activeKeyword|default(activeCategoryName) }}の暮らしの入口">
+  <div class="idea-collection-hero-copy">
+    <p class="idea-eyebrow">{{ categoryHero.eyebrow }}</p>
+    <h1 id="idea-catalog-heading" class="idea-title idea-title--compact">
+      {% for titleLine in categoryHero.titleLines %}<span class="idea-title-line">{{ titleLine }}</span>{% endfor %}
+    </h1>
+    <p class="idea-muted">{{ categoryHero.lead }}</p>
+    <form class="idea-catalog-search idea-catalog-search--overlay" action="/products" method="get" role="search">
+      <input type="search" name="name" value="{{ activeKeyword }}" placeholder="キーワードで探す" aria-label="商品を検索">
+      <button class="idea-button" type="submit">検索</button>
+    </form>
+  </div>
+</section>
+{% else %}
+<section class="idea-container idea-collection-hero" aria-labelledby="idea-catalog-heading">
+  <div>
+    <p class="idea-eyebrow">Catalog</p>
+    {% if activeKeyword %}
+      <h1 id="idea-catalog-heading" class="idea-title idea-title--compact">
+        <span class="idea-title-line">「{{ activeKeyword }}」</span>
+        <span class="idea-title-line">の検索結果</span>
+      </h1>
+    {% else %}
+      <h1 id="idea-catalog-heading" class="idea-title idea-title--compact">
+        <span class="idea-title-line">暮らしに合う道具を、</span>
+        <span class="idea-title-line">ここから選ぶ。</span>
+      </h1>
     {% endif %}
+    <p class="idea-muted">キーワードやカテゴリで絞り込めます。</p>
+  </div>
+  <form class="idea-catalog-search" action="/products" method="get" role="search">
+    <input type="search" name="name" value="{{ activeKeyword }}" placeholder="キーワードで探す" aria-label="商品を検索">
+    <button class="idea-button" type="submit">検索</button>
+  </form>
+</section>
+{% endif %}
+
+{# --- toolbar: item count + quick filters + sort --- #}
+<section class="idea-container idea-section idea-catalog-body" aria-label="商品一覧">
+  <div class="idea-toolbar">
+    <div>
+      <p class="idea-eyebrow">{{ totalItemCount|default(products|default([])|length) }} items</p>
+      <h2 class="idea-section-title">
+        {% if activeCategoryName %}
+          {{ activeCategoryName }}の商品
+        {% elseif activeKeyword %}
+          検索結果
+        {% else %}
+          すべての商品
+        {% endif %}
+      </h2>
+    </div>
+    <div class="idea-chip-row idea-chip-row--toolbar" aria-label="カテゴリで絞り込む">
+      <a href="/products">すべて</a>
+      <a href="/products?name={{ '収納'|url_encode }}">収納</a>
+      <a href="/products?name={{ '台所'|url_encode }}">台所</a>
+      <a href="/products?name={{ '家具'|url_encode }}">家具</a>
+      <a href="/products?name={{ '本と雑誌'|url_encode }}">本</a>
+      <a href="/products?name={{ '音楽'|url_encode }}">音楽</a>
+      <a href="/products?name={{ '工作の道具'|url_encode }}">工作</a>
+    </div>
+    <div class="idea-sort-links" aria-label="並び順">
+      <a href="/products?name={{ activeKeyword|url_encode }}{% if filters.category_id|default('') %}&amp;category_id={{ filters.category_id }}{% endif %}&amp;disp_number={{ dispNumber }}">新着順</a>
+      <a href="/products?name={{ activeKeyword|url_encode }}{% if filters.category_id|default('') %}&amp;category_id={{ filters.category_id }}{% endif %}&amp;orderby=price_low&amp;disp_number={{ dispNumber }}">価格が低い順</a>
+      <a href="/products?name={{ activeKeyword|url_encode }}{% if filters.category_id|default('') %}&amp;category_id={{ filters.category_id }}{% endif %}&amp;orderby=price_high&amp;disp_number={{ dispNumber }}">価格が高い順</a>
+    </div>
+  </div>
+
+  {# --- product grid or empty state --- #}
+  {% if products|default([]) is not empty %}
+    <div class="idea-catalog-layout">
+      <aside class="idea-catalog-note" aria-label="カタログ案内">
+        <p class="idea-eyebrow">Curation note</p>
+        <h3>カテゴリから選ぶと、見つけやすい。</h3>
+        <p>用途や素材で絞り込むと、暮らしに合う道具が見つかります。</p>
+        <a href="/products">すべての商品を見る</a>
+      </aside>
+      <div class="idea-product-grid">
+        {% for product in products %}
+          {% include 'IdeaStore/product/card.html.twig' with { product: product } %}
+        {% endfor %}
+      </div>
+    </div>
+
+    {# --- pager --- #}
+    {% if pager.pageCount|default(1) > 1 %}
+      <nav class="idea-section idea-section--tight" aria-label="ページ移動">
+        <div class="idea-chip-row" style="justify-content:center">
+          {% if pager.previous %}
+            <a class="idea-button idea-button--light"
+               href="/products?name={{ activeKeyword|url_encode }}&amp;category_id={{ filters.category_id|default('') }}&amp;orderby={{ activeOrderby }}&amp;disp_number={{ dispNumber }}&amp;pageno={{ pager.previous }}">
+              前のページ
+            </a>
+          {% endif %}
+          {% for page in pager.pages|default([]) %}
+            <a class="idea-chip-row{% if page == currentPage %} is-active{% endif %}"
+               href="/products?name={{ activeKeyword|url_encode }}&amp;category_id={{ filters.category_id|default('') }}&amp;orderby={{ activeOrderby }}&amp;disp_number={{ dispNumber }}&amp;pageno={{ page }}"
+               {% if page == currentPage %}aria-current="page"{% endif %}>
+              {{ page }}
+            </a>
+          {% endfor %}
+          {% if pager.next %}
+            <a class="idea-button idea-button--light"
+               href="/products?name={{ activeKeyword|url_encode }}&amp;category_id={{ filters.category_id|default('') }}&amp;orderby={{ activeOrderby }}&amp;disp_number={{ dispNumber }}&amp;pageno={{ pager.next }}">
+              次のページ
+            </a>
+          {% endif %}
+        </div>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <div class="idea-empty">
+      <p class="idea-eyebrow">No results</p>
+      <h2 class="idea-section-title">
+        {% if activeKeyword %}
+          「{{ activeKeyword }}」に一致する商品は見つかりませんでした。
+        {% else %}
+          商品が見つかりませんでした。
+        {% endif %}
+      </h2>
+      <p class="idea-muted">別のキーワードで試すか、カテゴリから探してください。</p>
+      <a class="idea-button" href="/products" rel="goProductList">すべての商品へ</a>
+    </div>
+  {% endif %}
+
+</section>
 {% endblock %}

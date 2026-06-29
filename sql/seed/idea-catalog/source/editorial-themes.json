@@ -1,0 +1,7 @@
+[
+  {"id":"edit-morning","title":"朝を整える","lead":"一日のはじまりを軽くする、台所と身支度の道具。","image":"/assets/idea-store/images/editorial/editorial-01.svg"},
+  {"id":"edit-desk","title":"仕事机を整える","lead":"集中を邪魔しない、静かな収納と文具。","image":"/assets/idea-store/images/editorial/editorial-02.svg"},
+  {"id":"edit-small-room","title":"小さな部屋で暮らす","lead":"しまう、畳む、兼ねる。余白をつくる家具。","image":"/assets/idea-store/images/editorial/editorial-03.svg"},
+  {"id":"edit-reading","title":"読む時間","lead":"灯り、椅子、音。ページをめくるための場所づくり。","image":"/assets/idea-store/images/editorial/editorial-04.svg"},
+  {"id":"edit-craft","title":"週末につくる","lead":"直して、組んで、試す。手を動かす道具。","image":"/assets/idea-store/images/editorial/editorial-05.svg"}
+]

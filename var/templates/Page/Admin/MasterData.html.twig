@@ -1,91 +1,566 @@
 {#
-  BeMart admin Master data — EC-CUBE Setting/System/masterdata.twig.
+  BeMart admin マスタデータ管理 — idea-admin clean-room build.
+
+  DATA CONTRACT (src/Resource/Page/Admin/MasterData.php):
+
+    GET /admin/master-data
+      form           AdminMasterDataForm   — field: masterType (select)
+      masterTypes    list<{value,label,table}>
+      selectedMaster string
+      rows           list<{id,name}>
+      submitTo       {rel,method,href}     rel=doSelectMasterData, method=PUT
+
+    PUT /admin/master-data (doSelectMasterData)
+      same shape as GET, but submitTo changes to:
+        rel=doUpdateMasterData, href=page://self/admin/master-data-edit
+      rows are the selected master's current rows.
+
+    PUT /admin/master-data-edit (doUpdateMasterData — MasterDataEdit resource)
+      body: masterType (string), rows (list<{id,name,sortNo?}>)
+      → redirects to GET /admin/master-data?masterType=...
+
+  FORM FIELDS:
+    Phase 1 — doSelectMasterData: masterType (select), _method=PUT, csrfToken
+    Phase 2 — doUpdateMasterData: masterType (hidden), rows[N][id] (hidden),
+               rows[N][name] (text), _method=PUT, csrfToken
+
+  ACTIONS:
+    PUT /admin/master-data         — doSelectMasterData
+    PUT /admin/master-data-edit    — doUpdateMasterData
+
+  idea-admin vocabulary used:
+    idea-admin-shell            app shell landmark (in base)
+    idea-admin-content          main content area (in base)
+    idea-admin-page-header      page title bar (in base)
+    idea-admin-layout           two-column editor grid
+    idea-admin-primary          main column
+    idea-admin-side             sticky side column
+    idea-admin-panel            section card
+    idea-admin-panel__head      section heading strip
+    idea-admin-panel__body      section content
+    idea-admin-field            label + input row
+    idea-admin-field__label     label cell
+    idea-admin-field__input     input cell + error slot
+    idea-admin-required         required badge
+    idea-admin-error            inline validation message
+    idea-admin-notice           page-level alert strip
+    idea-admin-table-wrap       scrollable table container
+    idea-admin-table            data grid
+    idea-admin-action           button / link affordance
+    idea-admin-action--primary  primary CTA
+    idea-admin-toolbar          fixed bottom action bar
+    idea-admin-toolbar__back    back-nav
+    idea-admin-toolbar__actions submit cluster
+    idea-admin-count            row-count chip
+    idea-admin-badge            type context chip
+    idea-admin-empty            empty-state block
+    idea-admin-master-*         (local) per-page additions
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-master-data' %}
-{% set title = 'マスタデータ管理' %}
-{% set sub_title = 'システム設定' %}
+{% set route     = 'admin-master-data' %}
+{% set title     = 'マスタデータ管理' %}
+{% set sub_title = '設定 / システム' %}
+
+{#
+  Derive UX phase:
+    phase2 = true  → rows loaded, submitTo points to doUpdateMasterData
+    phase2 = false → initial view or re-selection
+#}
+{% set phase2 = (
+  submitTo is defined and submitTo is not null
+  and submitTo.rel is defined
+  and submitTo.rel == 'doUpdateMasterData'
+  and rows is defined and rows is not null
+) %}
+
+{% block stylesheet %}
+<style>
+/* ── Phase 1: select + load row ─────────────────────────────────────── */
+.idea-admin-master-select-row {
+  display: flex;
+  align-items: flex-end;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+.idea-admin-master-select-row .idea-admin-field {
+  flex: 1;
+  min-width: 14rem;
+  margin: 0;
+}
+
+/* ── Phase 2: editable name inputs in table cells ────────────────────── */
+.idea-admin-master-row-name {
+  width: 100%;
+  min-height: 2rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: rgba(255, 253, 248, .95);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: .86rem;
+  padding: .35rem .6rem;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.idea-admin-master-row-name:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .15);
+}
+.idea-admin-master-row-id {
+  font-family: monospace;
+  font-size: .78rem;
+  color: var(--idea-muted);
+  word-break: break-all;
+}
+.idea-admin-master-row-del {
+  border: none;
+  background: transparent;
+  color: var(--idea-muted);
+  font-size: .9rem;
+  cursor: pointer;
+  padding: .25rem .4rem;
+  border-radius: 4px;
+  transition: color .14s, background .14s;
+  line-height: 1;
+}
+.idea-admin-master-row-del:hover {
+  color: #a9472e;
+  background: rgba(169, 71, 46, .08);
+}
+
+/* ── Side panel: master-type context badge ───────────────────────────── */
+.idea-admin-master-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .22rem .65rem;
+  border-radius: var(--idea-admin-radius-badge);
+  background: rgba(73, 111, 124, .12);
+  color: var(--idea-blue);
+  border: 1px solid rgba(73, 111, 124, .25);
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .03em;
+  word-break: break-all;
+}
+</style>
+{% endblock %}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <form id="form1" name="form1" method="post" action="/admin/master-data?_method=put">
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_master_data')) }}">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="各種マスターデータを管理します。">
-                                <span>マスタデータ管理</span><i class="fa fa-question-circle fa-lg ml-1"></i>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-3">
-                                    {{ form.input('masterType')|raw }}
-                                    {% if form.error('masterType') %}{{ form.error('masterType') }}{% endif %}
-                                </div>
-                                <div class="col mb-2">
-                                    <button class="btn btn-primary" type="submit">選択</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
 
-                {% if rows is not empty %}
-                    <form id="form2" name="form2" method="post" action="/admin/master-data-edit?_method=put">
-                        <input type="hidden" name="masterType" value="{{ selectedMaster }}">
-                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_master_data')) }}">
-                        <div class="card rounded border-0 mb-4">
-                            <div class="card-header">
-                                <div class="read">
-                                    IDとNameを編集します。IDの重複に注意してください。
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <table class="table table-sm">
-                                    <thead>
-                                    <tr>
-                                        <th class="border-top-0 pt-2 pb-2 text-center" style="width: 20%">ID</th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center">Name</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for data in rows %}
-                                        <tr id="ex-masterdata-{{ loop.index0 }}">
-                                            <td class="align-middle text-center ps-3">
-                                                <input type="text" name="rows[{{ loop.index0 }}][id]" class="form-control" value="{{ data.id }}">
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                <input type="text" name="rows[{{ loop.index0 }}][name]" class="form-control" value="{{ data.name }}">
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+{# ── Page-level success / error notice ───────────────────────────────── #}
+{% if message is defined and message %}
+<div class="idea-admin-notice" role="status" aria-live="polite">
+  <i class="fa fa-check-circle" aria-hidden="true"></i>
+  {{ message }}
+</div>
+{% endif %}
 
-                        <div class="c-conversionArea">
-                            <div class="c-conversionArea__container">
-                                <div class="row justify-content-between align-items-center">
-                                    <div class="col-6">
-                                        <div class="c-conversionArea__leftBlockItem"></div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                                            <div class="col-auto">
-                                                <button class="btn btn-ec-conversion px-5" type="submit">保存</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                {% endif %}
-            </div>
+{# ════════════════════════════════════════════════════════════════════
+   Phase 1 — doSelectMasterData
+   Always rendered so the user can switch master type at any time.
+════════════════════════════════════════════════════════════════════ #}
+<form
+  id="master_select_form"
+  method="post"
+  action="/admin/master-data"
+  role="form"
+  novalidate
+  aria-label="マスタ種別選択"
+>
+  <input type="hidden" name="_method" value="PUT">
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+  <div class="idea-admin-layout">
+
+    <div class="idea-admin-primary">
+
+      {# ── Panel: マスタ種別 ──────────────────────────────────── #}
+      <section class="idea-admin-panel" aria-labelledby="section-type-select">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-type-select">
+            <i class="fa fa-database fa-fw" aria-hidden="true"></i>
+            マスタ種別
+          </h3>
+          <p class="idea-admin-panel__hint">編集するマスタを選択し「ロード」を押してください。</p>
         </div>
+        <div class="idea-admin-panel__body">
+
+          <div class="idea-admin-master-select-row">
+
+            <div class="idea-admin-field" style="grid-template-columns:7rem 1fr">
+              <div class="idea-admin-field__label">
+                <label for="admin_system_masterdata_masterdata">マスタ種別</label>
+                <span class="idea-admin-required">必須</span>
+              </div>
+              <div class="idea-admin-field__input">
+                {% if form is not null %}
+                  {{ form.input('masterType')|raw }}
+                  {% if form.error('masterType') %}
+                  <span class="idea-admin-error" role="alert">{{ form.error('masterType') }}</span>
+                  {% endif %}
+                {% else %}
+                  {# Fallback: render directly from masterTypes when form object unavailable #}
+                  <select
+                    id="admin_system_masterdata_masterdata"
+                    name="masterType"
+                    class="form-select"
+                  >
+                    {% for mt in masterTypes|default([]) %}
+                    <option
+                      value="{{ mt.value|default('') }}"
+                      {% if mt.value|default('') == selectedMaster|default('') %} selected{% endif %}
+                    >{{ mt.label|default(mt.value|default('')) }}</option>
+                    {% endfor %}
+                  </select>
+                {% endif %}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="idea-admin-action idea-admin-action--primary"
+            >
+              <i class="fa fa-arrow-right fa-fw" aria-hidden="true"></i>
+              ロード
+            </button>
+
+          </div>
+        </div>
+      </section>
+
+    </div>{# /idea-admin-primary #}
+
+    {# ── Side panel (phase 1) ──────────────────────────────────── #}
+    <aside class="idea-admin-side" aria-label="マスタ種別一覧">
+      <section class="idea-admin-panel" aria-labelledby="section-types-info">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-types-info">
+            <i class="fa fa-list-alt fa-fw" aria-hidden="true"></i>
+            マスタ一覧
+          </h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          {% if masterTypes is defined and masterTypes %}
+          <dl class="idea-admin-spec-list">
+            {% for mt in masterTypes %}
+            <div class="idea-admin-spec-row">
+              <dt style="word-break:break-word">{{ mt.label|default(mt.value|default('—')) }}</dt>
+              <dd style="font-family:monospace;font-size:.78rem;color:var(--idea-muted)">
+                {{ mt.table|default('') }}
+              </dd>
+            </div>
+            {% endfor %}
+          </dl>
+          {% else %}
+          <p style="font-size:.84rem;color:var(--idea-muted);margin:0">
+            種別情報を読み込めませんでした。
+          </p>
+          {% endif %}
+        </div>
+      </section>
+    </aside>
+
+  </div>{# /idea-admin-layout (phase 1) #}
+
+  {# Phase 1 toolbar (shown when phase 2 is not active) #}
+  {% if not phase2 %}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="ページ操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/index">
+        <i class="fa fa-backward" aria-hidden="true"></i>
+        ダッシュボード
+      </a>
     </div>
+    <div class="idea-admin-toolbar__actions">
+      <button
+        type="submit"
+        class="idea-admin-action idea-admin-action--primary"
+      >
+        <i class="fa fa-arrow-right fa-fw" aria-hidden="true"></i>
+        ロード
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+</form>{# /master_select_form #}
+
+
+{% if phase2 %}
+{# ════════════════════════════════════════════════════════════════════
+   Phase 2 — doUpdateMasterData
+   Rendered only after a master type has been loaded (PUT responded
+   with submitTo.rel == doUpdateMasterData).
+════════════════════════════════════════════════════════════════════ #}
+<form
+  id="master_edit_form"
+  method="post"
+  action="/admin/master-data-edit"
+  role="form"
+  novalidate
+  aria-label="マスタデータ編集"
+>
+  <input type="hidden" name="_method" value="PUT">
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="masterType" value="{{ selectedMaster|default('') }}">
+
+  <div class="idea-admin-layout" style="margin-top:1.25rem">
+
+    <div class="idea-admin-primary">
+
+      {# ── Panel: 行データ ───────────────────────────────────── #}
+      <section class="idea-admin-panel" aria-labelledby="section-rows">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-rows">
+            <i class="fa fa-list fa-fw" aria-hidden="true"></i>
+            行データ
+            <span class="idea-admin-count" id="master-row-count">
+              {{ rows|length }} 件
+            </span>
+          </h3>
+          <p class="idea-admin-panel__hint">
+            IDとNameを編集します。名称を直接編集して「保存」を押してください。
+          </p>
+        </div>
+
+        {% if rows|length == 0 %}
+        <div class="idea-admin-empty">
+          <i class="fa fa-inbox fa-2x" aria-hidden="true"></i>
+          <span class="idea-admin-empty__title">行がありません</span>
+          <span>「行を追加」ボタンで新しい行を追加できます。</span>
+        </div>
+        {% else %}
+        <div class="idea-admin-table-wrap">
+          <table
+            class="idea-admin-table"
+            id="master-rows-table"
+            aria-label="{{ selectedMaster|default('マスタ') }} の行一覧"
+          >
+            <thead>
+              <tr>
+                <th scope="col" style="width:2.8rem">#</th>
+                <th scope="col" style="width:38%">ID</th>
+                <th scope="col">名称</th>
+                <th scope="col" class="idea-admin-table__actions"></th>
+              </tr>
+            </thead>
+            <tbody id="master-rows-body">
+              {% for row in rows %}
+              <tr data-row-index="{{ loop.index0 }}">
+                <td style="color:var(--idea-muted);font-size:.8rem;text-align:center">
+                  {{ loop.index }}
+                </td>
+                <td>
+                  <input
+                    type="hidden"
+                    name="rows[{{ loop.index0 }}][id]"
+                    value="{{ row.id|default('') }}"
+                  >
+                  <span class="idea-admin-master-row-id">{{ row.id|default('—') }}</span>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    class="idea-admin-master-row-name"
+                    name="rows[{{ loop.index0 }}][name]"
+                    value="{{ row.name|default('') }}"
+                    aria-label="行 {{ loop.index }} の名称"
+                    maxlength="255"
+                  >
+                </td>
+                <td class="idea-admin-table__actions">
+                  <button
+                    type="button"
+                    class="idea-admin-master-row-del"
+                    aria-label="行 {{ loop.index }} を削除"
+                    data-action="delete-row"
+                  >
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+
+        <div class="idea-admin-panel__body" style="border-top:1px solid rgba(205,191,170,.3)">
+          <button
+            type="button"
+            class="idea-admin-action"
+            id="master-add-row"
+          >
+            <i class="fa fa-plus fa-fw" aria-hidden="true"></i>
+            行を追加
+          </button>
+        </div>
+
+      </section>
+
+    </div>{# /idea-admin-primary #}
+
+    {# ── Side panel (phase 2) ──────────────────────────────────── #}
+    <aside class="idea-admin-side" aria-label="選択中マスタの情報">
+      <section class="idea-admin-panel" aria-labelledby="section-context">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-context">
+            <i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>
+            対象マスタ
+          </h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <dl class="idea-admin-spec-list">
+
+            <div class="idea-admin-spec-row">
+              <dt>種別</dt>
+              <dd>
+                <span class="idea-admin-master-type-badge">
+                  <i class="fa fa-database fa-fw" aria-hidden="true"></i>
+                  {{ selectedMaster|default('—') }}
+                </span>
+              </dd>
+            </div>
+
+            {% for mt in masterTypes|default([]) %}
+              {% if mt.value|default('') == selectedMaster|default('') %}
+              <div class="idea-admin-spec-row">
+                <dt>テーブル</dt>
+                <dd style="font-family:monospace;font-size:.8rem">
+                  {{ mt.table|default('—') }}
+                </dd>
+              </div>
+              {% endif %}
+            {% endfor %}
+
+            <div class="idea-admin-spec-row">
+              <dt>行数</dt>
+              <dd>
+                <span class="idea-admin-count" id="side-row-count">
+                  {{ rows|length }} 件
+                </span>
+              </dd>
+            </div>
+
+          </dl>
+        </div>
+      </section>
+    </aside>
+
+  </div>{# /idea-admin-layout (phase 2) #}
+
+  {# Phase 2 toolbar #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="ページ操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/index">
+        <i class="fa fa-backward" aria-hidden="true"></i>
+        ダッシュボード
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button
+        type="submit"
+        class="idea-admin-action idea-admin-action--primary"
+      >
+        <i class="fa fa-save fa-fw" aria-hidden="true"></i>
+        保存
+      </button>
+    </div>
+  </div>
+
+</form>{# /master_edit_form #}
+{% endif %}{# /phase2 #}
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /* ──────────────────────────────────────────────────────────────
+     Row-level add / delete for phase-2 edit table.
+     No-ops silently when the edit form is not in the DOM (phase 1).
+  ────────────────────────────────────────────────────────────── */
+
+  var tbody     = document.getElementById('master-rows-body');
+  var addBtn    = document.getElementById('master-add-row');
+  var countMain = document.getElementById('master-row-count');
+  var countSide = document.getElementById('side-row-count');
+
+  if (!tbody || !addBtn) { return; }
+
+  function setCount(n) {
+    var label = n + ' 件';
+    if (countMain) { countMain.textContent = label; }
+    if (countSide) { countSide.textContent = label; }
+  }
+
+  function reindex() {
+    var rows = tbody.querySelectorAll('tr');
+    rows.forEach(function (tr, i) {
+      tr.setAttribute('data-row-index', i);
+
+      var numCell = tr.querySelector('td:first-child');
+      if (numCell) { numCell.textContent = i + 1; }
+
+      var hiddenId = tr.querySelector('input[type="hidden"][name^="rows["]');
+      if (hiddenId) { hiddenId.name = 'rows[' + i + '][id]'; }
+
+      var nameInput = tr.querySelector('input.idea-admin-master-row-name');
+      if (nameInput) {
+        nameInput.name = 'rows[' + i + '][name]';
+        nameInput.setAttribute('aria-label', '行 ' + (i + 1) + ' の名称');
+      }
+
+      var delBtn = tr.querySelector('[data-action="delete-row"]');
+      if (delBtn) { delBtn.setAttribute('aria-label', '行 ' + (i + 1) + ' を削除'); }
+    });
+  }
+
+  /* Add row */
+  addBtn.addEventListener('click', function () {
+    var idx = tbody.querySelectorAll('tr').length;
+    var tr  = document.createElement('tr');
+    tr.setAttribute('data-row-index', idx);
+    tr.innerHTML =
+      '<td style="color:var(--idea-muted);font-size:.8rem;text-align:center">' + (idx + 1) + '</td>' +
+      '<td>' +
+        '<input type="hidden" name="rows[' + idx + '][id]" value="">' +
+        '<span class="idea-admin-master-row-id">新規</span>' +
+      '</td>' +
+      '<td>' +
+        '<input type="text" class="idea-admin-master-row-name"' +
+        ' name="rows[' + idx + '][name]"' +
+        ' value=""' +
+        ' aria-label="行 ' + (idx + 1) + ' の名称"' +
+        ' maxlength="255">' +
+      '</td>' +
+      '<td class="idea-admin-table__actions">' +
+        '<button type="button" class="idea-admin-master-row-del"' +
+        ' aria-label="行 ' + (idx + 1) + ' を削除"' +
+        ' data-action="delete-row">' +
+          '<i class="fa fa-trash" aria-hidden="true"></i>' +
+        '</button>' +
+      '</td>';
+    tbody.appendChild(tr);
+    setCount(tbody.querySelectorAll('tr').length);
+    var newInput = tr.querySelector('.idea-admin-master-row-name');
+    if (newInput) { newInput.focus(); }
+  });
+
+  /* Delete row — event delegation */
+  tbody.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-action="delete-row"]');
+    if (!btn) { return; }
+    var tr = btn.closest('tr');
+    if (tr) { tr.remove(); }
+    reindex();
+    setCount(tbody.querySelectorAll('tr').length);
+  });
+
+}());
+</script>
 {% endblock %}

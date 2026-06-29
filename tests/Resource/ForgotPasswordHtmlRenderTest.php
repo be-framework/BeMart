@@ -31,21 +31,15 @@ use function str_contains;
 use function trim;
 
 /**
- * Phase 3 — fidelity check for the ForgotPassword (goRequestPasswordReset)
- * HTML port.
+ * Functional HTML render test for ForgotPassword (goRequestPasswordReset).
  *
- * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
- * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
+ * The template was rebuilt from scratch in the IdeaStore design language
+ * (var/templates/Page/ForgotPassword.html.twig); it no longer carries EC-CUBE
+ * markup. The EC-CUBE parity comparison test is archived below.
  *
- * EC-CUBE's `Forgot/index.twig` is a single-input FORM page. This port
- * follows the Ray.WebFormModule form-page recipe (see
- * var/templates/README.md): the ForgotPassword resource exposes a real
- * {@see ForgotForm} (an AbstractForm) as `body.form`, the port renders
- * `{{ form.input('email') }}`, and this test renders EC-CUBE's
- * `form_widget(form.email)` through the SAME `ForgotForm` instance
- * so the input diffs to ZERO. The residual is the genuinely
- * EC-CUBE-runtime-only `<head>` frame material + the empty CSRF hidden
- * value.
+ * L1 checks: required fields present in the rendered output.
+ * L2 checks: form action / method match the Resource #[Link] contract
+ *   (page://self/forgot-password, POST) and the login link (rel=goLogin).
  */
 final class ForgotPasswordHtmlRenderTest extends TestCase
 {
@@ -95,32 +89,30 @@ final class ForgotPasswordHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
+        $this->assertStringContainsString('<main>', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testForgotPagePreservesEcCubeMarkupStructure(): void
+    /**
+     * L1/L2 functional check: the forgot-password form exposes the required
+     * ALPS data-contract field and the correct action/method transition, and
+     * the login link matches the Resource #[Link] rel=goLogin contract.
+     */
+    public function testForgotPagePreservesSemanticStructure(): void
     {
         $html = $this->resource->get('page://self/forgot-password')->toString();
 
-        foreach ([
-            '<div class="ec-role">',
-            '<div class="ec-pageHeader">',
-            '<div class="ec-forgotRole">',
-            '<form name="form1" id="form1" method="post"',
-            '<div class="ec-off1Grid">',
-            'class="ec-off1Grid__cell"',
-            'class="ec-forgotRole__form"',
-            'class="ec-forgotRole__intro"',
-            '<div class="ec-borderedDefs">',
-            '<div class="ec-input">',
-            '<div class="ec-off4Grid">',
-            'class="ec-blockBtn--action"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        // L2 — ALPS transition: form posts to /forgot-password
+        $this->assertStringContainsString('method="post"', $html, 'form method must be POST');
+        $this->assertStringContainsString('action="/forgot-password"', $html, 'form action must be /forgot-password');
+
+        // L2 — goLogin link present (Resource #[Link] rel=goLogin, href=page://self/login)
+        $this->assertStringContainsString('href="/login"', $html, 'goLogin link to /login required');
+
+        // L2 — submit button present
+        $this->assertStringContainsString('type="submit"', $html, 'submit button required');
     }
 
     /**
@@ -130,18 +122,20 @@ final class ForgotPasswordHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/forgot-password')->toString();
 
-        $this->assertStringContainsString('name="email"', $html);
-        $this->assertStringContainsString('type="text"', $html);
+        // L1 — email field present (ForgotForm::init() field name is `email`)
+        $this->assertStringContainsString('name="email"', $html, 'email input required');
+        $this->assertStringContainsString('type="text"', $html, 'email input type must be text');
     }
 
     /**
-     * The honesty test: diff BeMart's rendered forgot page against
-     * EC-CUBE's own rendering. Every difference must be in the residual
-     * allowlist.
+     * EC-CUBE markup parity test — archived; superseded by functional checks
+     * (license cleanup). The template was rebuilt in the IdeaStore design
+     * language and no longer shares EC-CUBE DOM structure.
      */
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-parity-archived')]
     public function testForgotHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
+        $this->markTestSkipped('EC-CUBE markup parity retired; superseded by functional checks (license cleanup).');
         $beMart = $this->resource->get('page://self/forgot-password')->toString();
         $ecCube = $this->renderEcCubeForgot();
 
@@ -166,10 +160,6 @@ final class ForgotPasswordHtmlRenderTest extends TestCase
             . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
         );
 
-        // With the email input + label rendered by a real ForgotForm /
-        // ported `form_label` on both sides, the residual is purely the
-        // shared <head> frame material + the empty CSRF hidden value —
-        // no form-widget residual at all. Same family as the Login pilot.
         $this->assertLessThanOrEqual(
             12,
             count($onlyInEcCube) + count($onlyInBeMart),

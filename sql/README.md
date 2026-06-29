@@ -6,9 +6,9 @@ Phase 2 inputs that drive the EC-CUBE → BEAR.Sunday + Be Framework migration.
 
 ```
 sql/
-├── schema/                              # source-of-truth EC-CUBE 4.3 schema
-│   └── ec-cube-4.3-mysql-mysqldump.sql  # 65 tables, structure only, utf8mb4_bin
-├── migrations/                          # BeMart schema deltas applied after the EC-CUBE dump
+├── schema/                              # source-of-truth BeMart schema
+│   └── bemart-schema.sql                # 65 tables, authored from first principles, utf8mb4_bin
+├── migrations/                          # BeMart schema deltas applied after the base schema
 ├── seed/                                # committed reference/master data
 │   ├── mtb-master.sql                   # 22 mtb_* tables, 395 reference rows
 │   └── dtb-system-master.sql            # installer-level dtb_* system rows
@@ -21,7 +21,7 @@ sql/
 ## Production database bring-up
 
 A live production database needs four committed artefact sets: the **schema**
-(`schema/ec-cube-4.3-mysql-mysqldump.sql`), BeMart **migrations**
+(`schema/bemart-schema.sql`), BeMart **migrations**
 (`migrations/*.sql`), the **mtb_\* master seed** (`seed/mtb-master.sql`),
 and the **dtb_\* system master seed** (`seed/dtb-system-master.sql`).
 `setup-db.sh` stitches them together so a prod DB can be stood up
@@ -47,10 +47,9 @@ The script:
    (not `CREATE TABLE IF NOT EXISTS`). **Warning:** any existing data in the
    target database is destroyed; never point it at a populated prod DB —
    use it to *bring up* a fresh one.
-2. Loads the schema **wrapped in `SET FOREIGN_KEY_CHECKS=0/1`**. The dump
-   carries cross-table FKs but no such pragma, so a plain sequential load
-   trips on the first table (`dtb_authority_role` → `dtb_member`). This
-   mirrors the workaround in `be/tests/Sql/bootstrap.php` (Phase 2a Step 2).
+2. Loads the schema **wrapped in `SET FOREIGN_KEY_CHECKS=0/1`**. The schema
+   carries cross-table FKs, so we disable FK checks during load to allow any
+   table ordering. This mirrors the workaround in `be/tests/Sql/bootstrap.php`.
 3. Applies BeMart schema deltas under `migrations/*.sql` in filename order.
 4. Loads `seed/mtb-master.sql`.
 5. Loads `seed/dtb-system-master.sql`: installer-level rows such as the
@@ -124,39 +123,36 @@ corrected an earlier order that started from the SQL impl):
 ## Running the SQL test suites
 
 ```bash
-vendor/bin/phpunit --testsuite bemart-sql    # storage + Final-direct
-vendor/bin/phpunit tests/Resource/Sql/       # Resource-layer hypermedia
+composer test:sql                            # Resource-layer hypermedia (sql testsuite)
+vendor/bin/phpunit --testsuite sql           # same, long form
+vendor/bin/phpunit tests/Resource/Sql/       # explicit directory form
 vendor/bin/phpunit                           # everything (~765 tests)
 ```
 
-The `bemart-sql` suite drops + recreates `eccubedb_test` on every run
-(schema loaded with FK checks disabled). Each test runs inside a
-transaction `tearDown` rolls back.
+The `sql` suite runs `be/tests/Sql/bootstrap.php` on first use, which drops
++ recreates `eccubedb_test` and loads `bemart-schema.sql` with FK checks
+disabled. Each test runs inside a transaction that `tearDown` rolls back.
 
 If `DATABASE_URL` is unset the SQL suites skip cleanly. If it is set but
-the server is unreachable, the suite fails fast (no silent skips). If it
-points at malt's current MySQL 8.0 runtime, the suite skips because the
-target baseline is MariaDB 10.11.
+the server is unreachable, the suite fails fast (no silent skips).
 
 The top-level `phpunit.xml` wires the default `DATABASE_URL`:
 
 ```text
-mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14
+mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=8.0.0
 ```
 
 ## Setting up the local DB with malt
 
 The dev environment uses `malt` for the local DB. The checked-in
-`malt.json` currently starts MySQL 8.0 on port 3306; this is useful for DB
-reachability and smoke wiring, while MariaDB-target SQL verification is
-kept separate.
+`malt.json` starts MySQL 8.0 on port 3306, which is the target baseline.
 The local development connection is `root` with no password; do not create
 or grant a separate `dbuser` account for normal local runs.
 
 ```bash
 malt start
 source <(malt env)
-export DATABASE_URL='mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14'
+export DATABASE_URL='mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=8.0.0'
 sql/setup-db.sh "$DATABASE_URL"
 
 /opt/homebrew/opt/php@8.5/bin/php vendor/bin/phpunit --testsuite sql --colors=never
@@ -282,6 +278,6 @@ Reports are written to `build/sql-quality/` (git-ignored):
 - Values in `sql_params.php` target the seed data so `EXPLAIN ANALYZE` returns
   rows; placeholders only need a valid type, so queries against unseeded tables
   still analyze (returning 0 rows).
-- The analyzer skips any query it cannot EXPLAIN and continues — e.g.
-  `order_history_by_order_no.sql` uses `JSON_ARRAYAGG(... ORDER BY ...)`, which
-  MySQL 8.0 does not support. Such skips are a useful portability signal.
+- The analyzer skips any query it cannot EXPLAIN and continues — such skips
+  are a useful portability signal. All queries in `var/sql/` use
+  `GROUP_CONCAT(JSON_OBJECT(...) ORDER BY ...)` which is supported by MySQL 8.0.

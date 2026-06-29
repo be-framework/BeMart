@@ -1,149 +1,594 @@
-{#
-  BeMart admin ファイル管理 — EC-CUBE goFileManager.
-
-  PORT of EC-CUBE 4.3 admin-theme `Content/file.twig`
-  (src/Eccube/Resource/template/admin/Content/file.twig).
-
-  FORM page (the user_data file manager). Extends the admin frame
-  (`admin-base.html.twig`). The markup skeleton + `c-*` / `ec-*` /
-  Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
-  bindings are rebound.
-
-  The FileManager resource (src/Resource/Page/Admin/Content/FileManager.php)
-  is a thin HTML renderer — see its port header (EC-CUBE's FileController
-  is a filesystem file manager with no Be domain). The body renders the
-  fresh / empty-directory state.
-
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md): the
-  resource exposes an {@see \MyVendor\BeMart\Form\AdminFileForm} as
-  `body['form']`. The upload + new-folder inputs render through that real
-  form object:
-    {{ form.input('file')|raw }}          <- real <input type=file>
-    {{ form.input('create_file')|raw }}   <- real <input type=text>
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - the `{% block javascript %}` file-tree / breadcrumb runtime
-     (`tpl_javascript`, `paths`, `now_dir_list`, `file_manager.js`) ->
-     client-side file-manager runtime; the markup shells are kept, the
-     JS payload variables render empty (the resource carries no file
-     tree). Enumerated as residual.
-   - `arrFileList` -> empty (the FileManager renderer lists no files —
-     see its port header). The `{% for file in arrFileList %}` loop
-     produces no rows; the table renders empty. Enumerated as residual —
-     MISSING-BODY-FIELD: `arrFileList` (the user_data file listing).
-   - `tpl_is_top_dir` -> false (at the user_data root): the parent-dir
-     "go up" row is omitted.
-   - `{% form_theme %}` -> Symfony form-theme runtime. Dropped.
-#}
 {% extends 'admin-base.html.twig' %}
+{#
+  BeMart admin — ファイル管理
+  Clean-room build. EC-CUBE markup is NOT mirrored.
+
+  DATA CONTRACT (src/Resource/Page/Admin/Content/FileManager.php onGet):
+    form          AdminFileForm   — fields: file (file, multiple), create_file (text)
+    tplNowDir     string|null     — current directory path; empty string = root
+    tplParentDir  string|null     — parent directory path
+    tplIsTopDir   bool|null       — true when at user_data root
+    arrFileList   array|null      — list of file/dir entries in current dir
+    errors        array|null      — domain error messages
+
+  ACTIONS (POST to self):
+    upload:        name=mode value=upload        + file field (multiple)
+    create_folder: name=mode value=create_file   + create_file field
+    delete:        name=mode value=delete        + select_file (hidden)
+    rename:        name=mode value=rename        + select_file + create_file
+    navigate:      GET /admin/content/file-manager?now_dir=...
+
+  idea-admin vocabulary used:
+    idea-admin-layout / idea-admin-primary / idea-admin-side
+    idea-admin-panel / idea-admin-panel__head / idea-admin-panel__body
+    idea-admin-table-wrap / idea-admin-table / idea-admin-table__actions
+    idea-admin-empty / idea-admin-empty__title
+    idea-admin-field / idea-admin-field__label / idea-admin-field__input
+    idea-admin-action / idea-admin-action--primary / idea-admin-action--ghost
+    idea-admin-error
+    idea-admin-notice / idea-admin-notice--error
+    idea-admin-toolbar / idea-admin-toolbar__back / idea-admin-toolbar__actions
+
+  Per-page additions (block stylesheet):
+    idea-admin-fm-dropzone    — drag-and-drop upload target
+    idea-admin-fm-breadcrumb  — path breadcrumb strip
+    idea-admin-fm-icon        — file/folder icon cell
+#}
 
 {% set route = 'admin-content-file' %}
 {% set title = 'ファイル管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
+{% set nowDir     = tplNowDir|default('') %}
+{% set parentDir  = tplParentDir|default('') %}
+{% set isTopDir   = tplIsTopDir|default(false) %}
+{% set fileList   = arrFileList|default([]) %}
+{% set errorList  = errors|default([]) %}
+
 {% block stylesheet %}
-    <style>
-        .copy-file-path {
-            display: none;
-        }
-    </style>
-{% endblock stylesheet %}
+<style>
+/* ── Breadcrumb ──────────────────────────────────────────────── */
+.idea-admin-fm-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .25rem;
+  font-size: .85rem;
+  color: var(--idea-muted);
+  margin-bottom: 1.25rem;
+}
+.idea-admin-fm-breadcrumb a {
+  color: var(--idea-olive);
+  text-decoration: none;
+}
+.idea-admin-fm-breadcrumb a:hover { text-decoration: underline; }
+.idea-admin-fm-breadcrumb__sep { color: var(--idea-stone); }
+.idea-admin-fm-breadcrumb__current { color: var(--idea-ink); font-weight: 600; }
+
+/* ── Drop-zone ───────────────────────────────────────────────── */
+.idea-admin-fm-dropzone {
+  border: 2px dashed var(--idea-stone);
+  border-radius: var(--idea-admin-radius-panel);
+  padding: 1.75rem 1.25rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .18s, background .18s;
+  background: var(--idea-surface-soft);
+}
+.idea-admin-fm-dropzone:hover,
+.idea-admin-fm-dropzone.is-over {
+  border-color: var(--idea-olive);
+  background: rgba(82, 107, 85, .07);
+}
+.idea-admin-fm-dropzone__icon {
+  font-size: 2rem;
+  color: var(--idea-stone);
+  margin-bottom: .5rem;
+}
+.idea-admin-fm-dropzone__label {
+  font-size: .88rem;
+  color: var(--idea-muted);
+  line-height: 1.5;
+}
+.idea-admin-fm-dropzone__label strong { color: var(--idea-ink); }
+/* hide real file input visually but keep accessible */
+.idea-admin-fm-dropzone input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Upload progress strip ───────────────────────────────────── */
+.idea-admin-fm-upload-status {
+  margin-top: .75rem;
+  font-size: .82rem;
+  color: var(--idea-muted);
+  min-height: 1.2em;
+}
+
+/* ── File icon in table ──────────────────────────────────────── */
+.idea-admin-fm-icon { width: 2rem; text-align: center; color: var(--idea-muted); }
+
+/* ── Filename link ───────────────────────────────────────────── */
+.idea-admin-fm-name a {
+  color: var(--idea-ink);
+  text-decoration: none;
+  font-weight: 500;
+}
+.idea-admin-fm-name a:hover { color: var(--idea-olive); text-decoration: underline; }
+
+/* ── Rename inline input ─────────────────────────────────────── */
+.idea-admin-fm-rename-input {
+  display: none;
+  width: 100%;
+  padding: .2rem .4rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  font-size: .87rem;
+}
+.idea-admin-fm-rename-input:focus {
+  outline: none;
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .18);
+}
+
+/* ── Copy-path button ────────────────────────────────────────── */
+.idea-admin-fm-copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--idea-muted);
+  padding: 0 .2rem;
+  font-size: .85rem;
+  transition: color .15s;
+}
+.idea-admin-fm-copy-btn:hover { color: var(--idea-ink); }
+</style>
+{% endblock %}
 
 {% block main %}
-    <form name="form1" id="form1" method="post" action="?" enctype="multipart/form-data">
-        <input type="hidden" name="mode" value=""/>
-        <input type="hidden" name="now_file" value="{{ tplNowDir|default('') }}"/>
-        <input type="hidden" name="now_dir" value="{{ tplNowDir|default('') }}"/>
-        <input type="hidden" name="tree_select_file" value="{{ tplNowDir|default('') }}"/>
-        <input type="hidden" name="tree_status" value=""/>
-        <input type="hidden" name="select_file" value=""/>
-        <input type="hidden" id="file__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <div class="c-outsideBlock">
-            <div class="c-outsideBlock__contents">
-                <nav aria-label="breadcrumb" role="navigation">
-                    <ol class="breadcrumb mb-2 p-0" id="bread"></ol>
-                </nav>
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header"><span class="card-title">ファイル・フォルダを追加</span></div>
-                    <div class="card-body">
-                        <div id="upload_box__file" class="row mb-2">
-                            <div class="col-2" data-bs-toggle="tooltip" data-bs-placement="top" title="ファイルの追加は複数ファイルを選択してアップロードできます。"><span>ファイルを追加</span><i class="fa fa-question-circle fa-lg ms-1"></i></div>
-                            <div class="col mb-3">
-                                <div class="mb-2">
-                                    {{ form.input('file')|raw }}
-                                </div>
-                                <div class="mb-2">
-                                    <a class="btn btn-ec-conversion action-upload" href="javascript:;">アップロード</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-2"><span>フォルダを追加</span></div>
-                            <div class="col">
-                                <div class="row">
-                                    <div class="col-3">
-                                        {{ form.input('create_file')|raw }}
-                                    </div>
-                                    <div class="col-auto">
-                                        <a class="btn btn-ec-regular action-create" href="javascript:">新規作成</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="c-contentsArea__cols">
-                <div class="c-contentsArea__primaryCol">
-                    <div class="c-primaryCol">
-                        <div class="card rounded border-0 mb-4">
-                            <div class="card-header">
-                                <div class="row">
-                                    <div class="col-8"><span class="card-title">このフォルダ内のファイル</span></div>
-                                    <div class="col-4 text-end"><a data-bs-toggle="collapse" href="#fileList" aria-expanded="false" aria-controls="fileList"><i class="fa fa-angle-up fa-lg"></i></a></div>
-                                </div>
-                            </div>
-                            <div class="collapse show ec-cardCollapse" id="fileList">
-                                <div class="card-body p-0">
 
-                                    <table class="table">
-                                        <tbody>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="c-contentsArea__secondaryCol">
-                    <div class="c-secondaryCol">
-                        <div class="card rounded border-0 mb-4">
-                            <div class="card-header">
-                                <div class="row">
-                                    <div class="col-8"><span class="card-title">フォルダ構成</span></div>
-                                    <div class="col-4 text-end"><a data-bs-toggle="collapse" href="#folderDirectory" aria-expanded="false" aria-controls="folderDirectory"><i class="fa fa-lg fa-angle-down"></i></a></div>
-                                </div>
-                            </div>
-                            <div class="collapse show ec-cardCollapse" id="folderDirectory">
-                                <div class="card-body">
-                                    <div class="c-directoryTree--folder mb-3">
-                                        <ul id="directory_userdata" class="list-unstyled">
-                                            <li>
-                                                <label class="collapsed" data-bs-toggle="collapse" href="#directory_userdata" aria-expanded="false" aria-controls="directory_userdata">user_data</label>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+{# ── Error notices ────────────────────────────────────────────────────────── #}
+{% if errorList is not empty %}
+  {% for err in errorList %}
+  <div class="idea-admin-notice idea-admin-notice--error" role="alert">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    {{ err }}
+  </div>
+  {% endfor %}
+{% endif %}
+
+{# ── Breadcrumb ───────────────────────────────────────────────────────────── #}
+<nav aria-label="現在地" class="idea-admin-fm-breadcrumb">
+  <a href="/admin/content/file-manager" rel="goAdminContentFileManager">
+    <i class="fa fa-folder-open" aria-hidden="true"></i>
+    user_data
+  </a>
+  {% if nowDir %}
+    {% for segment in nowDir|split('/') %}
+      {% if segment %}
+      <span class="idea-admin-fm-breadcrumb__sep" aria-hidden="true">/</span>
+      <span class="idea-admin-fm-breadcrumb__current">{{ segment }}</span>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+</nav>
+
+{# ── Two-column layout ────────────────────────────────────────────────────── #}
+<div class="idea-admin-layout">
+
+  {# ── Primary: file listing ──────────────────────────────────────────────── #}
+  <div class="idea-admin-primary">
+    <div class="idea-admin-panel">
+      <div class="idea-admin-panel__head">
+        <h3>
+          <i class="fa fa-folder-open-o" aria-hidden="true"></i>
+          {% if nowDir %}{{ nowDir }}{% else %}/ (ルート){% endif %}
+        </h3>
+      </div>
+      <div class="idea-admin-panel__body" style="padding: 0;">
+
+        {% if fileList is empty %}
+        {# ── Empty state ── #}
+        <div class="idea-admin-empty">
+          <div class="idea-admin-empty__title">
+            <i class="fa fa-folder-o" aria-hidden="true"></i>
+            このフォルダは空です
+          </div>
+          <p>右パネルからファイルをアップロードするか、新しいフォルダを作成してください。</p>
         </div>
-    </form>
+
+        {% else %}
+        {# ── File table ── #}
+        <div class="idea-admin-table-wrap">
+          <table class="idea-admin-table" aria-label="ファイル一覧">
+            <thead>
+              <tr>
+                <th class="idea-admin-fm-icon" aria-label="種別"></th>
+                <th class="idea-admin-fm-name">名前</th>
+                <th style="width:8rem; text-align:right;">サイズ</th>
+                <th style="width:11rem;">更新日時</th>
+                <th class="idea-admin-table__actions" aria-label="操作"></th>
+              </tr>
+            </thead>
+            <tbody>
+
+              {# Parent dir row #}
+              {% if not isTopDir and parentDir is not empty %}
+              <tr data-entry-type="parent">
+                <td class="idea-admin-fm-icon">
+                  <i class="fa fa-level-up" aria-hidden="true"></i>
+                </td>
+                <td class="idea-admin-fm-name" colspan="3">
+                  <a href="/admin/content/file-manager?now_dir={{ parentDir|url_encode }}"
+                     rel="goAdminContentFileManager">
+                    .. (上のフォルダへ)
+                  </a>
+                </td>
+                <td class="idea-admin-table__actions"></td>
+              </tr>
+              {% endif %}
+
+              {# File / folder rows #}
+              {% for file in fileList %}
+              {% set isDir = file ends with '/' %}
+              {% set fileName = isDir ? file|trim('/') : file %}
+              {% set filePath = nowDir ? (nowDir ~ '/' ~ fileName) : fileName %}
+              <tr data-entry="{{ fileName }}" data-path="{{ filePath }}">
+                <td class="idea-admin-fm-icon">
+                  {% if isDir %}
+                  <i class="fa fa-folder-o" aria-hidden="true" style="color:var(--idea-wood);"></i>
+                  {% else %}
+                  <i class="fa fa-file-o" aria-hidden="true"></i>
+                  {% endif %}
+                </td>
+                <td class="idea-admin-fm-name">
+                  {% if isDir %}
+                  <a href="/admin/content/file-manager?now_dir={{ filePath|url_encode }}"
+                     rel="goAdminContentFileManager">{{ fileName }}</a>
+                  {% else %}
+                  <a href="/user_data/{{ filePath }}" target="_blank" rel="noopener">{{ fileName }}</a>
+                  <button type="button"
+                          class="idea-admin-fm-copy-btn"
+                          data-copy-path="/user_data/{{ filePath }}"
+                          title="パスをコピー"
+                          aria-label="{{ fileName }} のパスをコピー">
+                    <i class="fa fa-copy" aria-hidden="true"></i>
+                  </button>
+                  {% endif %}
+                  {# Inline rename input (hidden until activated) #}
+                  <input type="text"
+                         class="idea-admin-fm-rename-input"
+                         aria-label="{{ fileName }} の新しい名前"
+                         value="{{ fileName }}">
+                </td>
+                <td style="text-align:right; color:var(--idea-muted); font-size:.83rem; white-space:nowrap;">
+                  {{ isDir ? '—' : '' }}
+                </td>
+                <td style="color:var(--idea-muted); font-size:.83rem; white-space:nowrap;">
+                </td>
+                <td class="idea-admin-table__actions">
+                  <button type="button"
+                          class="idea-admin-icon-btn js-rename-btn"
+                          title="名前を変更"
+                          aria-label="{{ fileName }} の名前を変更">
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                  </button>
+                  <button type="button"
+                          class="idea-admin-icon-btn js-delete-btn"
+                          title="削除"
+                          aria-label="{{ fileName }} を削除"
+                          style="color: #a9472e;">
+                    <i class="fa fa-trash-o" aria-hidden="true"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+
+      </div>{# panel__body #}
+    </div>{# panel #}
+  </div>{# primary #}
+
+  {# ── Sidebar: upload + new folder ───────────────────────────────────────── #}
+  <div class="idea-admin-side">
+
+    {# Upload panel #}
+    <div class="idea-admin-panel" style="margin-bottom:1.25rem;">
+      <div class="idea-admin-panel__head">
+        <h3><i class="fa fa-upload" aria-hidden="true"></i> ファイルをアップロード</h3>
+      </div>
+      <div class="idea-admin-panel__body">
+        <form id="fm-upload-form"
+              method="post"
+              action="/admin/content/file-manager"
+              enctype="multipart/form-data"
+              novalidate>
+          <input type="hidden" name="mode" value="upload">
+          <input type="hidden" name="now_dir" value="{{ nowDir }}">
+
+          <div class="idea-admin-fm-dropzone" id="fm-dropzone" role="button" tabindex="0"
+               aria-label="ファイルをここにドロップするか、クリックして選択">
+            <div class="idea-admin-fm-dropzone__icon">
+              <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+            </div>
+            <div class="idea-admin-fm-dropzone__label">
+              <strong>ドラッグ&ドロップ</strong> またはクリックして<br>ファイルを選択
+              <br><span style="font-size:.78rem; margin-top:.35rem; display:block;">複数ファイル選択可</span>
+            </div>
+            {{ form.input('file')|raw }}
+          </div>
+          <div class="idea-admin-fm-upload-status" id="fm-upload-status" aria-live="polite"></div>
+          <div style="margin-top:.85rem;">
+            {{ form.error('file') }}
+            <button type="submit"
+                    id="fm-upload-btn"
+                    class="idea-admin-action idea-admin-action--primary"
+                    style="width:100%;">
+              <i class="fa fa-upload" aria-hidden="true"></i>
+              アップロード実行
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {# New folder panel #}
+    <div class="idea-admin-panel">
+      <div class="idea-admin-panel__head">
+        <h3><i class="fa fa-folder-o" aria-hidden="true"></i> フォルダを作成</h3>
+      </div>
+      <div class="idea-admin-panel__body">
+        <form id="fm-mkdir-form"
+              method="post"
+              action="/admin/content/file-manager"
+              novalidate>
+          <input type="hidden" name="mode" value="create_file">
+          <input type="hidden" name="now_dir" value="{{ nowDir }}">
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="form_create_file">フォルダ名</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('create_file')|raw }}
+              {% if form.error('create_file') %}
+              <div class="idea-admin-error" role="alert">{{ form.error('create_file') }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div style="margin-top:.85rem;">
+            <button type="submit"
+                    class="idea-admin-action idea-admin-action--ghost"
+                    style="width:100%;">
+              <i class="fa fa-plus" aria-hidden="true"></i>
+              フォルダを作成
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>{# side #}
+
+</div>{# layout #}
+
+{# ── Hidden delete / rename form ──────────────────────────────────────────── #}
+<form id="fm-action-form" method="post" action="/admin/content/file-manager" hidden>
+  <input type="hidden" name="mode" id="fm-action-mode" value="">
+  <input type="hidden" name="now_dir" value="{{ nowDir }}">
+  <input type="hidden" name="select_file" id="fm-select-file" value="">
+  <input type="hidden" name="create_file" id="fm-rename-value" value="">
+</form>
+
+{# ── Fixed bottom toolbar ─────────────────────────────────────────────────── #}
+<div class="idea-admin-toolbar" role="toolbar" aria-label="ページアクション">
+  <div class="idea-admin-toolbar__back">
+    <a href="/admin/content/cache" rel="goAdminContentCache">
+      <i class="fa fa-archive" aria-hidden="true"></i>
+      キャッシュ管理へ
+    </a>
+  </div>
+  <div class="idea-admin-toolbar__actions">
+    {# Contextual: back to root when navigated into subfolder #}
+    {% if not isTopDir and nowDir %}
+    <a href="/admin/content/file-manager"
+       class="idea-admin-action idea-admin-action--ghost"
+       rel="goAdminContentFileManager">
+      <i class="fa fa-home" aria-hidden="true"></i>
+      ルートへ戻る
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /* ── Drop-zone: forward clicks and drag events to the hidden file input ── */
+  var zone      = document.getElementById('fm-dropzone');
+  var fileInput = document.getElementById('form_file');
+  var statusEl  = document.getElementById('fm-upload-status');
+  var uploadBtn = document.getElementById('fm-upload-btn');
+
+  if (zone && fileInput) {
+    /* click on zone → open file picker */
+    zone.addEventListener('click', function () { fileInput.click(); });
+
+    /* keyboard activation */
+    zone.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+
+    /* drag visual feedback */
+    ['dragenter', 'dragover'].forEach(function (evName) {
+      zone.addEventListener(evName, function (e) {
+        e.preventDefault();
+        zone.classList.add('is-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(function (evName) {
+      zone.addEventListener(evName, function (e) {
+        e.preventDefault();
+        zone.classList.remove('is-over');
+      });
+    });
+
+    /* drop → assign files to the hidden input and reflect in status */
+    zone.addEventListener('drop', function (e) {
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (!files || !files.length) return;
+      try {
+        var dt = new DataTransfer();
+        for (var i = 0; i < files.length; i++) { dt.items.add(files[i]); }
+        fileInput.files = dt.files;
+      } catch (_) { /* DataTransfer not available in all environments */ }
+      reflectFileSelection(files);
+    });
+
+    /* reflect manual file picker selection */
+    fileInput.addEventListener('change', function () {
+      reflectFileSelection(fileInput.files);
+    });
+  }
+
+  function reflectFileSelection(files) {
+    if (!statusEl) return;
+    if (!files || !files.length) {
+      statusEl.textContent = '';
+      return;
+    }
+    var names = [];
+    for (var i = 0; i < Math.min(files.length, 4); i++) {
+      names.push(files[i].name);
+    }
+    var extra = files.length > 4 ? ' 他 ' + (files.length - 4) + ' ファイル' : '';
+    statusEl.textContent = names.join(', ') + extra + ' を選択中';
+    if (uploadBtn) { uploadBtn.focus(); }
+  }
+
+  /* ── Copy-path buttons ───────────────────────────────────────────────── */
+  document.querySelectorAll('.idea-admin-fm-copy-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var path = btn.getAttribute('data-copy-path');
+      if (!path) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(path).then(function () {
+          showCopyFeedback(btn);
+        });
+      } else {
+        /* fallback */
+        var ta = document.createElement('textarea');
+        ta.value = path;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showCopyFeedback(btn); } catch (_) {}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  function showCopyFeedback(btn) {
+    var icon = btn.querySelector('i');
+    if (icon) {
+      icon.className = 'fa fa-check';
+      setTimeout(function () { icon.className = 'fa fa-copy'; }, 1500);
+    }
+  }
+
+  /* ── Rename inline edit ──────────────────────────────────────────────── */
+  var actionForm    = document.getElementById('fm-action-form');
+  var actionMode    = document.getElementById('fm-action-mode');
+  var selectFileEl  = document.getElementById('fm-select-file');
+  var renameValueEl = document.getElementById('fm-rename-value');
+
+  document.querySelectorAll('.js-rename-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var row       = btn.closest('tr');
+      var nameCell  = row && row.querySelector('.idea-admin-fm-name');
+      var nameLink  = nameCell && nameCell.querySelector('a');
+      var renameIn  = nameCell && nameCell.querySelector('.idea-admin-fm-rename-input');
+      if (!nameLink || !renameIn) return;
+
+      /* toggle: show input, hide link */
+      nameLink.style.display = 'none';
+      var copyBtn = nameCell.querySelector('.idea-admin-fm-copy-btn');
+      if (copyBtn) copyBtn.style.display = 'none';
+      renameIn.style.display = 'block';
+      renameIn.focus();
+      renameIn.select();
+
+      /* confirm on Enter, cancel on Escape */
+      renameIn.addEventListener('keydown', function handler(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          submitRename(row, renameIn.value);
+          renameIn.removeEventListener('keydown', handler);
+        } else if (e.key === 'Escape') {
+          cancelRename(nameLink, copyBtn, renameIn);
+          renameIn.removeEventListener('keydown', handler);
+        }
+      });
+      renameIn.addEventListener('blur', function blurHandler() {
+        /* slight delay to let Enter handler fire first */
+        setTimeout(function () {
+          if (renameIn.style.display !== 'none') {
+            cancelRename(nameLink, copyBtn, renameIn);
+          }
+        }, 150);
+        renameIn.removeEventListener('blur', blurHandler);
+      });
+    });
+  });
+
+  function cancelRename(link, copyBtn, input) {
+    if (link) link.style.display = '';
+    if (copyBtn) copyBtn.style.display = '';
+    if (input) { input.style.display = 'none'; input.value = input.defaultValue; }
+  }
+
+  function submitRename(row, newName) {
+    if (!newName || !actionForm || !actionMode || !selectFileEl || !renameValueEl) return;
+    var path = row.getAttribute('data-path');
+    if (!path) return;
+    actionMode.value    = 'rename';
+    selectFileEl.value  = path;
+    renameValueEl.value = newName.trim();
+    actionForm.hidden   = false;
+    actionForm.submit();
+  }
+
+  /* ── Delete confirmation ─────────────────────────────────────────────── */
+  document.querySelectorAll('.js-delete-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var row  = btn.closest('tr');
+      var name = row && row.getAttribute('data-entry');
+      var path = row && row.getAttribute('data-path');
+      if (!name || !path) return;
+      if (!window.confirm('「' + name + '」を削除しますか?\nこの操作は元に戻せません。')) return;
+      if (!actionForm || !actionMode || !selectFileEl) return;
+      actionMode.value   = 'delete';
+      selectFileEl.value = path;
+      actionForm.hidden  = false;
+      actionForm.submit();
+    });
+  });
+
+}());
+</script>
 {% endblock %}

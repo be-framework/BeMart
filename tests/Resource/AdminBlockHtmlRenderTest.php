@@ -6,67 +6,29 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Entity\BlockEntity;
+use MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Form\AdminBlockForm;
-use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
-use MyVendor\BeMart\Tests\Resource\Admin\ContentJaMessages;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
-use Ray\WebFormModule\FormFactory;
-use Twig\Environment;
-use Twig\Markup;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
-
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
-use function dirname;
-use function explode;
-use function http_build_query;
-use function implode;
-use function in_array;
-use function is_dir;
-use function is_string;
-use function preg_replace;
-use function str_contains;
-use function trim;
 
 /**
- * Phase 3 — fidelity check for the admin Block-edit HTML port (the
- * Content section's `Content/block_edit.twig` FORM/CRUD page).
+ * Phase 3 — semantic/functional parity check for the admin Block-edit page.
  *
- * Same standard as the admin form pilot {@see AdminNewsHtmlRenderTest}:
- * EC-CUBE renders the block inputs through the Symfony FormView
- * (`form_widget(form.name)`); BeMart renders them through a real
- * Ray.WebFormModule {@see AdminBlockForm} exposed as `body.form`. This
- * test renders EC-CUBE's `form_widget(form.<field>)` calls through the
- * SAME `AdminBlockForm` instance, so the inputs are byte-identical on
- * both sides and the form-widget residual family is eliminated.
+ * The template has been clean-room rebuilt using the idea-admin design
+ * vocabulary. These tests verify:
+ *  L1 — required fields render with correct name/id attributes
+ *  L2 — form action, method, and CSRF hidden input are correct
+ *  Frame — the page extends admin-base.html.twig (idea-admin-shell landmark)
+ *
+ * The EC-CUBE rendering comparison was retired when the template was
+ * rebuilt clean-room (@group ec-cube-parity-archived).
  */
 final class AdminBlockHtmlRenderTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
-
-    /** @var list<string> */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        "'ECCUBE-CSRF-TOKEN': $('meta[name=\"eccube-csrf-token\"]').attr('content')",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>ブロック管理 コンテンツ管理 - BeMart</title>',
-        '<title>ブロック管理 コンテンツ管理 - EC-CUBE</title>',
-    ];
 
     private ResourceInterface $resource;
 
@@ -87,6 +49,8 @@ final class AdminBlockHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
+    // ── Frame ──────────────────────────────────────────────────────────────
+
     public function testBlockEditRendersAsHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/admin/block/block');
@@ -97,215 +61,136 @@ final class AdminBlockHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
         $this->assertStringContainsString('</body>', $html);
-
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testBlockEditRendersRealFormInputs(): void
+    public function testBlockEditUsesIdeaAdminShellLandmark(): void
+    {
+        $html = $this->resource->get('page://self/admin/block/block')->toString();
+
+        $this->assertStringContainsString('class="idea-admin-shell"', $html);
+        $this->assertStringContainsString('class="idea-admin-content"', $html);
+    }
+
+    // ── L1: required fields ────────────────────────────────────────────────
+
+    public function testBlockEditRendersBlockNameField(): void
     {
         $html = $this->resource->get('page://self/admin/block/block')->toString();
 
         $this->assertStringContainsString('id="block_name"', $html);
         $this->assertStringContainsString('name="blockName"', $html);
+    }
+
+    public function testBlockEditRendersBlockFileNameField(): void
+    {
+        $html = $this->resource->get('page://self/admin/block/block')->toString();
+
         $this->assertStringContainsString('id="block_file_name"', $html);
         $this->assertStringContainsString('name="blockFileName"', $html);
+    }
+
+    public function testBlockEditRendersBlockHtmlField(): void
+    {
+        $html = $this->resource->get('page://self/admin/block/block')->toString();
+
         $this->assertStringContainsString('id="block_block_html"', $html);
         $this->assertStringContainsString('disabled="disabled"', $html);
+    }
+
+    // ── L2: form action / method / CSRF ───────────────────────────────────
+
+    public function testNewBlockFormPostsToBlockList(): void
+    {
+        $html = $this->resource->get('page://self/admin/block/block')->toString();
+
+        // New-block form: POST to block-list (doCreateBlock)
         $this->assertStringContainsString('action="/admin/block/block-list"', $html);
-        $this->assertStringContainsString('class="c-conversionArea"', $html);
+        $this->assertStringContainsString('method="post"', $html);
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
-    public function testBlockEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    public function testBlockFormIncludesCsrfHiddenInput(): void
     {
-        $beMart = $this->resource->get('page://self/admin/block/block')->toString();
-        $ecCube = $this->renderEcCube();
+        $html = $this->resource->get('page://self/admin/block/block')->toString();
 
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's admin Block-edit HTML diverged from EC-CUBE's beyond "
-            . "the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
-        );
-
-        $this->assertLessThanOrEqual(
-            45,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
+        $this->assertStringContainsString('name="csrfToken"', $html);
     }
 
-    private static function isResidual(string $line): bool
+    public function testEditBlockFormPostsToPutEndpoint(): void
     {
-        if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
-            return true;
-        }
-
-        foreach ([
-            'eccube-csrf-token',
-            '<title>',
-            'c-headerBar__shopTitle',
-            'c-headerBar__userMenu',
-            'data-bs-content',
-            'last_login',
-            'nav-',
-            'data-bs-toggle="collapse"',
-            'fa-fw',
-            // Form: EC-CUBE's hidden `csrfToken` CSRF input. BeMart keeps the
-            // hidden input with an empty value.
-            'name="csrfToken"',
-            'csrfcsrfToken',
-            // Form: EC-CUBE's hidden `id` + `DeviceType` bookkeeping
-            // inputs (BlockType carries them; the AdminBlockForm declares
-            // only name/file_name/block_html). The form_widget for an
-            // undeclared field renders empty here too — defensive family.
-            'style="display: none;"',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function renderEcCube(): string
-    {
-        $adminTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/admin';
-        if (! is_dir($adminTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
-
-        $twig = new Environment(new EcCubeAdminStubLoader($adminTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-
-        // The new-block form: EC-CUBE's form_widget calls render through
-        // BeMart's real AdminBlockForm (the Block resource's onGet builds
-        // the new-block form — see its port header).
-        $form = (new FormFactory())->newInstance(AdminBlockForm::class);
-
-        $this->registerEcCubeStubs($twig, $form instanceof AdminBlockForm ? $form : null);
-
-        return $twig->render('Content/block_edit.twig', [
-            'form' => new EcCubeStub([
-                'csrfToken' => 'csrfToken',
-                'id' => 'id',
-                'DeviceType' => 'DeviceType',
-                'name' => 'name',
-                'file_name' => 'file_name',
-                'block_html' => 'block_html',
-            ]),
-            'block_id' => null,
-            'deletable' => true,
-            'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
-            'eccube_config' => [
-                'locale' => 'ja',
-                'eccube_official_site_url' => 'https://www.ec-cube.net/',
-                'eccube_community_site_url' => 'https://xoo.ps/eccube/',
-                'eccube_document_url' => 'https://doc4.ec-cube.net/',
-                'eccube_manual_url' => 'https://www.ec-cube.net/product/',
-            ],
-            'eccubeNav' => [],
-            'menus' => ['content', 'block'],
-            'plugin_assets' => [],
-            'plugin_snippets' => [],
-            'app' => new EcCubeStub([
-                'user' => new EcCubeStub([
-                    'name' => '管理者',
-                    'login_date' => '2026-05-20 10:00:00',
-                    'two_factor_auth_enabled' => false,
-                ]),
-                'request' => new EcCubeStub(['_route' => 'admin_content_block_new']),
-            ]),
-            'subtitle' => 'コンテンツ管理',
-            'sub_title' => 'コンテンツ管理',
-            'title' => 'ブロック管理',
-        ]);
-    }
-
-    private function registerEcCubeStubs(Environment $twig, AdminBlockForm|null $form): void
-    {
-        $messages = AdminJaMessages::forSection(ContentJaMessages::keys());
-        $trans = static function (string $key, array $params = []) use ($messages): string {
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
+        // Provide a fake BlockStorageInterface that seeds a block with id 'bk-test'
+        $fakeBlock = new BlockEntity('bk-test', 'テストブロック', 'test_block', true);
+        $fakeStorage = new class ($fakeBlock) implements BlockStorageInterface {
+            public function __construct(private readonly BlockEntity $block)
+            {
             }
 
-            return $text;
+            /** @return list<BlockEntity> */
+            public function list(): array
+            {
+                return [$this->block];
+            }
+
+            public function item(string $blockId): BlockEntity|null
+            {
+                return $this->block->blockId === $blockId ? $this->block : null;
+            }
+
+            public function put(BlockEntity $block): void
+            {
+            }
+
+            public function delete(string $blockId): void
+            {
+            }
         };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('date_sec', static fn ($d): string => (string) $d));
-        $twig->addFilter(new TwigFilter('date_min', static fn ($d): string => (string) $d));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
-
-        // EC-CUBE's `form_widget(form.<field>)` renders through BeMart's
-        // real AdminBlockForm so the inputs are byte-identical to
-        // BeMart's port. EC-CUBE field names map to BeMart's canonical
-        // Resource request names. Fields the AdminBlockForm does NOT declare
-        // (`csrfToken`, `id`, `DeviceType` — EC-CUBE bookkeeping / CSRF
-        // runtime) render empty here, mirroring BeMart's port; both are
-        // residual families.
-        $formFields = [
-            'name' => 'blockName',
-            'file_name' => 'blockFileName',
-            'block_html' => 'block_html',
-        ];
-        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFields): Markup {
-            if ($form instanceof AdminBlockForm && is_string($field) && isset($formFields[$field])) {
-                return new Markup($form->input($formFields[$field]), 'UTF-8');
+        $session = new FakeAdminSession(self::TEST_ADMIN_ID);
+        $injector = HtmlTestInjector::getOverrideInstance(new class ($session, $fakeStorage) extends AbstractModule {
+            public function __construct(
+                private readonly FakeAdminSession $session,
+                private readonly BlockStorageInterface $blockStorage,
+            ) {
+                parent::__construct();
             }
 
-            return new Markup('', 'UTF-8');
-        }));
-        $twig->addFunction(new TwigFunction('form_errors', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('form_label', static fn ($f = '', $l = '', $o = []): string => ''));
-        $twig->addFunction(new TwigFunction('form_row', static fn ($f = '', $o = []): string => ''));
-        $twig->addFunction(new TwigFunction('form_rest', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('has_errors', static fn (...$f): bool => false));
+            protected function configure(): void
+            {
+                $this->bind(AdminSession::class)->toInstance($this->session);
+                $this->bind(BlockStorageInterface::class)->toInstance($this->blockStorage);
+            }
+        });
+        $resource = $injector->getInstance(ResourceInterface::class);
+
+        $html = $resource->get('page://self/admin/block/block', ['blockId' => 'bk-test'])->toString();
+
+        // Edit-block form: PUT tunnel via _method=put
+        $this->assertStringContainsString('bk-test', $html);
+        $this->assertStringContainsString('_method=put', $html);
     }
+
+    // ── L2: navigation link ────────────────────────────────────────────────
+
+    public function testBlockEditContainsBackLinkToBlockList(): void
+    {
+        $html = $this->resource->get('page://self/admin/block/block')->toString();
+
+        $this->assertStringContainsString('href="/admin/block/block-list"', $html);
+    }
+
+    // ── EC-CUBE parity (retired) ───────────────────────────────────────────
 
     /**
-     * @return list<string>
+     * EC-CUBE rendering comparison retired — template rebuilt clean-room.
+     *
+     * @group ec-cube-parity-archived
      */
-    private function normalize(string $html): array
+    public function testBlockEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
-        }
-
-        return $lines;
+        $this->markTestSkipped(
+            'EC-CUBE rendering comparison retired. '
+            . 'Template rebuilt clean-room using idea-admin design language. '
+            . 'Functional parity verified by L1/L2 assertions above.'
+        );
     }
 }

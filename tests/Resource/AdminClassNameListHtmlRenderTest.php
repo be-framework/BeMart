@@ -36,34 +36,18 @@ use function str_contains;
 use function trim;
 
 /**
- * Phase 3 — fidelity check for the admin ClassName-management HTML port
- * (the Product section's LIST + inline-create-FORM page).
+ * Phase 3 HTML render tests for the admin ClassName list (規格管理).
  *
- * Same residual-diff standard as the admin pilot {@see AdminNewsListHtmlRenderTest}.
- * The page extends `admin-base.html.twig`, served via
- * {@see EcCubeAdminStubLoader}. The inline-create `name` / `backend_name`
- * inputs are rendered by a real {@see AdminClassNameForm} on BOTH sides,
- * so they diff to ZERO.
+ * The page extends `admin-base.html.twig` via the idea-admin design language.
+ *
+ * L1 — required field / list data output (functional parity).
+ * L2 — form action/method and link href/rel (hypermedia contract parity).
+ *
+ * The EC-CUBE rendering comparison is archived to @group ec-cube-parity-archived.
  */
 final class AdminClassNameListHtmlRenderTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
-
-    /** @var list<string> */
-    private const RESIDUAL_ALLOWLIST = [
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        "'ECCUBE-CSRF-TOKEN': $('meta[name=\"eccube-csrf-token\"]').attr('content')",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>規格管理 商品管理 - BeMart</title>',
-        '<title>規格管理 商品管理 - EC-CUBE</title>',
-    ];
 
     private ResourceInterface $resource;
 
@@ -84,7 +68,9 @@ final class AdminClassNameListHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testClassNameListRendersAsHtmlDocument(): void
+    // ── Shell landmarks (idea-admin frame) ──────────────────────────────────
+
+    public function testRendersCompleteHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/admin/class-name/class-name-list');
 
@@ -92,80 +78,195 @@ final class AdminClassNameListHtmlRenderTest extends TestCase
 
         $html = $ro->toString();
 
+        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
         $this->assertStringContainsString('</body>', $html);
-
-        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testClassNameListPreservesEcCubeAdminMarkupStructure(): void
+    public function testRendersIdeaAdminShellLandmarks(): void
     {
         $html = $this->resource->get('page://self/admin/class-name/class-name-list')->toString();
 
         foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-mainNavArea">',
-            'class="c-outsideBlock"',
-            'class="c-primaryCol"',
-            'class="list-group list-group-flush sortable-container"',
-            'id="DeleteModal"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
+            'class="idea-admin-shell"',
+            'class="idea-admin-topbar"',
+            'class="idea-admin-sidebar"',
+            'class="idea-admin-content"',
+        ] as $landmark) {
+            $this->assertStringContainsString($landmark, $html, "idea-admin shell landmark missing: {$landmark}");
         }
     }
 
-    public function testClassNameListRendersSeededRows(): void
+    // ── L1: required field rendering ────────────────────────────────────────
+
+    public function testRendersClassNameLabelInputWithCorrectId(): void
     {
         $html = $this->resource->get('page://self/admin/class-name/class-name-list')->toString();
 
+        // AdminClassNameForm renders classNameLabel with id="admin_class_name_name"
         $this->assertStringContainsString('id="admin_class_name_name"', $html);
+    }
+
+    public function testRendersClassNameLabelInputWithCorrectName(): void
+    {
+        $html = $this->resource->get('page://self/admin/class-name/class-name-list')->toString();
+
         $this->assertStringContainsString('name="classNameLabel"', $html);
-        $this->assertStringContainsString('id="admin_class_name_backend_name"', $html);
+    }
+
+    public function testDoesNotRenderBackendNameAsSubmittableField(): void
+    {
+        $html = $this->resource->get('page://self/admin/class-name/class-name-list')->toString();
+
+        // backend_name is not projected by AdminClassNameListFetched (Wave 7 shallow slice)
+        // and is not accepted by the Resource POST endpoint. It must not appear as a named input.
         $this->assertStringNotContainsString('name="backend_name"', $html);
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
-    public function testClassNameListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    // ── L1: list data output ────────────────────────────────────────────────
+
+    public function testRendersSeededClassNameRows(): void
     {
-        $beMart = $this->resource->get('page://self/admin/class-name/class-name-list')->toString();
-        $ecCube = $this->renderEcCube();
+        $ro = $this->resource->get('page://self/admin/class-name/class-name-list');
+        $classNames = $ro->body['classNames'] ?? [];
 
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
+        $this->assertNotEmpty($classNames, 'Fake seed must supply at least one className row');
 
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
+        $html = $ro->toString();
 
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
+        foreach ($classNames as $row) {
+            $this->assertStringContainsString(
+                (string) $row['classNameId'],
+                $html,
+                "classNameId '{$row['classNameId']}' not rendered in list",
+            );
+            $this->assertStringContainsString(
+                (string) $row['name'],
+                $html,
+                "name '{$row['name']}' not rendered in list",
+            );
+        }
+    }
 
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's admin ClassName HTML diverged from EC-CUBE's beyond "
-            . "the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
-        );
+    public function testRendersCountInOutput(): void
+    {
+        $ro = $this->resource->get('page://self/admin/class-name/class-name-list');
 
-        $this->assertLessThanOrEqual(
-            55,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
+        $html = $ro->toString();
+        $count = (int) ($ro->body['count'] ?? 0);
+
+        $this->assertStringContainsString((string) $count, $html, 'count value not rendered');
+    }
+
+    // ── L2: form action / method (hypermedia contract) ──────────────────────
+
+    public function testCreateFormPostsToClassNameListEndpoint(): void
+    {
+        $html = $this->resource->get('page://self/admin/class-name/class-name-list')->toString();
+
+        $this->assertStringContainsString('action="/admin/class-name/class-name-list"', $html);
+        $this->assertMatchesRegularExpression(
+            '#<form[^>]+method=["\']post["\'][^>]*action="/admin/class-name/class-name-list"#i',
+            $html,
+            'Create form must POST to /admin/class-name/class-name-list',
         );
     }
 
-    private static function isResidual(string $line): bool
+    public function testPerRowEditFormPostsToClassNameEndpointWithPutTunnel(): void
     {
-        if (RenderDiffResiduals::isAdminListEnrichment($line)) {
-            return true;
+        $ro = $this->resource->get('page://self/admin/class-name/class-name-list');
+        $classNames = $ro->body['classNames'] ?? [];
+
+        if ($classNames === []) {
+            $this->markTestSkipped('No className rows in Fake seed — cannot verify per-row edit form.');
         }
 
+        $html = $ro->toString();
+
+        // PUT tunnel: action contains _method=put
+        $this->assertStringContainsString('_method=put', $html, 'Per-row edit form must carry _method=put tunnel');
+        // The action targets the single-row endpoint
+        $this->assertStringContainsString('/admin/class-name/class-name?classNameId=', $html);
+    }
+
+    public function testDeleteActionTargetsClassNameEndpointWithDeleteTunnel(): void
+    {
+        $ro = $this->resource->get('page://self/admin/class-name/class-name-list');
+        $classNames = $ro->body['classNames'] ?? [];
+
+        if ($classNames === []) {
+            $this->markTestSkipped('No className rows in Fake seed — cannot verify delete action.');
+        }
+
+        $html = $ro->toString();
+
+        $this->assertStringContainsString('_method=delete', $html, 'Delete action must carry _method=delete tunnel');
+    }
+
+    // ── L2: navigation links (href/rel contract) ─────────────────────────────
+
+    public function testRendersLinkToClassCategoryListWithClassNameId(): void
+    {
+        $ro = $this->resource->get('page://self/admin/class-name/class-name-list');
+        $classNames = $ro->body['classNames'] ?? [];
+
+        if ($classNames === []) {
+            $this->markTestSkipped('No className rows — cannot verify goClassCategoryList link.');
+        }
+
+        $html = $ro->toString();
+
+        foreach ($classNames as $row) {
+            $href = '/admin/class-category/class-category-list?classNameId=' . $row['classNameId'];
+            $this->assertStringContainsString(
+                $href,
+                $html,
+                "goClassCategoryList link missing for classNameId={$row['classNameId']}",
+            );
+        }
+    }
+
+    public function testRendersLinkToClassNameExport(): void
+    {
+        $html = $this->resource->get('page://self/admin/class-name/class-name-list')->toString();
+
+        $this->assertStringContainsString('/admin/class-name/class-name-export', $html);
+    }
+
+    // ── EC-CUBE parity (archived) ────────────────────────────────────────────
+
+    /**
+     * @group ec-cube-parity-archived
+     */
+    public function testClassNameListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE markup-parity test archived: template rebuilt in idea-admin-* design language. '
+            . 'Functional/semantic coverage is provided by L1/L2 tests above.',
+        );
+    }
+
+    // ── Helpers (preserved for archived test; kept for future reference) ─────
+
+    /** @var list<string> */
+    private const RESIDUAL_ALLOWLIST = [
+        '<meta name="eccube-csrf-token" content="">',
+        '<script>',
+        '$(function() {',
+        '$.ajaxSetup({',
+        "'headers': {",
+        "'ECCUBE-CSRF-TOKEN': $('meta[name=\"eccube-csrf-token\"]').attr('content')",
+        '}',
+        '});',
+        '});',
+        '</script>',
+        '<title>規格管理 商品管理 - BeMart</title>',
+        '<title>規格管理 商品管理 - EC-CUBE</title>',
+    ];
+
+    private static function isResidual(string $line): bool
+    {
         if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
             return true;
         }
@@ -180,28 +281,10 @@ final class AdminClassNameListHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            // ClassName list: EC-CUBE's hidden `csrfToken` CSRF input.
             'name="csrfToken"',
-            // ClassName list: EC-CUBE's CSV-setting link passes the
-            // `CsvType::CSV_TYPE_CLASS_NAME` constant as the `id` query
-            // param; BeMart's port links to the bare route. Same anchor.
             'admin_setting_shop_csv',
-            // ClassName list: `ClassName.sortNo` — dtb_class_name has the
-            // column but ClassNameEntity does not project it; the
-            // `data-sort-no` attr renders empty. EC-CUBE renders a value.
             'data-sort-no=',
-            // ClassName list: the row label embeds `ClassName.backend_name`
-            // and the `ClassCategories|length` count. The
-            // AdminClassNameListFetched projection carries neither (Wave 7
-            // shallow-list slice), so BeMart renders `［管理名：］ (0)`;
-            // EC-CUBE renders the real backend name + child count. The
-            // wrapping `<a>` and its url are identical. FLAGGED for
-            // enrichment follow-up.
             'admin_product_class_category?class_name_id=',
-            // ClassName list: the per-row inline-EDIT form. The per-row
-            // edit is `doUpdateClassName` at a sibling resource; BeMart
-            // renders plain `<input>`s instead of `form_widget`s. The
-            // `mode-edit` panel STRUCTURE is kept.
             'data-origin-value',
             'mode-edit',
         ] as $family) {
@@ -211,117 +294,6 @@ final class AdminClassNameListHtmlRenderTest extends TestCase
         }
 
         return false;
-    }
-
-    private function renderEcCube(): string
-    {
-        $adminTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/admin';
-        if (! is_dir($adminTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
-
-        $twig = new Environment(new EcCubeAdminStubLoader($adminTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-
-        $createForm = (new FormFactory())->newInstance(AdminClassNameForm::class);
-
-        $this->registerEcCubeStubs($twig, $createForm instanceof AdminClassNameForm ? $createForm : null);
-
-        $beMartList = $this->resource->get('page://self/admin/class-name/class-name-list');
-        $classNames = [];
-        $forms = [];
-        foreach ($beMartList->body['classNames'] as $cn) {
-            $classNames[] = new EcCubeStub([
-                'id' => $cn['classNameId'],
-                'name' => $cn['name'],
-                'backend_name' => '',
-                'sortNo' => '',
-                'ClassCategories' => [],
-            ]);
-            $forms[$cn['classNameId']] = new EcCubeStub([
-                'csrfToken' => 'csrfToken',
-                'name' => 'name',
-                'backend_name' => 'backend_name',
-            ]);
-        }
-
-        return $twig->render('Product/class_name.twig', [
-            'form' => new EcCubeStub(['csrfToken' => 'csrfToken', 'name' => 'name', 'backend_name' => 'backend_name']),
-            'forms' => $forms,
-            'ClassNames' => $classNames,
-            'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
-            'eccube_config' => [
-                'locale' => 'ja',
-                'eccube_official_site_url' => 'https://www.ec-cube.net/',
-                'eccube_community_site_url' => 'https://xoo.ps/eccube/',
-                'eccube_document_url' => 'https://doc4.ec-cube.net/',
-                'eccube_manual_url' => 'https://www.ec-cube.net/product/',
-            ],
-            'eccubeNav' => [],
-            'menus' => ['product', 'class_name'],
-            'plugin_assets' => [],
-            'plugin_snippets' => [],
-            'app' => new EcCubeStub([
-                'user' => new EcCubeStub([
-                    'name' => '管理者',
-                    'login_date' => '2026-05-20 10:00:00',
-                    'two_factor_auth_enabled' => false,
-                ]),
-                'request' => new EcCubeStub(['_route' => 'admin_product_class_name']),
-            ]),
-            'subtitle' => '商品管理',
-            'sub_title' => '商品管理',
-            'title' => '規格管理',
-        ]);
-    }
-
-    private function registerEcCubeStubs(Environment $twig, AdminClassNameForm|null $createForm): void
-    {
-        $messages = AdminJaMessages::forSection(ProductJaMessages::keys());
-        $trans = static function (string $key, array $params = []) use ($messages): string {
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('date_sec', static fn ($d): string => (string) $d));
-        $twig->addFilter(new TwigFilter('date_min', static fn ($d): string => (string) $d));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
-
-        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($createForm): Markup {
-            if (! $createForm instanceof AdminClassNameForm || ! is_string($field)) {
-                return new Markup('', 'UTF-8');
-            }
-
-            if ($field === 'name') {
-                return new Markup($createForm->input('classNameLabel'), 'UTF-8');
-            }
-
-            if ($field === 'backend_name') {
-                return new Markup($createForm->input($field), 'UTF-8');
-            }
-
-            return new Markup('', 'UTF-8');
-        }));
-        $twig->addFunction(new TwigFunction('form_errors', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('form_label', static fn ($f = '', $l = '', $o = []): string => ''));
-        $twig->addFunction(new TwigFunction('form_row', static fn ($f = '', $o = []): string => ''));
-        $twig->addFunction(new TwigFunction('form_rest', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('has_errors', static fn (...$f): bool => false));
     }
 
     /**
