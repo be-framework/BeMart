@@ -47,7 +47,7 @@ jobs:
         run: |
           MYSQL_PWD=root mysql -h127.0.0.1 -P3306 -uroot <<'SQL'
           CREATE USER IF NOT EXISTS 'dbuser'@'%' IDENTIFIED BY 'secret';
-          GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@'%' WITH GRANT OPTION;
+          GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'%';
           FLUSH PRIVILEGES;
           SQL
 

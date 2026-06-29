@@ -49,7 +49,7 @@ final class ProductFactory
     /**
      * Resolve a stored image filename to a web path.
      *
-     * Bare EC-CUBE upload filenames are served from the `save_image/` upload
+     * Bare upload filenames are served from the `save_image/` upload
      * dir. Values that are already full asset/absolute/remote paths (e.g. the
      * seeded `assets/idea-store/...` catalog images) are used as-is.
      */
@@ -69,7 +69,7 @@ final class ProductFactory
             return '/' . $imageFileName;
         }
 
-        // Bare EC-CUBE upload filenames are served from the upload dir.
+        // Bare upload filenames are served from the upload dir.
         return '/save_image/' . $imageFileName;
     }
 
