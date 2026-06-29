@@ -24,12 +24,12 @@ declare(strict_types=1);
  * Skip conditions (silent, no failure):
  *   - DATABASE_URL environment variable is unset or empty
  *   - The server described by DATABASE_URL is unreachable
- *   - The connected server is not MariaDB (SQL suite targets MariaDB 10.11)
+ *   - The connected server is neither MySQL 8.0+ nor MariaDB 10.11+
  *
  * Hard-failure condition (smoke fail — not a skip):
- *   - MariaDB is reachable but schema load fails
+ *   - A supported server is reachable but schema load fails
  *
- * When the bootstrap runs for real (MariaDB reachable):
+ * When the bootstrap runs for real (MySQL 8.0+ or MariaDB 10.11+ reachable):
  *   1. Drops and re-creates `eccubedb_test`  (utf8mb4 / utf8mb4_bin)
  *   2. Loads sql/schema/bemart-schema.sql wrapped in SET FOREIGN_KEY_CHECKS=0/1
  *   3. Loads seed/mtb-master.sql (mtb_* reference data)

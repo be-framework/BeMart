@@ -3,12 +3,12 @@
 -- =============================================================================
 --
 -- Primary source: sql/diff/entity-vs-eccube.md (field map, type, constraint,
--- and hazard documentation for all 34 BeMart Entity ↔ EC-CUBE table pairs).
+-- and hazard documentation for all 34 BeMart Entity table pairs).
 -- Structural facts (column types, nullable flags, key shapes) were verified
--- against the EC-CUBE 4.3 raw dump (sql/schema/ec-cube-4.3-mysql-mysqldump.sql)
--- and are used here as functional facts, which are not subject to copyright.
+-- against the reference schema dump and are used here as functional facts,
+-- which are not subject to copyright.
 --
--- Differentiations from the original EC-CUBE Doctrine-generated dump:
+-- Differentiations from the original Doctrine-generated dump:
 --   1. Index names: Doctrine hash identifiers (IDX_4A1F70B181EC865B, etc.)
 --      replaced with idx_<table>_<col> descriptive names.
 --   2. COMMENT '(DC2Type:...)' annotations stripped — BeMart does not use
@@ -1169,7 +1169,8 @@ CREATE TABLE `dtb_order_pdf` (
   `update_date`        datetime NOT NULL,
   `visible`            tinyint(1) NOT NULL DEFAULT 1,
   `discriminator_type` varchar(255) NOT NULL,
-  PRIMARY KEY (`member_id`)
+  PRIMARY KEY (`member_id`),
+  CONSTRAINT `fk_order_pdf_member` FOREIGN KEY (`member_id`) REFERENCES `dtb_member` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- ---------------------------------------------------------------------------
