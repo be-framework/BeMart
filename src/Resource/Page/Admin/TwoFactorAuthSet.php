@@ -153,7 +153,7 @@ class TwoFactorAuthSet extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goTwoFactorAuth', href: 'page://self/admin/two-factor-auth')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
-    public function onPut(string $deviceToken, string|null $loginId = null, string|null $authKey = null): static
+    public function onPut(string $deviceToken, string|null $loginId = null, string|null $authKey = null, string|null $mode = null): static
     {
         unset($loginId, $authKey);
 
@@ -174,13 +174,22 @@ class TwoFactorAuthSet extends ResourceObject
         assert($final instanceof TwoFactorAuthConfigured);
         $this->loginChallenge->completeSetup($challenge);
 
-        $this->code = Code::OK;
         $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doSetTwoFactorAuth',
             'loginId' => $final->loginId,
             'message' => '二要素認証を設定しました。',
         ];
+        if ($mode !== null) {
+            // Browser form submit: 303 See Other so the browser actually
+            // navigates (a 200 + Location response leaves browsers on the
+            // setup page). JSON/Resource clients keep 200 OK.
+            $this->code = Code::SEE_OTHER;
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
 
         return $this;
     }

@@ -254,6 +254,7 @@
     <form method="post" action="/admin/two-factor-auth-set?_method=put" novalidate
           aria-label="認証コード登録フォーム" rel="doSetTwoFactorAuth">
       <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="mode" value="set">
       {# hidden authKey — server-generated TOTP secret bound to pending setup challenge #}
       {{ form.input('authKey')|raw }}
 
