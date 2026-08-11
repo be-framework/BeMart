@@ -177,7 +177,6 @@ class Login extends ResourceObject
         // next login-context 2FA step. JSON clients still read the
         // authenticated admin proof off the body below, but the trusted
         // identity used by 2FA is the session-backed challenge above.
-        $this->code = Code::OK;
         $this->headers['Location'] = $location;
         $this->body = [
             'adminId' => $final->adminId,
@@ -185,6 +184,16 @@ class Login extends ResourceObject
             'name' => $final->name,
             'authority' => $final->authority,
         ];
+        if ($mode !== null) {
+            // Browser form submit: 303 See Other so the browser actually
+            // navigates (a 200 + Location response leaves browsers on the
+            // login page). JSON/Resource clients keep 200 OK with the body.
+            $this->code = Code::SEE_OTHER;
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
 
         return $this;
     }
