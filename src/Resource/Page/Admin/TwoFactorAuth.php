@@ -127,7 +127,7 @@ class TwoFactorAuth extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
-    public function onPost(string $deviceToken, string|null $loginId = null): static
+    public function onPost(string $deviceToken, string|null $loginId = null, string|null $mode = null): static
     {
         unset($loginId);
 
@@ -147,13 +147,22 @@ class TwoFactorAuth extends ResourceObject
         assert($final instanceof TwoFactorAuthVerified);
         $this->loginChallenge->completeVerification($challenge);
 
-        $this->code = Code::OK;
         $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doVerifyTwoFactorAuth',
             'loginId' => $final->loginId,
             'message' => '二要素認証を確認しました。',
         ];
+        if ($mode !== null) {
+            // Browser form submit: 303 See Other so the browser actually
+            // navigates (a 200 + Location response leaves browsers on the
+            // challenge page). JSON/Resource clients keep 200 OK.
+            $this->code = Code::SEE_OTHER;
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
 
         return $this;
     }
