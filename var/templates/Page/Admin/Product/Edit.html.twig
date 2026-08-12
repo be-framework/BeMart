@@ -183,7 +183,7 @@
 
           {% if mainImage is defined and mainImage is not empty %}
           <div class="idea-admin-meta__image">
-            {# mainImage is already a root-absolute web path (ProductFactory). #}
+            {# mainImage is already a root-absolute web URL resolved by ProductFactory. #}
             <img
               src="{{ mainImage }}"
               alt="{{ productName|default('商品画像') }}"
