@@ -43,7 +43,9 @@ docker compose exec -T app docker/demo-reset.sh
 schema → master → dev fixture → カタログ → デモ資格情報の順に作り直す。
 データベースは DROP されるので、残したいデータがある用途には使わない。
 
-デモホスト（Oracle Cloud VM）には以下を導入済み。6 時間ごとに走る。
+デモホスト（Oracle Cloud VM）には以下を導入済み。毎時 0 分に走る。
+管理画面も公開しているので、メンテナンスモードや店名・テンプレートの書き換えが
+次のリセットまで残る。その滞留時間が間隔の上限を決める。
 
 ```ini
 # /etc/systemd/system/bemart-demo-reset.service
@@ -66,7 +68,7 @@ TimeoutStartSec=900
 Description=Periodic BeMart demo reset
 
 [Timer]
-OnCalendar=*-*-* 00,06,12,18:00:00
+OnCalendar=hourly
 Persistent=true
 
 [Install]
@@ -78,6 +80,7 @@ sudo systemctl enable --now bemart-demo-reset.timer
 systemctl list-timers bemart-demo-reset.timer
 ```
 
-リセット中はデータベースが一時的に空になる（`setup-db.sh` が DROP するため）。
-実測 約 34 秒（デモ VM / 3,000 商品）、ローカルの Docker では約 4 秒。
-その間のリクエストは 500 を返し得る。
+リセットは `setup-db.sh` がデータベースを DROP するところから始まる。
+所要はデモ VM で 14〜34 秒（3,000 商品の投入が大半）、ローカルの Docker で約 4 秒。
+リセット中の `/products` を 0.8 秒間隔で 40 回叩いた計測では、全て 200 で
+商品カードも 20 枚のままだった。訪問者に見える停止は観測できていない。
