@@ -43,9 +43,15 @@ docker compose exec -T app docker/demo-reset.sh
 schema → master → dev fixture → カタログ → デモ資格情報の順に作り直す。
 データベースは DROP されるので、残したいデータがある用途には使わない。
 
-デモホスト（Oracle Cloud VM）には以下を導入済み。毎時 0 分に走る。
-管理画面も公開しているので、メンテナンスモードや店名・テンプレートの書き換えが
-次のリセットまで残る。その滞留時間が間隔の上限を決める。
+デモホスト（Oracle Cloud VM）には以下を導入済み。1 日 1 回 18:00 UTC（03:00 JST）に走る。
+
+この間隔で足りるのは、訪問者が触れる書き込みが DB 行に限られるからである。管理画面から
+書けるのは商品・受注・マスタ等の行だけで、Twig の自動エスケープを通るので残るのは
+見た目の汚れだけ。サイトを壊す経路は移植されていない — メンテナンスモードは
+`var/tmp` のフラグを書くだけで storefront に強制されず（`EccubeMaintenanceMode`）、
+CSS/JS 編集は `var/tmp` の JSON に入るだけで公開ページに出力されず、テンプレート追加は
+zip を展開せず名前とサイズだけを記録し、`move_uploaded_file` はリポジトリに存在しない。
+この前提が変わったら間隔を短くする。
 
 ```ini
 # /etc/systemd/system/bemart-demo-reset.service
@@ -68,7 +74,7 @@ TimeoutStartSec=900
 Description=Periodic BeMart demo reset
 
 [Timer]
-OnCalendar=hourly
+OnCalendar=*-*-* 18:00:00
 Persistent=true
 
 [Install]
