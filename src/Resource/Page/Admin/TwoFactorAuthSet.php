@@ -21,6 +21,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -62,6 +63,7 @@ class TwoFactorAuthSet extends ResourceObject
         private readonly AdminQueryInterface $adminQuery,
         private readonly TwoFactorAuthInterface $twoFactorAuth,
         private readonly CsrfToken $csrf,
+        private readonly AdminLoginFormSubmissionInterface $formSubmission,
     ) {
     }
 
@@ -180,8 +182,9 @@ class TwoFactorAuthSet extends ResourceObject
             'loginId' => $final->loginId,
             'message' => '二要素認証を設定しました。',
         ];
-        if ($mode !== null) {
-            // Browser form submit: 303 See Other so the browser actually
+        if (($this->formSubmission)($mode)) {
+            // Browser form submit (decided by the formSubmission port, not
+            // raw client input): 303 See Other so the browser actually
             // navigates (a 200 + Location response leaves browsers on the
             // setup page). JSON/Resource clients keep 200 OK.
             $this->code = Code::SEE_OTHER;
