@@ -66,13 +66,14 @@ final class AdminLoginHtmlRenderTest extends TestCase
         $this->assertStringContainsString('id="admin_login_password"', $html);
     }
 
-    public function testLoginRendersPoCPrefillValues(): void
+    public function testLoginFormShipsNoCredentials(): void
     {
-        // PoC fixture: Resource pre-fills loginId and password for the HTML demo.
+        // The login page is anonymous-reachable, so it must never hand a
+        // working admin credential to the visitor.
         $html = $this->resource->get('page://self/admin/login')->toString();
 
-        $this->assertStringContainsString('value="test-admin"', $html);
-
+        $this->assertStringNotContainsString('value="test-admin"', $html);
+        $this->assertStringNotContainsString('local-dev-admin-password', $html);
     }
 
     // ─── L2: form action / method / CSRF ──────────────────────────────────
