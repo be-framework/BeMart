@@ -19,6 +19,7 @@ use MyVendor\BeMart\Auth\HtmlCustomerSessionWriter;
 use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Provide\Error\HtmlThrowableHandler;
+use MyVendor\BeMart\Provide\Render\AdminAuthRedirectRenderer;
 use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\HtmlDownloadContentTypePolicy;
 use MyVendor\BeMart\Support\Html\SilentHtmlLinkAuditLogger;
@@ -45,7 +46,10 @@ final class HtmlModule extends AbstractModule
     #[Override]
     protected function configure(): void
     {
-        $this->override(new LinkHeaderModule(new TwigModule(options: $this->twigOptions)));
+        // Admin firewall UX: Page\Admin 403s reach the browser as a 303 to
+        // the login page, not as a template rendered with an empty body.
+        // See AdminAuthRedirectRenderer. Resource-level 403s are unchanged.
+        $this->override(new LinkHeaderModule(new AdminAuthRedirectModule(new TwigModule(options: $this->twigOptions))));
         $this->bind(HtmlLinkAuditLoggerInterface::class)->to(SilentHtmlLinkAuditLogger::class);
         $this->bind(ReverseLinkerInterface::class)->to(RouterReverseLinker::class);
         $this->bind(AdminSession::class)->to(HtmlAdminSessionAdapter::class);
