@@ -100,7 +100,10 @@ final class HtmlAdminSessionAdapterTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        // HTML context: the formSubmission port treats every mutation POST as
+        // a browser form, so a successful login answers 303 (the body and
+        // challenge semantics below are unchanged).
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertNotSame($sessionIdBeforeLogin, session_id());
         $this->assertSame('/admin/two-factor-auth', $ro->headers['Location']);
         $this->assertArrayNotHasKey(HtmlAdminSessionAdapter::ADMIN_ID_KEY, $_SESSION);

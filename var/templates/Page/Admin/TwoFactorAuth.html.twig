@@ -205,6 +205,7 @@
 
     <form method="post" action="/admin/two-factor-auth" novalidate rel="doVerifyTwoFactorAuth">
       <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="mode" value="verify">
 
       <div style="display: grid; gap: 1.1rem;">
 
