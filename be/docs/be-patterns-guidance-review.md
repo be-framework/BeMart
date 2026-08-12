@@ -2,7 +2,7 @@
 
 | メタ | 値 |
 |---|---|
-| 評価対象 | [be-patterns](https://github.com/be-framework/be-patterns) のパターン案内(8 デモ + CLAUDE.md + patterns.json)が、BeMart 移植(154 Input / 155 Final / 14 Being)をどうルートしたか |
+| 評価対象 | [be-patterns](https://github.com/be-framework/be-patterns) のパターン案内(8 デモ + CLAUDE.md + patterns.json)が、BeMart 移植(state クラス 323 = Input 154 / Final 155 / Being 14)をどうルートしたか |
 | 評価時点 | 2026-07-18 |
 | 評価種別 | 外部監査。be-patterns 側の 4 軸監査([PR #22](https://github.com/be-framework/be-patterns/pull/22) として修正済み)と、BeMart 側の 3 軸精査(形状全数調査 / イディオム伝播 / 決定痕跡の再構成)の統合 |
 | 想定読者 | be-patterns / be-framework のメンテナ、および BE でドメインを書く AI エージェントの案内を設計する人 |
@@ -14,7 +14,7 @@
 
 BeMart は「案内がどう成果物に写像されるか」の一級の実証標本である。観察の要点は 3 つ:
 
-1. **生きた手本と機械検証可能な規則は完全に伝播する。** 5 つの hard invariant は 323/323 ファイルで 100% 準拠(教師の be-patterns 自身に 2 件あった順序違反が BeMart にはゼロ)。Semantic 命名整合も 155/155 で、be-patterns の `ClaimAmount` 型バグは非再現。medical-triage(E2E テスト付きで動く唯一の Branching デモ)の typed `$being` discriminator + Case クラスは、[OrderConfirming](../src/Being/OrderConfirming.php) に docblock の機構説明まで含めて正確に再現された。テストも本物の `Becoming` E2E。**伝播率は案内の強度(機械検証可能性 × 生きた実例の有無)に比例する。**
+1. **生きた手本と機械検証可能な規則は完全に伝播する。** 機械検証可能な 4 invariant(§3 で 6 チェックに展開)は全 323 state クラスで 100% 準拠(教師の be-patterns 自身に 2 件あった順序違反が BeMart にはゼロ)。Semantic 命名解決も 163 クラス中 162 が整合(唯一の例外は置換忘れの orphan — §5.3)で、be-patterns の `ClaimAmount` 型バグは非再現。medical-triage(E2E テスト付きで動く唯一の Branching デモ)の typed `$being` discriminator + Case クラスは、[OrderConfirming](../src/Being/OrderConfirming.php) に docblock の機構説明まで含めて正確に再現された。テストも本物の `Becoming` E2E。**伝播率は案内の強度(機械検証可能性 × 生きた実例の有無)に比例する。**
 2. **Diamond(Moment)の不採用は案内の見落としではない。** BeMart は案内どおり Diamond を探し、3 軸判定器で全遷移を形式判定し、Pilot 3 で実際に試して `Ray\Di\Exception\NoHint` で失敗し、「apex が `#[Input]` を要する Diamond は現行メカニクス上不成立」という成立条件まで自力で導出して棄却した([be-adoption-evaluation.md §6](./be-adoption-evaluation.md))。ドメイン適合性(EC-CUBE の遷移は本質的に順序依存)の判断も正しい。
 3. **それでも案内の欠落は実害を残した。** パターンの**機構**(Moment / `be()` / 並列収束)は正しく棄却されたが、パターンの**本質**(補償可能な予約→一斉確定の二相コミット)まで一緒に捨てられた。[CheckoutSettled](../src/Being/CheckoutSettled.php) は在庫引当+課金+採番を一発実行の Reason 直列で行い、「カード課金済み・注文行なし」の補償不能ウィンドウを docblock で自己申告している。order-processing の Reason 契約(`lock→confirm` / `authorize→capture`)は Input 依存でも使えたのに、伝播しなかった。
 
@@ -26,10 +26,11 @@ BeMart は「案内がどう成果物に写像されるか」の一級の実証�
 
 - **be-patterns 側**: docs-vs-code 整合 / CLAUDE.md invariant 準拠 / テスト・ツーリング / コード品質の 4 軸監査。発見(フレッシュ install 破損、advanced 3 デモの未配線、CardExpiry 日付バグ等)は [PR #22](https://github.com/be-framework/be-patterns/pull/22) で修正済み。
 - **BeMart 側**: (a) `#[Be]` 全 168 宣言の形状全数調査、(b) イディオム伝播の突合、(c) `docs/HANDOVER.md`・`be/var/analysis/*.json`・[be-adoption-evaluation.md](./be-adoption-evaluation.md)・`.claude/prompts/*` による決定過程の再構成。
+- **数値の単位**: 「クラス」は `be/src` 下の PHP ファイル数(1 ファイル 1 クラス)、「フロー」は Input を起点とする `#[Be]` チェーン(Input 数と同じ 154 本)。分母の対応: 323 = state クラス(Input 154 + Final 155 + Being 14)、168 = `#[Be]` 宣言(Input 154 + Being 14。Final は定義上持たない)、163 = Semantic クラス、128 = Exception クラス。
 
 ## 2. 観察 — 形状分布
 
-`#[Be]` グラフは純フォレスト(全ノード in-degree ≤ 1)。収束系の形は構造的にゼロ。
+`#[Be]` グラフは純フォレスト(全ノード in-degree ≤ 1)。収束系の形は構造的にゼロ。以下は全 154 フローの形状分布:
 
 | 形状(カタログ名) | 件数 | 比率 | 例 |
 |---|---:|---:|---|
@@ -41,21 +42,21 @@ BeMart は「案内がどう成果物に写像されるか」の一級の実証�
 
 付随観察:
 
-- **読み取り系(`Get* → *Fetched` + CSV/PDF export)が約 50/154 ≈ 32%**。カタログに query/projection の項が無いため、全て Minimal に「たまたま」流れた(結果は妥当だが無案内)。
-- `*Fetched` のうち [ShoppingFetched](../src/Final/ShoppingFetched.php) のみ constructor で DB write(EC-CUBE の `goShopping` 互換の意図的設計)。「Fetched = 副作用なし」は 40/41 で成立する**ほぼ**不変則。
-- 重量級(4+ Reason 注入)は 21/169 クラス(12.4%)。最大は ShoppingFetched の 6。
+- **読み取り系(`Get* → *Fetched` + CSV/PDF export)が全 154 フロー中約 50 ≈ 32%**。カタログに query/projection の項が無いため、全て Minimal に「たまたま」流れた(結果は妥当だが無案内)。
+- `*Fetched` を名乗る Final 41 クラスのうち [ShoppingFetched](../src/Final/ShoppingFetched.php) のみ constructor で DB write(EC-CUBE の `goShopping` 互換の意図的設計)。「Fetched = 副作用なし」は 40/41 で成立する**ほぼ**不変則。
+- 重量級(`#[Inject]` 4 つ以上)は、`#[Inject]` を 1 つ以上持つ state クラス 168(Input 1 + Being 13 + Final 154)中 21 = 12.5%。最大は ShoppingFetched の 6。
 
 ## 3. 観察 — 何が伝播し、何が伝播しなかったか
 
 | 案内の要素 | 伝播 | 証拠 |
 |---|---|---|
-| 機械検証可能な invariant(`final readonly` / strict_types / `#[Be]` 配置 / Input→Inject 順序) | ◎ **323/323 = 100%** | 教師である be-patterns 自身に順序違反が 2 件あった(PR #22 で修正)のに対し、BeMart はゼロ |
-| Semantic 命名整合(パラメータ名 → クラス解決) | ◎ **155/155 = 100%** | be-patterns の `ClaimAmount`-vs-`$estimatedAmount` 型バグは非再現。`UpdateTradeLawInput` は解決規則を docblock で自己文書化 |
+| 機械検証可能な 4 invariant(`final readonly` / strict_types / `#[Be]` 配置 / Input→Inject 順序) | ◎ **323/323 = 100%** | 6 チェックに展開して全 state クラスを検証: `final readonly` 323/323、`strict_types` 323/323、`#[Be]` on Input 154/154・on Being 14/14・absent on Final 155/155、Input→Inject 順序違反 0(両属性を持つ 138 クラスが対象)。教師である be-patterns 自身には順序違反が 2 件あった(PR #22 で修正) |
+| Semantic 命名整合(パラメータ名 → クラス解決) | ◎ **162/163** | Semantic 163 クラス中 162 が state クラスの constructor パラメータ名から解決される。唯一の未解決は置換忘れの orphan `MemberName`(§5.3)で、be-patterns の `ClaimAmount`-vs-`$estimatedAmount` 型バグ(解決されない検証クラス)は非再現。`UpdateTradeLawInput` は解決規則を docblock で自己文書化 |
 | Branching の typed discriminator(medical-triage) | ◎ 完全 | `OrderConfirming` の `PaymentSuccessCase\|PaymentFailureCase $being`。機構説明の docblock 付き |
 | 本物の `Becoming` E2E テスト | ◎ | `tests/Domain/*` は TestModule + Injector で実チェーンを駆動(be-patterns の advanced デモの手組みテストより忠実) |
-| Exception 規約(`DomainException` 継承 + `#[Message]` i18n) | ◎ 100% / 99.2% | 唯一の欠落は `CalendarHolidayNotFoundException` の `#[Message]` |
+| Exception 規約(`DomainException` 継承 + `#[Message]` i18n) | ◎ 100% / 99.2% | Exception 128 クラス中: 継承 128/128、`#[Message]` 127/128 — 唯一の欠落は `CalendarHolidayNotFoundException` |
 | 境界 Reason の Interface 化 | ◯ | `InventoryAllocatorInterface` / `PaymentGatewayInterface` 等。`AdminSession` 等 3 件は abstract class(public プロパティを持つため — PHP 制約による合理的逸脱) |
-| `@link schema.org` docblock | ✗ 4.9%(8/163) | `Email` / `PostalCode` / `PhoneNumber` すら無い。**運用の弱い案内(「when a standard term exists」)は伝播しない** — be-patterns 側でも insurance-claim が 0% だった |
+| `@link schema.org` docblock | ✗ 4.9%(Semantic 163 クラス中 8) | `Email` / `PostalCode` / `PhoneNumber` すら無い。**運用の弱い案内(「when a standard term exists」)は伝播しない** — be-patterns 側でも insurance-claim が 0% だった |
 | Moment / Potential 機構 | ✗(正当な棄却) | §4 |
 | **Reason の二相契約(lock→confirm / authorize→capture)** | **✗(欠落・実害あり)** | `InventoryAllocatorInterface::allocate()` は一発実行。§5.1 |
 | state クラスでの clock/乱数直呼び回避 | ✗(悪例が伝播) | 7 クラス(`new DateTimeImmutable()` 4 + `date`/`random_bytes`/`uniqid` 4、重複 1)。be-patterns の canonical Final 自身の `date()` 直呼びが伝播源。しかも BeMart は `Reason/Provider/` に正しい seam を 16 個持ちながら、これらの箇所でバイパスしている(内部不整合) |
@@ -67,7 +68,7 @@ BeMart は「案内がどう成果物に写像されるか」の一級の実証�
 
 1. **ドメイン形状(一次)**: EC-CUBE の遷移は各段の出力が次段の入力になる順序依存の連鎖で、「相互独立な関心事の並列収束」という Diamond の前提を満たさない。`be/var/analysis/doAddCartItem.json` の 3 軸判定(`independent_parallel: false`)が形式的に記録。
 2. **フレームワーク制約(二次)**: `#[Inject]` 解決は Ray.Di の純 DI で行われ `BecomingArguments` を経由しないため、`#[Input]` を持つクラスは注入不能(`NoHint`)。**「Diamond は収束対象が全て Input 非依存という稀な条件でのみ成立」**([be-adoption-evaluation.md §6](./be-adoption-evaluation.md))。be-patterns の order-processing が Moment のスカラーを qualifier 属性 + `toInstance()` **固定値**で束縛している(= 入力が流れない)のは、この制約の症状である。
-3. **案内の欠落(三次)**: 上記の成立条件は be-patterns のどこにも書かれておらず、BeMart はフレームワークのソースを読んで自力で導出した。また BeMart のルーティングスキーマ(`alps-analyze` の `be_pattern` enum: 5 値)はカタログの 8 パターンと対応しておらず、`Diamond-Independent` は一度も割り当てられなかった。
+3. **案内の欠落(三次)**: 上記の成立条件は be-patterns のどこにも書かれておらず、BeMart はフレームワークのソースを読んで自力で導出した。また BeMart のルーティングスキーマ(`../../.claude/prompts/alps-analyze.md` が定義する `be_pattern` enum の 5 値: `Direct` / `Multi-stage` / `Diamond-Independent` / `Diamond-Cascade` / `Diamond-Branching`)はカタログの 8 パターン名と一対一対応しない — `Direct` ≈ Minimal、`Multi-stage` は Linear / Sequential / Multi-Reason Being を区別しない粗い束、Branching・Complex Convergence には対応値が無い(名称差と粒度差であり、意図的除外の記録は無い)。`Diamond-Independent` が全 154 フローで一度も割り当てられなかったのは層 1(ドメイン形状)の帰結。
 
 **評価**: 層 1・2 に基づく棄却は正しく、その過程の文書化品質は高い。問題は層 3 — 正しい判断に到達するコストが「ソース読解と実試行」だった点、および次節の取りこぼし。
 
@@ -86,7 +87,7 @@ Diamond の**機構**が使えないことと、**二相コミット(予約→�
 パターン名が「多段逐次」の便利なラベルとして流用され、名前が指す機構は伴っていない:
 
 - `HANDOVER.md` は「Diamond-Cascade: 3 件(Pilot 2, 5, 12)」と集計するが、3 件とも `MomentInterface` ゼロの逐次 Reason チェーン。
-- [ReorderResolving](../src/Being/ReorderResolving.php) は「Cascade Diamond Stage 1 (loan-application demo)」を自称。`docs/skills/G-15-multi-side-effect-final.md` は loan-application を「Complex Convergence」と誤記(カタログ上その名は insurance-claim のもの)。
+- [ReorderResolving](../src/Being/ReorderResolving.php) は「Cascade Diamond Stage 1 (loan-application demo)」を自称。[G-15-multi-side-effect-final.md](../../docs/skills/G-15-multi-side-effect-final.md) は loan-application を「Complex Convergence」と誤記(カタログ上その名は insurance-claim のもの)。
 - `CheckoutSettled` は自らを「Three Reasons **converge** on a single Being」と説明 — Diamond と Multi-Reason Being の境界判断基準がカタログに無いことの直接の現れ。
 
 ### 5.3 その他
@@ -131,5 +132,6 @@ be-patterns のデモは永続レコードを round-trip しないため、以�
 ## 7. 出典
 
 - be-patterns 監査と修正: [PR #22](https://github.com/be-framework/be-patterns/pull/22)(2026-07-18、install 復旧・未配線の開示・CardExpiry 等のバグ修正・invariant 精緻化)
-- 決定痕跡: [be-adoption-evaluation.md](./be-adoption-evaluation.md) §6–7、`../../docs/HANDOVER.md`、`../var/analysis/doAddCartItem.json`、`../../.claude/prompts/{alps-analyze,domain-implement,be-review}.md`
+- 決定痕跡: [be-adoption-evaluation.md](./be-adoption-evaluation.md) §6–7、`../../docs/HANDOVER.md`、`../var/analysis/doAddCartItem.json`、`../../.claude/prompts/{alps-analyze,domain-implement,be-review}.md`、`../../docs/skills/G-15-multi-side-effect-final.md`(§5.2 の用語 drift の証拠)
 - 実装の一次証拠: [OrderConfirming](../src/Being/OrderConfirming.php)、[CheckoutSettled](../src/Being/CheckoutSettled.php)、[ShoppingFetched](../src/Final/ShoppingFetched.php)、`../tests/Domain/OrderConfirmedTest.php`
+- 本節は主要出典の再掲であり網羅ではない。本文中の各ファイルリンク・パスがそれぞれの記述の一次出典である。集計数値(§1〜§3)はすべて `be/src` 直下の grep/find で再計算可能(単位の定義は §1)。
