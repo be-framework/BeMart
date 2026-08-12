@@ -8,7 +8,9 @@ use Aura\Sql\ExtendedPdoInterface;
 use BEAR\Resource\ResourceInterface;
 use Closure;
 use MyVendor\BeMart\Injector;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use MyVendor\BeMart\Support\Resource\ApiMutationResponse;
+use MyVendor\BeMart\Support\Resource\ExplicitAdminLoginFormSubmission;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Override;
 use Ray\Di\AbstractModule;
@@ -36,11 +38,17 @@ final class WorkflowDbSession
         // rollback actually protects operational rows. The `prod` compiled
         // context resolves Resource SQL calls through a separate connection;
         // HTTP workflow tests cover that boundary separately.
+        //
+        // The HTML context is borrowed only for that shared connection: the
+        // workflow drives resources as a Resource/JSON client, so the two
+        // browser-shaped ports (mutation response, login form submission) are
+        // overridden back to their API bindings.
         $injector = Injector::getOverrideInstance('html-eccube-sql-hal-app', new class extends AbstractModule {
             #[Override]
             protected function configure(): void
             {
                 $this->bind(MutationResponseInterface::class)->to(ApiMutationResponse::class);
+                $this->bind(AdminLoginFormSubmissionInterface::class)->to(ExplicitAdminLoginFormSubmission::class);
             }
         });
 

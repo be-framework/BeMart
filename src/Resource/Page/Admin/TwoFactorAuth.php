@@ -20,6 +20,7 @@ use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -54,6 +55,7 @@ class TwoFactorAuth extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly AdminQueryInterface $adminQuery,
         private readonly CsrfToken $csrf,
+        private readonly AdminLoginFormSubmissionInterface $formSubmission,
     ) {
     }
 
@@ -127,7 +129,7 @@ class TwoFactorAuth extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
-    public function onPost(string $deviceToken, string|null $loginId = null): static
+    public function onPost(string $deviceToken, string|null $loginId = null, string|null $mode = null): static
     {
         unset($loginId);
 
@@ -147,13 +149,23 @@ class TwoFactorAuth extends ResourceObject
         assert($final instanceof TwoFactorAuthVerified);
         $this->loginChallenge->completeVerification($challenge);
 
-        $this->code = Code::OK;
         $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doVerifyTwoFactorAuth',
             'loginId' => $final->loginId,
             'message' => '二要素認証を確認しました。',
         ];
+        if (($this->formSubmission)($mode)) {
+            // Browser form submit (decided by the formSubmission port, not
+            // raw client input): 303 See Other so the browser actually
+            // navigates (a 200 + Location response leaves browsers on the
+            // challenge page). JSON/Resource clients keep 200 OK.
+            $this->code = Code::SEE_OTHER;
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
 
         return $this;
     }
