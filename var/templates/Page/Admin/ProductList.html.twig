@@ -280,7 +280,9 @@
                     <td class="idea-admin-table__thumb">
                         <a href="/admin/product/edit?productCode={{ Product.productCode }}">
                             {% if Product.imagePath %}
-                                <img src="{{ asset(Product.imagePath, 'save_image') }}"
+                                {# imagePath is already root-absolute (ProductFactory);
+                                   asset() would double the leading slash. #}
+                                <img src="{{ Product.imagePath }}"
                                      alt="{{ Product.productName }}">
                             {% else %}
                                 <img src="{{ asset('assets/img/common/no_image_product.png', 'save_image') }}"
