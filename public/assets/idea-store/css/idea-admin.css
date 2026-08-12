@@ -127,10 +127,15 @@
   display: flex;
   align-items: center;
   gap: .6rem;
+  width: 100%;
   padding: .62rem 1rem;
   color: rgba(255, 250, 240, .72);
+  font-family: inherit;
   font-size: .84rem;
+  text-align: left;
   text-decoration: none;
+  background: transparent;
+  border: 0;
   transition: background .14s, color .14s;
   cursor: pointer;
 }
