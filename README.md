@@ -6,8 +6,8 @@
 
 EC-CUBE 4.3 を Be Framework + BEAR.Sunday へ移植したデモプロジェクトです。
 Entity・Controller・Twig に散らばっていた業務ルールを [ALPS プロファイル](alps.json)（SSOT）に集約し、
-そこからドメイン・リソース・SQL・HTML・テストを生成しています。外から見える振る舞いは EC-CUBE 互換、
-中身は契約駆動のクリーンルーム実装です（EC-CUBE のソースコードは一切含みません）。
+そこからドメイン・リソース・SQL・HTML・テストを生成しています。外から見える振る舞いは EC-CUBE 互換。
+ドメイン層は ALPS 契約からの独立実装で、HTML とスキーマは EC-CUBE からの移植です。
 
 ```text
 EC-CUBE source → ALPS contract → Be / Resource / SQL / HTML / Test
@@ -96,6 +96,14 @@ docs/            # ドキュメント
 
 ## ライセンス
 
-[MIT License](LICENSE)。EC-CUBE 4.3 の独立再実装であり、セマンティクスを ALPS として契約化して
-作り直したクリーンルーム実装です。EC-CUBE 本体（GPL）のソースコードは含みません。
-参照元: [EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube)。
+[GPL-2.0-only](LICENSE)。[EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube) と同じ条項です。
+
+ドメイン層（`be/`, `src/`）は ALPS 契約から独立に実装していますが、リポジトリには EC-CUBE 由来の
+成果物が含まれます。
+
+| 場所 | 由来 |
+| --- | --- |
+| `var/templates/` | EC-CUBE のマークアップを逐語移植した Twig（[移植手順](var/templates/README.md)） |
+| `sql/` | EC-CUBE のスキーマと初期データ |
+| `public/template/admin/assets/` | EC-CUBE 管理テーマのアセット。28 ファイル中 14 は上流とバイト一致 |
+| `docs/eccube-spec-coverage/` | EC-CUBE 画面のキャプチャ |
