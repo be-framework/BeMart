@@ -7,7 +7,7 @@
 EC-CUBE 4.3 を Be Framework + BEAR.Sunday へ移植したデモプロジェクトです。
 Entity・Controller・Twig に散らばっていた業務ルールを [ALPS プロファイル](alps.json)（SSOT）に集約し、
 そこからドメイン・リソース・SQL・HTML・テストを生成しています。外から見える振る舞いは EC-CUBE 互換。
-ドメイン層は ALPS 契約からの独立実装で、HTML とスキーマは EC-CUBE からの移植です。
+Be ドメイン層（`be/src/`）は契約からの独立実装、HTML テンプレートと DB スキーマは EC-CUBE からの移植です。
 
 ```text
 EC-CUBE source → ALPS contract → Be / Resource / SQL / HTML / Test
@@ -98,12 +98,18 @@ docs/            # ドキュメント
 
 [GPL-2.0-only](LICENSE)。[EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube) と同じ条項です。
 
-ドメイン層（`be/`, `src/`）は ALPS 契約から独立に実装していますが、リポジトリには EC-CUBE 由来の
-成果物が含まれます。
+Be ドメイン層（`be/src/`）は ALPS 契約から独立に実装しています。`src/Resource/` `src/Module/`
+`src/Form/` はその契約を移植済み HTML に束ねる BEAR レイヤーで、EC-CUBE 由来の成果物に接します。
 
-| 場所 | 由来 |
-| --- | --- |
-| `var/templates/` | EC-CUBE のマークアップを逐語移植した Twig（[移植手順](var/templates/README.md)） |
-| `sql/` | EC-CUBE のスキーマと初期データ |
-| `public/template/admin/assets/` | EC-CUBE 管理テーマのアセット。28 ファイル中 14 は上流とバイト一致 |
-| `docs/eccube-spec-coverage/` | EC-CUBE 画面のキャプチャ |
+| 場所 | 由来 | 条項 |
+| --- | --- | --- |
+| `var/templates/` | EC-CUBE のマークアップを逐語移植した Twig（[移植手順](var/templates/README.md)） | GPL-2.0-only |
+| `sql/` | EC-CUBE のスキーマと初期データ | GPL-2.0-only |
+| `public/template/admin/assets/` | EC-CUBE 管理テーマのアセット。28 ファイル中 14 は上流とバイト一致 | GPL-2.0-only |
+| `docs/eccube-spec-coverage/` | EC-CUBE 画面のキャプチャ（同梱の CSS/JS を含む） | GPL-2.0-only |
+
+公式 EC-CUBE ロゴは含みません。`public/template/admin/assets/img/logo{,2,@2x}.png` と
+`pdf/logo.png` は上流とバイト・寸法とも異なる差し替えで、本プロジェクトの IDEA STORE
+ブランド（`public/assets/idea-store/logo/`）に置き換えてあります。EC-CUBE の公式ブランドアセットは
+GPL とは別に [CC BY-NC-ND 2.1 JP](https://www.ec-cube.net/brand-assets/) で提供されますが、
+同梱していないためその条件は適用されません。
