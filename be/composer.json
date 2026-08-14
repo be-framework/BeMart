@@ -1,7 +1,7 @@
 {
     "name": "my-vendor/be-mart-be",
     "type": "library",
-    "license": "GPL-2.0-only",
+    "license": "MIT",
     "description": "BeMart Be — pure Be Framework domain (Input / Final / Semantic / Exception / Becoming / Reason) for the BeMart project.",
     "require": {
         "php": "^8.3",

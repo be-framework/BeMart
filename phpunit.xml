@@ -13,6 +13,7 @@
             <directory>tests/Router</directory>
             <directory>tests/Docs</directory>
             <directory>tests/EntryPoint</directory>
+            <directory>tests/License</directory>
             <directory>be/tests/Domain</directory>
         </testsuite>
         <testsuite name="hypermedia">

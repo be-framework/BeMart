@@ -96,17 +96,23 @@ docs/            # ドキュメント
 
 ## ライセンス
 
-[GPL-2.0-only](LICENSE)。[EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube) と同じ条項です。
-
-Be ドメイン層（`be/src/`）は ALPS 契約から独立に実装しています。`src/Resource/` `src/Module/`
-`src/Form/` はその契約を移植済み HTML に束ねる BEAR レイヤーで、EC-CUBE 由来の成果物に接します。
+リポジトリは [GPL-2.0-only](LICENSE)。[EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube) と同じ条項です。
+ただし Be ドメイン層 `be/`（パッケージ `my-vendor/be-mart-be`）だけは [MIT](be/LICENSE) です。
 
 | 場所 | 由来 | 条項 |
 | --- | --- | --- |
+| `be/` | ALPS 契約からの独立実装。EC-CUBE 由来の表現を含まない | **MIT** |
+| `src/Resource/` `src/Module/` `src/Form/` | 契約を移植済み HTML に束ねる BEAR レイヤー。EC-CUBE の文言に接する | GPL-2.0-only |
 | `var/templates/` | EC-CUBE のマークアップを逐語移植した Twig（[移植手順](var/templates/README.md)） | GPL-2.0-only |
 | `sql/` | EC-CUBE のスキーマと初期データ | GPL-2.0-only |
 | `public/template/admin/assets/` | EC-CUBE 管理テーマのアセット。28 ファイル中 14 は上流とバイト一致 | GPL-2.0-only |
 | `docs/eccube-spec-coverage/` | EC-CUBE 画面のキャプチャ（同梱の CSS/JS を含む） | GPL-2.0-only |
+
+`be/` の MIT は測定に基づく主張です。EC-CUBE の `messages.ja.yaml` から逐語コピーした文言は
+`tests/Resource/Admin/*JaMessages.php` に集約されており、`be/` の日本語リテラルとの一致は
+短い語彙だけで、文はひとつもありません。この境界は
+[`tests/License/BeLicenseBoundaryTest.php`](tests/License/BeLicenseBoundaryTest.php) が検査します。
+MIT のコードを GPL の作品から利用するのは互換（インバウンド）で、`be/` は単体で取り出せます。
 
 公式 EC-CUBE ロゴは含みません。`public/template/admin/assets/img/logo{,2,@2x}.png` と
 `pdf/logo.png` は上流とバイト・寸法とも異なる差し替えで、本プロジェクトの IDEA STORE
