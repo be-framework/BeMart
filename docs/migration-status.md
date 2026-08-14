@@ -47,7 +47,7 @@ Counts are ALPS transitions per flow. `✓` done · `~` partial · `✗` pending
 | flow-favorite | ✓ 3 | ✓ | ✓ | ✓ | ✓ storefront |
 | flow-inquiry (contact form) | ✓ 2 | ✓ | ✓ | ✓ (`Contact` has no table) | ✓ storefront |
 | flow-admin-auth | ✓ 1 | ✓ | ✓ | ✓ | ✓ admin |
-| flow-manage-product | ✓ 24 | ~ (product CSV import intentionally not migrated; category/class CSV paths connected) | ✓ | ✓ | ~ admin (list/tag/class + product/category editors done; `product-class` and `csv-product` render POST forms with no write handler — see §2.1) |
+| flow-manage-product | ✓ 24 | ~ (no Be transition for product CSV import — `ProductCsv::onPost` parses inline; category/class CSV paths go through Be) | ✓ | ✓ | ~ admin (list/tag/class + product/category/csv editors done; `product-class` renders a POST form with no write handler — see §2.1) |
 | flow-manage-order | ✓ 13 | ~ (PDF fidelity residual; shipping CSV persistence connected) | ✓ | ✓ | ✓ admin (list + edit/shipping/mail/mail_confirm/pdf/csv-shipping done) |
 | flow-manage-customer | ✓ 6 | ✓ | ✓ | ✓ | ~ admin (list done; `customer` edit and `customer-delivery-edit` render POST forms with no write handler — see §2.1) |
 | flow-manage-shop | ✓ 15 | ✓ | ✓ | ✓ | ✓ admin (payment/delivery/tax list + calendar/csv/order-status/tradelaw + payment/delivery edits + shop-master editors done) |
@@ -68,7 +68,7 @@ Layer-specific notes:
 
 ### 2.1 Rendered forms without a write handler
 
-Six admin resources render a `<form method="post">` that no method answers. The
+Five admin resources render a `<form method="post">` that no method answers. The
 markup was ported ahead of the handler, so the button reaches BEAR\Resource and
 comes back 405. Reproduce any row with `composer page -- post <path>`.
 
@@ -79,11 +79,20 @@ comes back 405. Reproduce any row with `composer page -- post <path>`.
 | `Page/Admin/TwoFactorAuthEdit.html.twig:125` | `/admin/two-factor-auth-edit` | `Admin/TwoFactorAuthEdit.php` | `onGet` |
 | `Page/Admin/Content/FileManager.html.twig:308,348,382` | `/admin/content/file-manager` | `Admin/Content/FileManager.php` | `onGet` |
 | `Page/Admin/Product/ProductClass.html.twig:284` | `/admin/product/product-class` | `Admin/Product/ProductClass.php` | `onGet` |
-| `Page/Admin/Product/CsvProduct.html.twig:112` | `/admin/product/csv-product` | `Admin/Product/CsvProduct.php` | `onGet` |
+
+Each of the five needs a transition the ALPS profile does not carry yet. The
+storefront equivalents cannot be reused: `UpdateCustomerAddressInput` omits
+`customerId` on purpose and derives the owner from the customer session, which
+is the opposite of an administrator editing someone else's row.
+
+`Page/Admin/Product/CsvProduct.html.twig` was a sixth entry. Its upload posted
+to its own screen URL instead of `/admin/product-csv`, where `ProductCsv::onPost`
+already implements the import (the router turns an `import_file` upload into the
+`csv` parameter). Repointing the action was the whole fix — no new transition.
 
 `tests/Router/TemplateFormActionTest.php` holds the same list and fails both
-ways: a seventh dead form breaks the build, and so does an entry that is no
-longer dead. The other 117 POST forms resolve to a resource that writes.
+ways: a sixth dead form breaks the build, and so does an entry that is no
+longer dead. The other 118 POST forms resolve to a resource that writes.
 
 ---
 

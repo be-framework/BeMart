@@ -34,7 +34,7 @@ final class AdminProductCsvUploadHtmlRenderTest extends TestCase
         return [
             [
                 'page://self/admin/product/csv-product',
-                '/admin/product/csv-product',
+                '/admin/product-csv',
                 '商品CSV登録',
             ],
             [
