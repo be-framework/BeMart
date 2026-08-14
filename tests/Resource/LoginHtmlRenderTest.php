@@ -75,13 +75,14 @@ final class LoginHtmlRenderTest extends TestCase
         $this->assertStringContainsString('type="password"', $html);
     }
 
-    public function testLoginPageRendersFormWithFilledEmailFromPocFixture(): void
+    public function testLoginFormShipsNoCredentials(): void
     {
-        // The resource prefills the form with a PoC fixture email for the
-        // HTML-context demo (Login::prefilledLoginForm). Verify it surfaces.
+        // The login page is anonymous-reachable, so it must never hand a
+        // working member credential to the visitor.
         $html = $this->resource->get('page://self/login')->toString();
 
-        $this->assertStringContainsString('value="login-test@example.com"', $html);
+        $this->assertStringNotContainsString('value="login-test@example.com"', $html);
+        $this->assertStringNotContainsString('local-dev-member-password', $html);
     }
 
     public function testLoginPageRendersCsrfHiddenField(): void

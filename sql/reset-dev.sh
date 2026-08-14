@@ -20,6 +20,12 @@ DB="${DB_NAME:-eccubedb}"
 URL="mysql://${USER}@${HOST}:${PORT}/${DB}?charset=utf8mb4"
 MYSQL=(mysql --default-character-set=utf8mb4 -h "$HOST" -P "$PORT" -u "$USER" "$DB")
 
+# Demo credentials. The defaults are local-development values committed to the
+# repository; a publicly reachable deployment MUST pass its own via the
+# environment so that no working credential is readable from the source.
+MEMBER_PASSWORD="${BEMART_DEMO_MEMBER_PASSWORD:-local-dev-member-password}"
+ADMIN_PASSWORD="${BEMART_DEMO_ADMIN_PASSWORD:-}"
+
 echo "reset-dev: [1/4] regenerating fixture from be/var/fake/*.json ..."
 python3 sql/seed/build-dev-fixture.py
 
@@ -33,8 +39,11 @@ echo "reset-dev: [3b/4] loading IdeaStore themed catalog (収納/台所/家具�
 DB_HOST="$HOST" DB_PORT="$PORT" DB_USER="$USER" DB_NAME="$DB" php sql/seed/load-idea-catalog.php
 
 echo "reset-dev: [4/4] making the PoC test customer loginnable ..."
-HASH="$(php -r "echo password_hash('local-dev-member-password', PASSWORD_BCRYPT, ['cost' => 12]);")"
+HASH="$(SEED_PASSWORD="$MEMBER_PASSWORD" php -r "echo password_hash(getenv('SEED_PASSWORD'), PASSWORD_BCRYPT, ['cost' => 12]);")"
 "${MYSQL[@]}" -e "UPDATE dtb_customer SET password='${HASH}' WHERE email='login-test@example.com';"
+if [ -n "$ADMIN_PASSWORD" ]; then
+    ADMIN_HASH="$(SEED_PASSWORD="$ADMIN_PASSWORD" php -r "echo password_hash(getenv('SEED_PASSWORD'), PASSWORD_BCRYPT, ['cost' => 12]);")"
+    "${MYSQL[@]}" -e "UPDATE dtb_member SET password='${ADMIN_HASH}' WHERE login_id='test-admin';"
+fi
 
 echo "reset-dev: done. products=$("${MYSQL[@]}" -N -e 'SELECT COUNT(*) FROM dtb_product') customers=$("${MYSQL[@]}" -N -e 'SELECT COUNT(*) FROM dtb_customer') orders=$("${MYSQL[@]}" -N -e 'SELECT COUNT(*) FROM dtb_order')"
-echo "reset-dev: admin=test-admin/local-dev-admin-password (2FA dev=123456)  member=login-test@example.com/local-dev-member-password"

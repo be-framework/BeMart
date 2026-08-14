@@ -17,8 +17,10 @@ EC-CUBE source → ALPS contract → Be / Resource / SQL / HTML / Test
 
 <https://131.186.41.241.sslip.io/> — Oracle Cloud Always Free 上で常時稼働中です。
 
-- ストアフロント: <https://131.186.41.241.sslip.io/>（会員 `login-test@example.com` / `local-dev-member-password`）
-- 管理画面: <https://131.186.41.241.sslip.io/admin/login>（`test-admin` / `local-dev-admin-password`、2FA は `123456`）
+ストアフロントは <https://131.186.41.241.sslip.io/>、管理画面は <https://131.186.41.241.sslip.io/admin/login>。
+デモ用のログイン資格情報は公開していません。ログインを伴う動作確認は下の Docker 手順でローカルに立ち上げてください。
+誰でも書き込めるデモなので、定期的に seed 状態へリセットしています。
+運用手順は [`docs/demo-operation.md`](docs/demo-operation.md)。
 
 ## 起動（Docker）
 
