@@ -23,7 +23,7 @@ grid, exports the corpus, or applies a bulk action.
 ## GET
 ALPS `goProductList` に対応する GET 操作。
 
-**ALPS**: `goProductList`
+**ALPS**: `goProductList` - 商品一覧を見る
 
 
 

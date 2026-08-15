@@ -38,7 +38,7 @@ here.
 Wave 7: orderNo comes from the admin UI (click on an order-list
 row, or pasted into the URL).
 
-**ALPS**: `goOrder`
+**ALPS**: `goOrder` - 受注詳細を見る
 
 
 
@@ -90,7 +90,7 @@ Wave 7: every editable field is admin-form input. The orderNo
 selector is also admin-controlled. Same taint discipline as the
 Wave 5 / Wave 6 admin resources.
 
-**ALPS**: `doUpdateOrder`
+**ALPS**: `doUpdateOrder` - 受注を更新する
 
 
 

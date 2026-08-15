@@ -46,7 +46,7 @@ address; for the new screen it is empty. VALIDATION AUTHORITY
 STAYS WITH the Be Framework Becoming chain (onPost). The JSON
 contexts ignore `body['form']`.
 
-**ALPS**: `doUpdateCustomerAddress`
+**ALPS**: `doUpdateCustomerAddress` - 配送先を更新する
 
 
 
@@ -79,7 +79,7 @@ contexts ignore `body['form']`.
 ## PUT
 ALPS `doUpdateCustomerAddress` に対応する PUT 操作。
 
-**ALPS**: `doUpdateCustomerAddress`
+**ALPS**: `doUpdateCustomerAddress` - 配送先を更新する
 
 
 
@@ -127,7 +127,7 @@ ALPS `doUpdateCustomerAddress` に対応する PUT 操作。
 ## DELETE
 ALPS `doUpdateCustomerAddress` に対応する DELETE 操作。
 
-**ALPS**: `doUpdateCustomerAddress`
+**ALPS**: `doUpdateCustomerAddress` - 配送先を更新する
 
 
 

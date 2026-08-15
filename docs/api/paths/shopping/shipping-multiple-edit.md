@@ -70,7 +70,7 @@ multi-destination checkout branch.
 This mirrors {@see \ShippingEdit::onPost()} but returns to the
 multi-shipping screen instead of the main shopping screen.
 
-**ALPS**: `doUpdateShippingAddress`
+**ALPS**: `doUpdateShippingAddress` - お届け先を更新する
 
 
 

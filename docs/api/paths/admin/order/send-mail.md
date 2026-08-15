@@ -31,7 +31,7 @@ AUTHZ is a direct admin-session check (Pattern B — no Be
 transition is invoked on the GET path). The composition fields
 render blank so the page is faithful with empty JSON-backed fake storage.
 
-**ALPS**: `doSendOrderMail`
+**ALPS**: `doSendOrderMail` - 受注メールを送信する
 
 
 
@@ -61,7 +61,7 @@ render blank so the page is faithful with empty JSON-backed fake storage.
 ## POST
 ALPS `doSendOrderMail` に対応する POST 操作。
 
-**ALPS**: `doSendOrderMail`
+**ALPS**: `doSendOrderMail` - 受注メールを送信する
 
 
 

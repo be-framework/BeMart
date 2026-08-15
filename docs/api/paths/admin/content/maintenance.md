@@ -16,7 +16,7 @@ which 有効/無効 button the template shows.
 ## GET
 ALPS `goMaintenance` に対応する GET 操作。
 
-**ALPS**: `goMaintenance`
+**ALPS**: `goMaintenance` - メンテナンス管理を見る
 
 
 
@@ -43,7 +43,7 @@ Toggles maintenance mode to an explicit state (doToggleMaintenance).
 
 ALPS marks it `idempotent` → PUT.
 
-**ALPS**: `doToggleMaintenance`
+**ALPS**: `doToggleMaintenance` - メンテナンス状態を切り替える
 
 
 

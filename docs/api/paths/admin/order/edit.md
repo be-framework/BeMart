@@ -26,7 +26,7 @@ firewall. Both surface 403.
 ## GET
 ALPS `goOrder` に対応する GET 操作。
 
-**ALPS**: `goOrder`
+**ALPS**: `goOrder` - 受注詳細を見る
 
 
 

@@ -18,7 +18,7 @@ behind {@see \MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface}.
 ## GET
 ALPS `goExportClassCategory` に対応する GET 操作。
 
-**ALPS**: `goExportClassCategory`
+**ALPS**: `goExportClassCategory` - 規格分類CSVをエクスポートする
 
 
 
@@ -45,7 +45,7 @@ _No parameters required_
 ## POST
 Imports the 規格分類 CSV (doImportClassCategoryCsv).
 
-**ALPS**: `doImportClassCategoryCsv`
+**ALPS**: `doImportClassCategoryCsv` - 規格分類CSVをインポートする
 
 
 

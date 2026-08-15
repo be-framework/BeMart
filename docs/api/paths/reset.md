@@ -31,7 +31,7 @@ is carried into a hidden form field for the subsequent POST.
 `csrfToken` stays `null` — the EventListener mirrors the Symfony
 token into the session for the POST (same as Login).
 
-**ALPS**: `doResetPassword`
+**ALPS**: `doResetPassword` - パスワードをリセットする
 
 
 
@@ -64,7 +64,7 @@ token into the session for the POST (same as Login).
 ## POST
 ALPS `doResetPassword` に対応する POST 操作。
 
-**ALPS**: `doResetPassword`
+**ALPS**: `doResetPassword` - パスワードをリセットする
 
 
 

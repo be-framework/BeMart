@@ -19,7 +19,7 @@ Thin GET renderer for `Setting/Shop/delivery_edit.twig`. An empty
 pre-fills the editor; an unknown id is 404. The delivery-master
 list doubles as the AUTHZ gate — no admin session → 403.
 
-**ALPS**: `doUpdateDelivery`
+**ALPS**: `doUpdateDelivery` - 配送方法を更新する
 
 
 
@@ -48,7 +48,7 @@ list doubles as the AUTHZ gate — no admin session → 403.
 ## PUT
 ALPS `doUpdateDelivery` に対応する PUT 操作。
 
-**ALPS**: `doUpdateDelivery`
+**ALPS**: `doUpdateDelivery` - 配送方法を更新する
 
 
 
@@ -79,7 +79,7 @@ ALPS `doUpdateDelivery` に対応する PUT 操作。
 ## DELETE
 ALPS `doDeleteDelivery` に対応する DELETE 操作。
 
-**ALPS**: `doDeleteDelivery`
+**ALPS**: `doDeleteDelivery` - 配送方法を削除する
 
 
 

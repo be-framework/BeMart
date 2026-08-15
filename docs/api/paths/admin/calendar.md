@@ -11,7 +11,7 @@ Renderer and action surface for `Setting/Shop/calendar.twig`.
 ## GET
 ALPS `goCalendar` に対応する GET 操作。
 
-**ALPS**: `goCalendar`
+**ALPS**: `goCalendar` - 営業日カレンダーを見る
 
 
 
@@ -40,7 +40,7 @@ _No parameters required_
 ## POST
 EC-CUBE doUpdateCalendar / doCreateCalendarHoliday.
 
-**ALPS**: `doUpdateCalendar`
+**ALPS**: `doUpdateCalendar` - 営業日カレンダーを更新する
 
 
 
@@ -74,7 +74,7 @@ EC-CUBE doUpdateCalendar / doCreateCalendarHoliday.
 ## DELETE
 EC-CUBE doDeleteCalendarHoliday.
 
-**ALPS**: `doDeleteCalendarHoliday`
+**ALPS**: `doDeleteCalendarHoliday` - 休日を削除する
 
 
 

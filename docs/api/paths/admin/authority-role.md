@@ -45,7 +45,7 @@ screen. The ALPS transition covers `doUpdateAuthorityRole`; EC-CUBE
 uses the same resource to edit URL-deny rules stored in
 `dtb_authority_role`.
 
-**ALPS**: `doUpdateAuthorityRole`
+**ALPS**: `doUpdateAuthorityRole` - 権限ルールを更新する
 
 
 
@@ -77,7 +77,7 @@ shape carries CSRF at the request boundary plus
 The legacy member role-flip shape (`loginId`, `authority`)
 remains supported for member workflow.
 
-**ALPS**: `doUpdateAuthorityRole`
+**ALPS**: `doUpdateAuthorityRole` - 権限ルールを更新する
 
 
 

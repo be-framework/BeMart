@@ -24,7 +24,7 @@ CSV; this GET serves the upload-form shell. AUTHZ is a direct
 admin-session check (Pattern B — no Be transition is invoked on
 the GET path); a non-admin firewall is refused with 403.
 
-**ALPS**: `doImportShippingCsv`
+**ALPS**: `doImportShippingCsv` - 配送CSVをインポートする
 
 
 
@@ -48,7 +48,7 @@ _No parameters required_
 ## POST
 ALPS `doImportShippingCsv` に対応する POST 操作。
 
-**ALPS**: `doImportShippingCsv`
+**ALPS**: `doImportShippingCsv` - 配送CSVをインポートする
 
 
 

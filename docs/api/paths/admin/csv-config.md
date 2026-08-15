@@ -29,7 +29,7 @@ EC-CUBE CSV出力項目設定 — Setting/Shop Tier-2.
 Thin GET renderer for `Setting/Shop/csv.twig`. The existing POST
 persists a submitted vector; this GET serves the editor body.
 
-**ALPS**: `doUpdateCsv`
+**ALPS**: `doUpdateCsv` - CSV出力設定を更新する
 
 
 
@@ -62,7 +62,7 @@ Wave 9: admin-form input. The columns list is sanitized by Be /
 Semantic; the column entries themselves carry user-supplied
 column names so the taint mark applies to the whole payload.
 
-**ALPS**: `doUpdateCsv`
+**ALPS**: `doUpdateCsv` - CSV出力設定を更新する
 
 
 

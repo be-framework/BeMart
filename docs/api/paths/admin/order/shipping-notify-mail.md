@@ -23,7 +23,7 @@ Failure mapping:
 ## GET
 Displays the shipping-notification confirmation form.
 
-**ALPS**: `doSendShippingNotifyMail`
+**ALPS**: `doSendShippingNotifyMail` - 出荷通知メールを送信する
 
 
 
@@ -55,7 +55,7 @@ Displays the shipping-notification confirmation form.
 ## POST
 ALPS `doSendShippingNotifyMail` に対応する POST 操作。
 
-**ALPS**: `doSendShippingNotifyMail`
+**ALPS**: `doSendShippingNotifyMail` - 出荷通知メールを送信する
 
 
 

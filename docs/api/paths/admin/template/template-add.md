@@ -48,7 +48,7 @@ _No parameters required_
 Installs an uploaded design template (doInstallTemplate). ALPS
 marks it `unsafe` → POST.
 
-**ALPS**: `doInstallTemplate`
+**ALPS**: `doInstallTemplate` - テンプレートを追加する
 
 
 

@@ -13,7 +13,7 @@ EC-CUBE doUpdateClassName + doDeleteClassName — single-row endpoint
 ## PUT
 ALPS `doUpdateClassName` に対応する PUT 操作。
 
-**ALPS**: `doUpdateClassName`
+**ALPS**: `doUpdateClassName` - 規格名を更新する
 
 
 
@@ -42,7 +42,7 @@ ALPS `doUpdateClassName` に対応する PUT 操作。
 ## DELETE
 ALPS `doDeleteClassName` に対応する DELETE 操作。
 
-**ALPS**: `doDeleteClassName`
+**ALPS**: `doDeleteClassName` - 規格名を削除する
 
 
 

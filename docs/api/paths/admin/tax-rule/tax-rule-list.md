@@ -18,7 +18,7 @@ The single-row affordance (`doDeleteTaxRule`) lives at
 ## GET
 ALPS `goTaxRuleList` に対応する GET 操作。
 
-**ALPS**: `goTaxRuleList`
+**ALPS**: `goTaxRuleList` - 税率ルール一覧を見る
 
 
 
@@ -45,7 +45,7 @@ _No parameters required_
 ## POST
 ALPS `doCreateTaxRule` に対応する POST 操作。
 
-**ALPS**: `doCreateTaxRule`
+**ALPS**: `doCreateTaxRule` - 税率ルールを作成する
 
 
 

@@ -20,7 +20,7 @@ Failure mapping:
 ## POST
 ALPS `doReorder` に対応する POST 操作。
 
-**ALPS**: `doReorder`
+**ALPS**: `doReorder` - 再注文する
 
 
 

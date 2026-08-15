@@ -20,7 +20,7 @@ instead of the runtime compatibility boundary.
 ## GET
 ALPS `goContentJs` に対応する GET 操作。
 
-**ALPS**: `goContentJs`
+**ALPS**: `goContentJs` - JavaScript管理を見る
 
 
 
@@ -45,7 +45,7 @@ _No parameters required_
 ## PUT
 Saves the customize JS (doUpdateContentJs). ALPS idempotent → PUT.
 
-**ALPS**: `doUpdateContentJs`
+**ALPS**: `doUpdateContentJs` - JavaScriptを更新する
 
 
 

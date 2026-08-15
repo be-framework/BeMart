@@ -20,7 +20,7 @@ Failure mapping:
 ## GET
 ALPS `goMypageHistory` に対応する GET 操作。
 
-**ALPS**: `goMypageHistory`
+**ALPS**: `goMypageHistory` - 注文履歴詳細を見る
 
 
 

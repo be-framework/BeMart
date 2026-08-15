@@ -20,6 +20,12 @@ On a verify failure the chain produces an {@see \OrderConfirmFailed}
 Final; the resource forwards the customer to the ShoppingError state
 (`goShoppingError`), mirroring EC-CUBE's controller behaviour.
 
+Failure mapping mirrors {@see \Checkout}, the other consumer of the same
+pre-order ownership rule:
+  - PreOrderNotFoundException           → 404 (the pre-order never existed)
+  - UnauthorizedPreOrderAccessException → 403 (not the owner)
+  - SemanticVariableException           → 400 (preOrderId malformed)
+
 Maps to `page://self/shopping/confirm`. The submit target is
 doCheckout (`page://self/shopping/checkout`).
 
@@ -29,7 +35,7 @@ doCheckout (`page://self/shopping/checkout`).
 ## GET
 ALPS `goShopping` に対応する GET 操作。
 
-**ALPS**: `goShopping`
+**ALPS**: `goShopping` - 注文手続きを見る
 
 
 
@@ -76,7 +82,7 @@ HTML checkout form posts the selected payment field as `payment`.
 
 Keep GET query compatibility while accepting the real browser form.
 
-**ALPS**: `goShopping`
+**ALPS**: `goShopping` - 注文手続きを見る
 
 
 

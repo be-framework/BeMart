@@ -18,7 +18,7 @@ Hard ActionRedirect completion: `onGet` is the upload shell
 ## GET
 ALPS `goExportClassName` に対応する GET 操作。
 
-**ALPS**: `goExportClassName`
+**ALPS**: `goExportClassName` - 規格名CSVをエクスポートする
 
 
 
@@ -45,7 +45,7 @@ _No parameters required_
 ## POST
 Imports the 規格名 CSV (doImportClassNameCsv).
 
-**ALPS**: `doImportClassNameCsv`
+**ALPS**: `doImportClassNameCsv` - 規格名CSVをインポートする
 
 
 

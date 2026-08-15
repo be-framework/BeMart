@@ -24,7 +24,7 @@ already enabled at the time of the request. ALPS `type=idempotent`
 ## POST
 ALPS `doEnablePlugin` に対応する POST 操作。
 
-**ALPS**: `doEnablePlugin`
+**ALPS**: `doEnablePlugin` - プラグインを有効化する
 
 
 

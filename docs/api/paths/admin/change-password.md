@@ -30,7 +30,7 @@ firewall contract as the other admin pages, enforced at the
 resource layer (there is no Be Final to raise
 `UnauthorizedAdminAccessException`).
 
-**ALPS**: `doChangePassword`
+**ALPS**: `doChangePassword` - パスワードを変更する
 
 
 
@@ -65,7 +65,7 @@ Failure mapping:
 - UnauthorizedAdminAccessException     → 403 (no admin session)
 - AdminNotFoundException               → 404 (stale session)
 
-**ALPS**: `doChangePassword`
+**ALPS**: `doChangePassword` - パスワードを変更する
 
 
 

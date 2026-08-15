@@ -30,7 +30,7 @@ Anonymous-accessible (login-context): returns 200 regardless of
 session state — the admin firewall guard is downstream of a
 successful challenge.
 
-**ALPS**: `doVerifyTwoFactorAuth`
+**ALPS**: `doVerifyTwoFactorAuth` - 二要素認証を確認する
 
 
 
@@ -69,7 +69,7 @@ Failure mapping:
   - SemanticVariableException     → 400 (malformed code)
   - TwoFactorAuthFailedException  → 400 (code mismatch)
 
-**ALPS**: `doVerifyTwoFactorAuth`
+**ALPS**: `doVerifyTwoFactorAuth` - 二要素認証を確認する
 
 
 
@@ -79,6 +79,7 @@ Failure mapping:
 |------|------|-------------|---------|----------|-------------|---------|
 | deviceToken | string | 二要素認証デバイストークン（入力） - /admin/two-factor-auth のレスポンスで扱う二要素認証デバイストークン。数値演算対象ではなく、照合・URL・配送追跡などに使う不透明な文字列識別子。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
 | loginId | string | ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。 この値は2FAログインチャレンジでは互換入力としてのみ受け取り、信頼しない。 |  | Optional | {"minLength":0,"maxLength":128,"$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | test-admin |
+| mode | string | フォーム送信モード - HTMLフォーム送信をResource/JSON境界と区別するための任意パラメータ。2FAチャレンジ画面では browser の 303 リダイレクト判定にだけ使う。 |  | Optional | {"minLength":0,"maxLength":32} | verify |
 
 
 ### Response

@@ -22,7 +22,7 @@ Renders the layout editor form (new-layout case).
 
 The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
 
-**ALPS**: `goLayout`
+**ALPS**: `goLayout` - レイアウト詳細を見る
 
 
 
@@ -54,7 +54,7 @@ The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
 ## PUT
 ALPS `doUpdateLayout` に対応する PUT 操作。
 
-**ALPS**: `doUpdateLayout`
+**ALPS**: `doUpdateLayout` - レイアウトを更新する
 
 
 

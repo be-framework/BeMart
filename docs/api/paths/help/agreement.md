@@ -14,7 +14,7 @@ Admin-editable. Wave 3H exposes the shape only.
 ## GET
 ALPS `goHelpAgreement` に対応する GET 操作。
 
-**ALPS**: `goHelpAgreement`
+**ALPS**: `goHelpAgreement` - ご利用規約を見る
 
 
 

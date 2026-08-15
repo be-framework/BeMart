@@ -18,7 +18,7 @@ the main shopping screen).
 ## GET
 ALPS `goShoppingShippingMultiple` に対応する GET 操作。
 
-**ALPS**: `goShoppingShippingMultiple`
+**ALPS**: `goShoppingShippingMultiple` - 複数配送先設定画面を見る
 
 
 
@@ -52,7 +52,7 @@ The current page exposes the allocation form shape but has no cart-item
 rows yet. The POST endpoint is still concrete: CSRF is enforced, the
 transition is acknowledged, and the user returns to the shopping page.
 
-**ALPS**: `doSelectShippingAddress`
+**ALPS**: `doSelectShippingAddress` - お届け先を選択する
 
 
 

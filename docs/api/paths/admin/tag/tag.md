@@ -12,7 +12,7 @@ neither doUpdateTag nor goTag — only DELETE.
 ## DELETE
 ALPS `doDeleteTag` に対応する DELETE 操作。
 
-**ALPS**: `doDeleteTag`
+**ALPS**: `doDeleteTag` - タグを削除する
 
 
 

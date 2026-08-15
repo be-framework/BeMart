@@ -12,7 +12,7 @@ same idempotency convention.
 ## POST
 ALPS `doDisablePlugin` に対応する POST 操作。
 
-**ALPS**: `doDisablePlugin`
+**ALPS**: `doDisablePlugin` - プラグインを無効化する
 
 
 

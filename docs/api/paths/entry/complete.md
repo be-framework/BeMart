@@ -28,7 +28,7 @@ Maps to `page://self/entry/complete`.
 ## GET
 ALPS `goCustomerRegistrationComplete` に対応する GET 操作。
 
-**ALPS**: `goCustomerRegistrationComplete`
+**ALPS**: `goCustomerRegistrationComplete` - 会員登録完了を見る
 
 
 

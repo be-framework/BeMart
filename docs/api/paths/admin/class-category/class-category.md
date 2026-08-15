@@ -15,7 +15,7 @@ endpoint (Wave 7).
 ## PUT
 ALPS `doUpdateClassCategory` に対応する PUT 操作。
 
-**ALPS**: `doUpdateClassCategory`
+**ALPS**: `doUpdateClassCategory` - 規格分類を更新する
 
 
 
@@ -45,7 +45,7 @@ ALPS `doUpdateClassCategory` に対応する PUT 操作。
 ## DELETE
 ALPS `doDeleteClassCategory` に対応する DELETE 操作。
 
-**ALPS**: `doDeleteClassCategory`
+**ALPS**: `doDeleteClassCategory` - 規格分類を削除する
 
 
 

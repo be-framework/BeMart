@@ -19,7 +19,7 @@ public customize.css asset instead of the runtime compatibility boundary.
 ## GET
 ALPS `goContentCss` に対応する GET 操作。
 
-**ALPS**: `goContentCss`
+**ALPS**: `goContentCss` - CSS管理を見る
 
 
 
@@ -44,7 +44,7 @@ _No parameters required_
 ## PUT
 Saves the customize CSS (doUpdateContentCss). ALPS idempotent → PUT.
 
-**ALPS**: `doUpdateContentCss`
+**ALPS**: `doUpdateContentCss` - CSSを更新する
 
 
 

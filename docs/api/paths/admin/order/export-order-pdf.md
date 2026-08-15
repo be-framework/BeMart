@@ -20,7 +20,7 @@ Failure mapping:
 ## GET
 ALPS `goExportOrderPdf` に対応する GET 操作。
 
-**ALPS**: `goExportOrderPdf`
+**ALPS**: `goExportOrderPdf` - 帳票PDFをエクスポートする
 
 
 

@@ -41,7 +41,7 @@ Maps to `page://self/shopping/complete`.
 ## GET
 ALPS `goShoppingComplete` に対応する GET 操作。
 
-**ALPS**: `goShoppingComplete`
+**ALPS**: `goShoppingComplete` - 購入完了を見る
 
 
 

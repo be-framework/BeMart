@@ -37,7 +37,7 @@ doSubmitContact (`page://self/contact`).
 ## GET
 ALPS `goContactForm` に対応する GET 操作。
 
-**ALPS**: `goContactForm`
+**ALPS**: `goContactForm` - お問い合わせフォームを見る
 
 
 

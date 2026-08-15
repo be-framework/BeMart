@@ -14,7 +14,7 @@ server facts.
 ## GET
 ALPS `goSystemInfo` に対応する GET 操作。
 
-**ALPS**: `goSystemInfo`
+**ALPS**: `goSystemInfo` - システム情報を見る
 
 
 

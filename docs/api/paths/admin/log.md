@@ -3,10 +3,13 @@
 # /admin/log
 EC-CUBE ログ表示 — Setting/System Tier-2.
 
-Thin GET renderer for `Setting/System/log.twig`. EC-CUBE reads log
-files from Symfony's log directory; BeMart has no ALPS transition for
-log inspection, so this resource exposes a stable form and a bounded
-sample body without adding a file-read mutation surface.
+GET renderer for `Setting/System/log.twig`. EC-CUBE tails log files
+from Symfony's log directory; BeMart does the same, but reads ONE
+FIXED path injected by the module ({@see \MyVendor\BeMart\Module\AppModule}
+`adminLogPath`) — never a request-supplied filename — so there is no
+path-traversal surface. Admin-only (403 for anonymous). Read-only:
+the last {@see \LINE_MAX} lines, each truncated to the response-schema
+bound; an absent file renders the template's 「ログがありません」.
 
 
 

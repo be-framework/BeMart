@@ -28,8 +28,10 @@ Failure mapping (common to all four):
 POST-only:
   - LoginIdAlreadyTakenException          → 409 (loginId conflict)
 
-DELETE-only:
-  - InsufficientAuthorityException        → 403 (caller targeting self)
+POST / DELETE:
+  - InsufficientAuthorityException        → 403 (the caller may not
+    create or delete an admin that outranks them; DELETE also refuses
+    the caller's own account)
 
 
 
@@ -38,7 +40,7 @@ DELETE-only:
 Wave 8: the loginId comes from the admin UI (typed input or
 query string) — user-controlled.
 
-**ALPS**: `goMember`
+**ALPS**: `goMember` - 管理者詳細を見る
 
 
 
@@ -76,7 +78,7 @@ Wave 8: all form fields are user-controlled. The admin AUTHZ
 check lives inside the first Being (MemberCreating), so this
 method just maps the exceptions.
 
-**ALPS**: `doCreateMember`
+**ALPS**: `doCreateMember` - 管理者を作成する
 
 
 
@@ -84,7 +86,7 @@ method just maps the exceptions.
 
 | Name | Type | Description | Default | Required | Constraints | Example |
 |------|------|-------------|---------|----------|-------------|---------|
-| loginId | string | ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | test-admin |
+| loginId | string | ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。 |  | Required | {"minLength":0,"maxLength":128,"pattern":"^[A-Za-z0-9._-]+$","$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | test-admin |
 | password | string | パスワード（入力） - 書き込み専用（ハッシュ化して保存） Fake観察文字長 50〜63; 観察値 '$2y$12$stXeC3GBw5uMLkgK/6Vb0.R7XLnwERRqWM/Hl7rtAhp4IcHoK8eWi', '$2y$10$deputyplaceholder.hash.never.verified.0123456789abcdef', '$2y$10$zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876', '$2y$12$lbpzHVyv.ytzJju.4xk9Au5tPePdQe1WFH6sLWeWwcvIKbn0vMnE.', '$2y$10$shopownerplaceholder.hash.never.verified.0123456789ab', '$2y$10$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123', '$2y$10$0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS', '$2y$12$placeholder.hash.never.verified.never.0123456789abcde'。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | $2y$12$stXeC3GBw5uMLkgK/6Vb0.R7XLnwERRqWM/Hl7rtAhp4IcHoK8eWi |
 | name | string | 処理表示名（入力） - Fake観察文字長 1〜7; 観察値 'テスト管理者', '副管理者', '店舗オーナー', '削除済み管理者', 'Red', 'Blue', 'S', 'Color'。 |  | Required | {"minLength":0,"maxLength":32,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | テスト管理者 |
 | authority | int | 権限（入力） - 管理者権限レベル。0=システム管理者（最高権限、全機能アクセス可能）, 1=店舗オーナー（制限あり、denyUrlで制限されたURLにアクセス不可）。数値が小さいほど権限が高い。AuthorityRoleのURL拒否パターンでアクセス制御 Fake観察数値 0〜1; 観察値 '1', '0'。 |  | Required | {"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | 1 |
@@ -117,7 +119,7 @@ transitions / are out of scope for Phase 1. EC-CUBE 4.3
 dtb_member has no email column, so no mailAddress field is
 accepted.
 
-**ALPS**: `doUpdateMember`
+**ALPS**: `doUpdateMember` - 管理者を更新する
 
 
 
@@ -150,10 +152,11 @@ accepted.
 | goMember | [<code>page://self/admin/member</code>](/admin/member.md) |
 ## DELETE
 Wave 8: doDeleteMember — soft-delete (work=0). Idempotent
-replay returns 200 with `alreadyDeleted=true`. Self-target
-raises {@see InsufficientAuthorityException} → 403.
+replay returns 200 with `alreadyDeleted=true`. The caller's own
+account, and any target that outranks the caller, raise
+{@see InsufficientAuthorityException} → 403.
 
-**ALPS**: `doDeleteMember`
+**ALPS**: `doDeleteMember` - 管理者を削除する
 
 
 

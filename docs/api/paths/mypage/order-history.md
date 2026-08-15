@@ -22,7 +22,7 @@ Failure mapping:
 ## GET
 ALPS `goOrderHistory` に対応する GET 操作。
 
-**ALPS**: `goOrderHistory`
+**ALPS**: `goOrderHistory` - 注文履歴を見る
 
 
 

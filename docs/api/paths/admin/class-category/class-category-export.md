@@ -16,7 +16,7 @@ are isolated behind
 ## GET
 ALPS `goExportClassCategory` に対応する GET 操作。
 
-**ALPS**: `goExportClassCategory`
+**ALPS**: `goExportClassCategory` - 規格分類CSVをエクスポートする
 
 
 

@@ -17,7 +17,7 @@ dedicated `goClassName` (admin reads the list directly).
 ## GET
 ALPS `goClassNameList` に対応する GET 操作。
 
-**ALPS**: `goClassNameList`
+**ALPS**: `goClassNameList` - 規格名一覧を見る
 
 
 
@@ -46,7 +46,7 @@ _No parameters required_
 ## POST
 ALPS `doCreateClassName` に対応する POST 操作。
 
-**ALPS**: `doCreateClassName`
+**ALPS**: `doCreateClassName` - 規格名を作成する
 
 
 

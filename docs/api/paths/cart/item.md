@@ -18,7 +18,7 @@ trace them through Becoming into any downstream sink (Phase 2 will
 surface real flows once Fake Reasons are swapped for DB-backed
 implementations).
 
-**ALPS**: `doAddCartItem`
+**ALPS**: `doAddCartItem` - カートに追加する
 
 
 
@@ -58,7 +58,7 @@ implementations).
 EC-CUBE doUpdateCartItemQuantity — replace an item's quantity
 (Pilot 10). Idempotent (PUT semantics), CSRF-guarded.
 
-**ALPS**: `doUpdateCartItemQuantity`
+**ALPS**: `doUpdateCartItemQuantity` - カート数量を変更する
 
 
 
@@ -96,7 +96,7 @@ EC-CUBE doRemoveCartItem — remove an item from the cart (Pilot 11).
 
 Idempotent (DELETE), CSRF-guarded.
 
-**ALPS**: `doRemoveCartItem`
+**ALPS**: `doRemoveCartItem` - カートから削除する
 
 
 

@@ -11,7 +11,7 @@ EC-CUBE goNewsList + doCreateNews — collection endpoint (Wave 9).
 ## GET
 ALPS `goNewsList` に対応する GET 操作。
 
-**ALPS**: `goNewsList`
+**ALPS**: `goNewsList` - ニュース一覧を見る
 
 
 
@@ -39,7 +39,7 @@ _No parameters required_
 ## POST
 ALPS `doCreateNews` に対応する POST 操作。
 
-**ALPS**: `doCreateNews`
+**ALPS**: `doCreateNews` - ニュースを作成する
 
 
 

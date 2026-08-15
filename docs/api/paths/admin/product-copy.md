@@ -15,7 +15,7 @@ URL.
 ## POST
 ALPS `doCopyProduct` に対応する POST 操作。
 
-**ALPS**: `doCopyProduct`
+**ALPS**: `doCopyProduct` - 商品をコピーする
 
 
 

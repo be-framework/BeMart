@@ -22,7 +22,7 @@ Failure mapping:
 ## GET
 ALPS `goLoginHistoryList` に対応する GET 操作。
 
-**ALPS**: `goLoginHistoryList`
+**ALPS**: `goLoginHistoryList` - ログイン履歴を見る
 
 
 

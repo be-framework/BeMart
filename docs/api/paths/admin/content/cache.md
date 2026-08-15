@@ -15,7 +15,7 @@ marks the transition `idempotent` → PUT. `onGet` renders the screen.
 ## GET
 ALPS `doClearCache` に対応する GET 操作。
 
-**ALPS**: `doClearCache`
+**ALPS**: `doClearCache` - キャッシュを削除する
 
 
 
@@ -39,7 +39,7 @@ _No parameters required_
 ## PUT
 Clears the application cache (doClearCache).
 
-**ALPS**: `doClearCache`
+**ALPS**: `doClearCache` - キャッシュを削除する
 
 
 

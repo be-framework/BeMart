@@ -585,7 +585,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doVerifyTwoFactorAuth), href(goAdminLogin) |
-| POST | deviceToken*, loginId | href(goContentCache), href(goAdminHome) |
+| POST | deviceToken*, loginId, mode | href(goContentCache), href(goAdminHome) |
 
 ### Page/Admin/TwoFactorAuthEdit
 `/admin/two-factor-auth-edit`
@@ -600,7 +600,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doSetTwoFactorAuth), href(goAdminLogin) |
-| PUT | deviceToken*, loginId, authKey | href(goTwoFactorAuth), href(goAdminHome) |
+| PUT | deviceToken*, loginId, authKey, mode | href(goTwoFactorAuth), href(goAdminHome) |
 
 ### Page/Admin/UnsupportedRoute
 `/admin/unsupported-route`
@@ -764,7 +764,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doWithdrawCustomer) |
-| POST | sessionPrefix | href(goMypageWithdrawComplete), href(goTop) |
+| POST | - | href(goMypageWithdrawComplete), href(goTop) |
 
 ### Page/Mypage/WithdrawComplete
 `/mypage/withdraw-complete`
@@ -1318,7 +1318,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-admin-customer | get-admin-customer.json | form, sex, kana02, phoneNumber, initialPoint, totalSpent, name02, kana01, name01, favorites, postalCode, addr01, birth, customerId, addr02, customerStatus, email, pref, favoriteCount, companyName, job, orders, orderCount |
 | Get-admin-customer-csv | get-admin-customer-csv.json | rowCount, csv |
 | Get-admin-customer-delivery-edit | get-admin-customer-delivery-edit.json | form, customerId |
-| Get-admin-customer-list | get-admin-customer-list.json | filters, count, searchForm, customers |
+| Get-admin-customer-list | get-admin-customer-list.json | filters, count, csrfToken, searchForm, customers |
 | Post-admin-delete-customer | post-admin-delete-customer.json | alreadyDeleted, originalEmail, message, customerId |
 | Get-admin-empty-page | get-admin-empty-page.json |  |
 | Get-admin-index | get-admin-index.json | countNonStockProducts, salesToday, recommendedPlugins, orders, salesThisMonth, orderStatuses, countCustomers, countProducts, salesYesterday |
@@ -1330,8 +1330,8 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-admin-mail-template | get-admin-mail-template.json | form, mailTemplates, id, count, csrfToken, Mail |
 | Post-admin-mail-template | post-admin-mail-template.json | mailTemplateId, mailTemplateName, fileName, changed, mailSubject |
 | Delete-admin-mail-template | delete-admin-mail-template.json | mailTemplateId, mailTemplateName, fileName, message, transitionId |
-| Get-admin-master-data | get-admin-master-data.json | form, submitTo, masterTypes, selectedMaster, rows |
-| Put-admin-master-data | put-admin-master-data.json | message, form, submitTo, masterTypes, transitionId, selectedMaster, rows |
+| Get-admin-master-data | get-admin-master-data.json | form, csrfToken, submitTo, masterTypes, selectedMaster, rows |
+| Put-admin-master-data | put-admin-master-data.json | message, form, csrfToken, submitTo, masterTypes, transitionId, selectedMaster, rows |
 | Put-admin-master-data-edit | put-admin-master-data-edit.json | message, transitionId, masterType, count |
 | Get-admin-member | get-admin-member.json | form, name, loginId, csrfToken, sortNo, authority, work, adminId |
 | Post-admin-member | post-admin-member.json | name, sortNo, loginId, authority, work, adminId |
@@ -1340,7 +1340,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-admin-member-list | get-admin-member-list.json | filters, count, csrfToken, members |
 | Get-admin-order | get-admin-order.json | paymentDate, paymentMethodId, orderNo, orderStatus, orderDate, preOrderId, itemCount, discount, addPoint, items, customer, customerId, deliveryFeeTotal, usePoint, charge, paymentTotal, tax, orderStatusOptions, subtotal, csrfToken, total |
 | Put-admin-order | put-admin-order.json | orderNo, customerId, orderStatus, deliveryFeeTotal, usePoint, charge, paymentTotal, tax, subtotal, discount, total |
-| Get-admin-order-list | get-admin-order-list.json | offset, limit, orders, count, searchForm |
+| Get-admin-order-list | get-admin-order-list.json | offset, limit, orders, count, searchForm, csrfToken |
 | Get-admin-order-status | get-admin-order-status.json | form, orderStatuses, csrfToken |
 | Put-admin-order-status | put-admin-order-status.json | orderStatusRows, message, count, transitionId |
 | Post-admin-order-status | post-admin-order-status.json | changed, previousStatus, orderNo, orderStatus |
@@ -1402,7 +1402,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-mypage-order-history | get-mypage-order-history.json | offset, limit, orders, customerId, orderCount |
 | Post-mypage-reorder | post-mypage-reorder.json | skippedCount, skippedProductCodes, addedCount, cartKeys, orderNo, customerId |
 | Get-mypage-withdraw | get-mypage-withdraw.json | name01, fields, email, name02, submitTo, transitionId, csrfToken, customerId |
-| Post-mypage-withdraw | post-mypage-withdraw.json | message, cleared, customerId, dummyEmail |
+| Post-mypage-withdraw | post-mypage-withdraw.json | message, cleared, customerId |
 | Get-mypage-withdraw-complete | get-mypage-withdraw-complete.json | fields, submitTo, staticContent, transitionId |
 | Get-mypage-withdraw-confirm | get-mypage-withdraw-confirm.json | fields, submitTo, transitionId, csrfToken |
 | Post-shopping-checkout | post-shopping-checkout.json | addPoint, orderDate, paymentTotal, completeMessage, paymentDate, orderNo, customerId, total, orderStatus |
@@ -1516,7 +1516,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Delete-admin-template-template-list | delete-admin-template-template-list.json | message, transitionId, templateId |
 | Post-admin-template-template-list | post-admin-template-template-list.json | message, value |
 
-## SQL (160)
+## SQL (161)
 
 | File | Query |
 |------|-------|
@@ -1751,14 +1751,13 @@ FROM
   id, customer_status_id, sex_id, job_id,
   pref_i...` |
 | customer_search.sql | `SELECT
-  id,
-  email,
-  password,
-  name01,
-  name02,
-  kana01,
-  kana02,
-  c...` |
+  c.id,
+  c.email,
+  c.password,
+  c.name01,
+  c.name02,
+  c.kana01,
+ ...` |
 | customer_update.sql | `UPDATE
   dtb_customer
 SET
@@ -1771,6 +1770,12 @@ SET
   password = :passwordHash,
   update_date = NOW()
 W...` |
+| dashboard_counts.sql | `SELECT
+    (
+        SELECT
+            COUNT(*)
+        FROM
+            dtb...` |
 | delivery_next_id.sql | `SELECT
   IFNULL(
     MAX(id),
@@ -2091,9 +2096,12 @@ FROM
   category_name,
   CAST(parent_category_id A...` |
 | tcategory_list.sql | `SELECT
-  CAST(id AS CHAR) AS id,
-  category_name,
-  CAST(parent_category_id A...` |
+  c.id,
+  c.category_name,
+  c.parent_category_id,
+  c.sort_no
+FROM
+  ...` |
 | tcategory_put.sql | `INSERT INTO dtb_category (
   id, category_name, parent_category_id,
   sort_no...` |

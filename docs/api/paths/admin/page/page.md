@@ -16,7 +16,7 @@ contexts (`app`, `prod`, `test`) ignore `body['form']`.
 ## GET
 ALPS `goPage` に対応する GET 操作。
 
-**ALPS**: `goPage`
+**ALPS**: `goPage` - ページ詳細を見る
 
 
 
@@ -49,7 +49,7 @@ ALPS `goPage` に対応する GET 操作。
 ## PUT
 ALPS `doUpdatePage` に対応する PUT 操作。
 
-**ALPS**: `doUpdatePage`
+**ALPS**: `doUpdatePage` - ページを更新する
 
 
 
@@ -83,7 +83,7 @@ ALPS `doUpdatePage` に対応する PUT 操作。
 ## DELETE
 ALPS `doDeletePage` に対応する DELETE 操作。
 
-**ALPS**: `doDeletePage`
+**ALPS**: `doDeletePage` - ページを削除する
 
 
 

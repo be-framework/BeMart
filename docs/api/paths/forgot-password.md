@@ -31,7 +31,7 @@ Anonymous-accessible (returns 200 regardless of session state).
 `csrfToken` stays `null` — the EventListener mirrors the Symfony
 token into the session for the subsequent POST (same as Login).
 
-**ALPS**: `doRequestPasswordReset`
+**ALPS**: `doRequestPasswordReset` - パスワードリセットを依頼する
 
 
 
@@ -60,7 +60,7 @@ _No parameters required_
 ## POST
 ALPS `doRequestPasswordReset` に対応する POST 操作。
 
-**ALPS**: `doRequestPasswordReset`
+**ALPS**: `doRequestPasswordReset` - パスワードリセットを依頼する
 
 
 

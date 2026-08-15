@@ -23,7 +23,7 @@ EC-CUBE goProductList — render the product-list page.
 `name` is the EC-CUBE header search field. `nameKeyword` is accepted
 as a BeMart/API-friendly alias.
 
-**ALPS**: `goProductList`
+**ALPS**: `goProductList` - 商品一覧を見る
 
 
 

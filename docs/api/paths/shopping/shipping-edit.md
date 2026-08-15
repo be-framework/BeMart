@@ -23,7 +23,7 @@ address inputs through the Symfony FormView; BeMart exposes a {@see \ShoppingShi
 ## GET
 ALPS `goShoppingShippingEdit` に対応する GET 操作。
 
-**ALPS**: `goShoppingShippingEdit`
+**ALPS**: `goShoppingShippingEdit` - お届け先変更画面を見る
 
 
 
@@ -58,7 +58,7 @@ persistence as a later enrichment. This method removes the former
 ActionRedirect placeholder and gives the submitted address a concrete
 Resource surface while returning the user to the main shopping page.
 
-**ALPS**: `doUpdateShippingAddress`
+**ALPS**: `doUpdateShippingAddress` - お届け先を更新する
 
 
 

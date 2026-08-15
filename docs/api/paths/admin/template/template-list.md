@@ -12,7 +12,7 @@ no other affordances; template upload / activation is Phase 2.
 ## GET
 ALPS `goTemplateList` に対応する GET 操作。
 
-**ALPS**: `goTemplateList`
+**ALPS**: `goTemplateList` - テンプレート一覧を見る
 
 
 
@@ -44,7 +44,7 @@ Activates a template (doSelectTemplate). ALPS idempotent → PUT.
 
 ALPS `doSelectTemplate` に対応する PUT 操作。
 
-**ALPS**: `doSelectTemplate`
+**ALPS**: `doSelectTemplate` - テンプレートを選択する
 
 
 
@@ -75,7 +75,7 @@ Deletes a template (doDeleteTemplate). ALPS idempotent → DELETE.
 
 ALPS `doDeleteTemplate` に対応する DELETE 操作。
 
-**ALPS**: `doDeleteTemplate`
+**ALPS**: `doDeleteTemplate` - テンプレートを削除する
 
 
 
@@ -106,7 +106,7 @@ Downloads a template zip (doDownloadTemplate). ALPS unsafe → POST.
 
 ALPS `doDownloadTemplate` に対応する POST 操作。
 
-**ALPS**: `doDownloadTemplate`
+**ALPS**: `doDownloadTemplate` - テンプレートをダウンロードする
 
 
 

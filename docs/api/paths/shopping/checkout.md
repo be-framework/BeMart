@@ -31,7 +31,7 @@ Phase B Slice 9: the domain parameter arrives from the HTTP request body.
 format-validates. The CSRF boundary token is enforced declaratively by
 the CsrfProtected attribute.
 
-**ALPS**: `doCheckout`
+**ALPS**: `doCheckout` - 注文を確定する
 
 
 

@@ -19,7 +19,7 @@ Failure mapping:
 ## GET
 ALPS `goFavoriteList` に対応する GET 操作。
 
-**ALPS**: `goFavoriteList`
+**ALPS**: `goFavoriteList` - お気に入り一覧を見る
 
 
 

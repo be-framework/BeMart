@@ -15,7 +15,7 @@ encoding + download headers are isolated behind
 ## GET
 ALPS `goExportClassName` に対応する GET 操作。
 
-**ALPS**: `goExportClassName`
+**ALPS**: `goExportClassName` - 規格名CSVをエクスポートする
 
 
 

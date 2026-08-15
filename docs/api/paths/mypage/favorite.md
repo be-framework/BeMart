@@ -13,7 +13,7 @@ distinguish first-add from re-add.
 ## POST
 ALPS `doAddFavorite` に対応する POST 操作。
 
-**ALPS**: `doAddFavorite`
+**ALPS**: `doAddFavorite` - お気に入りに追加する
 
 
 
@@ -53,7 +53,7 @@ underlying state.
 Unlike onPost, we do NOT validate that productCode resolves to
 a real product — DELETE removes a stored row, not a product.
 
-**ALPS**: `doRemoveFavorite`
+**ALPS**: `doRemoveFavorite` - お気に入りから削除する
 
 
 

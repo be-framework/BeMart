@@ -17,7 +17,7 @@ carries it); the export download is on that same resource's onGet.
 ## GET
 ALPS `goExportCategory` に対応する GET 操作。
 
-**ALPS**: `goExportCategory`
+**ALPS**: `goExportCategory` - カテゴリCSVをエクスポートする
 
 
 

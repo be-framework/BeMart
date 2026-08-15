@@ -16,7 +16,7 @@ at `page://self/admin/payment/payment`.
 ## GET
 ALPS `goPaymentList` に対応する GET 操作。
 
-**ALPS**: `goPaymentList`
+**ALPS**: `goPaymentList` - 支払方法一覧を見る
 
 
 
@@ -46,7 +46,7 @@ _No parameters required_
 ## POST
 ALPS `doCreatePayment` に対応する POST 操作。
 
-**ALPS**: `doCreatePayment`
+**ALPS**: `doCreatePayment` - 支払方法を作成する
 
 
 

@@ -24,7 +24,7 @@ Failure mapping:
 ## PUT
 ALPS `doSortNoMove` に対応する PUT 操作。
 
-**ALPS**: `doSortNoMove`
+**ALPS**: `doSortNoMove` - 並び順を変更する
 
 
 

@@ -19,7 +19,7 @@ Thin GET renderer for `Setting/Shop/payment_edit.twig`. An empty
 pre-fills the editor; an unknown id is 404. The payment-master
 list doubles as the AUTHZ gate — no admin session → 403.
 
-**ALPS**: `doUpdatePayment`
+**ALPS**: `doUpdatePayment` - 支払方法を更新する
 
 
 
@@ -48,7 +48,7 @@ list doubles as the AUTHZ gate — no admin session → 403.
 ## PUT
 ALPS `doUpdatePayment` に対応する PUT 操作。
 
-**ALPS**: `doUpdatePayment`
+**ALPS**: `doUpdatePayment` - 支払方法を更新する
 
 
 
@@ -85,7 +85,7 @@ ALPS `doUpdatePayment` に対応する PUT 操作。
 ## DELETE
 ALPS `doDeletePayment` に対応する DELETE 操作。
 
-**ALPS**: `doDeletePayment`
+**ALPS**: `doDeletePayment` - 支払方法を削除する
 
 
 

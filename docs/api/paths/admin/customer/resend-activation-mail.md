@@ -31,7 +31,7 @@ an admin-anonymous client learns NOTHING about which emails resolve
 ## POST
 ALPS `doResendActivationMail` に対応する POST 操作。
 
-**ALPS**: `doResendActivationMail`
+**ALPS**: `doResendActivationMail` - 認証メールを再送する
 
 
 
