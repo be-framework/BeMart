@@ -31,7 +31,12 @@ docker compose up --build      # 初回はビルド + シード。完了後 http
 MySQL 8.0 とアプリが立ち上がり、約 3,000 商品のカタログとデモ会員・管理者が自動投入されます。
 Docker 以外に必要なものはありません。停止は `docker compose down`（データ保持）/ `down -v`（初期化）。
 
-> デモ専用構成です（DB はパスワードなし root、2FA は固定コード `123456`）。本番では使わないでください。
+会員は `login-test@example.com`、パスワードは `BEMART_DEMO_MEMBER_PASSWORD`（未設定ならローカル開発用の既定値）。
+管理者は `test-admin` で、`BEMART_DEMO_ADMIN_PASSWORD` 未設定ならシードのたびにランダム生成され
+`docker compose logs app` に 1 度だけ表示されます。管理画面は 2 要素認証必須で、初回ログイン後の
+設定画面に表示される鍵を認証アプリに登録してください（固定コードはありません）。
+
+> デモ専用構成です（DB はパスワードなし root、アプリは `php -S`）。本番では使わないでください。
 
 ホストで直接動かす手順（malt / `DATABASE_URL` / `composer serve` など）は
 [`docs/`](docs/) と [`sql/README.md`](sql/README.md) を参照してください。

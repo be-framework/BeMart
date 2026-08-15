@@ -17,6 +17,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /app
 
+# Production INI (display_errors off, opcache on). Without it the base image
+# runs on the compiled defaults and writes diagnostics into responses.
+COPY docker/php.ini "$PHP_INI_DIR/conf.d/zz-bemart.ini"
+
 # Dependency layer first (kept cache-friendly): the manifest, the `be` path
 # repository, and the composer patches are all that `composer install` needs.
 COPY composer.json composer.lock ./
@@ -28,7 +32,7 @@ RUN composer install --no-interaction --no-progress --prefer-dist
 # GPL EC-CUBE reference clone under tools/ never enters the image.
 COPY . .
 RUN composer dump-autoload --optimize \
-    && mkdir -p var/tmp var/log && chmod -R 0777 var
+    && mkdir -p var/tmp var/log && chmod -R 0770 var
 
 EXPOSE 8080
 ENTRYPOINT ["/app/docker/entrypoint.sh"]

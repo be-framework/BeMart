@@ -13,9 +13,11 @@
 | `BEMART_DEMO_MEMBER_PASSWORD` | 会員 `login-test@example.com` |
 | `BEMART_DEMO_ADMIN_PASSWORD` | 管理者 `test-admin` |
 
-未設定なら会員はリポジトリのローカル開発値、管理者は seed の
-`sql/seed/dtb-system-master.sql` の値のままになる。**公開デプロイでは両方必ず設定する。**
-`docker-compose.override.yml` などに置き、リポジトリには commit しない。
+会員が未設定ならリポジトリのローカル開発値になる。管理者が未設定なら
+`docker/seed.sh` がシードごとにランダムなパスワードを生成してログに 1 度だけ出す
+（`sql/seed/dtb-system-master.sql` の committed hash は必ず上書きされる）。
+**公開デプロイでは両方設定する。** `docker-compose.override.yml` などに置き、
+リポジトリには commit しない。
 
 ```yaml
 # docker-compose.override.yml（デモホスト側のみ。コミットしない）
@@ -28,6 +30,19 @@ services:
 
 設定後は一度リセット（下記）を回すと、その値がデータベースに反映される。
 README にログイン情報は書かない。
+
+## コンテキストと 2 要素認証
+
+`APP_CONTEXT` は `prod-html-eccube-sql-hal-app`。`prod` トークンが BEAR の `ProdModule` を
+入れるので、① 未マップ例外は `message` と `logref` だけの本番エラーページになり
+スタックトレースや絶対パスを返さない ② `OPTIONS` イントロスペクションが 405 になる
+③ DI がコンパイルされる。`docker/php.ini` が `display_errors` を切り、
+`PHP_CLI_SERVER_WORKERS` が `php -S` の単一プロセス化を緩和する。
+
+`prod` コンテキストでは開発用 2FA バイパス（固定コード `123456`）が効かない
+（`src/Dev/DevLogin::active()` が `prod` を含む文脈を拒否する）。管理画面の初回ログイン後に
+表示される鍵を認証アプリに登録して 6 桁コードを入力する。リセットで登録は消えるので、
+リセット後の最初の管理操作では再登録が必要。
 
 ## 定期リセット
 
