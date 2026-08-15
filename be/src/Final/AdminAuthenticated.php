@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\AdminLoginFailedException;
+use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use Ray\Di\Di\Inject;
@@ -16,17 +17,21 @@ use SensitiveParameter;
  *
  *   AdminLoginInput → AdminAuthenticated  (this stage — verification)
  *
- * Two failure modes both raise AdminLoginFailedException (no
+ * Three failure modes all raise AdminLoginFailedException (no
  * enumeration):
  *   1. no admin with that loginId
  *   2. password does not verify
+ *   3. the admin is de-provisioned (work != WORK_ACTIVE) — a
+ *      soft-deleted member keeps its row and its password hash, so
+ *      only the work state stops it from minting a session
  *
- * Existence of this object proves: loginId is registered AND password
- * matches stored hash. The public surface exposes the adminId and the
- * admin profile fields the BEAR resource needs to populate the session
- * and the response body. The plaintext password is consumed inside the
- * constructor (#[SensitiveParameter]) and is intentionally NOT promoted
- * to a public property — mirrors Pilot 6 customer authentication.
+ * Existence of this object proves: loginId is registered AND the admin
+ * is active AND password matches stored hash. The public surface
+ * exposes the adminId and the admin profile fields the BEAR resource
+ * needs to populate the session and the response body. The plaintext
+ * password is consumed inside the constructor (#[SensitiveParameter])
+ * and is intentionally NOT promoted to a public property — mirrors
+ * Pilot 6 customer authentication.
  *
  * Distinct from customer-side {@see CustomerAuthenticated}: admins are
  * a different AAA principal class (admin firewall vs customer
@@ -52,6 +57,10 @@ final readonly class AdminAuthenticated
         }
 
         if (! $passwordHasher->verify($password, $admin->passwordHash)) {
+            throw new AdminLoginFailedException();
+        }
+
+        if ($admin->work !== AdminEntity::WORK_ACTIVE) {
             throw new AdminLoginFailedException();
         }
 

@@ -26,9 +26,9 @@ use const PHP_SESSION_ACTIVE;
  *
  * Phase B Slice 8 (CSRF guard, BEAR side only). The matching EC-CUBE
  * side — a small EventListener that mirrors the active Symfony Forms /
- * EC-CUBE CSRF token to {@see SESSION_KEY} on form render and rotates
- * it on login/logout — is **not yet implemented**. Until that ships,
- * every production HTTP POST resolves to "no stored token" → 403. The
+ * EC-CUBE CSRF token to {@see SESSION_KEY} on form render — is **not yet
+ * implemented**. Until that ships, every production HTTP POST resolves
+ * to "no stored token" → 403. The
  * adapter is the BEAR-side half of the contract, not a complete
  * production CSRF path; this matches Slice 7's split-implementation
  * convention.
@@ -56,7 +56,11 @@ use const PHP_SESSION_ACTIVE;
  * already stored under {@see SESSION_KEY}, or — when none is present —
  * generates a cryptographically strong one and stores it back, so a
  * form render and its subsequent POST agree even before the EC-CUBE
- * EventListener mirror ships. It never rotates an existing token.
+ * EventListener mirror ships. It never rotates a reference it finds:
+ * rotation is driven by the session lifecycle, where the customer/admin
+ * session writers and {@see HtmlAdminLoginChallengeAdapter} discard the
+ * reference on every authentication state change and let the next read
+ * here mint a fresh one.
  */
 final readonly class EccubeSharedCsrfTokenAdapter extends CsrfToken
 {

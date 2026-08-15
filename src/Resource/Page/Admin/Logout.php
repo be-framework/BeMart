@@ -38,9 +38,10 @@ use function assert;
  * `type=idempotent`, logging out an admin-anonymous client is a no-op
  * success — the response body simply carries `wasLoggedIn=false`.
  *
- * In the html context this resource clears the flat admin session key
- * through the session-writer port. Non-html contexts bind a no-op writer,
- * so Resource code does not branch on environment or touch PHP session storage.
+ * In the html context the session-writer port ends the browser session behind
+ * this resource, including the pre-auth 2FA challenge state. Non-html contexts
+ * bind a no-op writer, so Resource code does not branch on environment or
+ * touch PHP session storage.
  *
  * Source-of-truth gap: alps.json does not currently carry a
  * `doAdminLogout` transition id; using the conventional name to

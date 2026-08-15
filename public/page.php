@@ -15,11 +15,21 @@ if (PHP_SAPI === 'cli-server') {
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
+// The session cookie must carry `Secure` over HTTPS without breaking plain
+// `http://localhost` development, and the demo is served by a TLS-terminating
+// proxy that forwards plain HTTP — so the flag follows the request scheme,
+// direct or forwarded, never a build- or environment-level switch.
+$serverHttps = strtolower((string) ($_SERVER['HTTPS'] ?? ''));
+$forwardedProto = explode(',', (string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+$httpsRequest = ($serverHttps !== '' && $serverHttps !== 'off')
+    || strtolower(trim($forwardedProto[0])) === 'https';
+
 if (session_status() !== PHP_SESSION_ACTIVE && ! headers_sent()) {
     session_start([
         'use_strict_mode' => true,
         'cookie_httponly' => true,
         'cookie_samesite' => 'Lax',
+        'cookie_secure' => $httpsRequest,
     ]);
 }
 

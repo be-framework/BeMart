@@ -16,6 +16,12 @@ use const PHP_SESSION_ACTIVE;
  * Password verification establishes a pending identity here. The normal admin
  * session is elevated only after the setup/challenge token succeeds, so the
  * 2FA resources never need to trust client-supplied login ids or setup secrets.
+ *
+ * Elevation retires the session id the client held while unauthenticated, so a
+ * planted session cookie stops being usable the moment the admin is logged in.
+ * The shared CSRF reference is retired by the session writer at login and
+ * logout ({@see HtmlAdminSessionWriter}); elevation happens inside an
+ * already-authenticated session, so it does not rotate it again.
  */
 final class HtmlAdminLoginChallengeAdapter
 {
