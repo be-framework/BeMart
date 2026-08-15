@@ -67,7 +67,9 @@ use MyVendor\BeMart\Be\Reason\Service\OrderPdfCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
+use MyVendor\BeMart\Be\Reason\Service\PreOrderClaimInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
+use MyVendor\BeMart\Be\Reason\Service\SqlPreOrderClaim;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\TemplateCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
@@ -192,6 +194,7 @@ final class AppModule extends AbstractAppModule
         // leaking test doubles into production.
         $this->bind(InventoryAllocatorInterface::class)->to(NoopInventoryAllocator::class)->in(Scope::SINGLETON);
         $this->bind(PaymentGatewayInterface::class)->to(NoopPaymentGateway::class)->in(Scope::SINGLETON);
+        $this->bind(PreOrderClaimInterface::class)->to(SqlPreOrderClaim::class)->in(Scope::SINGLETON);
         $this->bind(MailerInterface::class)->to(NoopMailer::class)->in(Scope::SINGLETON);
         $this->bind(CustomerInitialPointInterface::class)->to(FixedCustomerInitialPoint::class)->in(Scope::SINGLETON);
         $this->bind(PurchaseFlowInterface::class)->to(DefaultPurchaseFlow::class)->in(Scope::SINGLETON);

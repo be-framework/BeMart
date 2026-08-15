@@ -35,6 +35,8 @@ use function assert;
  * Failure mapping (per `be/docs/pilot5/alps-analyze.md` §例外フロー):
  *   - PreOrderNotFoundException           → 404 (the pre-order never existed)
  *   - UnauthorizedPreOrderAccessException → 403 (not the owner; Pilot 5 F-1)
+ *   - PreOrderAlreadyClaimedException     → 409 (another request is already
+ *                                            completing this pre-order)
  *   - InsufficientStockException          → 422 (stock cannot fulfill the order)
  *   - PaymentDeclinedException            → 422 (gateway refused the charge)
  *   - SemanticVariableException           → 400 (preOrderId malformed)

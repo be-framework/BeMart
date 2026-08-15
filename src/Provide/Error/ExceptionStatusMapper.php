@@ -90,6 +90,7 @@ final class ExceptionStatusMapper
         \MyVendor\BeMart\Be\Exception\LoginIdAlreadyTakenException::class,
         \MyVendor\BeMart\Be\Exception\OutOfStockException::class,
         \MyVendor\BeMart\Be\Exception\PluginNotInstalledException::class,
+        \MyVendor\BeMart\Be\Exception\PreOrderAlreadyClaimedException::class,
         \MyVendor\BeMart\Be\Exception\ProductCodeAlreadyInUseException::class,
     ];
 

@@ -1516,7 +1516,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Delete-admin-template-template-list | delete-admin-template-template-list.json | message, transitionId, templateId |
 | Post-admin-template-template-list | post-admin-template-template-list.json | message, value |
 
-## SQL (162)
+## SQL (164)
 
 | File | Query |
 |------|-------|
@@ -1818,6 +1818,18 @@ FROM
   o.customer_id,
   o.payment_id,
   o.delivery_fee_to...` |
+| order_claim_pre_order.sql | `UPDATE
+  dtb_order
+SET
+  order_no = :orderNo,
+  order_status_id = 1,
+  update...` |
+| order_claimed_no.sql | `SELECT
+  COALESCE(o.order_no, '') AS order_no
+FROM
+  dtb_order o
+WHERE
+  o.pr...` |
 | order_history_by_order_no.sql | `SELECT
   o.order_no,
   o.customer_id,
