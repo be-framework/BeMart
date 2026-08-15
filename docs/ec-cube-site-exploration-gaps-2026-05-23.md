@@ -12,7 +12,7 @@ title: "EC-CUBE実サイト探索によるBeMart機能欠落レポート（2026-
 ## 探索方法
 
 - Storefront匿名導線: トップ、商品一覧、商品詳細、カート、会員登録、問い合わせ、ログイン、ヘルプ系を同一ホスト内でクロール。
-- Admin導線: `test-admin / local-dev-admin-password` でEC-CUBE/BeMart双方にログインし、管理画面リンクをクロール。
+- Admin導線: `test-admin`（パスワードは `ADMIN_PW`） でEC-CUBE/BeMart双方にログインし、管理画面リンクをクロール。
 - 除外: `delete` / `copy` / `enable` / `disable` / `install` / `uninstall` / `export` / `download` / `pdf` / `csv` / `mail` など、状態変更または非HTMLの可能性が高いリンク。
 - 判定: HTTP status、画面タイトル、主要見出し、フォーム数、リンク数、フォームinput名を比較。
 

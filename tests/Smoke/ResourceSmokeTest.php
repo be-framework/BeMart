@@ -51,8 +51,10 @@ final class ResourceSmokeTest extends TestCase
         'GET page://self/mypage/change' => self::ALICE_CUSTOMER_ID,
         'GET page://self/mypage/withdraw' => self::ALICE_CUSTOMER_ID,
         'GET page://self/shopping' => self::ALICE_CUSTOMER_ID,
+        'GET page://self/shopping/confirm' => self::ALICE_CUSTOMER_ID,
         'POST page://self/mypage/change' => self::ALICE_CUSTOMER_ID,
         'POST page://self/mypage/withdraw' => self::ALICE_CUSTOMER_ID,
+        'POST page://self/shopping/confirm' => self::ALICE_CUSTOMER_ID,
         'PUT page://self/mypage/address' => self::ALICE_CUSTOMER_ID,
     ];
 

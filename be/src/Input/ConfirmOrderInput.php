@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Being\PreOrderResolved;
  * Linear Cascade + Branching:
  *
  *   ConfirmOrderInput
- *     → PreOrderResolved   (Stage 1 — pre-order existence proved)
+ *     → PreOrderResolved   (Stage 1 — pre-order existence + ownership proved)
  *     → PurchaseFlowApplied (Stage 2 — totals computed)
  *     → PaymentVerified    (Stage 3 — verify() called)
  *     → OrderConfirming    (Stage 4 — Branching)

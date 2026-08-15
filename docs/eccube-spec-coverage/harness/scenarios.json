@@ -22,7 +22,7 @@
     "steps": [
       { "action": "goto", "url": "/admin/login" },
       { "action": "fill", "sel": "input[name=\"loginId\"]", "value": "test-admin" },
-      { "action": "fill", "sel": "input[name=\"password\"]", "value": "local-dev-admin-password" },
+      { "action": "fill", "sel": "input[name=\"password\"]", "value": "$ADMIN_PW" },
       { "action": "submitFollow" },
       { "action": "fill", "sel": "input[name=\"deviceToken\"]", "value": "123456" },
       { "action": "submitFollow" }
