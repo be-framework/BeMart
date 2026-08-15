@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\AdminLoginFailedException;
+use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
 use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\LoginAttemptGateInterface;
+use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClientIpInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -24,6 +28,23 @@ use SensitiveParameter;
  *   3. the admin is de-provisioned (work != WORK_ACTIVE) — a
  *      soft-deleted member keeps its row and its password hash, so
  *      only the work state stops it from minting a session
+ *
+ * Each of those three, and the success, appends an audit row through
+ * {@see LoginHistoryStorageInterface} — the write is here rather than
+ * in the Resource because this constructor is where the verdict is
+ * reached, and it is the only place that can record the failure modes
+ * without the caller having to re-derive them. Same convergence rule as
+ * {@see CheckoutCompleted}: existence of this object proves its side
+ * effects ran, and a thrown AdminLoginFailedException proves the failed
+ * attempt was logged. Attempts arrive as the submitted loginId, so a
+ * login against an unregistered id is recorded too.
+ *
+ * Before any credential is touched, {@see LoginAttemptGateInterface}
+ * refuses a loginId that has already burned through MAX_FAILURES inside
+ * WINDOW_MINUTES with {@see LoginAttemptsExceededException}; the
+ * refusal is not itself counted or logged, because nothing was
+ * attempted, so the window can expire. A correct password does not lift
+ * the lock — that is the whole point of the throttle.
  *
  * Existence of this object proves: loginId is registered AND the admin
  * is active AND password matches stored hash. The public surface
@@ -50,19 +71,34 @@ final readonly class AdminAuthenticated
         #[Input] #[SensitiveParameter] string $password,
         #[Inject] AdminQueryInterface $adminQuery,
         #[Inject] PasswordHasherInterface $passwordHasher,
+        #[Inject] LoginHistoryStorageInterface $history,
+        #[Inject] LoginAttemptGateInterface $gate,
+        #[Inject] ClientIpInterface $clientIp,
     ) {
+        $gate->failuresSinceLastSuccess($loginId, LoginAttemptGateInterface::WINDOW_MINUTES)
+            ->assertBelow(LoginAttemptGateInterface::MAX_FAILURES);
+
+        $clientAddress = $clientIp->address();
         $admin = $adminQuery->byLogin($loginId);
         if ($admin === null) {
+            $history->append($loginId, false, $clientAddress);
+
             throw new AdminLoginFailedException();
         }
 
         if (! $passwordHasher->verify($password, $admin->passwordHash)) {
+            $history->append($loginId, false, $clientAddress);
+
             throw new AdminLoginFailedException();
         }
 
         if ($admin->work !== AdminEntity::WORK_ACTIVE) {
+            $history->append($loginId, false, $clientAddress);
+
             throw new AdminLoginFailedException();
         }
+
+        $history->append($admin->loginId, true, $clientAddress);
 
         $this->adminId = $admin->adminId;
         $this->loginId = $admin->loginId;

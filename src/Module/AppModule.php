@@ -40,6 +40,7 @@ use MyVendor\BeMart\Be\Reason\Query\Factory\AdminFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\CartFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\CustomerFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\FinalizedOrderFactory;
+use MyVendor\BeMart\Be\Reason\Query\Factory\LoginHistoryFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\OrderFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\OrderHistoryFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\OrderItemFactory;
@@ -54,6 +55,7 @@ use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClientIpInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface;
@@ -71,6 +73,7 @@ use MyVendor\BeMart\Be\Reason\Service\TemplateCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeCacheClearer;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeClassCsvCompatibility;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeClientIp;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeCustomizeAssetWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeMaintenanceMode;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeMasterDataWriter;
@@ -126,6 +129,7 @@ final class AppModule extends AbstractAppModule
         CartFactory::class,
         CustomerFactory::class,
         FinalizedOrderFactory::class,
+        LoginHistoryFactory::class,
         OrderFactory::class,
         OrderHistoryFactory::class,
         OrderItemFactory::class,
@@ -201,6 +205,7 @@ final class AppModule extends AbstractAppModule
         $this->bind(MasterDataWriterInterface::class)->to(EccubeMasterDataWriter::class)->in(Scope::SINGLETON);
         $this->bind(ClassCsvCompatibilityInterface::class)->to(EccubeClassCsvCompatibility::class)->in(Scope::SINGLETON);
         $this->bind(TemplateCompatibilityInterface::class)->to(EccubeTemplateCompatibility::class)->in(Scope::SINGLETON);
+        $this->bind(ClientIpInterface::class)->to(EccubeClientIp::class)->in(Scope::SINGLETON);
 
         // Shared registry over master storage interfaces. The storage
         // implementations come from the active persistence module (Fake or SQL).

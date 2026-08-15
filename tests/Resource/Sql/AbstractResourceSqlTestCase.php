@@ -158,12 +158,12 @@ use function dirname;
  *       slice. Same column shape as dtb_layout)
  *   - LoginHistoryStorageInterface → LoginHistoryStorageInterface (Phase 2b —
  *       admin login-attempt audit log against dtb_login_history. The
- *       interface is listRecent + append — an append + list audit log,
+ *       interface is list + append — an append + list audit log,
  *       no getById / update / delete (an audit row has no
  *       client-meaningful handle and is never mutated), so there is NO
  *       LoginHistoryIdProvider. login_history_status_id is a NOT NULL
- *       FK to the empty mtb_login_history_status master — seeded via
- *       seedLoginHistoryStatus, same precedent as seedAdminMasters)
+ *       FK to mtb_login_history_status, seeded by the bootstrap's
+ *       sql/seed/mtb-master.sql load)
  *   - PaymentMethodAdminStorageInterface → PaymentMethodAdminStorageInterface
  *       (Phase 2b — admin payment-method master CRUD against
  *       dtb_payment. list / getById / put / remove; remove pre-clears

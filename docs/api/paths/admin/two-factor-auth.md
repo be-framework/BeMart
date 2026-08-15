@@ -64,10 +64,14 @@ session is elevated only after the token succeeds. Legacy
 client-supplied `loginId` is ignored.
 
 Failure mapping:
-  - Invalid CSRF                  → 403 (interceptor)
-  - Missing pending challenge     → 403
-  - SemanticVariableException     → 400 (malformed code)
-  - TwoFactorAuthFailedException  → 400 (code mismatch)
+  - Invalid CSRF                   → 403 (interceptor)
+  - Missing pending challenge      → 403
+  - SemanticVariableException      → 400 (malformed code)
+  - TwoFactorAuthFailedException   → 400 (code mismatch)
+  - LoginAttemptsExceededException → 429 (too many codes burned;
+      the pending challenge is dropped here, so the admin has to
+      come back through the password stage — which is throttled on
+      the same counter, i.e. only after the window has passed)
 
 **ALPS**: `doVerifyTwoFactorAuth` - 二要素認証を確認する
 

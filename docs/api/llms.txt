@@ -1516,7 +1516,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Delete-admin-template-template-list | delete-admin-template-template-list.json | message, transitionId, templateId |
 | Post-admin-template-template-list | post-admin-template-template-list.json | message, value |
 
-## SQL (161)
+## SQL (162)
 
 | File | Query |
 |------|-------|
@@ -2224,6 +2224,12 @@ WHERE
   lh.create_date,
   lh.user_name AS login_id,
   (lh.login_history_stat...` |
+| tlogin_history_recent_failures.sql | `SELECT
+  COUNT(*) AS failures
+FROM
+  dtb_login_history lh
+WHERE
+  lh.user_nam...` |
 | tmail_template_delete.sql | `DELETE FROM
   dtb_mail_template
 WHERE

@@ -15,6 +15,7 @@ use Be\Framework\SemanticVariable\ValidationMessageHandler;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Exception\AdminLoginFailedException;
+use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
 use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\AdminAuthenticated;
 use MyVendor\BeMart\Be\Input\AdminLoginInput;
@@ -41,6 +42,12 @@ use function trim;
  *   - AdminLoginFailedException     → 401 (no such loginId OR wrong
  *                                            password — combined, no
  *                                            user enumeration)
+ *   - LoginAttemptsExceededException → 429 (too many recent failures for
+ *                                            that loginId — refused
+ *                                            before the password is
+ *                                            checked, and the message
+ *                                            reads the same whether the
+ *                                            loginId exists or not)
  *
  * Mirrors Pilot 6 customer {@see \MyVendor\BeMart\Resource\Page\Login}
  * but for the admin firewall — distinct namespace under `Page\Admin\`
@@ -61,6 +68,9 @@ use function trim;
  */
 class Login extends ResourceObject
 {
+    /** BEAR\Resource\Code has no 429; {@see \MyVendor\BeMart\Provide\Error\ExceptionStatusMapper} maps the same status for JSON clients. */
+    private const HTTP_TOO_MANY_REQUESTS = 429;
+
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfToken $csrf,
@@ -148,6 +158,16 @@ class Login extends ResourceObject
                 $values,
                 ['loginId' => self::domainMessage($e)],
                 Code::UNAUTHORIZED,
+            );
+        } catch (LoginAttemptsExceededException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            return $this->rejectForm(
+                $values,
+                ['loginId' => self::domainMessage($e)],
+                self::HTTP_TOO_MANY_REQUESTS,
             );
         }
 
@@ -253,7 +273,8 @@ class Login extends ResourceObject
         return [$field, $message];
     }
 
-    private static function domainMessage(AdminLoginFailedException $e): string
+    /** ja text carried by the rejection's #[Message]; the fallback keeps either case non-enumerating. */
+    private static function domainMessage(AdminLoginFailedException|LoginAttemptsExceededException $e): string
     {
         $message = (new ValidationMessageHandler())->getMessage($e, 'ja');
 

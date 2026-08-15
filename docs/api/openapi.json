@@ -4637,7 +4637,7 @@
             "post": {
                 "operationId": "doVerifyTwoFactorAuth",
                 "summary": "Verifies the submitted TOTP code (doVerifyTwoFactorAuth).",
-                "description": "Login-context: no admin-firewall guard. The trusted `loginId` is\nread from the password-verified session challenge and the admin\nsession is elevated only after the token succeeds. Legacy\nclient-supplied `loginId` is ignored.\n\nFailure mapping:\n  - Invalid CSRF                  \u2192 403 (interceptor)\n  - Missing pending challenge     \u2192 403\n  - SemanticVariableException     \u2192 400 (malformed code)\n  - TwoFactorAuthFailedException  \u2192 400 (code mismatch)",
+                "description": "Login-context: no admin-firewall guard. The trusted `loginId` is\nread from the password-verified session challenge and the admin\nsession is elevated only after the token succeeds. Legacy\nclient-supplied `loginId` is ignored.\n\nFailure mapping:\n  - Invalid CSRF                   \u2192 403 (interceptor)\n  - Missing pending challenge      \u2192 403\n  - SemanticVariableException      \u2192 400 (malformed code)\n  - TwoFactorAuthFailedException   \u2192 400 (code mismatch)\n  - LoginAttemptsExceededException \u2192 429 (too many codes burned;\n      the pending challenge is dropped here, so the admin has to\n      come back through the password stage \u2014 which is throttled on\n      the same counter, i.e. only after the window has passed)",
                 "requestBody": {
                     "content": {
                         "application/json": {
