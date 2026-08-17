@@ -49,6 +49,6 @@ Configuration: /Users/akihito/git/BeMart/phpunit.xml
 ............................................................. 2684 / 2720 ( 98%)
 ....................................                          2720 / 2720 (100%)
 
-Time: 02:29.588, Memory: 127.52 MB
+Time: 02:30.667, Memory: 127.52 MB
 
 OK (2720 tests, 30534 assertions)

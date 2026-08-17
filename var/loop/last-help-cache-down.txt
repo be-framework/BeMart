@@ -1,0 +1,8 @@
+cold read              get pool_error pool_error cache_miss put_donut cdn_headers pre_write_cleanup pool_error pool_error invalidate pool_error pool_error save_etag pool_error pool_error save_donut_view pool_error pool_error save_donut cache_miss
+second read            get pool_error pool_error cache_miss put_donut cdn_headers pre_write_cleanup pool_error pool_error invalidate pool_error pool_error save_etag pool_error pool_error save_donut_view pool_error pool_error save_donut cache_miss
+failing sides          ["read","write"]
+write outcome          save_etag saved=false
+write outcome          save_donut_view saved=false
+write outcome          save_donut saved=false
+
+OK help-cache-down: the store is down, the page is served, and the log names the cache as what failed

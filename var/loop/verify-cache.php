@@ -107,6 +107,16 @@ const FLOWS = [
         'embeds' => false,
         'mode' => 'per-request',
     ],
+    // The store is down - a Redis restart, a network partition - and the shop has to keep selling.
+    // The framework's contract is that a cache failure costs latency, not the response: the
+    // resource runs, the page is served, and the log says the cache was the thing that failed.
+    'help-cache-down' => [
+        'read' => 'page://self/help/about',
+        'write' => null,
+        'embeds' => false,
+        'mode' => 'cache-down',
+        'dsn' => 'redis://127.0.0.1:1',
+    ],
     // The edge's copy. A CDN is told what to keep and, later, what to drop: the two have to name
     // the same thing, or the edge serves a page the origin has already replaced - and nothing in
     // the origin's own cache can show it.
@@ -170,7 +180,7 @@ if ($dsnForFlush !== '') {
     exec('rm -rf ' . escapeshellarg(dirname(__DIR__) . '/tmp/' . (getenv('APP_CONTEXT') ?: 'eccube-sql-hal-app') . '/cache'));
 }
 
-$dsn = getenv('CACHE_DSN') ?: '';
+$dsn = $flow['dsn'] ?? (getenv('CACHE_DSN') ?: '');
 $override = new class ($dsn, ($flow['mode'] ?? '') === 'cdn') extends AbstractModule {
     public function __construct(private string $dsn, private bool $cdn)
     {
@@ -312,6 +322,65 @@ $mode = $flow['mode'] ?? 'cached';
 // URI produces. The response code separates the two: nothing here judges a request that failed.
 if ($codes['cold read'] !== 200) {
     printf("FAIL %s\n  - 0: the read returned %d, so nothing below is evidence of anything\n", $flowName, $codes['cold read']);
+
+    exit(1);
+}
+
+if ($mode === 'cache-down') {
+    // The response is the point: a shop whose cache is down is slow, not closed.
+    $types = typesOf($cold);
+    // Two shapes carry a failing store: `cache_error` when the exception reached this package, and
+    // `pool_error` when the adapter swallowed it - which is what symfony/cache does.
+    $errors = array_values(array_filter($cold, static fn (array $e): bool => in_array($e['type'], ['cache_error', 'pool_error'], true)));
+
+    if ($errors === []) {
+        record('21: the store is unreachable and the log says nothing about it - a silent degrade is an outage nobody can attribute', $violations, $known);
+    }
+
+    $sides = array_values(array_unique(array_map(static fn (array $e): string => (string) ($e['context']['operation'] ?? '?'), $errors)));
+    if (! in_array('read', $sides, true)) {
+        record(sprintf('22: no failing read was recorded (sides: %s) - the lookup is what a request hits first', json_encode($sides)), $violations, $known);
+    }
+
+    if (! in_array('cache_miss', $types, true)) {
+        record('23: the failed lookup did not close as a miss - a reader cannot tell a broken pool from a cold one', $violations, $known);
+    }
+
+    // Twice, because the second request must not depend on the first having stored anything.
+    $second = $read('second read');
+    if ($codes['second read'] !== 200) {
+        record(sprintf('24: the second read returned %d - the degrade is not repeatable', $codes['second read']), $violations, $known);
+    }
+
+    if (in_array('cache_hit', typesOf($second), true)) {
+        record('25: a hit was reported while the store was unreachable', $violations, $known);
+    }
+
+    foreach ($sessions as $label => $entries) {
+        printf("%-22s %s\n", $label, implode(' ', typesOf($entries)));
+    }
+
+    printf("%-22s %s\n", 'failing sides', json_encode($sides));
+    foreach ($cold as $entry) {
+        if (str_starts_with($entry['type'], 'save_')) {
+            printf("%-22s %s saved=%s\n", 'write outcome', $entry['type'], var_export($entry['context']['saved'] ?? null, true));
+        }
+    }
+
+    foreach (array_unique($known) as $entry) {
+        printf("KNOWN %s\n", $entry);
+    }
+
+    if ($violations === []) {
+        printf("\nOK %s: the store is down, the page is served, and the log names the cache as what failed\n", $flowName);
+
+        exit(0);
+    }
+
+    printf("\nFAIL %s\n", $flowName);
+    foreach ($violations as $violation) {
+        printf("  - %s\n", $violation);
+    }
 
     exit(1);
 }

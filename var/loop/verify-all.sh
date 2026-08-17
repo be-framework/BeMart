@@ -13,7 +13,7 @@ PHP=${PHP:-/opt/homebrew/opt/php@8.4/bin/php}
 [ -x "$PHP" ] || { echo "no php at $PHP"; exit 2; }
 
 status=0
-for flow in help help-revalidate help-cdn products-app products-page product-stock products-corpus-tag shopping-complete customer-profile; do
+for flow in help help-revalidate help-cdn help-cache-down products-app products-page product-stock products-corpus-tag shopping-complete customer-profile; do
     if "$PHP" var/loop/verify-cache.php "$flow" > "var/loop/last-$flow.txt" 2>&1; then
         printf 'oracle %-14s ok\n' "$flow"
     else
