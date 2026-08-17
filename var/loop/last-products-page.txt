@@ -1,0 +1,4 @@
+cold read          get pre_write_cleanup invalidate save_etag save_value cache_miss
+second read        get cache_hit
+
+OK products-page: nothing about the page is stored, and its child answers from cache

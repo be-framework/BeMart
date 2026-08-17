@@ -1,0 +1,6 @@
+cold read          get get pre_write_cleanup invalidate save_etag save_value cache_miss pre_write_cleanup invalidate depends_on save_etag save_value cache_miss
+warm read          get cache_hit
+purge child        manual_purge invalidate manual_purge_result
+read after purge   get get pre_write_cleanup invalidate save_etag save_value cache_miss pre_write_cleanup invalidate depends_on save_etag save_value cache_miss
+
+OK product-stock: the log proves store, hit, invalidation and rebuild

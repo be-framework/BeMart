@@ -1,0 +1,6 @@
+cold read          get cache_miss put_donut cdn_headers pre_write_cleanup invalidate save_etag save_donut_view save_donut cache_miss
+warm read          get cache_hit
+KNOWN 6: save_donut saved with an empty tag list - no invalidation can reach it [bearsunday/BEAR.QueryRepository#185]
+KNOWN 7: save_etag/save_donut_view/save_donut asked for no expiry; the store gave donut-_help_about_ a TTL of 8640000 seconds [backend floor]
+
+OK help: the log proves store, hit

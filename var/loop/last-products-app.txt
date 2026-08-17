@@ -1,0 +1,4 @@
+cold read          get pre_write_cleanup invalidate save_etag save_value cache_miss
+warm read          get cache_hit
+
+OK products-app: the log proves store, hit
