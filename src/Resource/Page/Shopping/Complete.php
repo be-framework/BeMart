@@ -27,14 +27,15 @@ use BEAR\Resource\ResourceObject;
  * carries beyond the `goTop` / `goCart` transitions. EC-CUBE re-fetches
  * the `Order` row by id from the request; BeMart mirrors that: the
  * post-checkout redirect carries `orderNo` as a query parameter, and the
- * resource resolves the finalized-order header through
- * {@see OrderQueryInterface::byOrderNo} (the same NEW(1)-onwards row
- * `CheckoutCompleted` registered). The body then carries `orderNo` so
- * the screen shows the real order number.
+ * resource resolves the finalized-order header through the order-header
+ * resource's `byOrderNo` read (the same NEW(1)-onwards row
+ * `CheckoutCompleted` registered) - now through `app://self/order/header`, which this resource
+ * embeds rather than querying itself. The body then carries `orderNo` so the screen shows the
+ * real order number.
  *
  * `completeMessage` is intentionally empty — EC-CUBE lets payment
  * plugins append to it via `appendCompleteMessage()`, but the finalized
- * order header carries no such field ({@see CheckoutCompleted} produces
+ * order header carries no such field (CheckoutCompleted produces
  * an empty string in Pilot 5 — a future Plugin Pilot wires it up). The
  * body surfaces it as a `''` default so the template's
  * complete-message block degrades to empty, matching EC-CUBE's

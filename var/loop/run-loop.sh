@@ -29,7 +29,7 @@ remaining_flows() {
 # starts: the first run judged its own machinery commit because the wait fell through in seconds.
 # Wait for the transition into running, then for the return to idle.
 await_agent() {
-    local id="$1" limit="$2" waited=0 seen_running=0 status
+    local id="$1" limit="$2" waited=0 seen_running=0 status activity last_activity="" stalled=0
     while [ "$waited" -lt "$limit" ]; do
         status=$(paseo inspect "$id" 2>/dev/null | awk '/^Status/ {print $2; exit}')
         case "$status" in
@@ -37,6 +37,23 @@ await_agent() {
             idle|completed) [ "$seen_running" = 1 ] && return 0 ;;
             error|closed) return 1 ;;
         esac
+
+        # A worker that stops acting is not working: the first run sat "running" for twenty
+        # minutes with its activity count frozen. Treat a still count as a stall, not as thinking.
+        activity=$(paseo logs "$id" 2>/dev/null | wc -l | tr -d ' ')
+        if [ "$activity" = "$last_activity" ]; then
+            stalled=$((stalled + 10))
+            if [ "$stalled" -ge 600 ]; then
+                log "await: $id has not acted for 10 minutes - stopping it"
+                paseo stop "$id" >/dev/null 2>&1
+
+                return 1
+            fi
+        else
+            stalled=0
+            last_activity="$activity"
+        fi
+
         sleep 10
         waited=$((waited + 10))
     done
