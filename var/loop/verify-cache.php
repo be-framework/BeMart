@@ -31,6 +31,7 @@ use BEAR\RepositoryModule\Annotation\CacheLog;
 use BEAR\QueryRepository\QueryRepositoryInterface;
 use BEAR\QueryRepository\ResourceStorageInterface;
 use BEAR\Resource\ResourceInterface;
+use BEAR\Sunday\Extension\Transfer\HttpCacheInterface;
 use BEAR\Resource\Uri;
 use Koriym\SemanticLogger\LogJson;
 use Koriym\SemanticLogger\SemanticLogger;
@@ -102,6 +103,15 @@ const FLOWS = [
         'write' => null,
         'embeds' => false,
         'mode' => 'per-request',
+    ],
+    // The client's copy, revalidated. A cached page hands out an ETag, and the next request offers
+    // it back: the answer must be 304 while the entry stands and 200 once it does not. Answering
+    // 304 about content that changed freezes that client on it - a browser will not ask again.
+    'help-revalidate' => [
+        'read' => 'page://self/help/about',
+        'write' => null,
+        'embeds' => false,
+        'mode' => 'revalidate',
     ],
 ];
 
@@ -214,7 +224,27 @@ function tagsOf(array $entries, string $prefix): array
 const KNOWN = [
     // #185 (a donut template stored untagged) is fixed and its entry is gone: an entry stays here
     // only while its issue is open, so a defect that comes back fails the next run.
+    "another page's validator was answered 304" => 'bearsunday/BEAR.QueryRepository#197',
 ];
+
+/**
+ * A violation the loop already knows about carries its issue instead of failing the run
+ *
+ * @param list<string> $violations
+ * @param list<string> $known
+ */
+function record(string $violation, array &$violations, array &$known): void
+{
+    foreach (KNOWN as $needle => $tracked) {
+        if (str_contains($violation, $needle)) {
+            $known[] = $violation . ' [' . $tracked . ']';
+
+            return;
+        }
+    }
+
+    $violations[] = $violation;
+}
 
 $violations = [];
 $known = [];
@@ -238,6 +268,78 @@ $mode = $flow['mode'] ?? 'cached';
 // URI produces. The response code separates the two: nothing here judges a request that failed.
 if ($codes['cold read'] !== 200) {
     printf("FAIL %s\n  - 0: the read returned %d, so nothing below is evidence of anything\n", $flowName, $codes['cold read']);
+
+    exit(1);
+}
+
+if ($mode === 'revalidate') {
+    // The client's copy of this page, and what the app says when it offers it back.
+    $etag = null;
+    foreach ($cold as $entry) {
+        if ($entry['type'] === 'save_etag' && ($entry['context']['uri'] ?? '') === $flow['read']) {
+            $etag = (string) $entry['context']['etag'];
+        }
+    }
+
+    if ($etag === null) {
+        printf("FAIL %s\n  - 10: the page stored no validator, so a client has nothing to revalidate with\n", $flowName);
+
+        exit(1);
+    }
+
+    $httpCache = $injector->getInstance(HttpCacheInterface::class);
+    $ask = static function (string $label, string $offered) use ($httpCache, $logger, &$sessions): bool {
+        $answer = $httpCache->isNotModified(['HTTP_IF_NONE_MATCH' => $offered, 'REQUEST_URI' => '/help/about']);
+        $sessions[$label] = flatten($logger->flush());
+
+        return $answer;
+    };
+
+    if (! $ask('offer the etag', $etag)) {
+        $violations[] = '11: the validator the page just handed out does not revalidate - every client refetches the whole page';
+    }
+
+    if ($ask('offer a stale etag', '"0000000000000000000000000000000000000000"')) {
+        $violations[] = '12: an unknown validator was answered 304 - the client keeps content the server never saw';
+    }
+
+    $repository = $injector->getInstance(QueryRepositoryInterface::class);
+    $repository->purge(new Uri($flow['read']));
+    $sessions['purge the page'] = flatten($logger->flush());
+
+    if ($ask('offer it after the purge', $etag)) {
+        $violations[] = '13: the purged page still answers 304 to the old validator - a revalidating client is frozen on content that is gone';
+    }
+
+    // Another live page's validator, offered for this one. HTTP scopes an entity-tag to the
+    // resource it came from; the ETag pool is a set of live validators, so the answer is 304 for
+    // any URI. A client that returns the validator it was given cannot reach this - the value is
+    // derived from the URI - but a proxy or client that mixes them is served the wrong page.
+    $other = $resource->get('page://self/help/privacy');
+    $otherEtag = (string) ($other->headers['ETag'] ?? '');
+    $logger->flush();
+    if ($otherEtag !== '' && $ask('offer another page validator', $otherEtag)) {
+        record("14: another page's validator was answered 304 for this URI - the 304 decision is not scoped to the resource", $violations, $known);
+    }
+
+    foreach ($sessions as $label => $entries) {
+        printf("%-22s %s\n", $label, implode(' ', typesOf($entries)));
+    }
+
+    foreach (array_unique($known) as $entry) {
+        printf("KNOWN %s\n", $entry);
+    }
+
+    if ($violations === []) {
+        printf("\nOK %s: the validator revalidates, an unknown one does not, and the purge ends it\n", $flowName);
+
+        exit(0);
+    }
+
+    printf("\nFAIL %s\n", $flowName);
+    foreach ($violations as $violation) {
+        printf("  - %s\n", $violation);
+    }
 
     exit(1);
 }
@@ -303,16 +405,7 @@ foreach ($saves as $save) {
 
     // 6. an entry with no tags is unreachable by any invalidation
     if (($save['context']['tags'] ?? null) === []) {
-        $violation = sprintf('6: %s saved with an empty tag list - no invalidation can reach it', $save['type']);
-        $issue = null;
-        foreach (KNOWN as $needle => $tracked) {
-            if (str_contains($violation, $needle)) {
-                $issue = $tracked;
-                break;
-            }
-        }
-
-        $issue === null ? $violations[] = $violation : $known[] = $violation . ' [' . $issue . ']';
+        record(sprintf('6: %s saved with an empty tag list - no invalidation can reach it', $save['type']), $violations, $known);
     }
 }
 
