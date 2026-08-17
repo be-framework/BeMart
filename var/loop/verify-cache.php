@@ -449,6 +449,28 @@ if ($dsn !== '') {
             break;
         }
     }
+
+    // The declaration, against what the store will really do with it. `requestedTtl` cannot ask
+    // this question: `expiry: never` resolves to a finite number, so an entry meant to live until
+    // invalidation looks like a deliberate 1-year TTL both in the log and in the store.
+    foreach ($sessions['cold read'] as $entry) {
+        if ($entry['type'] !== 'cache_policy' || ($entry['context']['expiry'] ?? null) !== 'never') {
+            continue;
+        }
+
+        $ttls = array_filter(array_map(static fn (string $key): int => (int) $client->ttl($key), $keys), static fn (int $ttl): bool => $ttl > 0);
+        if ($ttls === []) {
+            continue;
+        }
+
+        $known[] = sprintf(
+            '9: %s declares expiry=never - until invalidation - and the store drops its entries in %d..%d seconds [backend floor]',
+            $entry['context']['uri'],
+            min($ttls),
+            max($ttls),
+        );
+        break;
+    }
 }
 
 foreach (array_unique($known) as $entry) {
