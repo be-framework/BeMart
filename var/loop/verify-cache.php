@@ -23,6 +23,9 @@ declare(strict_types=1);
  * Exit code 0 means the log proved it. Non-zero prints which invariant failed and the tree.
  */
 
+use BEAR\QueryRepository\Cdn\FastlyCacheControlHeaderSetter;
+use BEAR\QueryRepository\CdnCacheControlHeaderSetterInterface;
+use BEAR\QueryRepository\PurgerInterface;
 use BEAR\QueryRepository\Log\SafeSemanticLogger;
 use BEAR\QueryRepository\ProdQueryRepositoryModule;
 use BEAR\QueryRepository\StorageRedisDsnModule;
@@ -104,6 +107,15 @@ const FLOWS = [
         'embeds' => false,
         'mode' => 'per-request',
     ],
+    // The edge's copy. A CDN is told what to keep and, later, what to drop: the two have to name
+    // the same thing, or the edge serves a page the origin has already replaced - and nothing in
+    // the origin's own cache can show it.
+    'help-cdn' => [
+        'read' => 'page://self/help/about',
+        'write' => null,
+        'embeds' => false,
+        'mode' => 'cdn',
+    ],
     // The client's copy, revalidated. A cached page hands out an ETag, and the next request offers
     // it back: the answer must be 304 while the entry stands and 200 once it does not. Answering
     // 304 about content that changed freezes that client on it - a browser will not ask again.
@@ -114,6 +126,31 @@ const FLOWS = [
         'mode' => 'revalidate',
     ],
 ];
+
+/**
+ * The CDN, as far as the origin can see it
+ *
+ * A real purge leaves the process; what matters to the judgement is what the origin decided to
+ * send. Static because Ray.Di hands the same instance to the storage while the script keeps a
+ * reference for the assertions.
+ */
+final class RecordingPurger implements PurgerInterface
+{
+    /** @var list<string> */
+    public array $purged = [];
+
+    private static self|null $instance = null;
+
+    public static function instance(): self
+    {
+        return self::$instance ??= new self();
+    }
+
+    public function __invoke(string $tag): void
+    {
+        $this->purged[] = $tag;
+    }
+}
 
 $flowName = $argv[1] ?? '';
 if (! isset(FLOWS[$flowName])) {
@@ -134,8 +171,8 @@ if ($dsnForFlush !== '') {
 }
 
 $dsn = getenv('CACHE_DSN') ?: '';
-$override = new class ($dsn) extends AbstractModule {
-    public function __construct(private string $dsn)
+$override = new class ($dsn, ($flow['mode'] ?? '') === 'cdn') extends AbstractModule {
+    public function __construct(private string $dsn, private bool $cdn)
     {
         parent::__construct();
     }
@@ -152,6 +189,12 @@ $override = new class ($dsn) extends AbstractModule {
         // Recording on, by replacing the one binding that decides it
         $this->bind(SemanticLoggerInterface::class)->annotatedWith(CacheLog::class)
             ->toInstance(new SafeSemanticLogger(new SemanticLogger()));
+
+        if ($this->cdn) {
+            // The CDN flavour BeMart would deploy behind, with the purge recorded instead of sent.
+            $this->bind(CdnCacheControlHeaderSetterInterface::class)->to(FastlyCacheControlHeaderSetter::class);
+            $this->bind(PurgerInterface::class)->toInstance(RecordingPurger::instance());
+        }
     }
 };
 
@@ -161,6 +204,7 @@ $context = getenv('APP_CONTEXT') ?: 'eccube-sql-hal-app';
 $injector = Injector::getOverrideInstance($context, $override);
 $resource = $injector->getInstance(ResourceInterface::class);
 $logger = $injector->getInstance(SemanticLoggerInterface::class, CacheLog::class);
+
 
 /** @return list<array{type: string, context: array<string, mixed>}> */
 function flatten(LogJson $log): array
@@ -268,6 +312,107 @@ $mode = $flow['mode'] ?? 'cached';
 // URI produces. The response code separates the two: nothing here judges a request that failed.
 if ($codes['cold read'] !== 200) {
     printf("FAIL %s\n  - 0: the read returned %d, so nothing below is evidence of anything\n", $flowName, $codes['cold read']);
+
+    exit(1);
+}
+
+if ($mode === 'cdn') {
+    // What the edge was told to keep.
+    $told = null;
+    foreach ($cold as $entry) {
+        if ($entry['type'] === 'cdn_headers' && ($entry['context']['uri'] ?? '') === $flow['read']) {
+            $told = $entry['context'];
+        }
+    }
+
+    if ($told === null) {
+        printf("FAIL %s\n  - 15: the response went out with no CDN headers recorded, so nothing says what the edge holds\n", $flowName);
+
+        exit(1);
+    }
+
+    /** @var list<string> $keptUnder */
+    $keptUnder = array_map('strval', (array) ($told['surrogateKeys'] ?? []));
+    $lifetime = array_filter(
+        (array) ($told['headers'] ?? []),
+        static fn (string $name): bool => in_array(strtolower($name), ['surrogate-control', 'cache-control', 'edge-control'], true),
+        ARRAY_FILTER_USE_KEY,
+    );
+
+    if ($keptUnder === []) {
+        record('16: the edge was given no surrogate key - nothing the origin invalidates can reach it', $violations, $known);
+    }
+
+    if ($lifetime === []) {
+        record('17: the edge was given no lifetime directive - it decides for itself how long to keep the page', $violations, $known);
+    }
+
+    // A write drops the edge's copy too. With a year-long Surrogate-Control the purge is the only
+    // way a change reaches the edge, so the write path issuing one is load-bearing, not noise.
+    $sentOnWrite = RecordingPurger::instance()->purged;
+    if (array_intersect($keptUnder, $sentOnWrite) === []) {
+        record(sprintf(
+            '20: the write told the edge to keep %s without dropping the copy it replaced (sent %s) - with a %s lifetime the edge serves the old page until it lapses',
+            json_encode($keptUnder),
+            json_encode($sentOnWrite),
+            json_encode(array_values($lifetime)),
+        ), $violations, $known);
+    }
+
+    // What the edge is later told to drop.
+    RecordingPurger::instance()->purged = [];
+    $repository = $injector->getInstance(QueryRepositoryInterface::class);
+    $repository->purge(new Uri($flow['read']));
+    $sessions['purge the page'] = flatten($logger->flush());
+
+    $sent = RecordingPurger::instance()->purged;
+    $cdnOutcome = null;
+    foreach ($sessions['purge the page'] as $entry) {
+        if ($entry['type'] === 'invalidate') {
+            $cdnOutcome = (string) ($entry['context']['cdn'] ?? '');
+        }
+    }
+
+    if ($cdnOutcome !== 'purged') {
+        record(sprintf('18: the log reports the CDN as %s for a purge that has to reach it', var_export($cdnOutcome, true)), $violations, $known);
+    }
+
+    // The two lists have to meet: a key the edge holds and never hears about again is stale forever.
+    if (array_intersect($keptUnder, $sent) === []) {
+        record(sprintf(
+            '19: the edge keeps %s and was told to drop %s - the two never meet, so the edge serves the old page until its own lifetime runs out',
+            json_encode($keptUnder),
+            json_encode($sent),
+        ), $violations, $known);
+    }
+
+    foreach ($sessions as $label => $entries) {
+        printf("%-22s %s\n", $label, implode(' ', typesOf($entries)));
+    }
+
+    printf(
+        "%-22s keep=%s drop-on-write=%s drop-on-purge=%s lifetime=%s\n",
+        'cdn',
+        json_encode($keptUnder),
+        json_encode($sentOnWrite),
+        json_encode($sent),
+        json_encode($lifetime),
+    );
+
+    foreach (array_unique($known) as $entry) {
+        printf("KNOWN %s\n", $entry);
+    }
+
+    if ($violations === []) {
+        printf("\nOK %s: the edge was told what to keep, and the purge names the same thing\n", $flowName);
+
+        exit(0);
+    }
+
+    printf("\nFAIL %s\n", $flowName);
+    foreach ($violations as $violation) {
+        printf("  - %s\n", $violation);
+    }
 
     exit(1);
 }
