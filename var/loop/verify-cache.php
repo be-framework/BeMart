@@ -29,6 +29,7 @@ use BEAR\QueryRepository\StorageRedisDsnModule;
 use BEAR\QueryRepository\QueryRepositoryModule;
 use BEAR\RepositoryModule\Annotation\CacheLog;
 use BEAR\QueryRepository\QueryRepositoryInterface;
+use BEAR\QueryRepository\ResourceStorageInterface;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\Uri;
 use Koriym\SemanticLogger\LogJson;
@@ -76,6 +77,15 @@ const FLOWS = [
         'embeds' => false,
         'mode' => 'per-request',
         'childCached' => false,
+    ],
+    // The write announcing itself: an admin edit invalidates the shared surrogate key, and every
+    // cached variant of the corpus falls with it - a URI tag would only reach the exact query
+    // string that produced an entry.
+    'products-corpus-tag' => [
+        'read' => 'app://self/products?nameKeyword=sample',
+        'write' => null,
+        'purgeTags' => ['product-corpus'],
+        'embeds' => false,
     ],
     // A page that carries a CSRF token must NOT be cached; what it must do is hit the child it
     // embeds. Caching it would hand one shopper's token to the next.
@@ -337,6 +347,28 @@ if ($flow['embeds']) {
 $warm = $read('warm read');
 if (! in_array('cache_hit', typesOf($warm), true)) {
     $violations[] = '2: the second read is not a hit';
+}
+
+$purgeTags = $flow['purgeTags'] ?? null;
+if ($purgeTags !== null) {
+    // The application announcing a change, the way a Be Final does: a direct invalidateTags()
+    $injector->getInstance(ResourceStorageInterface::class)->invalidateTags($purgeTags);
+    $tagEntries = flatten($logger->flush());
+    $sessions['invalidate tag'] = $tagEntries;
+
+    $savedTags = tagsOf($cold, 'save_');
+    if (array_intersect($purgeTags, $savedTags) === []) {
+        $violations[] = sprintf(
+            '4: the announced tags %s are absent from what the read stored %s',
+            json_encode($purgeTags),
+            json_encode($savedTags),
+        );
+    }
+
+    $afterTag = $read('read after invalidate');
+    if (in_array('cache_hit', typesOf($afterTag), true)) {
+        $violations[] = '5: the entry still hits after its tag was invalidated - stale content';
+    }
 }
 
 $purgeUri = $flow['purge'] ?? null;

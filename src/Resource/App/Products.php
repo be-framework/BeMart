@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\App;
 
+use BEAR\QueryRepository\Header;
 use BEAR\RepositoryModule\Annotation\Cacheable;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -23,13 +24,17 @@ use function array_values;
  * depended on. This resource owns the query and the row shape; pages embed it and do their own
  * per-request work (search field aliases, category filter, sort, pagination, CSRF).
  *
- * TTL rather than event-driven invalidation: a row carries `stock`, which changes as orders are
- * placed, and no write path in this application purges this URI yet. 30 seconds is the staleness
- * a shopper can be shown - the same budget the agent-facing resources use.
+ * Two invalidation paths, because one alone is not enough. Every entry declares the shared
+ * `product-corpus` surrogate key, so an admin edit can drop every keyword and limit variant with
+ * one tag - the URI tag would only reach the exact query string that produced an entry. The TTL is
+ * the floor under that: `stock` moves as orders are placed, and no write path announces those.
  */
 #[Cacheable(expirySecond: 30)]
 class Products extends ResourceObject
 {
+    /** The tag every variant of this corpus carries, so one purge reaches all of them */
+    public const SURROGATE_KEY = 'product-corpus';
+
     public function __construct(
         private readonly ProductQueryInterface $productQuery,
     ) {
@@ -52,6 +57,7 @@ class Products extends ResourceObject
         ));
 
         $this->code = Code::OK;
+        $this->headers[Header::SURROGATE_KEY] = self::SURROGATE_KEY;
         $this->body = ['products' => array_map($this->row(...), $visible)];
 
         return $this;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\App;
 
+use BEAR\QueryRepository\Header;
 use BEAR\RepositoryModule\Annotation\Cacheable;
 use BEAR\Resource\Annotation\Embed;
 use BEAR\Resource\Code;
@@ -43,6 +44,8 @@ class Product extends ResourceObject
         }
 
         $this->code = Code::OK;
+        // The same shared tag the corpus carries: an admin edit drops both with one call
+        $this->headers[Header::SURROGATE_KEY] = Products::SURROGATE_KEY;
         $this->body['productCode'] = $product->productCode;
         $this->body['productName'] = $product->productName;
         $this->body['price02'] = $product->price02;

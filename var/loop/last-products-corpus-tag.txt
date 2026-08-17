@@ -1,0 +1,6 @@
+cold read          get pre_write_cleanup invalidate save_etag save_value cache_miss
+warm read          get cache_hit
+invalidate tag     manual_invalidate invalidate manual_invalidate_result
+read after invalidate get pre_write_cleanup invalidate save_etag save_value cache_miss
+
+OK products-corpus-tag: the log proves store, hit
