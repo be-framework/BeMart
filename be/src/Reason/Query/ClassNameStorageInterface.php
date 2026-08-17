@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Query;
 
+use MyVendor\BeMart\Be\Reason\Service\ChangesProductCorpus;
 use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
 use Ray\MediaQuery\Annotation\DbQuery;
 
@@ -30,11 +31,14 @@ interface ClassNameStorageInterface
     public function item(string $classNameId): ClassNameEntity|null;
 
     #[DbQuery('tclass_name_put')]
+    #[ChangesProductCorpus]
     public function put(ClassNameEntity $className): void;
 
     #[DbQuery('tclass_name_remove')]
+    #[ChangesProductCorpus]
     public function delete(string $classNameId): void;
 
     #[DbQuery('tclass_name_reorder')]
+    #[ChangesProductCorpus]
     public function reorder(string $classNameId, int $sortNo): void;
 }

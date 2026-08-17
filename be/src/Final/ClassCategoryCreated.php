@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Exception\ClassNameNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
@@ -38,6 +39,7 @@ final readonly class ClassCategoryCreated
         #[Inject] AdminSession $adminSession,
         #[Inject] ClassNameStorageInterface $classNames,
         #[Inject] ClassCategoryStorageInterface $classCategories,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
         #[Inject] ClassCategoryIdProvider $ids,
     ) {
         if ($adminSession->adminId === null) {
@@ -55,6 +57,8 @@ final readonly class ClassCategoryCreated
         );
 
         $classCategories->put($entity);
+
+        $cacheInvalidator->invalidateCorpus();
 
         $this->classCategoryId = $entity->classCategoryId;
         $this->classNameId = $entity->classNameId;

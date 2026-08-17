@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\CategoryEntity;
 use MyVendor\BeMart\Be\Reason\Query\CategoryIdQueryInterface;
@@ -53,6 +54,7 @@ final readonly class CategoryCsvImported
         #[Input] string $csv,
         #[Inject] AdminSession $adminSession,
         #[Inject] CategoryStorageInterface $categories,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
         #[Inject] CategoryIdQueryInterface $categoryIds,
     ) {
         if ($adminSession->adminId === null) {
@@ -100,6 +102,7 @@ final readonly class CategoryCsvImported
                 parentId: $parentId !== '' ? $parentId : null,
                 sortNo: $sortNo,
             ));
+            $cacheInvalidator->invalidateCorpus();
             $imported++;
             $sortNo++;
         }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\ProductStatusCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\Param\ProductCodeList;
@@ -53,12 +54,15 @@ final readonly class AdminProductsStatusBulkUpdated
         #[Input] int $productStatus,
         #[Inject] AdminSession $adminSession,
         #[Inject] ProductStatusCommandInterface $productStatusCommand,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
         $changed = $productStatusCommand->update(ProductCodeList::fromArray($productCodes), $productStatus);
+
+        $cacheInvalidator->invalidateCorpus();
 
         $this->productCodes = $productCodes;
         $this->productStatus = $productStatus;

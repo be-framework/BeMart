@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Exception\CategoryNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\CategoryEntity;
@@ -44,6 +45,7 @@ final readonly class CategoryCreated
         #[Input] string|null $parentId,
         #[Inject] AdminSession $adminSession,
         #[Inject] CategoryStorageInterface $categories,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
         #[Inject] CategoryIdProvider $ids,
     ) {
         if ($adminSession->adminId === null) {
@@ -62,6 +64,8 @@ final readonly class CategoryCreated
         );
 
         $categories->put($entity);
+
+        $cacheInvalidator->invalidateCorpus();
 
         $this->categoryId = $entity->categoryId;
         $this->categoryName = $entity->categoryName;

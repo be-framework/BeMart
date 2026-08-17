@@ -24,7 +24,7 @@ use MyVendor\BeMart\Support\ProductImageCatalog;
  * and until an admin write path purges this URI, the cascade through stock plus the TTL are the
  * eviction paths.
  */
-#[Cacheable(expirySecond: 300)]
+#[Cacheable]
 class Product extends ResourceObject
 {
     public function __construct(

@@ -29,7 +29,7 @@ use function array_values;
  * one tag - the URI tag would only reach the exact query string that produced an entry. The TTL is
  * the floor under that: `stock` moves as orders are placed, and no write path announces those.
  */
-#[Cacheable(expirySecond: 30)]
+#[Cacheable]
 class Products extends ResourceObject
 {
     /** The tag every variant of this corpus carries, so one purge reaches all of them */

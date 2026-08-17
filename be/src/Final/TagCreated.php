@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\TagEntity;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
@@ -24,6 +25,7 @@ final readonly class TagCreated
         #[Input] string $tagName,
         #[Inject] AdminSession $adminSession,
         #[Inject] TagStorageInterface $tags,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
         #[Inject] TagIdProvider $ids,
     ) {
         if ($adminSession->adminId === null) {
@@ -36,6 +38,8 @@ final readonly class TagCreated
         );
 
         $tags->put($entity);
+
+        $cacheInvalidator->invalidateCorpus();
 
         $this->tagId = $entity->tagId;
         $this->tagName = $entity->tagName;
