@@ -202,7 +202,8 @@ function tagsOf(array $entries, string $prefix): array
  * closes - if the defect is still there, the next run says so.
  */
 const KNOWN = [
-    'save_donut saved with an empty tag list' => 'bearsunday/BEAR.QueryRepository#185',
+    // #185 (a donut template stored untagged) is fixed and its entry is gone: an entry stays here
+    // only while its issue is open, so a defect that comes back fails the next run.
 ];
 
 $violations = [];
