@@ -49,3 +49,53 @@ changed files:
 The KNOWN list in `var/loop/verify-cache.php` was extended in this commit.
 Command: `git -C /Users/akihito/git/BeMart diff HEAD~1 -
 [16:05:39] iteration 1: stopping - the worker committed nothing
+[16:33:26] loop start: max=1, pages still holding a query: 1
+[16:33:26] iteration 1: starting worker (claude/claude-opus-5)
+[16:33:29] iteration 1: agent 9cfcc7a8-d538-42d8-a2d2-ae6b3e132f6d
+[16:46:14] await: 9cfcc7a8-d538-42d8-a2d2-ae6b3e132f6d has not acted for 10 minutes - stopping it
+oracle help           ok
+oracle products-app   ok
+oracle products-page  ok
+oracle product-stock  ok
+oracle shopping-complete ok
+phpunit        ok  OK (2713 tests, 30523 assertions)
+judge: done=false
+
+**Check 2 fails** — no new commit since the previous iteration.
+
+```
+commit moved: 70998072 -> 70998072
+```
+
+The hash is unchanged; there is no new commit on `cache-app-layer`.
+
+**Check 3 fails** — the commit neither added an `app://self/…` resource nor changed a Page resource to use `#[Embed]`. The stat shows only a docblock tweak and a loop-script change, with no new resource file:
+
+```
+70998072 Point the complete page's docblock at the resource it embeds
+ src/Resource/Page/Shopping/Complete.php | 11 ++++++-----
+ var/loop/run-loop.sh                    | 19 ++++++++++++++++++-
+ 2 files changed, 24 insertions(+), 6 deletions(-)
+```
+
+No `App/` resource file is listed, and the commit message indicates a docblock change rather than an `#[Embed]` conversion.
+
+**Checks 1 and 4 pass:**
+
+- Check 1:
+```
+gate exit=0
+oracle help           ok
+oracle products-app   ok
+oracle products-page  ok
+oracle product-stock  ok
+oracle shopping-complete ok
+phpunit        ok  OK (2713 tests, 30523 assertions)
+```
+
+- Check 4:
+```
+KNOWN diff:
+```
+The KNOWN diff is empty, so `=> 'bearsunday'` entries did not grow.
+[16:49:01] iteration 1: stopping - the worker committed nothing

@@ -67,6 +67,16 @@ const FLOWS = [
         'mode' => 'per-request',
         'childCached' => false,
     ],
+    // Personal data: the assertion is that nothing about it is ever stored. Reading it twice must
+    // leave the store as empty as it found it - an entry keyed by customer id would be handed to
+    // whoever supplies the id.
+    'customer-profile' => [
+        'read' => 'app://self/customer/profile?customerId=0123456789abcdef0123456789abcdef',
+        'write' => null,
+        'embeds' => false,
+        'mode' => 'per-request',
+        'childCached' => false,
+    ],
     // A page that carries a CSRF token must NOT be cached; what it must do is hit the child it
     // embeds. Caching it would hand one shopper's token to the next.
     // The dependency case: master data embeds the number that moves. Purging the child is what an

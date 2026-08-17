@@ -120,6 +120,7 @@ final class ResourceSmokeTest extends TestCase
             'DELETE page://self/mypage/favorite?productCode=sample-001' => Code::OK,
             'GET app://self/agent/catalog?nameKeyword=%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB&limit=5' => Code::OK,
             'GET app://self/agent/product?productCode=sample-001' => Code::OK,
+            'GET app://self/customer/profile?customerId=0123456789abcdef0123456789abcdef' => Code::OK,
             'GET app://self/order/header' => Code::OK,
             'GET app://self/product?productCode=sample-001' => Code::OK,
             'GET app://self/product/stock?productCode=sample-001' => Code::OK,

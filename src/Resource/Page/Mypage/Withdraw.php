@@ -8,6 +8,7 @@ use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
+use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
@@ -16,7 +17,6 @@ use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
 use MyVendor\BeMart\Be\Input\WithdrawCustomerInput;
-use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -43,7 +43,7 @@ class Withdraw extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CustomerSession $session,
-        private readonly CustomerQueryInterface $customerQuery,
+        private readonly ResourceInterface $resource,
         private readonly CartSessionPrefixInterface $cartSessionPrefix,
         private readonly MutationResponseInterface $mutationResponse,
         private readonly CustomerSessionWriterInterface $sessionWriter,
@@ -76,8 +76,10 @@ class Withdraw extends ResourceObject
             return $this;
         }
 
-        $customer = $this->customerQuery->item($customerId);
-        if ($customer === null) {
+        // Called, not embedded: the key comes from the session, and #[Embed] resolves its URI
+        // template from method arguments - it would also fetch on requests that have no session.
+        $profile = $this->resource->get('app://self/customer/profile', ['customerId' => $customerId]);
+        if ($profile->code !== Code::OK) {
             // Stale session: the session points to a customerId that
             // no longer exists in the store (e.g. already withdrawn
             // in another tab). Treat as unauthenticated.
@@ -96,10 +98,10 @@ class Withdraw extends ResourceObject
                 'href' => 'page://self/mypage/withdraw',
             ],
             'csrfToken' => null,
-            'customerId' => $customer->customerId,
-            'email' => $customer->email,
-            'name01' => $customer->name01,
-            'name02' => $customer->name02,
+            'customerId' => (string) $profile->body['customerId'],
+            'email' => (string) $profile->body['email'],
+            'name01' => (string) $profile->body['name01'],
+            'name02' => (string) $profile->body['name02'],
         ];
 
         return $this;
