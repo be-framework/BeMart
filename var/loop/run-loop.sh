@@ -25,6 +25,27 @@ remaining_flows() {
     grep -rln "QueryInterface" src/Resource/Page 2>/dev/null | grep -v Admin | wc -l | tr -d ' '
 }
 
+# `paseo wait` returns as soon as the agent is idle, and a freshly created agent is idle before it
+# starts: the first run judged its own machinery commit because the wait fell through in seconds.
+# Wait for the transition into running, then for the return to idle.
+await_agent() {
+    local id="$1" limit="$2" waited=0 seen_running=0 status
+    while [ "$waited" -lt "$limit" ]; do
+        status=$(paseo inspect "$id" 2>/dev/null | awk '/^Status/ {print $2; exit}')
+        case "$status" in
+            running) seen_running=1 ;;
+            idle|completed) [ "$seen_running" = 1 ] && return 0 ;;
+            error|closed) return 1 ;;
+        esac
+        sleep 10
+        waited=$((waited + 10))
+    done
+
+    log "await: $id did not finish within ${limit}s"
+
+    return 1
+}
+
 judge() {
     # The gate says pass/fail; this asks a second model whether the evidence matches the checklist
     local evidence="$1"
@@ -62,7 +83,7 @@ for iteration in $(seq 1 "$MAX_ITERATIONS"); do
     agent=$(paseo run --background --quiet --provider "$WORKER_PROVIDER" --mode acceptEdits \
         --workspace "$WORKSPACE" --title "cache loop $iteration" "$WORKER_PROMPT" 2>&1 | tail -1)
     log "iteration $iteration: agent $agent"
-    paseo wait "$agent" --timeout 3600 >/dev/null 2>&1
+    await_agent "$agent" 3600
 
     gate_output=$("$LOOP_DIR/verify-all.sh" 2>&1)
     gate_status=$?
@@ -73,7 +94,7 @@ for iteration in $(seq 1 "$MAX_ITERATIONS"); do
         paseo send "$agent" "The gate failed. Fix the cause, not the assertion. Do not extend KNOWN.
 
 $gate_output" >/dev/null 2>&1
-        paseo wait "$agent" --timeout 1800 >/dev/null 2>&1
+        await_agent "$agent" 1800
         gate_output=$("$LOOP_DIR/verify-all.sh" 2>&1)
         gate_status=$?
         printf '%s\n' "$gate_output" | tee -a "$LOOP_DIR/loop.log"
