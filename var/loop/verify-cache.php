@@ -57,6 +57,16 @@ const FLOWS = [
         'write' => null,
         'embeds' => false,
     ],
+    // An order header belongs to one customer: neither the page nor the resource it embeds may be
+    // cached, and the flow asserts that nothing about the page is stored. Its child is uncached too,
+    // so the "child answers from cache" half does not apply - this flow only pins the negative.
+    'shopping-complete' => [
+        'read' => 'page://self/shopping/complete?orderNo=past0000000000000000000000000001',
+        'write' => null,
+        'embeds' => false,
+        'mode' => 'per-request',
+        'childCached' => false,
+    ],
     // A page that carries a CSRF token must NOT be cached; what it must do is hit the child it
     // embeds. Caching it would hand one shopper's token to the next.
     // The dependency case: master data embeds the number that moves. Purging the child is what an
@@ -189,8 +199,10 @@ $violations = [];
 $known = [];
 $sessions = [];
 
-$read = static function (string $label) use ($resource, $logger, $flow, &$sessions): array {
-    $resource->get($flow['read']);
+$codes = [];
+$read = static function (string $label) use ($resource, $logger, $flow, &$sessions, &$codes): array {
+    $ro = $resource->get($flow['read']);
+    $codes[$label] = $ro->code;
     $entries = flatten($logger->flush());
     $sessions[$label] = $entries;
 
@@ -200,6 +212,14 @@ $read = static function (string $label) use ($resource, $logger, $flow, &$sessio
 $cold = $read('cold read');
 $types = typesOf($cold);
 $mode = $flow['mode'] ?? 'cached';
+
+// An empty log is the expected proof for an uncacheable flow, and it is also what a typo in the
+// URI produces. The response code separates the two: nothing here judges a request that failed.
+if ($codes['cold read'] !== 200) {
+    printf("FAIL %s\n  - 0: the read returned %d, so nothing below is evidence of anything\n", $flowName, $codes['cold read']);
+
+    exit(1);
+}
 
 if ($mode === 'per-request') {
     // 8. the response is assembled per request: nothing about it may be stored, and the child it
@@ -213,8 +233,15 @@ if ($mode === 'per-request') {
     }
 
     $warmPerRequest = $read('second read');
-    if (! in_array('cache_hit', typesOf($warmPerRequest), true)) {
+    if (($flow['childCached'] ?? true) && ! in_array('cache_hit', typesOf($warmPerRequest), true)) {
         $violations[] = '8: the embedded resource is not answering from cache through this page';
+    }
+
+    if (($flow['childCached'] ?? true) === false && $warmPerRequest !== [] && array_filter(
+        $warmPerRequest,
+        static fn (array $e): bool => str_starts_with($e['type'], 'save_'),
+    ) !== []) {
+        $violations[] = '8: this flow is customer-specific, yet something in it was stored';
     }
 
     foreach ($sessions as $label => $entries) {
@@ -226,7 +253,11 @@ if ($mode === 'per-request') {
     }
 
     if ($violations === []) {
-        printf("\nOK %s: nothing about the page is stored, and its child answers from cache\n", $flowName);
+        printf(
+            "\nOK %s: 200 and nothing about the page stored%s\n",
+            $flowName,
+            ($flow['childCached'] ?? true) ? ', its child answering from cache' : ' - the flow is customer-specific, so nothing in it is',
+        );
         exit(0);
     }
 

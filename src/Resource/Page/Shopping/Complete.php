@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
 use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Annotation\Embed;
+use BEAR\Resource\Annotation\JsonSchema;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
+use BEAR\Resource\RequestInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
-use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goShoppingComplete — ご注文完了 (Phase 3 — thin renderer).
@@ -48,11 +49,6 @@ use BEAR\Resource\Annotation\JsonSchema;
  */
 class Complete extends ResourceObject
 {
-    public function __construct(
-        private readonly OrderQueryInterface $orderQuery,
-    ) {
-    }
-
     /**
      * ALPS `goShoppingComplete` に対応する GET 操作。
      * @psalm-taint-source input $orderNo
@@ -62,14 +58,18 @@ class Complete extends ResourceObject
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
+    #[Embed(rel: 'orderSource', src: 'app://self/order/header{?orderNo}')]
     public function onGet(string $orderNo = ''): static
     {
-        $order = $orderNo === '' ? null : $this->orderQuery->byOrderNo($orderNo);
+        // #[Embed] put the request in the body before this method ran; the response shape is fixed
+        // (additionalProperties: false), so it is consumed here rather than rendered.
+        $source = $this->body['orderSource'] ?? null;
+        $resolved = $source instanceof RequestInterface ? (string) (($source())->body['orderNo'] ?? '') : '';
 
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goShoppingComplete',
-            'orderNo' => $order?->orderNo ?? '',
+            'orderNo' => $resolved,
             'completeMessage' => '',
             'staticContent' => [
                 'page' => 'shopping-complete',
