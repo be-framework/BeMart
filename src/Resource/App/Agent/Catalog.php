@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\App\Agent;
 
+use BEAR\RepositoryModule\Annotation\Cacheable;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\ToolUse\Attribute\Tool;
@@ -19,6 +20,7 @@ use function max;
 use function min;
 
 /** LLM-readable catalogue search for BEAR.ToolUse agents. */
+#[Cacheable(expirySecond: 30)]
 final class Catalog extends ResourceObject
 {
     public function __construct(
