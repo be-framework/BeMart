@@ -24,6 +24,7 @@ Then, for that one flow only:
 - When an invariant fails, decide where the defect lives before fixing: the library (fix on a branch in BEAR.QueryRepository, with a test that fails without the fix), the skill (~/.claude/skills/bear-cache-strategy/SKILL.md), or the application.
 - Never widen KNOWN in verify-cache.php to make a run pass. It holds tracked upstream defects only, with an issue reference.
 - Commit on cache-app-layer with a message that says what moved and why the strategy is what it is. Do not push, do not open PRs.
+- `composer.json` and `composer.lock` are dirty on purpose: they carry path repositories to the local `BEAR.QueryRepository` and `Be.Framework` checkouts, which is how the loop tests library changes before they are released. Never stage them, and never revert them either.
 - Skip formatters and full-project linters; `./var/loop/verify-all.sh` is the gate.
 
 ## Progress this iteration means

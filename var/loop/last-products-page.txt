@@ -1,4 +1,0 @@
-cold read          get pre_write_cleanup invalidate cache_policy save_etag save_value cache_miss
-second read        get cache_hit
-
-OK products-page: 200 and nothing about the page stored, its child answering from cache

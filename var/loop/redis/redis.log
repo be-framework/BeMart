@@ -1,9 +1,0 @@
-83344:C 17 Aug 2026 13:38:47.266 * oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
-83344:C 17 Aug 2026 13:38:47.266 * Redis version=8.8.0, bits=64, commit=00000000, modified=1, pid=83344, just started
-83344:C 17 Aug 2026 13:38:47.266 * Configuration loaded
-83344:M 17 Aug 2026 13:38:47.267 * monotonic clock: ARM CNTVCT @ 1000 ticks/us
-83344:M 17 Aug 2026 13:38:47.268 * Running mode=standalone, port=6379.
-83344:M 17 Aug 2026 13:38:47.268 # WARNING: The TCP backlog setting of 511 cannot be enforced because kern.ipc.somaxconn is set to the lower value of 128.
-83344:M 17 Aug 2026 13:38:47.269 * Server initialized
-83344:M 17 Aug 2026 13:38:47.269 * Ready to accept connections tcp
-83344:M 17 Aug 2026 13:38:47.269 # WARNING: Redis does not require authentication. Redis will accept connections from any local client.

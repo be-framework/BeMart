@@ -1,5 +1,0 @@
-cold read              get cache_miss put_donut cdn_headers pre_write_cleanup invalidate save_etag save_donut_view save_donut cache_miss
-purge the page         manual_purge invalidate manual_purge_result
-cdn                    keep=["_help_about_"] drop-on-write=["_help_about_"] drop-on-purge=["_help_about_"] lifetime={"Surrogate-Control":"max-age=31536000"}
-
-OK help-cdn: the edge was told what to keep, and the purge names the same thing

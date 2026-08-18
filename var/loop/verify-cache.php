@@ -361,9 +361,18 @@ if ($mode === 'cache-down') {
     }
 
     printf("%-22s %s\n", 'failing sides', json_encode($sides));
+
+    // The other half of the contract, and the one that was visible before pool_error existed: a
+    // write to a store that cannot be reached has to say it did not happen.
     foreach ($cold as $entry) {
-        if (str_starts_with($entry['type'], 'save_')) {
-            printf("%-22s %s saved=%s\n", 'write outcome', $entry['type'], var_export($entry['context']['saved'] ?? null, true));
+        if (! str_starts_with($entry['type'], 'save_')) {
+            continue;
+        }
+
+        $saved = $entry['context']['saved'] ?? null;
+        printf("%-22s %s saved=%s\n", 'write outcome', $entry['type'], var_export($saved, true));
+        if ($saved !== false) {
+            record(sprintf('26: %s reports saved=%s while the store is unreachable - the log is claiming a write that cannot have happened', $entry['type'], var_export($saved, true)), $violations, $known);
         }
     }
 

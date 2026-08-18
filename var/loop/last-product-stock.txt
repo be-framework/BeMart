@@ -1,7 +1,0 @@
-cold read          get get pre_write_cleanup invalidate cache_policy save_etag save_value cache_miss pre_write_cleanup invalidate depends_on cache_policy save_etag save_value cache_miss
-warm read          get cache_hit
-purge child        manual_purge invalidate manual_purge_result
-read after purge   get get pre_write_cleanup invalidate cache_policy save_etag save_value cache_miss pre_write_cleanup invalidate depends_on cache_policy save_etag save_value cache_miss
-KNOWN 9: app://self/product?productCode=sample-001 declares expiry=never - until invalidation - and the store drops its entries in 30..31536000 seconds [backend floor]
-
-OK product-stock: the log proves store, hit, invalidation and rebuild

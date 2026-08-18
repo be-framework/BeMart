@@ -1,9 +1,0 @@
-cold read              get cache_miss put_donut cdn_headers pre_write_cleanup invalidate save_etag save_donut_view save_donut cache_miss
-offer the etag         conditional_request cache_hit
-offer a stale etag     conditional_request cache_miss
-purge the page         manual_purge invalidate manual_purge_result
-offer it after the purge conditional_request cache_miss
-offer another page validator conditional_request cache_hit
-KNOWN 14: another page's validator was answered 304 for this URI - the 304 decision is not scoped to the resource [bearsunday/BEAR.QueryRepository#197]
-
-OK help-revalidate: the validator revalidates, an unknown one does not, and the purge ends it

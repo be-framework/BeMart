@@ -1,4 +1,0 @@
-cold read          
-second read        
-
-OK customer-profile: 200 and nothing about the page stored - the flow is customer-specific, so nothing in it is
