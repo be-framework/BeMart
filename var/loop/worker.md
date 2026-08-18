@@ -1,4 +1,4 @@
-You are extending cache coverage in the BeMart application (/Users/akihito/git/BeMart, branch cache-app-layer), one flow per iteration. bear/query-repository is symlinked from /Users/akihito/git/BEAR.QueryRepository (branch loop-integration) — you may fix the library there on its own branch when it is the library that is wrong.
+You are extending cache coverage in the BeMart application (the repository root, branch cache-app-layer), one flow per iteration. bear/query-repository is symlinked from the BEAR.QueryRepository checkout (branch loop-integration) — you may fix the library there on its own branch when it is the library that is wrong.
 
 ## This iteration
 
@@ -21,7 +21,7 @@ Then, for that one flow only:
 ## Rules
 
 - The oracle is the judge, not your reading: `./var/loop/verify-all.sh` must exit 0.
-- When an invariant fails, decide where the defect lives before fixing: the library (fix on a branch in BEAR.QueryRepository, with a test that fails without the fix), the skill (~/.claude/skills/bear-cache-strategy/SKILL.md), or the application.
+- When an invariant fails, decide where the defect lives before fixing: the library (fix on a branch in BEAR.QueryRepository, with a test that fails without the fix), the skill (the bear-cache-strategy skill), or the application.
 - Never widen KNOWN in verify-cache.php to make a run pass. It holds tracked upstream defects only, with an issue reference.
 - Commit on cache-app-layer with a message that says what moved and why the strategy is what it is. Do not push, do not open PRs.
 - `composer.json` and `composer.lock` are dirty on purpose: they carry path repositories to the local `BEAR.QueryRepository` and `Be.Framework` checkouts, which is how the loop tests library changes before they are released. Never stage them, and never revert them either.

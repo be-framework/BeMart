@@ -35,26 +35,31 @@ use function trim;
  */
 final class RevalidationTest extends TestCase
 {
-    private const HOST = '127.0.0.1:8095';
+    /**
+     * A port of its own, overridable: 8092/8093 belong to the flow tests, and a fixed guess in the
+     * same range is how this suite ended up talking to another project's server on this machine.
+     */
+    private const HOST = '127.0.0.1:18095';
     private const PATH = '/help/about';
 
     private static PhpServer|null $server = null;
 
     public static function setUpBeforeClass(): void
     {
-        self::$server ??= new PhpServer(self::HOST, __DIR__ . '/prod-json-index.php');
+        self::$server ??= new PhpServer(getenv('BEMART_REVALIDATE_HOST') ?: self::HOST, __DIR__ . '/prod-json-index.php');
         self::$server->start();
     }
 
     /** @return array{status: int, headers: string, body: string} */
     private function get(string|null $ifNoneMatch = null): array
     {
+        $host = getenv('BEMART_REVALIDATE_HOST') ?: self::HOST;
         $curl = 'curl -s -i';
         if ($ifNoneMatch !== null) {
             $curl .= ' -H ' . escapeshellarg('If-None-Match: ' . $ifNoneMatch);
         }
 
-        $raw = (string) shell_exec($curl . ' ' . escapeshellarg('http://' . self::HOST . self::PATH));
+        $raw = (string) shell_exec($curl . ' ' . escapeshellarg('http://' . $host . self::PATH));
         $split = strpos($raw, "\r\n\r\n");
         $headers = $split === false ? $raw : substr($raw, 0, $split);
         $body = $split === false ? '' : trim(substr($raw, $split + 4));

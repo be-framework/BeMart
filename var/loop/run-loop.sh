@@ -8,7 +8,7 @@
 # has to prove store/hit/invalidation, and the application suite has to stay green.
 set -uo pipefail
 
-REPO=/Users/akihito/git/BeMart
+REPO=$(cd "$(dirname "$0")/../.." && pwd)
 LOOP_DIR="$REPO/var/loop"
 MAX_ITERATIONS=${1:-3}
 WORKER_PROVIDER=claude/claude-opus-5
