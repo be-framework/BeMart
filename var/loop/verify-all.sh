@@ -12,6 +12,18 @@ export APP_CONTEXT=cli-fake-hal-app
 PHP=${PHP:-/opt/homebrew/opt/php@8.4/bin/php}
 [ -x "$PHP" ] || { echo "no php at $PHP"; exit 2; }
 
+# Say what was judged. The library is a path repository, so the gate's verdict belongs to whatever
+# commit is checked out there - a green run against the wrong branch is how a fixed defect appears
+# to come back.
+LIB=/Users/akihito/git/BEAR.QueryRepository
+if [ -d "$LIB" ]; then
+    lib_branch=$(git -C "$LIB" branch --show-current)
+    lib_sha=$(git -C "$LIB" rev-parse --short HEAD)
+    lib_dirty=$(git -C "$LIB" status --porcelain -- src src-annotation | head -1)
+    printf 'library        %s %s%s\n' "$lib_branch" "$lib_sha" "${lib_dirty:+ (uncommitted src changes)}"
+    [ "$lib_branch" = "loop-integration" ] || printf 'library        NOTE: not loop-integration - earlier fixes may be missing\n'
+fi
+
 status=0
 for flow in help help-revalidate help-cdn help-cache-down products-app products-page product-stock products-corpus-tag shopping-complete customer-profile; do
     if "$PHP" var/loop/verify-cache.php "$flow" > "var/loop/last-$flow.txt" 2>&1; then
