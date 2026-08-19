@@ -46,7 +46,6 @@ use function mkdir;
 use function preg_match;
 use function preg_replace;
 use function preg_split;
-use function rmdir;
 use function shell_exec;
 use function sprintf;
 use function str_contains;
@@ -99,51 +98,9 @@ final class HttpResource implements ResourceInterface
             return;
         }
 
-        $this->clearCompiledContextCache($index);
-
         $server = new PhpServer($host, $index);
         $server->start();
         self::$servers[$serverKey] = $server;
-    }
-
-    private function clearCompiledContextCache(string $index): void
-    {
-        $context = match (true) {
-            str_ends_with($index, '/prod-json-index.php') => 'prod-eccube-sql-hal-app',
-            str_ends_with($index, '/index.php') => 'html-test-hal-app',
-            str_ends_with($index, '/html-sql-index.php') => 'html-eccube-sql-hal-app',
-            default => null,
-        };
-        if ($context === null) {
-            return;
-        }
-
-        $contextDir = dirname(__DIR__, 2) . '/var/tmp/' . $context;
-        foreach (['di', 'injector', 'twig'] as $subDir) {
-            $this->removeDirectory($contextDir . '/' . $subDir);
-        }
-    }
-
-    private function removeDirectory(string $directory): void
-    {
-        if (! is_dir($directory)) {
-            return;
-        }
-
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::CHILD_FIRST,
-        );
-        foreach ($iterator as $file) {
-            if ($file->isDir() && ! $file->isLink()) {
-                rmdir($file->getPathname());
-                continue;
-            }
-
-            unlink($file->getPathname());
-        }
-
-        rmdir($directory);
     }
 
     /** @param AbstractUri|string $uri */

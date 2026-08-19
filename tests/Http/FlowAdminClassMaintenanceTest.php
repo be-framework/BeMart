@@ -12,7 +12,7 @@ final class FlowAdminClassMaintenanceTest extends Workflow
     protected function newResource(): ResourceInterface
     {
         return new HttpResource(
-            '127.0.0.1:8089',
+            '127.0.0.1:18089',
             __DIR__ . '/prod-json-index.php',
             __DIR__ . '/log/' . self::FLOW_ID . '.log',
         );

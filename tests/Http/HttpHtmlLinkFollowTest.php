@@ -15,7 +15,7 @@ final class HttpHtmlLinkFollowTest extends TestCase
     public function testFollowsLinkHeaderRenderedFromLinkAttribute(): void
     {
         $resource = new HttpResource(
-            '127.0.0.1:8097',
+            '127.0.0.1:18097',
             __DIR__ . '/index.php',
             __DIR__ . '/log/html-link-follow.log',
         );
