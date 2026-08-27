@@ -115,7 +115,10 @@ const FLOWS = [
         'write' => null,
         'embeds' => false,
         'mode' => 'cache-down',
-        'dsn' => 'redis://127.0.0.1:1',
+        // lazy=1 on purpose: the scenario is a store that cannot be reached when a request needs it,
+        // not one that refuses to be configured. Without it symfony/cache connects eagerly and the
+        // injector throws before any read happens.
+        'dsn' => 'redis://127.0.0.1:1?lazy=1',
     ],
     // The edge's copy. A CDN is told what to keep and, later, what to drop: the two have to name
     // the same thing, or the edge serves a page the origin has already replaced - and nothing in
