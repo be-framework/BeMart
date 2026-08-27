@@ -742,6 +742,34 @@ foreach ($sessions as $label => $entries) {
     printf("%-18s %s\n", $label, implode(' ', typesOf($entries)));
 }
 
+// 6b. what the cache is worth: the close of each read carries what that answer cost. The sign is
+// the invariant - a hit that is not cheaper than a miss is a cache paid for and not used. The
+// difference is not "saved": a miss includes the write it triggered.
+$costOf = static function (array $entries, string $type): float|null {
+    foreach ($entries as $entry) {
+        if ($entry['type'] === $type && ($entry['context']['layer'] ?? null) !== 'donut') {
+            $duration = $entry['context']['durationMs'] ?? null;
+
+            return is_float($duration) || is_int($duration) ? (float) $duration : null;
+        }
+    }
+
+    return null;
+};
+
+$missCost = $costOf($cold, 'cache_miss');
+$hitCost = $costOf($sessions['warm read'] ?? [], 'cache_hit');
+if ($missCost !== null && $hitCost !== null) {
+    printf("%-18s miss=%.3fms hit=%.3fms\n", 'cost', $missCost, $hitCost);
+    if ($hitCost >= $missCost) {
+        record(sprintf(
+            '27: the hit cost %.3fms against a miss of %.3fms - this cache is paid for and not used',
+            $hitCost,
+            $missCost,
+        ), $violations, $known);
+    }
+}
+
 // 7. what the store actually did with the lifetime the log claims
 if ($dsn !== '') {
     $client = new Predis\Client($dsn);
