@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart;
 
 use BEAR\Resource\ResourceObject;
+use BEAR\QueryRepository\UriScopedHttpCacheInterface;
+use BEAR\Resource\Uri;
 use BEAR\Sunday\Extension\Application\AppInterface;
 use BEAR\Sunday\Extension\Router\RouterInterface;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
@@ -14,6 +16,7 @@ use Ray\Di\AbstractModule;
 use Throwable;
 
 use function assert;
+use function http_build_query;
 use function putenv;
 
 /**
@@ -42,13 +45,19 @@ final class Bootstrap
         assert($app instanceof App);
         /** @var array{HTTP_IF_NONE_MATCH?: string} $cacheServer */
         $cacheServer = $server;
-        if ($app->httpCache->isNotModified($cacheServer)) {
+        // Route first, then answer the conditional request: an entity-tag belongs to one resource,
+        // and the unscoped question ("is this validator alive anywhere?") answers 304 to a client
+        // returning a validator it holds for another URI. Matching a path is not what a 304 saves.
+        $request = $app->router->match($globals, $server);
+        $notModified = $app->httpCache instanceof UriScopedHttpCacheInterface
+            ? $app->httpCache->isNotModifiedFor(new Uri($request->path . ($request->query === [] ? '' : '?' . http_build_query($request->query))), $cacheServer)
+            : $app->httpCache->isNotModified($cacheServer);
+        if ($notModified) {
             $app->httpCache->transfer();
 
             return 0;
         }
 
-        $request = $app->router->match($globals, $server);
         try {
             $adminSession = $injector->getInstance(AdminSession::class);
             if ($adminSession instanceof HtmlAdminSessionAdapter) {

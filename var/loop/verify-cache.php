@@ -32,6 +32,7 @@ use BEAR\QueryRepository\StorageRedisDsnModule;
 use BEAR\QueryRepository\QueryRepositoryModule;
 use BEAR\RepositoryModule\Annotation\CacheLog;
 use BEAR\QueryRepository\QueryRepositoryInterface;
+use BEAR\QueryRepository\UriScopedHttpCacheInterface;
 use BEAR\QueryRepository\ResourceStorageInterface;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Sunday\Extension\Transfer\HttpCacheInterface;
@@ -281,7 +282,6 @@ function tagsOf(array $entries, string $prefix): array
 const KNOWN = [
     // #185 (a donut template stored untagged) is fixed and its entry is gone: an entry stays here
     // only while its issue is open, so a defect that comes back fails the next run.
-    "another page's validator was answered 304" => 'bearsunday/BEAR.QueryRepository#197',
 ];
 
 /**
@@ -514,8 +514,13 @@ if ($mode === 'revalidate') {
     }
 
     $httpCache = $injector->getInstance(HttpCacheInterface::class);
-    $ask = static function (string $label, string $offered) use ($httpCache, $logger, &$sessions): bool {
-        $answer = $httpCache->isNotModified(['HTTP_IF_NONE_MATCH' => $offered, 'REQUEST_URI' => '/help/about']);
+    $read = $flow['read'];
+    // The scoped question, the way an application asks it after routing: this validator, for this
+    // resource. The unscoped one cannot tell whose validator it is.
+    $ask = static function (string $label, string $offered) use ($httpCache, $logger, &$sessions, $read): bool {
+        $answer = $httpCache instanceof UriScopedHttpCacheInterface
+            ? $httpCache->isNotModifiedFor(new Uri($read), ['HTTP_IF_NONE_MATCH' => $offered])
+            : $httpCache->isNotModified(['HTTP_IF_NONE_MATCH' => $offered, 'REQUEST_URI' => '/help/about']);
         $sessions[$label] = flatten($logger->flush());
 
         return $answer;
