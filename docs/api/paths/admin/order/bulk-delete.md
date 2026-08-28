@@ -25,7 +25,7 @@ Failure mapping:
 ## POST
 ALPS `doBulkDeleteOrder` に対応する POST 操作。
 
-**ALPS**: `doBulkDeleteOrder` - 受注を一括削除する
+**ALPS**: `doBulkDeleteOrder`
 
 
 

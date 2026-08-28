@@ -16,7 +16,7 @@ download lives at the sibling action-only
 ## GET
 ALPS `goExportProduct` に対応する GET 操作。
 
-**ALPS**: `goExportProduct` - 商品CSVをエクスポートする
+**ALPS**: `goExportProduct`
 
 
 

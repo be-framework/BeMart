@@ -22,7 +22,7 @@ share a namespace prefix.
 ## GET
 ALPS `goMypage` に対応する GET 操作。
 
-**ALPS**: `goMypage` - マイページを見る
+**ALPS**: `goMypage`
 
 
 

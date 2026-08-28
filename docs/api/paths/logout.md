@@ -31,7 +31,7 @@ not branch on environment or touch PHP session storage.
 ## POST
 Phase B Slice 9: the CSRF token is user-controlled input.
 
-**ALPS**: `doLogout` - ログアウトする
+**ALPS**: `doLogout`
 
 
 

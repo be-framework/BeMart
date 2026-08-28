@@ -27,7 +27,7 @@ Failure mapping:
 ## POST
 ALPS `doCreateOrder` に対応する POST 操作。
 
-**ALPS**: `doCreateOrder` - 受注を作成する
+**ALPS**: `doCreateOrder`
 
 
 

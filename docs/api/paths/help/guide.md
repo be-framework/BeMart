@@ -15,7 +15,7 @@ Wave 3H exposes the shape only.
 ## GET
 ALPS `goHelpGuide` に対応する GET 操作。
 
-**ALPS**: `goHelpGuide` - ご利用ガイドを見る
+**ALPS**: `goHelpGuide`
 
 
 

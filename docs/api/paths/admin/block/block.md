@@ -22,7 +22,7 @@ Renders the block edit form.
 
 The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
 
-**ALPS**: `goBlock` - ブロック詳細を見る
+**ALPS**: `goBlock`
 
 
 
@@ -54,7 +54,7 @@ The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
 ## PUT
 ALPS `doUpdateBlock` に対応する PUT 操作。
 
-**ALPS**: `doUpdateBlock` - ブロックを更新する
+**ALPS**: `doUpdateBlock`
 
 
 
@@ -86,7 +86,7 @@ ALPS `doUpdateBlock` に対応する PUT 操作。
 ## DELETE
 ALPS `doDeleteBlock` に対応する DELETE 操作。
 
-**ALPS**: `doDeleteBlock` - ブロックを削除する
+**ALPS**: `doDeleteBlock`
 
 
 

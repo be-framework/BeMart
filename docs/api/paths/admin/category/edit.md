@@ -27,7 +27,7 @@ surfaced as 403.
 ## GET
 ALPS `goCategory` に対応する GET 操作。
 
-**ALPS**: `goCategory` - カテゴリ詳細を見る
+**ALPS**: `goCategory`
 
 
 

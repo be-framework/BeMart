@@ -29,7 +29,7 @@ Coexists with `Resource\Page\Shopping\Checkout.php` (Pilot 5) and
 ## GET
 ALPS `goShoppingLogin` に対応する GET 操作。
 
-**ALPS**: `goShoppingLogin` - 購入ログインを見る
+**ALPS**: `goShoppingLogin`
 
 
 

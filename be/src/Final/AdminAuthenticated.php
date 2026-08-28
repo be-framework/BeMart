@@ -40,11 +40,15 @@ use SensitiveParameter;
  * login against an unregistered id is recorded too.
  *
  * Before any credential is touched, {@see LoginAttemptGateInterface}
- * refuses a loginId that has already burned through MAX_FAILURES inside
- * WINDOW_MINUTES with {@see LoginAttemptsExceededException}; the
- * refusal is not itself counted or logged, because nothing was
- * attempted, so the window can expire. A correct password does not lift
- * the lock — that is the whole point of the throttle.
+ * refuses an attempt that has already burned through the per-client
+ * limit (MAX_FAILURES for that loginId from that client) or the
+ * per-account limit (MAX_ACCOUNT_FAILURES for that loginId across all
+ * clients) inside WINDOW_MINUTES with
+ * {@see LoginAttemptsExceededException}; the refusal is not itself
+ * counted or logged, because nothing was attempted, so the window can
+ * expire. A correct password does not lift the lock — that is the
+ * whole point of the throttle. Either limit raises the same exception,
+ * so the response does not tell the caller which one was hit.
  *
  * Existence of this object proves: loginId is registered AND the admin
  * is active AND password matches stored hash. The public surface
@@ -75,10 +79,12 @@ final readonly class AdminAuthenticated
         #[Inject] LoginAttemptGateInterface $gate,
         #[Inject] ClientIpInterface $clientIp,
     ) {
-        $gate->failuresSinceLastSuccess($loginId, LoginAttemptGateInterface::WINDOW_MINUTES)
-            ->assertBelow(LoginAttemptGateInterface::MAX_FAILURES);
-
         $clientAddress = $clientIp->address();
+        $gate->failuresSinceLastSuccess($loginId, $clientAddress, LoginAttemptGateInterface::WINDOW_MINUTES)
+            ->assertBelow(LoginAttemptGateInterface::MAX_FAILURES);
+        $gate->accountFailuresSinceLastSuccess($loginId, LoginAttemptGateInterface::WINDOW_MINUTES)
+            ->assertBelow(LoginAttemptGateInterface::MAX_ACCOUNT_FAILURES);
+
         $admin = $adminQuery->byLogin($loginId);
         if ($admin === null) {
             $history->append($loginId, false, $clientAddress);

@@ -14,7 +14,7 @@ onPost only. CSRF enforced. The Final silently skips unknown codes;
 ## POST
 ALPS `doBulkUpdateProductStatus` に対応する POST 操作。
 
-**ALPS**: `doBulkUpdateProductStatus` - 商品ステータスを一括変更する
+**ALPS**: `doBulkUpdateProductStatus`
 
 
 

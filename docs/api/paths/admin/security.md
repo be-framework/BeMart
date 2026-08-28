@@ -16,7 +16,7 @@ boundary (config/firewall side-effect isolated).
 ## GET
 ALPS `doUpdateSecurity` に対応する GET 操作。
 
-**ALPS**: `doUpdateSecurity` - セキュリティ設定を更新する
+**ALPS**: `doUpdateSecurity`
 
 
 
@@ -48,7 +48,7 @@ Failure mapping:
 - SemanticVariableException        → 400
 - UnauthorizedAdminAccessException → 403 (no admin session)
 
-**ALPS**: `doUpdateSecurity` - セキュリティ設定を更新する
+**ALPS**: `doUpdateSecurity`
 
 
 

@@ -35,7 +35,7 @@ Renders the admin 2FA device-setup form.
 Anonymous-accessible (login-context): returns 200 regardless of
 session state.
 
-**ALPS**: `doSetTwoFactorAuth` - 二要素認証を設定する
+**ALPS**: `doSetTwoFactorAuth`
 
 
 
@@ -78,7 +78,7 @@ Failure mapping:
   - SemanticVariableException     → 400 (malformed code)
   - TwoFactorAuthFailedException  → 400 (first code mismatch)
 
-**ALPS**: `doSetTwoFactorAuth` - 二要素認証を設定する
+**ALPS**: `doSetTwoFactorAuth`
 
 
 

@@ -25,7 +25,7 @@ Failure mapping:
 ## PUT
 ALPS `doToggleVisible` に対応する PUT 操作。
 
-**ALPS**: `doToggleVisible` - 表示・非表示を切り替える
+**ALPS**: `doToggleVisible`
 
 
 

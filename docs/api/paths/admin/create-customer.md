@@ -32,7 +32,7 @@ discipline as the front-end entry. The admin AUTHZ check lives
 inside the first Being (AdminCustomerCreating), so this method
 can stay free of session lookups; we just map the exception.
 
-**ALPS**: `doCreateCustomer` - 会員を作成する
+**ALPS**: `doCreateCustomer`
 
 
 

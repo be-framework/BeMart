@@ -31,6 +31,11 @@ use const PHP_SESSION_ACTIVE;
 /**
  * Fake login-attempt audit log — read, append AND throttle counter.
  *
+ * Implements the same two-counter rule as the SQL gate: the strict
+ * count is per client+loginId and resets on that client's own success,
+ * the loose account count is per loginId across all clients and resets
+ * on any success.
+ *
  * Ray.FakeQuery fixtures are static: append() against a JSONL corpus
  * does not change what the next read sees, and a throttle whose counter
  * never moves is not a throttle. So Fake contexts get a real (if
@@ -96,12 +101,33 @@ final class InMemoryLoginHistoryStorage implements LoginHistoryStorageInterface,
     }
 
     #[Override]
-    public function failuresSinceLastSuccess(string $loginId, int $windowMinutes): LoginFailureCount
+    public function failuresSinceLastSuccess(string $loginId, string $clientIp, int $windowMinutes): LoginFailureCount
+    {
+        return $this->countSinceLastSuccess($loginId, $clientIp, $windowMinutes);
+    }
+
+    #[Override]
+    public function accountFailuresSinceLastSuccess(string $loginId, int $windowMinutes): LoginFailureCount
+    {
+        return $this->countSinceLastSuccess($loginId, null, $windowMinutes);
+    }
+
+    /**
+     * Count failures for `$loginId` (from `$clientIp` when given) since
+     * the newest matching success — the same two-counter rule as the SQL
+     * gate: the per-client counter resets on that client's own success,
+     * the per-account counter on any success for the loginId.
+     */
+    private function countSinceLastSuccess(string $loginId, string|null $clientIp, int $windowMinutes): LoginFailureCount
     {
         $since = time() - ($windowMinutes * 60);
         $failures = 0;
         foreach ($this->rows() as $row) {
-            if ($row['loginId'] !== $loginId || strtotime($row['timestamp']) < $since) {
+            if (
+                $row['loginId'] !== $loginId
+                || ($clientIp !== null && $row['clientIp'] !== $clientIp)
+                || strtotime($row['timestamp']) < $since
+            ) {
                 continue;
             }
 

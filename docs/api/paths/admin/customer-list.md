@@ -29,7 +29,7 @@ customer actions that are available from the list surface.
 Wave 5: filter fields are admin-form input — taint discipline
 mirrors the Wave 4 admin login.
 
-**ALPS**: `goCustomerList` - 会員一覧を見る
+**ALPS**: `goCustomerList`
 
 
 

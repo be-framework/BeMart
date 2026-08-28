@@ -17,7 +17,7 @@ TODO until a dedicated aggregation lands.
 ## GET
 ALPS `goHelpTradeLaw` に対応する GET 操作。
 
-**ALPS**: `goHelpTradeLaw` - 特定商取引法を見る
+**ALPS**: `goHelpTradeLaw`
 
 
 

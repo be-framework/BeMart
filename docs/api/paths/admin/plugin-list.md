@@ -29,7 +29,7 @@ sub-resource affordances (enable / disable / uninstall).
 ## GET
 ALPS `goPluginList` に対応する GET 操作。
 
-**ALPS**: `goPluginList` - プラグイン一覧を見る
+**ALPS**: `goPluginList`
 
 
 
@@ -56,7 +56,7 @@ _No parameters required_
 ## POST
 Wave 8: every form field is admin-form input.
 
-**ALPS**: `doInstallPlugin` - プラグインをインストールする
+**ALPS**: `doInstallPlugin`
 
 
 

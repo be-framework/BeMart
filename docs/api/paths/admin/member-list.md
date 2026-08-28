@@ -30,7 +30,7 @@ surfaced here per the bear-hypermedia discipline.
 Wave 8: filter / paging knobs are admin-form input. Same taint
 discipline as the customer-list and order-list variants.
 
-**ALPS**: `goMemberList` - 管理者一覧を見る
+**ALPS**: `goMemberList`
 
 
 

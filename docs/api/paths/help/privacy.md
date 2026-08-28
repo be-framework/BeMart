@@ -14,7 +14,7 @@ Admin-editable. Wave 3H exposes the shape only.
 ## GET
 ALPS `goHelpPrivacy` に対応する GET 操作。
 
-**ALPS**: `goHelpPrivacy` - プライバシーポリシーを見る
+**ALPS**: `goHelpPrivacy`
 
 
 

@@ -21,7 +21,7 @@ inline as TODO until a dedicated Top aggregation lands.
 ## GET
 EC-CUBE goTop — render the top page scaffolding.
 
-**ALPS**: `goTop` - トップページを見る
+**ALPS**: `goTop`
 
 
 

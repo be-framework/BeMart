@@ -15,7 +15,7 @@ behind {@see \MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface}.
 ## PUT
 ALPS `doUpdateMasterData` に対応する PUT 操作。
 
-**ALPS**: `doUpdateMasterData` - マスタデータを更新する
+**ALPS**: `doUpdateMasterData`
 
 
 

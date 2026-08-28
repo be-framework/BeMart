@@ -29,7 +29,7 @@ separate confirmation page so each template has a 1:1 resource.
 EC-CUBE goForgotComplete — render the reset-mail-sent confirmation
 page scaffolding.
 
-**ALPS**: `doRequestPasswordReset` - パスワードリセットを依頼する
+**ALPS**: `doRequestPasswordReset`
 
 
 

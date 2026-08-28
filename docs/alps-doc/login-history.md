@@ -24,7 +24,7 @@ BeMart の `LoginHistoryEntity` は次の 4 項目を保持する。
 
 LoginHistory は append + list の追記専用監査ログである。getById、update、delete は存在しない。監査行はクライアント可視のハンドルを持たず、変更もされないため `LoginHistoryIdProvider` も存在しない。
 
-管理者認証の 2 段（パスワードと 2 要素認証コード）は、成功も失敗も 1 行ずつ append する。同じ行はログイン試行回数の制限にも使われ、`LoginAttemptGateInterface` が「直近の成功より後」の失敗数を数える。
+管理者認証の 2 段（パスワードと 2 要素認証コード）は、成功も失敗も 1 行ずつ append する。同じ行はログイン試行回数の制限にも使われ、`LoginAttemptGateInterface` が「直近の成功より後」の失敗数を数える。制限は 2 段階で、クライアント IP とログイン ID の組ごとに 5 回（`MAX_FAILURES`）、ログイン ID 全体では 50 回（`MAX_ACCOUNT_FAILURES`、いずれも 30 分窓）。どちらかを超えた試行は `LoginAttemptsExceededException` で拒否され、どちらの上限に当たったかは応答に現れない。
 
 ## Migration Decisions
 

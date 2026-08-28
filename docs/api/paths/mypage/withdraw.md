@@ -30,7 +30,7 @@ confirm page can render "退会されるアカウント: name01 name02
 mirrors the Symfony token into the session for the subsequent
 POST.
 
-**ALPS**: `goMypageWithdraw` - 退会画面を見る
+**ALPS**: `goMypageWithdraw`
 
 
 
@@ -61,7 +61,7 @@ _No parameters required_
 ## POST
 ALPS `doWithdrawCustomer` に対応する POST 操作。
 
-**ALPS**: `doWithdrawCustomer` - 退会する
+**ALPS**: `doWithdrawCustomer`
 
 
 

@@ -31,7 +31,7 @@ Maps to `page://self/mypage/change-complete`.
 ## GET
 ALPS `goMypageChangeComplete` に対応する GET 操作。
 
-**ALPS**: `goMypageChangeComplete` - 会員情報変更完了を見る
+**ALPS**: `goMypageChangeComplete`
 
 
 

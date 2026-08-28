@@ -28,7 +28,7 @@ firewall. Both surface 403.
 ## GET
 ALPS `goProduct` に対応する GET 操作。
 
-**ALPS**: `goProduct` - 商品詳細を見る
+**ALPS**: `goProduct`
 
 
 

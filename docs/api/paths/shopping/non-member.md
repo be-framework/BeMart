@@ -40,7 +40,7 @@ state). Fields mirror SubmitNonMemberInput. `csrfToken` carries
 the trusted reference token so the HTML form can pass the
 subsequent POST's CSRF boundary.
 
-**ALPS**: `goShoppingNonMember` - 非会員購入情報入力へ進む
+**ALPS**: `goShoppingNonMember`
 
 
 
@@ -76,7 +76,7 @@ Semantic value objects format-validate but do not universally
 escape — sinks downstream remain responsible for their own
 defence (bound params, HTML escape on render).
 
-**ALPS**: `doSubmitNonMember` - 非会員情報を送信する
+**ALPS**: `doSubmitNonMember`
 
 
 

@@ -31,7 +31,8 @@ use Ray\InputQuery\Attribute\Input;
  * the password stage ({@see AdminAuthenticated}). Every verification —
  * pass or fail — appends a row through {@see LoginHistoryStorageInterface},
  * and {@see LoginAttemptGateInterface} refuses the attempt with
- * {@see LoginAttemptsExceededException} once MAX_FAILURES codes have
+ * {@see LoginAttemptsExceededException} once MAX_FAILURES codes from
+ * this client, or MAX_ACCOUNT_FAILURES codes across all clients, have
  * been burned since the last success. The password stage's own success
  * row is what zeroes the count, so a fresh login buys a fresh set of
  * code attempts and nothing more.
@@ -48,10 +49,12 @@ final readonly class TwoFactorAuthVerified
         #[Inject] LoginAttemptGateInterface $gate,
         #[Inject] ClientIpInterface $clientIp,
     ) {
-        $gate->failuresSinceLastSuccess($loginId, LoginAttemptGateInterface::WINDOW_MINUTES)
-            ->assertBelow(LoginAttemptGateInterface::MAX_FAILURES);
-
         $clientAddress = $clientIp->address();
+        $gate->failuresSinceLastSuccess($loginId, $clientAddress, LoginAttemptGateInterface::WINDOW_MINUTES)
+            ->assertBelow(LoginAttemptGateInterface::MAX_FAILURES);
+        $gate->accountFailuresSinceLastSuccess($loginId, LoginAttemptGateInterface::WINDOW_MINUTES)
+            ->assertBelow(LoginAttemptGateInterface::MAX_ACCOUNT_FAILURES);
+
         if (! $twoFactorAuth->verify($loginId, $deviceToken)) {
             $history->append($loginId, false, $clientAddress);
 

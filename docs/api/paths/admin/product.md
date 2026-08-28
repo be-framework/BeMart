@@ -27,7 +27,7 @@ AdminCustomer onGet).
 ## GET
 goProduct (admin variant) — fetch full product detail.
 
-**ALPS**: `goProduct` - 商品詳細を見る
+**ALPS**: `goProduct`
 
 
 
@@ -70,7 +70,7 @@ goProduct (admin variant) — fetch full product detail.
 ## POST
 doCreateProduct — create a new product.
 
-**ALPS**: `doCreateProduct` - 商品を作成する
+**ALPS**: `doCreateProduct`
 
 
 
@@ -104,7 +104,7 @@ doCreateProduct — create a new product.
 ## PUT
 doUpdateProduct — edit an existing product (partial overwrite).
 
-**ALPS**: `doUpdateProduct` - 商品を更新する
+**ALPS**: `doUpdateProduct`
 
 
 
@@ -144,7 +144,7 @@ doUpdateProduct — edit an existing product (partial overwrite).
 doDeleteProduct — soft-delete (status=3). Idempotent replay
 surfaces `alreadyDeleted=true`.
 
-**ALPS**: `doDeleteProduct` - 商品を削除する
+**ALPS**: `doDeleteProduct`
 
 
 

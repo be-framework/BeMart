@@ -541,7 +541,7 @@ EC-CUBE handles the customer-inquiry form by emailing the shop directly (Symfony
 - EC-CUBE has `member_id` (FK back to the admin) — BeMart doesn't model it. Phase 2b should resolve `member_id` from `user_name` (login_id) at write time, or leave NULL (`ON DELETE SET NULL` so it's safe).
 - `success` is an enum FK, not a bool: writes map true → 1 and false → 0, reads compare against 1.
 
-**Used by**: `LoginHistoryStorageInterface::list`, `append`, and `LoginAttemptGateInterface::failuresSinceLastSuccess` (login throttle).
+**Used by**: `LoginHistoryStorageInterface::list`, `append`, and `LoginAttemptGateInterface::failuresSinceLastSuccess` / `accountFailuresSinceLastSuccess` (login throttle).
 
 **Phase 2b SQL surface**:
 - SELECT … JOIN mtb_login_history_status ORDER BY create_date DESC LIMIT ?

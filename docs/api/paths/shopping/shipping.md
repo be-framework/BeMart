@@ -20,7 +20,7 @@ other Shopping/* renderers under the Wave 3H scope).
 ## GET
 ALPS `goShoppingShipping` に対応する GET 操作。
 
-**ALPS**: `goShoppingShipping` - お届け先を選択する画面を見る
+**ALPS**: `goShoppingShipping`
 
 
 
@@ -58,7 +58,7 @@ surface and returns to the shopping page. The full pre-order shipping
 persistence is intentionally left to the existing checkout enrichment
 backlog; this method makes the route executable without a placeholder.
 
-**ALPS**: `doSelectShippingAddress` - お届け先を選択する
+**ALPS**: `doSelectShippingAddress`
 
 
 
