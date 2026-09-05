@@ -24,16 +24,16 @@ use MyVendor\BeMart\Be\Being\ReorderResolving;
 final readonly class ReorderInput
 {
     /**
-     * Phase B Slice 9: `orderNo` originates from the HTTP request body.
-     * `sessionPrefix` has a default but can be overridden by a future
-     * Resource call — also treat as input.
+     * `orderNo` originates from the HTTP request body. `sessionPrefix`
+     * is resolved by the Resource from CartSessionPrefixInterface — it
+     * has no default, because an omitted prefix would silently merge
+     * every customer's reorder into one shared cart partition.
      *
      * @psalm-taint-source input $orderNo
-     * @psalm-taint-source input $sessionPrefix
      */
     public function __construct(
         public string $orderNo,
-        public string $sessionPrefix = 'session-prefix-1',
+        public string $sessionPrefix,
     ) {
     }
 }

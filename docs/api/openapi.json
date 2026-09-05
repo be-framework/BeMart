@@ -2878,6 +2878,7 @@
                                         "example": "test-admin",
                                         "minLength": 0,
                                         "maxLength": 128,
+                                        "pattern": "^[A-Za-z0-9._-]+$",
                                         "$comment": "BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
                                     },
                                     "password": {
@@ -3035,7 +3036,7 @@
             },
             "delete": {
                 "operationId": "doDeleteMember",
-                "summary": "Wave 8: doDeleteMember \u2014 soft-delete (work=0). Idempotent\nreplay returns 200 with `alreadyDeleted=true`. Self-target\nraises {@see InsufficientAuthorityException} \u2192 403.",
+                "summary": "Wave 8: doDeleteMember \u2014 soft-delete (work=0). Idempotent\nreplay returns 200 with `alreadyDeleted=true`. The caller's own\naccount, and any target that outranks the caller, raise\n{@see InsufficientAuthorityException} \u2192 403.",
                 "parameters": [
                     {
                         "name": "loginId",
@@ -4636,7 +4637,7 @@
             "post": {
                 "operationId": "doVerifyTwoFactorAuth",
                 "summary": "Verifies the submitted TOTP code (doVerifyTwoFactorAuth).",
-                "description": "Login-context: no admin-firewall guard. The trusted `loginId` is\nread from the password-verified session challenge and the admin\nsession is elevated only after the token succeeds. Legacy\nclient-supplied `loginId` is ignored.\n\nFailure mapping:\n  - Invalid CSRF                  \u2192 403 (interceptor)\n  - Missing pending challenge     \u2192 403\n  - SemanticVariableException     \u2192 400 (malformed code)\n  - TwoFactorAuthFailedException  \u2192 400 (code mismatch)",
+                "description": "Login-context: no admin-firewall guard. The trusted `loginId` is\nread from the password-verified session challenge and the admin\nsession is elevated only after the token succeeds. Legacy\nclient-supplied `loginId` is ignored.\n\nFailure mapping:\n  - Invalid CSRF                   \u2192 403 (interceptor)\n  - Missing pending challenge      \u2192 403\n  - SemanticVariableException      \u2192 400 (malformed code)\n  - TwoFactorAuthFailedException   \u2192 400 (code mismatch)\n  - LoginAttemptsExceededException \u2192 429 (too many codes burned;\n      the pending challenge is dropped here, so the admin has to\n      come back through the password stage \u2014 which is throttled on\n      the same counter, i.e. only after the window has passed)",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -4665,6 +4666,17 @@
                                         "minLength": 0,
                                         "maxLength": 128,
                                         "$comment": "BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 32,
+                                        "title": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9",
+                                        "description": "HTML\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u3092Resource/JSON\u5883\u754c\u3068\u533a\u5225\u3059\u308b\u305f\u3081\u306e\u4efb\u610f\u30d1\u30e9\u30e1\u30fc\u30bf\u30022FA\u30c1\u30e3\u30ec\u30f3\u30b8\u753b\u9762\u3067\u306f browser \u306e 303 \u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u5224\u5b9a\u306b\u3060\u3051\u4f7f\u3046\u3002",
+                                        "example": "verify"
                                     }
                                 },
                                 "required": [
@@ -4771,6 +4783,17 @@
                                         "title": "\u4e8c\u8981\u7d20\u8a8d\u8a3c\u30ad\u30fc\uff08\u5165\u529b\uff09",
                                         "description": "/admin/two-factor-auth-set \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u6271\u3046\u4e8c\u8981\u7d20\u8a8d\u8a3c\u30ad\u30fc\u3002\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u304f\u3001\u7167\u5408\u30fbURL\u30fb\u914d\u9001\u8ffd\u8de1\u306a\u3069\u306b\u4f7f\u3046\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u8b58\u5225\u5b50\u3002 \u3053\u306e\u5024\u306f2FA\u8a2d\u5b9a\u3067\u306f\u4e92\u63db\u5165\u529b\u3068\u3057\u3066\u306e\u307f\u53d7\u3051\u53d6\u308a\u3001\u4fe1\u983c\u3057\u306a\u3044\u3002",
                                         "$comment": "\u30ad\u30fc/\u8ffd\u8de1\u756a\u53f7\u306f\u7167\u5408\u7528\u306e\u4e0d\u900f\u660e\u6587\u5b57\u5217\u3067\u3001\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 32,
+                                        "title": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9",
+                                        "description": "HTML\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u3092Resource/JSON\u5883\u754c\u3068\u533a\u5225\u3059\u308b\u305f\u3081\u306e\u4efb\u610f\u30d1\u30e9\u30e1\u30fc\u30bf\u30022FA\u30c7\u30d0\u30a4\u30b9\u767b\u9332\u753b\u9762\u3067\u306f browser \u306e 303 \u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u5224\u5b9a\u306b\u3060\u3051\u4f7f\u3046\u3002",
+                                        "example": "set"
                                     }
                                 },
                                 "required": [
@@ -6157,29 +6180,6 @@
             "post": {
                 "operationId": "doWithdrawCustomer",
                 "summary": "ALPS `doWithdrawCustomer` \u306b\u5bfe\u5fdc\u3059\u308b POST \u64cd\u4f5c\u3002",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "sessionPrefix": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "minLength": 0,
-                                        "maxLength": 128,
-                                        "title": "\u30bb\u30c3\u30b7\u30e7\u30f3\u63a5\u982d\u8f9e\uff08\u5165\u529b\uff09",
-                                        "description": "\u8cfc\u5165\u30d5\u30ed\u30fc\u306e\u30ab\u30fc\u30c8\u30ad\u30fc\u3092\u69cb\u6210\u3059\u308b\u30bb\u30c3\u30b7\u30e7\u30f3\u30b9\u30b3\u30fc\u30d7\u306e\u63a5\u982d\u8f9e\u3002saleTypeId \u3068\u7d44\u307f\u5408\u308f\u305b\u3066\u8ca9\u58f2\u7a2e\u5225\u3054\u3068\u306e\u30ab\u30fc\u30c8\u3092\u5206\u96e2\u3059\u308b\u3002 Fake\u89b3\u5bdf\u6587\u5b57\u9577 16\u301c23; \u89b3\u5bdf\u5024 'session-prefix-1', 'session-checkout-pilot5'\u3002",
-                                        "example": "session-prefix-1",
-                                        "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -15468,7 +15468,12 @@
                                         "title": "\u6ce8\u6587\u5546\u54c1",
                                         "properties": {
                                             "productCode": {
-                                                "$ref": "#/$defs/productCode"
+                                                "type": "string",
+                                                "minLength": 0,
+                                                "maxLength": 64,
+                                                "title": "\u5546\u54c1\u30b3\u30fc\u30c9",
+                                                "description": "SKU/\u54c1\u756a\u3002EC-CUBE \u306e dtb_order_item.product_code \u306f NULL \u8a31\u5bb9\uff08\u5546\u54c1\u524a\u9664\u5f8c\u306f\u7a7a\u306b\u306a\u308b\uff09\u305f\u3081\u3001\u660e\u7d30\u30b9\u30ca\u30c3\u30d7\u30b7\u30e7\u30c3\u30c8\u3067\u306f\u7a7a\u6587\u5b57\u3092\u8a31\u53ef\u3059\u308b\u3002",
+                                                "example": "sample-001"
                                             },
                                             "productName": {
                                                 "type": "string",
@@ -23881,6 +23886,13 @@
                         "title": "\u4ef6\u6570",
                         "description": "/admin/customer-list \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u8fd4\u3059\u4ef6\u6570\u3002\u4e00\u89a7\u30fb\u96c6\u8a08\u30fb\u51e6\u7406\u7d50\u679c\u306e\u898f\u6a21\u3092\u8868\u3059\u975e\u8ca0\u6574\u6570\u3002"
                     },
+                    "csrfToken": {
+                        "type": "string",
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u5143\u3092\u691c\u8a3c\u3059\u308b\u30c8\u30fc\u30af\u30f3\u3002\u7ba1\u7406\u8005\u5411\u3051\u4e00\u89a7\u30da\u30fc\u30b8\u3067\u306e\u7d5e\u308a\u8fbc\u307f\u30d5\u30a9\u30fc\u30e0\u306b\u4f7f\u7528\u3002",
+                        "minLength": 1,
+                        "maxLength": 160
+                    },
                     "searchForm": {
                         "type": [
                             "object",
@@ -27585,6 +27597,13 @@
                         "description": "Aura/WebForm\u7531\u6765\u306e\u30d5\u30a9\u30fc\u30e0\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\u3002\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5185\u90e8\u69cb\u9020\u306e\u305f\u3081schema\u3067\u306f\u5b58\u5728\u3068\u578b\u306e\u307f\u3092\u5951\u7d04\u3059\u308b\u3002",
                         "$comment": "Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"
                     },
+                    "csrfToken": {
+                        "type": "string",
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u5143\u3092\u691c\u8a3c\u3059\u308b\u30c8\u30fc\u30af\u30f3\u3002\u7ba1\u7406\u8005\u5411\u3051\u30de\u30b9\u30bf\u30c7\u30fc\u30bf\u9078\u629e\u30d5\u30a9\u30fc\u30e0\u306b\u4f7f\u7528\u3002",
+                        "minLength": 1,
+                        "maxLength": 160
+                    },
                     "submitTo": {
                         "type": [
                             "object",
@@ -27973,6 +27992,13 @@
                         "title": "\u5165\u529b\u30d5\u30a9\u30fc\u30e0",
                         "description": "Aura/WebForm\u7531\u6765\u306e\u30d5\u30a9\u30fc\u30e0\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\u3002\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5185\u90e8\u69cb\u9020\u306e\u305f\u3081schema\u3067\u306f\u5b58\u5728\u3068\u578b\u306e\u307f\u3092\u5951\u7d04\u3059\u308b\u3002",
                         "$comment": "Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"
+                    },
+                    "csrfToken": {
+                        "type": "string",
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u5143\u3092\u691c\u8a3c\u3059\u308b\u30c8\u30fc\u30af\u30f3\u3002\u7ba1\u7406\u8005\u5411\u3051\u30de\u30b9\u30bf\u30c7\u30fc\u30bf\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u306b\u4f7f\u7528\u3002",
+                        "minLength": 1,
+                        "maxLength": 160
                     },
                     "submitTo": {
                         "type": [
@@ -31213,6 +31239,13 @@
                         "title": "\u691c\u7d22\u30d5\u30a9\u30fc\u30e0",
                         "description": "/admin/order-list \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u4fdd\u6301\u3059\u308b\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u3002Aura/WebForm\u7531\u6765\u306e\u5185\u90e8\u69cb\u9020\u306f\u5225\u5883\u754c\u306e\u8cac\u52d9\u3067\u3001\u3053\u3053\u3067\u306fResource\u4e0a\u306e\u5f79\u5272\u3092\u793a\u3059\u3002",
                         "$comment": "Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"
+                    },
+                    "csrfToken": {
+                        "type": "string",
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "\u4e00\u62ec\u524a\u9664\u30d5\u30a9\u30fc\u30e0\u306e\u9001\u4fe1\u5143\u3092\u691c\u8a3c\u3059\u308b\u30c8\u30fc\u30af\u30f3\u3002\u7ba1\u7406\u8005\u5411\u3051\u53d7\u6ce8\u4e00\u89a7\u306e\u4e00\u62ec\u64cd\u4f5c\u30d5\u30a9\u30fc\u30e0\u306b\u4f7f\u7528\u3002",
+                        "minLength": 1,
+                        "maxLength": 160
                     }
                 },
                 "additionalProperties": false,
@@ -50302,15 +50335,6 @@
                         "maxLength": 128,
                         "pattern": "^[A-Za-z0-9._:@/-]*$",
                         "$comment": "BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002"
-                    },
-                    "dummyEmail": {
-                        "title": "\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u9805\u76ee",
-                        "description": "/mypage/withdraw \u306e\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u3067\u4f7f\u3046\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u9805\u76ee\u3002\u5165\u529b\u4fdd\u6301\u3001\u521d\u671f\u5024\u3001\u518d\u8868\u793a\u306b\u5fc5\u8981\u306a\u88dc\u52a9\u5024\u3002",
-                        "type": "string",
-                        "format": "email",
-                        "minLength": 3,
-                        "maxLength": 254,
-                        "example": "alice@example.com"
                     }
                 },
                 "additionalProperties": false,
@@ -50534,8 +50558,7 @@
                 "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
                 "required": [
                     "cleared",
-                    "customerId",
-                    "dummyEmail"
+                    "customerId"
                 ]
             },
             "GET/mypage/withdraw-completeResponse": {
@@ -57811,7 +57834,7 @@
                             "null"
                         ],
                         "minLength": 0,
-                        "maxLength": 32,
+                        "maxLength": 255,
                         "title": "\u30ab\u30c6\u30b4\u30ea\u540d",
                         "description": "\u30ab\u30c6\u30b4\u30ea\u306e\u8868\u793a\u540d Fake\u89b3\u5bdf\u6587\u5b57\u9577 4\u301c6; \u89b3\u5bdf\u5024 'Food', 'Drinks'\u3002",
                         "example": "Food"
@@ -58636,7 +58659,7 @@
                                         "null"
                                     ],
                                     "minLength": 0,
-                                    "maxLength": 32,
+                                    "maxLength": 255,
                                     "title": "\u30ab\u30c6\u30b4\u30ea\u540d",
                                     "description": "\u30ab\u30c6\u30b4\u30ea\u306e\u8868\u793a\u540d Fake\u89b3\u5bdf\u6587\u5b57\u9577 4\u301c6; \u89b3\u5bdf\u5024 'Food', 'Drinks'\u3002",
                                     "example": "Food"
@@ -59767,7 +59790,7 @@
                                         "null"
                                     ],
                                     "minLength": 0,
-                                    "maxLength": 32,
+                                    "maxLength": 255,
                                     "title": "\u30ab\u30c6\u30b4\u30ea\u540d",
                                     "description": "\u30ab\u30c6\u30b4\u30ea\u306e\u8868\u793a\u540d Fake\u89b3\u5bdf\u6587\u5b57\u9577 4\u301c6; \u89b3\u5bdf\u5024 'Food', 'Drinks'\u3002",
                                     "example": "Food"

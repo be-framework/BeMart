@@ -22,7 +22,8 @@ use function dirname;
 
 final class MemberDeletedTest extends TestCase
 {
-    private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
+    private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';  // test-admin, authority=0
+    private const SHOP_OWNER_ID = 'ad000000000000000000000000000002';  // shop-owner, authority=1
 
     private BecomingInterface $becoming;
 
@@ -70,9 +71,37 @@ final class MemberDeletedTest extends TestCase
 
     public function testSelfDeleteIsRefused(): void
     {
-        // test-admin's adminId matches the session. Self-target → 403.
+        // ALPS: 自身は削除不可. test-admin's adminId matches the session.
         $this->expectException(InsufficientAuthorityException::class);
         ($this->becoming)(new DeleteMemberInput(loginId: 'test-admin'));
+    }
+
+    public function testShopOwnerCannotDeleteSystemAdmin(): void
+    {
+        $this->build(self::SHOP_OWNER_ID);
+
+        $this->expectException(InsufficientAuthorityException::class);
+        ($this->becoming)(new DeleteMemberInput(loginId: 'test-admin'));
+    }
+
+    public function testShopOwnerCanDeletePeerShopOwner(): void
+    {
+        $this->build(self::SHOP_OWNER_ID);
+
+        // deputy is also authority=1 — a peer, not a superior, so this is
+        // ordinary staffing. Only outranking the caller is refused.
+        $final = ($this->becoming)(new DeleteMemberInput(loginId: 'deputy'));
+
+        $this->assertInstanceOf(MemberDeleted::class, $final);
+        $this->assertSame('deputy', $final->loginId);
+    }
+
+    public function testStaleAdminSessionRefuses(): void
+    {
+        $this->build('ad0000000000000000000000000000ff');
+
+        $this->expectException(UnauthorizedAdminAccessException::class);
+        ($this->becoming)(new DeleteMemberInput(loginId: 'shop-owner'));
     }
 
     public function testUnknownLoginIdRaisesNotFound(): void

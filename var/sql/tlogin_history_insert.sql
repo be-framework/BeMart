@@ -5,32 +5,10 @@ INSERT INTO dtb_login_history (
 )
 VALUES
   (
-    CASE WHEN CAST(
-      JSON_VALUE(
-        CAST(:entry AS CHAR),
-        '$.success'
-      ) AS UNSIGNED
-    ) = 1 THEN
-      1
-    ELSE
-      2
-    END,
-    JSON_VALUE(
-      CAST(:entry AS CHAR),
-      '$.loginId'
-    ),
-    JSON_VALUE(
-      CAST(:entry AS CHAR),
-      '$.clientIp'
-    ),
-    REPLACE(
-      JSON_VALUE(
-        CAST(:entry AS CHAR),
-        '$.timestamp'
-      ),
-      'T',
-      ' '
-    ),
+    CASE WHEN :success THEN 1 ELSE 0 END,
+    :loginId,
+    :clientIp,
+    NOW(),
     NOW(),
     'loginhistory'
   )

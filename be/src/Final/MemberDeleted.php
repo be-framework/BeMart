@@ -25,13 +25,20 @@ use Ray\InputQuery\Attribute\Input;
  * (the admin can re-activate). The login flow filters work=0
  * separately so a soft-deleted admin cannot log in.
  *
- * AUTHZ ladder — cross-firewall + self-protection:
+ * AUTHZ ladder — cross-firewall + privilege-escalation guard:
  *
  *   1. No admin session       → UnauthorizedAdminAccessException (403)
- *   2. Unknown loginId        → AdminNotFoundException           (404)
- *   3. Caller targeting self  → InsufficientAuthorityException   (403)
+ *   2. Unknown caller record  → UnauthorizedAdminAccessException (403)
+ *      (session adminId resolved to no admin — stale session)
+ *   3. Unknown loginId        → AdminNotFoundException           (404)
+ *   4. Target is the caller   → InsufficientAuthorityException   (403)
+ *   5. Target outranks caller → InsufficientAuthorityException   (403)
  *
- * "Cannot delete self" is the only privilege rule enforced in Wave 8.
+ * Step 4 is the ALPS rule "自身は削除不可". Step 5 refuses only a target
+ * holding higher privilege than the caller (lower numeric authority);
+ * deleting a peer is ordinary shop staffing and hands out nothing the
+ * caller does not already hold.
+ *
  * The "cannot delete the last system admin" rule (ALPS doc says
  * "最後のシステム管理者も削除不可") is deferred to Phase 2 — it requires
  * a corpus-wide count that this iteration does not wire up.
@@ -58,16 +65,22 @@ final readonly class MemberDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
+        $caller = $adminQuery->item($callerId);
+        if ($caller === null) {
+            // Session id no longer resolves — treat same as no session.
+            throw new UnauthorizedAdminAccessException();
+        }
+
         $target = $adminQuery->byLogin($loginId);
         if ($target === null) {
             throw new AdminNotFoundException();
         }
 
-        // Self-delete refused. Distinct from privilege-escalation: a
-        // system admin (authority=0) trying to delete themselves is
-        // still refused with the same exception, because the ALPS
-        // doc explicitly says "自身は削除不可" without caveats.
-        if ($target->adminId === $callerId) {
+        if ($target->adminId === $caller->adminId) {
+            throw new InsufficientAuthorityException();
+        }
+
+        if ($target->authority < $caller->authority) {
             throw new InsufficientAuthorityException();
         }
 

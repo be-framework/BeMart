@@ -52,6 +52,13 @@
       "title": "件数",
       "description": "/admin/customer-list のレスポンスで返す件数。一覧・集計・処理結果の規模を表す非負整数。"
     },
+    "csrfToken": {
+      "type": "string",
+      "title": "CSRFトークン",
+      "description": "フォーム送信元を検証するトークン。管理者向け一覧ページでの絞り込みフォームに使用。",
+      "minLength": 1,
+      "maxLength": 160
+    },
     "searchForm": {
       "type": [
         "object",

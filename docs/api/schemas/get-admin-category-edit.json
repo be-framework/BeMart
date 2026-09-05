@@ -48,7 +48,7 @@
               "null"
             ],
             "minLength": 0,
-            "maxLength": 32,
+            "maxLength": 255,
             "title": "カテゴリ名",
             "description": "カテゴリの表示名 Fake観察文字長 4〜6; 観察値 'Food', 'Drinks'。",
             "example": "Food"

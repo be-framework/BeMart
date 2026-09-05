@@ -60,7 +60,7 @@ composer serve:page:dev                                # http://127.0.0.1:8081�
 cd docs/eccube-spec-coverage/harness && npm install    # puppeteer-core（要 Google Chrome）
 ```
 seed 認証情報（すべて検証済・実動確認済）:
-- 管理者: `test-admin` / `local-dev-admin-password`、dev 2FA コード: `123456`
+- 管理者: `test-admin`、パスワードは `BEMART_DEMO_ADMIN_PASSWORD`（seed 側）/ `ADMIN_PW`（ハーネス側）で渡す。dev 2FA コード: `123456`
 - 会員: `login-test@example.com` / `local-dev-member-password`（本会員）
 - 公開商品コード: 偶数（`CODE000002, 004, …`）
 

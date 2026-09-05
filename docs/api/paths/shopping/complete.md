@@ -15,14 +15,15 @@ order's number (`#orderNo`) and the per-order complete message
 carries beyond the `goTop` / `goCart` transitions. EC-CUBE re-fetches
 the `Order` row by id from the request; BeMart mirrors that: the
 post-checkout redirect carries `orderNo` as a query parameter, and the
-resource resolves the finalized-order header through
-{@see \OrderQueryInterface::byOrderNo} (the same NEW(1)-onwards row
-`CheckoutCompleted` registered). The body then carries `orderNo` so
-the screen shows the real order number.
+resource resolves the finalized-order header through the order-header
+resource's `byOrderNo` read (the same NEW(1)-onwards row
+`CheckoutCompleted` registered) - now through `app://self/order/header`, which this resource
+embeds rather than querying itself. The body then carries `orderNo` so the screen shows the
+real order number.
 
 `completeMessage` is intentionally empty — EC-CUBE lets payment
 plugins append to it via `appendCompleteMessage()`, but the finalized
-order header carries no such field ({@see \CheckoutCompleted} produces
+order header carries no such field (CheckoutCompleted produces
 an empty string in Pilot 5 — a future Plugin Pilot wires it up). The
 body surfaces it as a `''` default so the template's
 complete-message block degrades to empty, matching EC-CUBE's
@@ -63,6 +64,11 @@ ALPS `goShoppingComplete` に対応する GET 操作。
 | transitionId | string | ALPS遷移ID - このレスポンス/操作が対応するALPS遷移ID。クライアントの状態遷移追跡に使う。 | Required | {"minLength":2,"maxLength":96,"pattern":"^(go|do)[A-Z][A-Za-z0-9]*$"} | doAddCartItem |
 | orderNo | string|null | 注文番号 - 顧客向けの注文番号。フォーマットはカスタマイズ可能 Fake観察文字長 32〜32; 観察値 'past0000000000000000000000000001'。 | Required | {"minLength":0,"maxLength":64} | past0000000000000000000000000001 |
 
+#### Embedded Resources
+
+| Relation | Source |
+|----------|--------|
+| orderSource | [<code>app://self/order/header{?orderNo}</code>](/order/header.md) |
 #### Links
 
 | Relation | URL |

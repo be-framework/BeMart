@@ -16,6 +16,12 @@ use const PHP_SESSION_ACTIVE;
  * Password verification establishes a pending identity here. The normal admin
  * session is elevated only after the setup/challenge token succeeds, so the
  * 2FA resources never need to trust client-supplied login ids or setup secrets.
+ *
+ * Elevation retires the session id the client held while unauthenticated, so a
+ * planted session cookie stops being usable the moment the admin is logged in.
+ * The shared CSRF reference is retired by the session writer at login and
+ * logout ({@see HtmlAdminSessionWriter}); elevation happens inside an
+ * already-authenticated session, so it does not rotate it again.
  */
 final class HtmlAdminLoginChallengeAdapter
 {
@@ -55,6 +61,19 @@ final class HtmlAdminLoginChallengeAdapter
         $session = &$this->session();
 
         return $this->challengeFrom($session[self::SETUP_CHALLENGE_KEY] ?? null, requiresAuthKey: true);
+    }
+
+    /**
+     * Drop a pending challenge without elevating the session.
+     *
+     * Used when the challenge is refused rather than answered (too many
+     * codes tried): the pre-auth identity must not survive, or the next
+     * request would resume the same challenge.
+     */
+    public function abandonVerification(): void
+    {
+        $session = &$this->session();
+        unset($session[self::VERIFY_CHALLENGE_KEY]);
     }
 
     public function completeVerification(AdminTwoFactorChallenge $challenge): void

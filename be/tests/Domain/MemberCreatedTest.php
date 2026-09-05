@@ -7,7 +7,9 @@ namespace MyVendor\BeMart\Be\Tests\Domain;
 use BEAR\AppMeta\Meta;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Be\Exception\InsufficientAuthorityException;
 use MyVendor\BeMart\Be\Exception\LoginIdAlreadyTakenException;
+use MyVendor\BeMart\Be\Exception\LoginIdFormatException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MemberCreated;
 use MyVendor\BeMart\Be\Input\CreateMemberInput;
@@ -22,7 +24,8 @@ use function dirname;
 
 final class MemberCreatedTest extends TestCase
 {
-    private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
+    private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';  // test-admin, authority=0
+    private const SHOP_OWNER_ID = 'ad000000000000000000000000000002';  // shop-owner, authority=1
 
     private BecomingInterface $becoming;
 
@@ -82,6 +85,33 @@ final class MemberCreatedTest extends TestCase
         ));
     }
 
+    public function testLoginIdCharsetIsEnforced(): void
+    {
+        // A login ID is rendered back into the member grid, including inside
+        // a JS string literal, so quotes and parentheses never become one.
+        try {
+            ($this->becoming)(new CreateMemberInput(
+                loginId: "evil'); alert(1); ('",
+                password: 'breakout-attempt-2026',
+                name: '侵入者',
+                authority: 1,
+            ));
+            $this->fail('Expected SemanticVariableException was not thrown.');
+        } catch (SemanticVariableException $e) {
+            $this->assertInstanceOf(LoginIdFormatException::class, $e->getErrors()->exceptions[0]);
+        }
+
+        // The hyphenated shape every fixture and admin form uses stays valid:
+        // it reaches the uniqueness check instead of failing the format check.
+        $this->expectException(LoginIdAlreadyTakenException::class);
+        ($this->becoming)(new CreateMemberInput(
+            loginId: 'test-admin',
+            password: 'charset-probe-2026',
+            name: '別人',
+            authority: 1,
+        ));
+    }
+
     public function testInvalidAuthorityRejected(): void
     {
         $this->expectException(SemanticVariableException::class);
@@ -90,6 +120,54 @@ final class MemberCreatedTest extends TestCase
             password: 'odd-password-2026',
             name: '奇権限',
             authority: 99,
+        ));
+    }
+
+    public function testShopOwnerCannotCreateSystemAdmin(): void
+    {
+        // The escalation path: a 店舗オーナー (authority=1) minting a
+        // システム管理者 (authority=0) it could then log in as.
+        $this->build(self::SHOP_OWNER_ID);
+
+        $this->expectException(InsufficientAuthorityException::class);
+        ($this->becoming)(new CreateMemberInput(
+            loginId: 'minted-admin',
+            password: 'minted-admin-password-2026',
+            name: '昇格管理者',
+            authority: 0,
+        ));
+    }
+
+    public function testShopOwnerCanCreatePeerShopOwner(): void
+    {
+        // A peer hands out nothing the caller does not already hold, so
+        // staffing another 店舗オーナー is allowed. Only outranking the
+        // caller is refused (see testShopOwnerCannotCreateSystemAdmin).
+        $this->build(self::SHOP_OWNER_ID);
+
+        $final = ($this->becoming)(new CreateMemberInput(
+            loginId: 'peer-admin',
+            password: 'peer-admin-password-2026',
+            name: '同格管理者',
+            authority: 1,
+        ));
+
+        $this->assertInstanceOf(MemberCreated::class, $final);
+        $this->assertSame(1, $final->authority);
+    }
+
+    public function testStaleAdminSessionRefuses(): void
+    {
+        // Session carries an adminId that no longer resolves to a
+        // record — no authority to compare against, so refuse.
+        $this->build('ad0000000000000000000000000000ff');
+
+        $this->expectException(UnauthorizedAdminAccessException::class);
+        ($this->becoming)(new CreateMemberInput(
+            loginId: 'ghost-admin',
+            password: 'ghost-admin-password-2026',
+            name: '幽霊管理者',
+            authority: 1,
         ));
     }
 

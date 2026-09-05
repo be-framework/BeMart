@@ -1,3 +1,4 @@
+const ADMIN_PW = process.env.ADMIN_PW || (() => { throw new Error('ADMIN_PW is required (admin demo password; see docs/demo-operation.md)'); })();
 const puppeteer = require('puppeteer-core');
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const B = 'http://127.0.0.1:8081';
@@ -13,7 +14,7 @@ async function follow(p, s) {
   const br = await puppeteer.launch({ executablePath: CHROME, headless: 'new', args: ['--no-sandbox'], defaultViewport: { width: 1280, height: 1100 } });
   const p = await br.newPage(); p.setDefaultTimeout(20000);
   await p.goto(B + '/admin/login', { waitUntil: 'networkidle2' });
-  await fill(p, 'input[name="loginId"]', 'test-admin'); await fill(p, 'input[name="password"]', 'local-dev-admin-password'); await follow(p, SUB);
+  await fill(p, 'input[name="loginId"]', 'test-admin'); await fill(p, 'input[name="password"]', ADMIN_PW); await follow(p, SUB);
   if (await p.$('input[name="deviceToken"]')) { await fill(p, 'input[name="deviceToken"]', '123456'); await follow(p, SUB); }
   console.log('after login:', p.url());
   await p.goto(B + '/admin/index', { waitUntil: 'networkidle2' });

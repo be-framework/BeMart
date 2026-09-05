@@ -21,7 +21,10 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
 {
     public const FLOW_ID = 'flow-admin-system-operation';
 
-    private const ADMIN_ID = 'ad000000000000000000000000000001';
+    // dtb_member.id of test-admin. The DB-backed flow creates another
+    // admin, so the session identity has to resolve to a real row: the
+    // authority guard in MemberCreating compares the caller's authority.
+    private const ADMIN_ID = '1';
     private const CSRF_TOKEN = 'workflow-system-csrf-token';
     private const ADMIN_PASSWORD = 'local-dev-admin-password';
     private const MEMBER_PASSWORD = 'workflow-member-password-2026';

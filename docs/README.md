@@ -40,6 +40,7 @@ title: "docs/ — ドキュメント索引"
 | [`HANDOVER.md`](HANDOVER.md) | 構築プロセスの記録。Phase A / Phase 2 / Phase 3 の決定ログ、Pilot/Wave 報告、skill gap 発見の経緯。 |
 | [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) | 引き継ぎ手順。再開時に読むファイル順・次にやること・リポジトリ構造。`migration-status.md` を正として読む。 |
 | [`tag.md`](tag.md) | タグ分類体系（`flow-*` / `src-*` 等、ワークフロー・ドメイン・アクター・情報源の命名規則）。 |
+| [`demo-operation.md`](demo-operation.md) | 公開デモの運用。資格情報を環境変数で与える方法と、seed 状態へ戻す定期リセット（systemd timer）。 |
 
 ## Published / Generated Files
 

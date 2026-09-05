@@ -36,15 +36,6 @@
       "maxLength": 128,
       "pattern": "^[A-Za-z0-9._:@/-]*$",
       "$comment": "BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。"
-    },
-    "dummyEmail": {
-      "title": "フォーム文脈項目",
-      "description": "/mypage/withdraw のフォーム文脈で使うフォーム文脈項目。入力保持、初期値、再表示に必要な補助値。",
-      "type": "string",
-      "format": "email",
-      "minLength": 3,
-      "maxLength": 254,
-      "example": "alice@example.com"
     }
   },
   "additionalProperties": false,
@@ -268,7 +259,6 @@
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
     "cleared",
-    "customerId",
-    "dummyEmail"
+    "customerId"
   ]
 }

@@ -11,7 +11,8 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
-use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
+use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
 use MyVendor\BeMart\Be\Input\WithdrawCustomerInput;
@@ -26,21 +27,26 @@ use function assert;
  *
  * The Be Final converges four side-effects (capture → replace →
  * cart-clear → mail). This resource adds the AUTHN-via-Session and
- * CSRF guards on the HTTP boundary; session-clear after the response
- * is the EC-CUBE EventListener's job (Slice 7.2 contract).
+ * CSRF guards on the HTTP boundary, and clears the customer session
+ * through the session-writer port once the Final proves the account
+ * is gone — the credentials the session carries no longer name a
+ * login-capable customer.
  *
  * Failure mapping:
- *   - SemanticVariableException → 400 (sessionPrefix format invalid)
  *   - UnauthenticatedException  → 401 (no session)
  *   - missing/invalid csrfToken → 403
  */
 class Withdraw extends ResourceObject
 {
+    private const DEFAULT_SESSION_PREFIX = 'session-prefix-1';
+
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CustomerSession $session,
         private readonly CustomerQueryInterface $customerQuery,
+        private readonly CartSessionPrefixInterface $cartSessionPrefix,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CustomerSessionWriterInterface $sessionWriter,
     ) {
     }
 
@@ -84,7 +90,7 @@ class Withdraw extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goMypageWithdraw',
-            'fields' => ['sessionPrefix', 'csrfToken'],
+            'fields' => ['csrfToken'],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/mypage/withdraw',
@@ -99,30 +105,25 @@ class Withdraw extends ResourceObject
         return $this;
     }
 
-    /**
-     * ALPS `doWithdrawCustomer` に対応する POST 操作。
-     * @psalm-taint-source input $sessionPrefix
-     */
+    /** ALPS `doWithdrawCustomer` に対応する POST 操作。 */
     #[Alps('doWithdrawCustomer')]
     #[JsonSchema(schema: 'post-mypage-withdraw.json', params: 'post-mypage-withdraw.param.json')]
     #[Link(rel: 'goMypageWithdrawComplete', href: 'page://self/mypage/withdraw-complete')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfProtected]
-    public function onPost(
-        string|null $sessionPrefix = null,
-    ): static {
-        $input = $sessionPrefix === null
-            ? new WithdrawCustomerInput()
-            : new WithdrawCustomerInput(sessionPrefix: $sessionPrefix);
-
-        $final = ($this->becoming)($input);
+    public function onPost(): static
+    {
+        $final = ($this->becoming)(new WithdrawCustomerInput(
+            sessionPrefix: $this->cartSessionPrefix->prefix() ?? self::DEFAULT_SESSION_PREFIX,
+        ));
 
         assert($final instanceof CustomerWithdrawn);
+
+        $this->sessionWriter->clear();
 
         ($this->mutationResponse)($this, Code::OK, '/mypage/withdraw-complete');
         $this->body = [
             'customerId' => $final->customerId,
-            'dummyEmail' => $final->dummyEmail,
             'cleared' => $final->cleared,
             'message' => '退会手続きが完了しました。',
         ];

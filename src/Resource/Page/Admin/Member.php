@@ -68,8 +68,10 @@ use function urlencode;
  * POST-only:
  *   - LoginIdAlreadyTakenException          → 409 (loginId conflict)
  *
- * DELETE-only:
- *   - InsufficientAuthorityException        → 403 (caller targeting self)
+ * POST / DELETE:
+ *   - InsufficientAuthorityException        → 403 (the caller may not
+ *     create or delete an admin that outranks them; DELETE also refuses
+ *     the caller's own account)
  */
 class Member extends ResourceObject
 {
@@ -394,8 +396,9 @@ class Member extends ResourceObject
 
     /**
      * Wave 8: doDeleteMember — soft-delete (work=0). Idempotent
-     * replay returns 200 with `alreadyDeleted=true`. Self-target
-     * raises {@see InsufficientAuthorityException} → 403.
+     * replay returns 200 with `alreadyDeleted=true`. The caller's own
+     * account, and any target that outranks the caller, raise
+     * {@see InsufficientAuthorityException} → 403.
      *
      * @psalm-taint-source input $loginId
      */
