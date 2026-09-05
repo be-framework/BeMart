@@ -13,13 +13,12 @@ use MyVendor\BeMart\Be\Input\AdminUpdateProductInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\RecordingProductCacheInvalidator;
 use MyVendor\BeMart\Module\TestModule;
 use Override;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
-
-use function dirname;
 
 /**
  * Every admin write announces that the product corpus changed
@@ -27,8 +26,7 @@ use function dirname;
  * The storefront reads a cached corpus. Without the announcement it keeps serving the old row
  * until a TTL runs out, and the shorter that TTL is made the more the cache costs - a write that
  * says so is what lets the cache be worth having. The invalidation itself is covered by the
- * cache oracle (`var/loop/verify-cache.php products-corpus-tag`); what this pins is the wiring:
- * the four transitions that change a product all call it.
+ * cache tests; what this pins is the wiring: the four transitions that change a product all call it.
  */
 final class AdminProductCacheAnnouncementTest extends TestCase
 {
@@ -93,14 +91,3 @@ final class AdminProductCacheAnnouncementTest extends TestCase
     }
 }
 
-// phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
-final class RecordingProductCacheInvalidator implements ProductCacheInvalidatorInterface
-{
-    public int $calls = 0;
-
-    #[Override]
-    public function invalidateCorpus(): void
-    {
-        $this->calls++;
-    }
-}

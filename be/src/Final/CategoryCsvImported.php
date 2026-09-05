@@ -85,6 +85,7 @@ final readonly class CategoryCsvImported
             if ($deleteFlag === '1') {
                 if ($id !== '') {
                     $categories->delete($id);
+                    $cacheInvalidator->invalidateCorpus();
                     $deleted++;
                 }
 

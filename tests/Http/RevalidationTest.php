@@ -29,9 +29,7 @@ use function trim;
  *
  * Two mechanisms answer it, and this pins the contract rather than either one: `Bootstrap` asks
  * the ETag pool before routing - a 304 that runs no resource - and `DownloadResponder` compares
- * the ETag of the resource it just ran. Disabling only the first is invisible here, by design; the
- * cheap path is judged where its cost shows, in the cache log (`var/loop/verify-cache.php
- * help-revalidate`, which requires the `conditional_request` scope to close as a hit).
+ * the ETag of the resource it just ran. Disabling only the first is invisible here, by design.
  */
 final class RevalidationTest extends TestCase
 {
@@ -50,6 +48,12 @@ final class RevalidationTest extends TestCase
         self::$server->start();
     }
 
+    public static function tearDownAfterClass(): void
+    {
+        self::$server?->stop();
+        self::$server = null;
+    }
+
     /** @return array{status: int, headers: string, body: string} */
     private function get(string|null $ifNoneMatch = null): array
     {
@@ -62,7 +66,7 @@ final class RevalidationTest extends TestCase
         $raw = (string) shell_exec($curl . ' ' . escapeshellarg('http://' . $host . self::PATH));
         $split = strpos($raw, "\r\n\r\n");
         $headers = $split === false ? $raw : substr($raw, 0, $split);
-        $body = $split === false ? '' : trim(substr($raw, $split + 4));
+        $body = $split === false ? '' : substr($raw, $split + 4);
         preg_match('/^HTTP\/[\d.]+ (\d{3})/', $headers, $m);
 
         return ['status' => (int) ($m[1] ?? 0), 'headers' => $headers, 'body' => $body];
