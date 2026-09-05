@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Help;
 
 use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\RepositoryModule\Annotation\CacheableResponse;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,6 +20,7 @@ use BEAR\Resource\Annotation\JsonSchema;
  * EC-CUBE default content is editable from the admin Help screen.
  * Wave 3H exposes the shape only.
  */
+#[CacheableResponse]
 class Guide extends ResourceObject
 {
     /**
@@ -39,9 +41,6 @@ class Guide extends ResourceObject
                 'page' => 'guide',
                 'title' => 'ご利用ガイド',
                 'sections' => [],
-            ],
-            'links' => [
-                'goTop' => 'page://self/',
             ],
         ];
 

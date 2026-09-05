@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
+         bootstrap="tests/bootstrap.php"
          colors="true"
          cacheDirectory=".phpunit.cache">
     <testsuites>
         <testsuite name="fake">
             <directory>tests/Resource</directory>
             <exclude>tests/Resource/Sql</exclude>
+            <directory>tests/Alps</directory>
             <directory>tests/Auth</directory>
             <directory>tests/Module</directory>
             <directory>tests/Router</directory>
             <directory>tests/Docs</directory>
             <directory>tests/EntryPoint</directory>
+            <directory>tests/License</directory>
             <directory>be/tests/Domain</directory>
         </testsuite>
         <testsuite name="hypermedia">
@@ -23,6 +25,15 @@
         </testsuite>
         <testsuite name="smoke">
             <directory>tests/Smoke</directory>
+        </testsuite>
+        <testsuite name="sql">
+            <!--
+                MySQL-backed boundary contracts that no Fake can answer for:
+                the login-throttle windowing and the checkout claim's
+                compare-and-swap. The bootstrap skips the suite when
+                DATABASE_URL is unset, so a database-less run stays green.
+            -->
+            <directory>be/tests/Sql</directory>
         </testsuite>
     </testsuites>
     <groups>
@@ -35,10 +46,11 @@
             -->
             <group>stateful-sql-covered</group>
             <group>ec-cube-reference</group>
+            <group>ec-cube-parity-archived</group>
         </exclude>
     </groups>
     <php>
-        <env name="DATABASE_URL" value="mysql://dbuser:secret@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&amp;serverVersion=mariadb-10.11.14"/>
+        <env name="DATABASE_URL" value="mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&amp;serverVersion=8.0.0"/>
     </php>
     <source>
         <include>

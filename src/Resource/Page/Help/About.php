@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Help;
 
 use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\RepositoryModule\Annotation\CacheableResponse;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -21,6 +22,7 @@ use BEAR\Resource\Annotation\JsonSchema;
  * shape only; the actual content lookup is left as TODO until a
  * BaseInfo aggregation lands.
  */
+#[CacheableResponse]
 class About extends ResourceObject
 {
     /**
@@ -41,9 +43,6 @@ class About extends ResourceObject
                 'page' => 'about',
                 'title' => '当サイトについて',
                 'sections' => [],
-            ],
-            'links' => [
-                'goTop' => 'page://self/',
             ],
         ];
 

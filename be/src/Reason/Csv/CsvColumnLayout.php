@@ -76,7 +76,10 @@ final readonly class CsvColumnLayout
 
     /**
      * Project one fully-encoded row (every default column → cell) down
-     * to the resolved layout, in layout order.
+     * to the resolved layout, in layout order, with every cell passed
+     * through {@see CsvFormulaGuard} — this is the projection every
+     * export Final funnels its rows through, so it is also where CSV
+     * formula injection is neutralised.
      *
      * @param array<string, string|int> $cells columnName → cell value, keyed by the default column set
      *
@@ -89,7 +92,7 @@ final readonly class CsvColumnLayout
             // `?? ''` is unreachable in practice — the layout is always
             // a subset of the default columns the caller keys $cells by
             // — but it keeps the projection total for the type checker.
-            $line[] = $cells[$name] ?? '';
+            $line[] = CsvFormulaGuard::neutralize($cells[$name] ?? '');
         }
 
         return $line;

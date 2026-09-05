@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\CustomerNotFoundException;
@@ -46,10 +47,13 @@ use function assert;
  *   - UnauthorizedAdminAccessException   → 403 (no admin session)
  *   - CustomerNotFoundException          → 404 (no such customerId)
  *
- * Success (200): `{customerId, originalEmail, alreadyDeleted, message}`.
- * The `alreadyDeleted` flag distinguishes a fresh delete (false, mail
- * sent) from an idempotent replay (true, no mail) — same shape as the
- * pilot's idempotent re-add convention.
+ * Success: JSON/HAL contexts return 200 with `{customerId,
+ * originalEmail, alreadyDeleted, message}`. HTML contexts use
+ * Post/Redirect/Get and return 303 to the customer list, matching the
+ * admin list-row delete affordance. The `alreadyDeleted` flag
+ * distinguishes a fresh delete (false, mail sent) from an idempotent
+ * replay (true, no mail) — same shape as the pilot's idempotent re-add
+ * convention.
  *
  * Anti-enumeration: the 403 / 404 ordering matches the Be Final's
  * check sequence (AUTHZ first, existence second). An admin-anonymous
@@ -60,6 +64,7 @@ class DeleteCustomer extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -83,7 +88,7 @@ class DeleteCustomer extends ResourceObject
 
         assert($final instanceof AdminCustomerDeleted);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, '/admin/customer-list');
         $this->body = [
             'customerId' => $final->customerId,
             'originalEmail' => $final->originalEmail,

@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
@@ -32,6 +33,7 @@ class Favorite extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -59,7 +61,7 @@ class Favorite extends ResourceObject
             'alreadyExisted' => $final->alreadyExisted,
         ];
 
-        return $this;
+        return $this->redirectToFavoriteListOnHtmlSuccess();
     }
 
     /**
@@ -92,6 +94,13 @@ class Favorite extends ResourceObject
             'productCode' => $final->productCode,
             'alreadyAbsent' => $final->alreadyAbsent,
         ];
+
+        return $this->redirectToFavoriteListOnHtmlSuccess();
+    }
+
+    private function redirectToFavoriteListOnHtmlSuccess(): static
+    {
+        ($this->mutationResponse)($this, $this->code, '/mypage/favorite-list');
 
         return $this;
     }

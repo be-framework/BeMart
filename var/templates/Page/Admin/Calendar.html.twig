@@ -1,170 +1,304 @@
-{#
-  BeMart admin holiday calendar settings — EC-CUBE Setting/Shop/calendar.twig.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-calendar' %}
-{% set title = '定休日カレンダー設定' %}
+{% set title = '定休日カレンダー' %}
 {% set sub_title = '店舗設定' %}
 
 {% block stylesheet %}
-    <style type="text/css">
-        .edit {
-            display: none;
-        }
-
-        .has-error .list {
-            display: none;
-        }
-
-        .has-error .edit {
-            display: block;
-        }
-    </style>
-{% endblock %}
-
-{% block javascript %}
-    <script type="text/javascript">
-        $(function() {
-            $('.calendar_list_item td.action a.edit-button').click(function() {
-                var id = $(this).data('id');
-                var tr = $('#ex-calendar-' + id);
-                $(tr).find('.list').hide();
-                $(tr).find('.edit').show();
-            });
-
-            $('.calendar_list_item .cancel').click(function() {
-                location.href = '/admin/calendar';
-            });
-        });
-    </script>
+<style>
+.cal-row__view  { display: flex; align-items: center; gap: .75rem; }
+.cal-row__edit  { display: none; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.cal-row--editing .cal-row__view { display: none; }
+.cal-row--editing .cal-row__edit { display: flex; }
+</style>
 {% endblock %}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header">
-                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="定休日をカレンダーに表示するための設定です。">
-                            <span>定休日カレンダー設定</span>
-                            <i class="fa fa-question-circle fa-lg ms-1"></i>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table tabel-sm">
-                            <colgroup>
-                                <col width="5%">
-                                <col width="35%">
-                                <col width="20%">
-                                <col width="">
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th class="border-top-0 pt-2 pb-2 ps-3">ID</th>
-                                    <th class="border-top-0 pt-2 pb-2 ps-3">タイトル</th>
-                                    <th class="border-top-0 pt-2 pb-2 ps-3">日付</th>
-                                    <th class="border-top-0 pt-2 pb-2 ps-3"></th>
-                                    <th class="border-top-0 pt-2 pb-2 ps-3 pe-5"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr id="calendar_item_new">
-                                    <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="/admin/calendar?operation=create">
-                                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                                        <td class="align-middle ps-3"></td>
-                                        <td class="align-middle" style="width:230px;">
-                                            <div class="input-group">
-                                                {{ form.input('title')|raw }}
-                                                {% if form.error('title') %}{{ form.error('title') }}{% endif %}
-                                            </div>
-                                        </td>
-                                        <td class="align-middle">
-                                            {{ form.input('holiday')|raw }}
-                                            {% if form.error('holiday') %}{{ form.error('holiday') }}{% endif %}
-                                        </td>
-                                        <td class="align-middle col-3"></td>
-                                        <td class="align-middle pe-5">
-                                            <div class="row justify-content-end w-100">
-                                                <button class="btn btn-ec-regular px-4" type="submit">新規作成</button>
-                                            </div>
-                                        </td>
-                                    </form>
-                                </tr>
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/Calendar.php + be/src/Final/AdminCalendarFetched.php):
+    form        AdminCalendarForm — blank create form (fields: title, holiday — both required)
+    calendars   list<{id: string, title: string, holiday: string, form: AdminCalendarForm, hasError: bool}>
+    csrfToken   string
 
-                                {% for Calendar in calendars %}
-                                    <tr id="ex-calendar-{{ Calendar.id }}" class="calendar_list_item {{ Calendar.hasError ? 'has-error' }}">
-                                        <form name="edit-form" id="edit-form_{{ Calendar.id }}" method="post" action="/admin/calendar?operation=update">
-                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                                            <input type="hidden" value="{{ Calendar.id }}" name="calendar_id">
-                                            <input type="hidden" value="edit_inline" name="mode">
-                                            <td class="align-middle ps-3"><span>{{ Calendar.id }}</span></td>
-                                            <td class="align-middle">
-                                                <div class="edit">
-                                                    {{ Calendar.form.input('title')|raw }}
-                                                </div>
-                                                <div class="list">
-                                                    <span>{{ Calendar.title }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="align-middle">
-                                                <div class="edit">
-                                                    {{ Calendar.form.input('holiday')|raw }}
-                                                    {% if Calendar.form.error('holiday') %}{{ Calendar.form.error('holiday') }}{% endif %}
-                                                </div>
-                                                <div class="list">
-                                                    <span>{{ Calendar.holiday }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="align-middle">
-                                                <div class="edit">
-                                                    <button type="submit" class="btn text-nowrap btn-ec-conversion">決定</button>
-                                                    <button type="button" class="btn text-nowrap btn-ec-sub cancel" data-id="{{ Calendar.id }}">キャンセル</button>
-                                                </div>
-                                            </td>
-                                            <td class="align-middle action">
-                                                <div class="col-12 col-sm-10 col-md-8 col-lg-6 float-end">
-                                                    <div class="row pe-2">
-                                                        <div class="col-6 text-center pe-0">
-                                                            <a class="btn btn-ec-actionIcon edit-button" data-bs-toggle="tooltip" data-id="{{ Calendar.id }}" data-bs-placement="top" title="編集">
-                                                                <i class="fa fa-pencil fa-lg text-secondary" aria-hidden="true"></i>
-                                                            </a>
-                                                        </div>
-                                                        <div class="col-6 text-center">
-                                                            <div class="d-inline-block me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="削除">
-                                                                <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#DeleteModal_{{ Calendar.id }}">
-                                                                    <i class="fa fa-close fa-lg text-secondary"></i>
-                                                                </a>
-                                                            </div>
-                                                            <div class="modal fade" id="DeleteModal_{{ Calendar.id }}" tabindex="-1" role="dialog" aria-labelledby="DeleteModal_{{ Calendar.id }}" aria-hidden="true">
-                                                                <div class="modal-dialog" role="document">
-                                                                    <div class="modal-content">
-                                                                        <div class="modal-header">
-                                                                            <h5 class="modal-title fw-bold">削除します</h5>
-                                                                            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                        </div>
-                                                                        <div class="modal-body text-start">
-                                                                            <p class="text-start modal-message">この操作はあとから取り消すことができません。「{{ Calendar.title }}」を削除してよろしいですか？</p>
-                                                                        </div>
-                                                                        <div class="modal-footer">
-                                                                            <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                                                            <a class="btn btn-ec-delete" href="/admin/calendar?calendarId={{ Calendar.id }}&_method=delete" data-confirm="false">削除</a>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </form>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+  ACTIONS (derived from #[Link] on Calendar resource):
+    POST   /admin/calendar?operation=create              — doCreateCalendarHoliday
+    POST   /admin/calendar?operation=update&calendarId=… — doUpdateCalendar
+    DELETE /admin/calendar?calendarId=…&_method=delete  — doDeleteCalendarHoliday
+
+  idea-admin vocabulary used:
+    idea-admin-panel        section card
+    idea-admin-panel__head  section header with action slot
+    idea-admin-panel__body  section content
+    idea-admin-field        label + input pair
+    idea-admin-required     required marker badge
+    idea-admin-error        inline validation message
+    idea-admin-table-wrap   overflow wrapper for data table
+    idea-admin-table        data table
+    idea-admin-table__actions  action cell (right-aligned)
+    idea-admin-action       button / link affordance
+    idea-admin-action--primary      primary submit
+    idea-admin-action--destructive  delete action
+    idea-admin-dialog-backdrop / idea-admin-dialog  confirm dialog
+    idea-admin-empty        zero-result state
+    idea-admin-notice       page-level alert strip
+#}
+
+{# ── Page-level validation notices ─────────────────────────────────────── #}
+{% if errors is defined and errors is not empty %}
+  <div class="idea-admin-notice idea-admin-notice--error" role="alert">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    {% for msg in errors %}{{ msg }}{% if not loop.last %} / {% endif %}{% endfor %}
+  </div>
+{% endif %}
+
+{# ── New entry form ─────────────────────────────────────────────────────── #}
+<section class="idea-admin-panel" aria-labelledby="calendar-new-head">
+  <div class="idea-admin-panel__head">
+    <h3 id="calendar-new-head">
+      <i class="fa fa-plus-circle" aria-hidden="true"></i>
+      休日の追加
+    </h3>
+  </div>
+  <div class="idea-admin-panel__body">
+    <form
+      id="calendar_item_new"
+      method="post"
+      action="/admin/calendar?operation=create"
+      novalidate
+    >
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:.75rem;align-items:end;">
+
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label for="calendar_title">タイトル</label>
+            <span class="idea-admin-required">必須</span>
+          </div>
+          <div class="idea-admin-field__input">
+            {{ form.input('title')|raw }}
+            {% if form.error('title') %}
+            <span class="idea-admin-error">{{ form.error('title') }}</span>
+            {% endif %}
+          </div>
         </div>
+
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label for="calendar_holiday">日付</label>
+            <span class="idea-admin-required">必須</span>
+          </div>
+          <div class="idea-admin-field__input">
+            {{ form.input('holiday')|raw }}
+            {% if form.error('holiday') %}
+            <span class="idea-admin-error">{{ form.error('holiday') }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div>
+          <button class="idea-admin-action idea-admin-action--primary" type="submit">
+            <i class="fa fa-plus" aria-hidden="true"></i>
+            追加
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</section>
+
+{# ── Registered holiday list ────────────────────────────────────────────── #}
+<section class="idea-admin-panel" aria-labelledby="calendar-list-head">
+  <div class="idea-admin-panel__head">
+    <h3 id="calendar-list-head">
+      <i class="fa fa-calendar" aria-hidden="true"></i>
+      登録済み休日
+    </h3>
+  </div>
+
+  {% if calendars is empty %}
+    <div class="idea-admin-empty">
+      <p class="idea-admin-empty__title">休日は登録されていません。</p>
     </div>
+  {% else %}
+    <div class="idea-admin-table-wrap">
+      <table class="idea-admin-table" aria-label="登録済み休日一覧">
+        <thead>
+          <tr>
+            <th scope="col">タイトル</th>
+            <th scope="col">日付</th>
+            <th scope="col" class="idea-admin-table__actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in calendars %}
+          <tr
+            id="ex-calendar-{{ item.id }}"
+            class="cal-row{{ item.hasError ? ' cal-row--editing' }}"
+            data-calendar-id="{{ item.id }}"
+          >
+            {# ── Inline update form (wraps both view+edit cells) ── #}
+            <form
+              id="edit-form-{{ item.id }}"
+              method="post"
+              action="/admin/calendar?operation=update"
+              novalidate
+            >
+              <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+              <input type="hidden" name="calendarId" value="{{ item.id }}">
+
+              <td>
+                <div class="cal-row__view">
+                  <span>{{ item.title }}</span>
+                </div>
+                <div class="cal-row__edit">
+                  {{ item.form.input('title')|raw }}
+                  {% if item.form.error('title') %}
+                  <span class="idea-admin-error">{{ item.form.error('title') }}</span>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td>
+                <div class="cal-row__view">
+                  <span>{{ item.holiday }}</span>
+                </div>
+                <div class="cal-row__edit">
+                  {{ item.form.input('holiday')|raw }}
+                  {% if item.form.error('holiday') %}
+                  <span class="idea-admin-error">{{ item.form.error('holiday') }}</span>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td class="idea-admin-table__actions">
+                {# view-mode buttons #}
+                <div class="cal-row__view" style="justify-content:flex-end;">
+                  <button
+                    class="idea-admin-icon-btn"
+                    type="button"
+                    aria-label="編集"
+                    data-action="cal-edit"
+                    data-target="{{ item.id }}"
+                  >
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                  </button>
+                  <button
+                    class="idea-admin-icon-btn"
+                    type="button"
+                    aria-label="削除"
+                    data-action="cal-delete-open"
+                    data-target="{{ item.id }}"
+                  >
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                  </button>
+                </div>
+                {# edit-mode buttons #}
+                <div class="cal-row__edit" style="justify-content:flex-end;">
+                  <button class="idea-admin-action idea-admin-action--primary" type="submit">
+                    <i class="fa fa-check" aria-hidden="true"></i>
+                    保存
+                  </button>
+                  <button
+                    class="idea-admin-action"
+                    type="button"
+                    data-action="cal-cancel"
+                    data-target="{{ item.id }}"
+                  >
+                    取消
+                  </button>
+                </div>
+              </td>
+
+            </form>
+          </tr>
+
+          {# ── Delete confirm dialog ──────────────────────────────── #}
+          <div
+            class="idea-admin-dialog-backdrop"
+            id="dialog-delete-{{ item.id }}"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dialog-delete-title-{{ item.id }}"
+            hidden
+          >
+            <div class="idea-admin-dialog">
+              <div class="idea-admin-dialog__head">
+                <h4 class="idea-admin-dialog__title" id="dialog-delete-title-{{ item.id }}">
+                  <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                  削除の確認
+                </h4>
+              </div>
+              <div class="idea-admin-dialog__body">
+                <p>「{{ item.title }}」（{{ item.holiday }}）を削除します。この操作は取り消せません。</p>
+              </div>
+              <div class="idea-admin-dialog__foot">
+                <button
+                  class="idea-admin-action"
+                  type="button"
+                  data-action="cal-delete-close"
+                  data-target="{{ item.id }}"
+                >
+                  取消
+                </button>
+                <form
+                  id="delete-form-{{ item.id }}"
+                  method="post"
+                  action="/admin/calendar?calendarId={{ item.id }}&_method=delete"
+                  style="display:inline;"
+                >
+                  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                  <button class="idea-admin-action idea-admin-action--destructive" type="submit">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    削除
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
+</section>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  function row(id)     { return document.getElementById('ex-calendar-' + id); }
+  function dialog(id)  { return document.getElementById('dialog-delete-' + id); }
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-action]');
+    if (!btn) return;
+
+    var action = btn.dataset.action;
+    var target = btn.dataset.target;
+
+    if (action === 'cal-edit') {
+      row(target).classList.add('cal-row--editing');
+    }
+
+    if (action === 'cal-cancel') {
+      row(target).classList.remove('cal-row--editing');
+    }
+
+    if (action === 'cal-delete-open') {
+      dialog(target).hidden = false;
+    }
+
+    if (action === 'cal-delete-close') {
+      dialog(target).hidden = true;
+    }
+  });
+}());
+</script>
 {% endblock %}

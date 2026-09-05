@@ -6,11 +6,12 @@ Phase 2 inputs that drive the EC-CUBE → BEAR.Sunday + Be Framework migration.
 
 ```
 sql/
-├── schema/                              # source-of-truth EC-CUBE 4.3 schema
-│   └── ec-cube-4.3-mysql-mysqldump.sql  # 65 tables, structure only, utf8mb4_bin
-├── migrations/                          # BeMart schema deltas applied after the EC-CUBE dump
+├── schema/                              # source-of-truth BeMart schema
+│   └── bemart-schema.sql                # 65 tables, authored from first principles, utf8mb4_bin
+├── migrations/                          # BeMart schema deltas applied after the base schema
 ├── seed/                                # committed reference/master data
-│   └── mtb-master.sql                   # 22 mtb_* tables, 395 reference rows
+│   ├── mtb-master.sql                   # 22 mtb_* tables, 395 reference rows
+│   └── dtb-system-master.sql            # installer-level dtb_* system rows
 ├── diff/                                # planning docs
 │   └── entity-vs-eccube.md              # BeMart Entity ↔ EC-CUBE table diff (Phase 2b)
 ├── setup-db.sh                          # reproducible prod DB bring-up
@@ -19,19 +20,20 @@ sql/
 
 ## Production database bring-up
 
-A live production database needs three committed artefact sets: the **schema**
-(`schema/ec-cube-4.3-mysql-mysqldump.sql`), BeMart **migrations**
-(`migrations/*.sql`), and the **mtb_\* master seed** (`seed/mtb-master.sql`).
+A live production database needs four committed artefact sets: the **schema**
+(`schema/bemart-schema.sql`), BeMart **migrations**
+(`migrations/*.sql`), the **mtb_\* master seed** (`seed/mtb-master.sql`),
+and the **dtb_\* system master seed** (`seed/dtb-system-master.sql`).
 `setup-db.sh` stitches them together so a prod DB can be stood up
 reproducibly:
 
 ```bash
 # from a DATABASE_URL (Symfony/Doctrine style)
-sql/setup-db.sh 'mysql://dbuser:secret@127.0.0.1:3306/eccubedb?charset=utf8mb4'
+sql/setup-db.sh 'mysql://root@127.0.0.1:3306/eccubedb?charset=utf8mb4'
 
 # or from explicit args
 sql/setup-db.sh --host 127.0.0.1 --port 3306 \
-                --user dbuser --pass secret --db eccubedb
+                --user root --pass '' --db eccubedb
 
 # or from the DATABASE_URL environment variable
 DATABASE_URL='mysql://...' sql/setup-db.sh
@@ -45,19 +47,37 @@ The script:
    (not `CREATE TABLE IF NOT EXISTS`). **Warning:** any existing data in the
    target database is destroyed; never point it at a populated prod DB —
    use it to *bring up* a fresh one.
-2. Loads the schema **wrapped in `SET FOREIGN_KEY_CHECKS=0/1`**. The dump
-   carries cross-table FKs but no such pragma, so a plain sequential load
-   trips on the first table (`dtb_authority_role` → `dtb_member`). This
-   mirrors the workaround in `be/tests/Sql/bootstrap.php` (Phase 2a Step 2).
+2. Loads the schema **wrapped in `SET FOREIGN_KEY_CHECKS=0/1`**. The schema
+   carries cross-table FKs, so we disable FK checks during load to allow any
+   table ordering. This mirrors the workaround in `be/tests/Sql/bootstrap.php`.
 3. Applies BeMart schema deltas under `migrations/*.sql` in filename order.
 4. Loads `seed/mtb-master.sql`.
-5. Prints exact `COUNT(*)` per `mtb_*` table as a sanity check
+5. Loads `seed/dtb-system-master.sql`: installer-level rows such as the
+   default admin member, layout, mail template, and initial payment methods.
+6. Prints exact `COUNT(*)` per `mtb_*` table as a sanity check
    (e.g. `mtb_pref = 47`).
 
-After this, the database has the full schema + all reference data and is
-ready for `dtb_*` operational data. Migrating `dtb_*` customer/order/product
-data from a live EC-CUBE instance is a **separate operational concern** and
-is **not** performed by this script.
+After this, the database has the full schema, reference data, and the small
+set of installer system rows required for a fresh shop to run. Migrating or
+seeding `dtb_*` customer/order/product/cart/favorite business data from a live
+EC-CUBE instance is a **separate operational concern** and is **not** performed
+by this script.
+
+## The dtb_* system master seed (`seed/dtb-system-master.sql`)
+
+These rows are application configuration masters, not business fixtures. They
+exist so a freshly installed shop has the same minimum affordances the web
+workflow expects:
+
+- `dtb_member`: the test/admin bootstrap account.
+- `dtb_payment`: initial visible payment methods (`代金引換`,
+  `クレジットカード`) referenced by checkout `dtb_order.payment_id`.
+- `dtb_layout`: the default PC layout.
+- `dtb_mail_template`: the default order mail template.
+
+Do not add products, customers, carts, orders, shippings, favorites, or other
+workflow-created business state here. Those must be created through Web/HTTP
+affordances in workflow tests.
 
 ## The mtb_* master seed (`seed/mtb-master.sql`)
 
@@ -103,50 +123,42 @@ corrected an earlier order that started from the SQL impl):
 ## Running the SQL test suites
 
 ```bash
-vendor/bin/phpunit --testsuite bemart-sql    # storage + Final-direct
-vendor/bin/phpunit tests/Resource/Sql/       # Resource-layer hypermedia
+composer test:sql                            # Resource-layer hypermedia (sql testsuite)
+vendor/bin/phpunit --testsuite sql           # same, long form
+vendor/bin/phpunit tests/Resource/Sql/       # explicit directory form
 vendor/bin/phpunit                           # everything (~765 tests)
 ```
 
-The `bemart-sql` suite drops + recreates `eccubedb_test` on every run
-(schema loaded with FK checks disabled). Each test runs inside a
-transaction `tearDown` rolls back.
+The `sql` suite runs `be/tests/Sql/bootstrap.php` on first use, which drops
++ recreates `eccubedb_test` and loads `bemart-schema.sql` with FK checks
+disabled. Each test runs inside a transaction that `tearDown` rolls back.
 
 If `DATABASE_URL` is unset the SQL suites skip cleanly. If it is set but
-the server is unreachable, the suite fails fast (no silent skips). If it
-points at malt's current MySQL 8.0 runtime, the suite skips because the
-target baseline is MariaDB 10.11.
+the server is unreachable, the suite fails fast (no silent skips).
 
 The top-level `phpunit.xml` wires the default `DATABASE_URL`:
 
 ```text
-mysql://dbuser:secret@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14
+mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=8.0.0
 ```
 
 ## Setting up the local DB with malt
 
 The dev environment uses `malt` for the local DB. The checked-in
-`malt.json` currently starts MySQL 8.0 on port 3306; this is useful for DB
-reachability and smoke wiring, while MariaDB-target SQL verification is
-kept separate.
+`malt.json` starts MySQL 8.0 on port 3306, which is the target baseline.
+The local development connection is `root` with no password; do not create
+or grant a separate `dbuser` account for normal local runs.
 
 ```bash
 malt start
 source <(malt env)
-
-# One-time grant for the test DB:
-mysql --protocol=TCP -h127.0.0.1 -P3306 -uroot <<'SQL'
-CREATE USER IF NOT EXISTS 'dbuser'@'localhost' IDENTIFIED BY 'secret';
-CREATE USER IF NOT EXISTS 'dbuser'@'127.0.0.1' IDENTIFIED BY 'secret';
-GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'localhost';
-GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'127.0.0.1';
-FLUSH PRIVILEGES;
-SQL
+export DATABASE_URL='mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=8.0.0'
+sql/setup-db.sh "$DATABASE_URL"
 
 /opt/homebrew/opt/php@8.5/bin/php vendor/bin/phpunit --testsuite sql --colors=never
 ```
 
-Defaults: host `127.0.0.1`, port `3306`, user `dbuser`, password `secret`.
+Defaults: host `127.0.0.1`, port `3306`, user `root`, password `(none)`.
 
 ## SQL implementations landed so far
 
@@ -223,8 +235,8 @@ also supplies each query's bind values.
 
    ```bash
    malt start
-   sql/setup-db.sh "mysql://dbuser:secret@127.0.0.1:3306/eccubedb_test?charset=utf8mb4"
-   mysql -h127.0.0.1 -P3306 -udbuser -psecret eccubedb_test < sql/seed/analysis-sample.sql
+   sql/setup-db.sh "mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4"
+   mysql -h127.0.0.1 -P3306 -uroot eccubedb_test < sql/seed/analysis-sample.sql
    ```
 
    `sql/seed/analysis-sample.sql` bulk-generates a representative catalog
@@ -266,6 +278,6 @@ Reports are written to `build/sql-quality/` (git-ignored):
 - Values in `sql_params.php` target the seed data so `EXPLAIN ANALYZE` returns
   rows; placeholders only need a valid type, so queries against unseeded tables
   still analyze (returning 0 rows).
-- The analyzer skips any query it cannot EXPLAIN and continues — e.g.
-  `order_history_by_order_no.sql` uses `JSON_ARRAYAGG(... ORDER BY ...)`, which
-  MySQL 8.0 does not support. Such skips are a useful portability signal.
+- The analyzer skips any query it cannot EXPLAIN and continues — such skips
+  are a useful portability signal. All queries in `var/sql/` use
+  `GROUP_CONCAT(JSON_OBJECT(...) ORDER BY ...)` which is supported by MySQL 8.0.

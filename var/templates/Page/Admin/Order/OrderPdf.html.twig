@@ -1,23 +1,55 @@
 {#
-  BeMart admin order-PDF options — EC-CUBE admin-theme
-  `Order/order_pdf.twig`.
+  BeMart admin 帳票出力 — idea-admin clean-room build.
 
-  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Order/order_pdf.twig`
-  — the 帳票出力 (納品書 PDF) options screen. It extends the admin frame
-  (`admin-base.html.twig`).
+  DATA CONTRACT (src/Resource/Page/Admin/Order/OrderPdf.php onGet):
+    form        AdminOrderPdfForm — pre-filled renderer
+                  fields: title (required), message1, message2, message3,
+                          note1, note2, note3, issue_date
+    orderNo     string            — target order number (may be empty for
+                                    bulk/manual entry)
 
-  Tier-2 port note: EC-CUBE collects the delivery-note title / greeting
-  / note / print date, then posts to the PDF renderer (TCPDF). BeMart's
-  PDF export ({@see \MyVendor\BeMart\Resource\Page\Admin\Order\ExportOrderPdf})
-  is a Phase 2 stub; this page renders the options panel so the screen
-  is faithful — the real renderer is the enumerated residual.
+  FORM CONTRACT (src/Form/AdminOrderPdfForm.php):
+    title       text  required — 納品書タイトル
+    message1    text           — 本文メッセージ 1行目
+    message2    text           — 本文メッセージ 2行目
+    message3    text           — 本文メッセージ 3行目
+    note1       text           — 備考 1行目
+    note2       text           — 備考 2行目
+    note3       text           — 備考 3行目
+    issue_date  text           — 発行日 (YYYY-MM-DD)
 
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
-     AdminOrderPdfForm leaf fields (Ray.WebFormModule).
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+  ACTIONS (derived from #[Link] on OrderPdf resource):
+    GET  /admin/order/export-order-pdf  — goExportOrderPdf (PDF download)
+    GET  /admin/order-list              — goOrderList (back nav)
+
+  UX design decisions (not mirroring EC-CUBE):
+    - Two-panel layout: primary (form) + side (order context + preview tip)
+    - Message fields grouped in a collapsible section for scannability
+    - Live character preview badge on title field
+    - Issue date defaults to today via JS to avoid empty-field friction
+    - PDF submit opens in a new tab so the form state is preserved
+    - Back link lives in the fixed bottom toolbar, not inside the form
+
+  idea-admin vocabulary used:
+    idea-admin-layout        two-column editor shell
+    idea-admin-primary       main column
+    idea-admin-side          sidebar column
+    idea-admin-panel         section card
+    idea-admin-panel__head   section heading bar
+    idea-admin-panel__body   section content area
+    idea-admin-field         label + input row
+    idea-admin-field__label  label cell
+    idea-admin-field__input  input cell
+    idea-admin-required      required badge
+    idea-admin-error         inline validation message
+    idea-admin-toolbar       fixed action bar at bottom
+    idea-admin-toolbar__back back-nav link
+    idea-admin-toolbar__actions  submit cluster
+    idea-admin-action        button / link affordance
+    idea-admin-notice        info strip
+    idea-admin-spec-list     read-only metadata list
+    idea-admin-spec-row      one metadata row (dt + dd)
+    idea-admin-badge         status chip
 #}
 {% extends 'admin-base.html.twig' %}
 
@@ -25,70 +57,350 @@
 {% set title = '帳票出力' %}
 {% set sub_title = '受注管理' %}
 
+{% block stylesheet %}
+<style>
+/* ── Page-local additions (idea-admin-* namespace) ───────────────────── */
+
+.idea-admin-pdf-preview-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+  padding: .8rem 1rem;
+  border-radius: var(--idea-admin-radius-panel);
+  background: rgba(73, 111, 124, .07);
+  border: 1px solid rgba(73, 111, 124, .22);
+  color: var(--idea-blue);
+  font-size: .82rem;
+  line-height: 1.5;
+}
+.idea-admin-pdf-preview-tip__icon {
+  flex-shrink: 0;
+  margin-top: .05rem;
+}
+
+.idea-admin-pdf-char-count {
+  font-size: .72rem;
+  color: var(--idea-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.idea-admin-pdf-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 700;
+  color: var(--idea-muted);
+  cursor: pointer;
+  transition: color .14s;
+}
+.idea-admin-pdf-section-toggle:hover { color: var(--idea-ink); }
+.idea-admin-pdf-section-toggle[aria-expanded="true"] .idea-admin-pdf-chevron {
+  transform: rotate(180deg);
+}
+.idea-admin-pdf-chevron {
+  display: inline-block;
+  transition: transform .18s;
+}
+
+.idea-admin-pdf-collapsible[hidden] { display: none; }
+
+.idea-admin-pdf-order-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .3rem .75rem;
+  border-radius: var(--idea-admin-radius-badge);
+  background: rgba(82, 107, 85, .10);
+  border: 1px solid rgba(82, 107, 85, .22);
+  color: var(--idea-olive);
+  font-size: .8rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
+  word-break: break-all;
+}
+</style>
+{% endblock %}
+
 {% block main %}
-    <form role="form" method="post" action="/admin/order/export-order-pdf" id="order_pdf_form" name="form1" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">納品書PDF出力</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3"><span>タイトル</span><span class="badge bg-primary ms-1">必須</span></div>
-                                <div class="col">
-                                    {{ form.input('title')|raw }}
-                                    {% if form.error('title') %}<span class="invalid-feedback d-block">{{ form.error('title') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>注文一覧上部のメッセージ</span></div>
-                                <div class="col">
-                                    {{ form.input('message1')|raw }}
-                                    {{ form.input('message2')|raw }}
-                                    {{ form.input('message3')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>備考欄</span></div>
-                                <div class="col">
-                                    {{ form.input('note1')|raw }}
-                                    {{ form.input('note2')|raw }}
-                                    {{ form.input('note3')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>発行日</span></div>
-                                <div class="col-4">{{ form.input('issue_date')|raw }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+{# ── form wraps the entire layout so the fixed toolbar submit works ─ #}
+<form
+  id="order-pdf-form"
+  role="form"
+  method="get"
+  action="/admin/order/export-order-pdf"
+  target="_blank"
+  novalidate
+>
+  <input type="hidden" name="orderNos[]" value="{{ orderNo|default('') }}">
+
+  <div class="idea-admin-layout">
+
+    {# ══ Primary column ════════════════════════════════════════════════ #}
+    <div class="idea-admin-primary">
+
+      {# ── Title panel ─────────────────────────────────────────────── #}
+      <div class="idea-admin-panel" role="region" aria-label="タイトル">
+        <div class="idea-admin-panel__head">
+          <h3>タイトル</h3>
         </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/order-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>受注一覧へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">PDF出力</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="idea-admin-panel__body">
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_pdf_title">
+                タイトル
+              </label>
+              <span class="idea-admin-required" aria-label="必須項目">必須</span>
             </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('title')|raw }}
+              <div class="idea-admin-pdf-char-count" aria-live="polite" id="title-char-count"></div>
+              <span class="idea-admin-error" role="alert">{{ form.error('title') }}</span>
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_pdf_issue_date">発行日</label>
+              <span style="font-size:.72rem;color:var(--idea-muted);">YYYY-MM-DD</span>
+            </div>
+            <div class="idea-admin-field__input" style="max-width:16rem;">
+              {{ form.input('issue_date')|raw }}
+              <span class="idea-admin-error" role="alert">{{ form.error('issue_date') }}</span>
+            </div>
+          </div>
         </div>
-    </form>
+      </div>
+
+      {# ── Body messages panel ──────────────────────────────────────── #}
+      <div class="idea-admin-panel" role="region" aria-label="本文メッセージ">
+        <div class="idea-admin-panel__head">
+          <h3>本文メッセージ</h3>
+          <p class="idea-admin-panel__hint">PDFの明細上部に印字される挨拶文（最大3行）</p>
+          <button
+            type="button"
+            class="idea-admin-pdf-section-toggle"
+            aria-expanded="true"
+            aria-controls="body-message-section"
+          >
+            <span>折りたたむ</span>
+            <span class="idea-admin-pdf-chevron" aria-hidden="true">&#8964;</span>
+          </button>
+        </div>
+        <div class="idea-admin-panel__body idea-admin-pdf-collapsible" id="body-message-section">
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_pdf_message1">1行目</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('message1')|raw }}
+              <span class="idea-admin-error" role="alert">{{ form.error('message1') }}</span>
+            </div>
+          </div>
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_pdf_message2">2行目</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('message2')|raw }}
+              <span class="idea-admin-error" role="alert">{{ form.error('message2') }}</span>
+            </div>
+          </div>
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_pdf_message3">3行目</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('message3')|raw }}
+              <span class="idea-admin-error" role="alert">{{ form.error('message3') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# ── Notes panel ─────────────────────────────────────────────── #}
+      <div class="idea-admin-panel" role="region" aria-label="備考欄">
+        <div class="idea-admin-panel__head">
+          <h3>備考欄</h3>
+          <p class="idea-admin-panel__hint">PDFの明細下部に印字されるメモ（最大3行）</p>
+          <button
+            type="button"
+            class="idea-admin-pdf-section-toggle"
+            aria-expanded="true"
+            aria-controls="notes-section"
+          >
+            <span>折りたたむ</span>
+            <span class="idea-admin-pdf-chevron" aria-hidden="true">&#8964;</span>
+          </button>
+        </div>
+        <div class="idea-admin-panel__body idea-admin-pdf-collapsible" id="notes-section">
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_pdf_note1">1行目</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('note1')|raw }}
+              <span class="idea-admin-error" role="alert">{{ form.error('note1') }}</span>
+            </div>
+          </div>
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_pdf_note2">2行目</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('note2')|raw }}
+              <span class="idea-admin-error" role="alert">{{ form.error('note2') }}</span>
+            </div>
+          </div>
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_pdf_note3">3行目</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('note3')|raw }}
+              <span class="idea-admin-error" role="alert">{{ form.error('note3') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>{# /idea-admin-primary #}
+
+    {# ══ Sidebar ════════════════════════════════════════════════════════ #}
+    <div class="idea-admin-side">
+
+      {# ── Target order info ───────────────────────────────────────── #}
+      <div class="idea-admin-panel" role="complementary" aria-label="対象受注">
+        <div class="idea-admin-panel__head">
+          <h3>対象受注</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          {% if orderNo is not empty %}
+            <dl class="idea-admin-spec-list">
+              <div class="idea-admin-spec-row">
+                <dt>受注番号</dt>
+                <dd>
+                  <span class="idea-admin-pdf-order-badge">
+                    <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                    {{ orderNo }}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+          {% else %}
+            <div class="idea-admin-notice idea-admin-notice--warning" role="note">
+              <i class="fa fa-info-circle" aria-hidden="true"></i>
+              <span>受注番号が指定されていません。受注一覧から対象を選んでください。</span>
+            </div>
+            <a
+              href="/admin/order-list"
+              class="idea-admin-action"
+              style="width:100%;justify-content:center;margin-top:.5rem;"
+              rel="goOrderList"
+            >
+              <i class="fa fa-list" aria-hidden="true"></i>
+              受注一覧を開く
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      {# ── Output tip ──────────────────────────────────────────────── #}
+      <div class="idea-admin-pdf-preview-tip" role="note" aria-label="出力についての説明">
+        <i class="fa fa-info-circle idea-admin-pdf-preview-tip__icon" aria-hidden="true"></i>
+        <span>「PDF出力」を押すと新しいタブでPDFが開きます。フォームの入力内容は保持されます。</span>
+      </div>
+
+    </div>{# /idea-admin-side #}
+
+  </div>{# /idea-admin-layout #}
+
+  {# ── Fixed bottom toolbar ─────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="toolbar" aria-label="ページ操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/order-list" rel="goOrderList">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        受注一覧へ戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button
+        type="submit"
+        class="idea-admin-action idea-admin-action--primary"
+        id="pdf-submit-btn"
+      >
+        <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+        PDF出力
+      </button>
+    </div>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /* ── Default issue_date to today ────────────────────────────────── */
+  var issueDateInput = document.getElementById('order_pdf_issue_date');
+  if (issueDateInput && issueDateInput.value === '') {
+    var today = new Date();
+    var y = today.getFullYear();
+    var m = String(today.getMonth() + 1).padStart(2, '0');
+    var d = String(today.getDate()).padStart(2, '0');
+    issueDateInput.value = y + '-' + m + '-' + d;
+  }
+
+  /* ── Live char counter on title ─────────────────────────────────── */
+  var titleInput = document.getElementById('order_pdf_title');
+  var charCount  = document.getElementById('title-char-count');
+  function updateCharCount() {
+    if (!titleInput || !charCount) { return; }
+    var len = titleInput.value.length;
+    charCount.textContent = len + ' 文字';
+  }
+  if (titleInput) {
+    titleInput.addEventListener('input', updateCharCount);
+    updateCharCount();
+  }
+
+  /* ── Collapsible section toggles ────────────────────────────────── */
+  var toggles = document.querySelectorAll('.idea-admin-pdf-section-toggle');
+  toggles.forEach(function (btn) {
+    var targetId = btn.getAttribute('aria-controls');
+    var target   = document.getElementById(targetId);
+    if (!target) { return; }
+
+    btn.addEventListener('click', function () {
+      var isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      if (isExpanded) {
+        target.setAttribute('hidden', '');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.querySelector('span:first-child').textContent = '展開する';
+      } else {
+        target.removeAttribute('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+        btn.querySelector('span:first-child').textContent = '折りたたむ';
+      }
+    });
+  });
+
+  /* ── Disable submit when orderNo is empty (guard) ───────────────── */
+  var submitBtn   = document.getElementById('pdf-submit-btn');
+  var orderNoHidden = document.querySelector('input[name="orderNos[]"]');
+  if (submitBtn && orderNoHidden && orderNoHidden.value === '') {
+    submitBtn.disabled = true;
+    submitBtn.title    = '受注番号を指定してください。';
+  }
+
+})();
+</script>
 {% endblock %}

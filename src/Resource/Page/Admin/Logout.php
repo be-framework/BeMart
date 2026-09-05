@@ -11,17 +11,12 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
+use MyVendor\BeMart\Auth\AdminSessionWriterInterface;
 use MyVendor\BeMart\Be\Final\AdminLoggedOut;
 use MyVendor\BeMart\Be\Input\AdminLogoutInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function session_status;
-use function str_contains;
-
-use const PHP_SESSION_ACTIVE;
 
 /**
  * EC-CUBE doAdminLogout — 管理者ログアウト (Wave 4, Direct, idempotent).
@@ -43,10 +38,10 @@ use const PHP_SESSION_ACTIVE;
  * `type=idempotent`, logging out an admin-anonymous client is a no-op
  * success — the response body simply carries `wasLoggedIn=false`.
  *
- * In the html context this resource clears the flat admin session key
- * read by HtmlAdminSessionAdapter. The clear is guarded by
- * an html APP_CONTEXT and PHP_SESSION_ACTIVE so app/test/prod contexts keep
- * their existing session behaviour.
+ * In the html context the session-writer port ends the browser session behind
+ * this resource, including the pre-auth 2FA challenge state. Non-html contexts
+ * bind a no-op writer, so Resource code does not branch on environment or
+ * touch PHP session storage.
  *
  * Source-of-truth gap: alps.json does not currently carry a
  * `doAdminLogout` transition id; using the conventional name to
@@ -56,6 +51,7 @@ class Logout extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly AdminSessionWriterInterface $sessionWriter,
     ) {
     }
 
@@ -74,13 +70,11 @@ class Logout extends ResourceObject
 
         assert($final instanceof AdminLoggedOut);
 
-        if (str_contains((string) getenv('APP_CONTEXT'), 'html') && session_status() === PHP_SESSION_ACTIVE) {
-            unset($_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY]);
-        }
+        $this->sessionWriter->clear();
 
         // Post/Redirect/Get: EC-CUBE's doAdminLogout redirects back to the
         // admin login page (the `goAdminLogin` transition declared above).
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/login';
         $this->body = [
             'wasLoggedIn' => $final->wasLoggedIn,

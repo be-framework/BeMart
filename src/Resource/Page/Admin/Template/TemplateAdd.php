@@ -9,12 +9,17 @@ use Be\Framework\BecomingInterface;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
+use Koriym\FileUpload\ErrorFileUpload;
+use Koriym\FileUpload\FileUpload;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\TemplateInstalled;
 use MyVendor\BeMart\Be\Input\InstallTemplateInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminTemplateAddForm;
+use Ray\InputQuery\Attribute\InputFile;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -41,6 +46,8 @@ class TemplateAdd extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
+        private readonly CsrfToken $csrfToken,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -62,7 +69,10 @@ class TemplateAdd extends ResourceObject
         assert($form instanceof AdminTemplateAddForm);
 
         $this->code = Code::OK;
-        $this->body = ['form' => $form];
+        $this->body = [
+            'form' => $form,
+            'csrfToken' => $this->csrfToken->token,
+        ];
 
         return $this;
     }
@@ -79,20 +89,45 @@ class TemplateAdd extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list')]
     #[Link(rel: 'doSelectTemplate', href: 'page://self/admin/template/template-list', method: 'put')]
-    public function onPost(string $templateCode, string $templateName): static
-    {
+    public function onPost(
+        string $templateCode,
+        string $templateName,
+        #[InputFile(maxSize: 10 * 1024 * 1024, allowedExtensions: ['zip'])]
+        FileUpload|ErrorFileUpload|null $file = null,
+    ): static {
+        if ($file === null) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = [
+                'message' => 'テンプレートファイルを選択してください。',
+            ];
+
+            return $this;
+        }
+
+        if ($file instanceof ErrorFileUpload) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = [
+                'message' => $file->message ?? 'テンプレートファイルをアップロードできません。',
+            ];
+
+            return $this;
+        }
+
         $final = ($this->becoming)(new InstallTemplateInput(
             templateCode: $templateCode,
             templateName: $templateName,
+            archiveName: $file->name,
+            archiveSize: $file->size,
         ));
 
         assert($final instanceof TemplateInstalled);
 
-        $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/template/template-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/template/template-list');
         $this->body = [
             'transitionId' => 'doInstallTemplate',
             'templateId' => $final->templateId,
+            'archiveName' => $final->archiveName,
+            'archiveSize' => $final->archiveSize,
             'message' => 'テンプレートを追加しました。',
         ];
 

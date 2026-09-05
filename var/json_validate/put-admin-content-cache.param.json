@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "put-admin-content-cache.param.json",
+  "title": "PUT /admin/content/cache request parameters",
+  "description": "PUT /admin/content/cache request parameters の request parameter schema。",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 32,
+      "title": "フォーム送信モード",
+      "$comment": "HTML form submit marker; Resource workflow calls omit it."
+    }
+  },
+  "additionalProperties": false
+}

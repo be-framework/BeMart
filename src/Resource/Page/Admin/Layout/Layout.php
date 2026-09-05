@@ -9,12 +9,17 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\LayoutNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\AdminLayoutFetched;
 use MyVendor\BeMart\Be\Final\LayoutUpdated;
+use MyVendor\BeMart\Be\Input\GetAdminLayoutInput;
 use MyVendor\BeMart\Be\Input\UpdateLayoutInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminLayoutForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -31,19 +36,18 @@ use function assert;
  * editor (`Content/layout.twig` port) can render the real layout-name
  * `<input>` via `{{ form.input(...) }}`.
  *
- * NOTE — single-row prefill: the Be domain exposes no
- * `GetAdminLayoutInput` / `AdminLayoutFetched` (single-row fetch), so
- * `onGet` renders the NEW-layout form (the `admin_content_layout_new`
- * case — the layout designer with an empty block canvas). Pre-filling an
- * existing layout + its block positions would need a Be fetch Input — a
- * `be/src/` change out of this Phase 3 HTML wave's scope. FLAGGED:
- * follow-up to add `GetAdminLayoutInput` for existing-layout edit prefill.
+ * `onGet` without a `layoutId` still renders the new-layout form. With a
+ * `layoutId`, it opens the existing layout row and prefills the editable
+ * name while the block-position designer remains a residual placeholder.
  */
 class Layout extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly AdminSession $adminSession,
+        private readonly CsrfToken $csrf,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -52,16 +56,40 @@ class Layout extends ResourceObject
      *
      * The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
      */
-    #[Alps('doUpdateLayout')]
-    #[JsonSchema(schema: 'get-admin-layout-layout.json')]
+    #[Alps('goLayout')]
+    #[JsonSchema(schema: 'get-admin-layout-layout.json', params: 'get-admin-layout-layout.param.json')]
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
-    public function onGet(): static
+    #[Link(rel: 'doUpdateLayout', href: 'page://self/admin/layout/layout', method: 'put')]
+    public function onGet(string|null $layoutId = null): static
     {
         $form = $this->formFactory->newInstance(AdminLayoutForm::class);
         assert($form instanceof AdminLayoutForm);
+        $body = [
+            'layoutId' => $layoutId,
+            'layoutName' => '',
+            'deviceType' => null,
+            'csrfToken' => $this->csrf->token,
+        ];
+
+        if ($layoutId === null || $layoutId === '') {
+            if ($this->adminSession->adminId === null) {
+                throw new UnauthorizedAdminAccessException();
+            }
+        } else {
+            $final = ($this->becoming)(new GetAdminLayoutInput(layoutId: $layoutId));
+            assert($final instanceof AdminLayoutFetched);
+            $body = [
+                'layoutId' => $final->layoutId,
+                'layoutName' => $final->layoutName,
+                'deviceType' => $final->deviceType,
+                'csrfToken' => $this->csrf->token,
+            ];
+        }
+
+        $form->fillValues($body);
 
         $this->code = Code::OK;
-        $this->body = ['form' => $form];
+        $this->body = $body + ['form' => $form];
 
         return $this;
     }
@@ -79,7 +107,9 @@ class Layout extends ResourceObject
     public function onPut(
         string $layoutId,
         string|null $layoutName = null,
+        string|null $name = null,
     ): static {
+        $layoutName ??= $name;
         $final = ($this->becoming)(new UpdateLayoutInput(
             layoutId: $layoutId,
             layoutName: $layoutName,
@@ -87,7 +117,7 @@ class Layout extends ResourceObject
 
         assert($final instanceof LayoutUpdated);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, '/admin/layout/layout-list');
         $this->body = [
             'layoutId' => $final->layoutId,
             'layoutName' => $final->layoutName,

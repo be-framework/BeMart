@@ -11,18 +11,24 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use Be\Framework\SemanticVariable\ValidationMessageHandler;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Exception\AdminLoginFailedException;
+use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
+use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\AdminAuthenticated;
 use MyVendor\BeMart\Be\Input\AdminLoginInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminLoginForm;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
+use function array_values;
 use function assert;
+use function trim;
 
 /**
  * EC-CUBE doAdminLogin — 管理者ログイン (Wave 4).
@@ -36,6 +42,12 @@ use function assert;
  *   - AdminLoginFailedException     → 401 (no such loginId OR wrong
  *                                            password — combined, no
  *                                            user enumeration)
+ *   - LoginAttemptsExceededException → 429 (too many recent failures for
+ *                                            that loginId — refused
+ *                                            before the password is
+ *                                            checked, and the message
+ *                                            reads the same whether the
+ *                                            loginId exists or not)
  *
  * Mirrors Pilot 6 customer {@see \MyVendor\BeMart\Resource\Page\Login}
  * but for the admin firewall — distinct namespace under `Page\Admin\`
@@ -56,10 +68,8 @@ use function assert;
  */
 class Login extends ResourceObject
 {
-    // PoC fixture prefill for the browser demo. Remove these constants
-    // and the prefilledLoginForm() call before production hardening.
-    private const POC_LOGIN_ID = 'test-admin';
-    private const POC_LOGIN_PASSWORD = '';
+    /** BEAR\Resource\Code has no 429; {@see \MyVendor\BeMart\Provide\Error\ExceptionStatusMapper} maps the same status for JSON clients. */
+    private const HTTP_TOO_MANY_REQUESTS = 429;
 
     public function __construct(
         private readonly BecomingInterface $becoming,
@@ -67,6 +77,7 @@ class Login extends ResourceObject
         private readonly FormFactory $formFactory,
         private readonly TwoFactorAuthInterface $twoFactorAuth,
         private readonly HtmlAdminLoginChallengeAdapter $loginChallenge,
+        private readonly AdminLoginFormSubmissionInterface $formSubmission,
     ) {
     }
 
@@ -94,9 +105,7 @@ class Login extends ResourceObject
                 'href' => 'page://self/admin/login',
             ],
             'csrfToken' => $this->csrf->token,
-            // PoC fixture prefill for quick HTML-context verification.
-            // See prefilledLoginForm(); deliberately easy to remove.
-            'form' => $this->prefilledLoginForm(),
+            'form' => $this->emptyLoginForm(),
         ];
 
         return $this;
@@ -113,12 +122,54 @@ class Login extends ResourceObject
     #[JsonSchema(schema: 'post-admin-login.json', params: 'post-admin-login.param.json')]
     #[Link(rel: 'goAdminTop', href: 'page://self/admin/index')]
     #[CsrfProtected]
-    public function onPost(string $loginId, string $password): static
+    public function onPost(string|null $loginId = null, string|null $password = null, string|null $mode = null): static
     {
-        $final = ($this->becoming)(new AdminLoginInput(
-            loginId: $loginId,
-            password: $password,
-        ));
+        $values = [
+            'loginId' => $loginId ?? '',
+            'password' => $password ?? '',
+        ];
+        $browserForm = ($this->formSubmission)($mode);
+        if ($browserForm) {
+            $errors = $this->formErrors($values);
+            if ($errors !== []) {
+                return $this->rejectForm($values, $errors);
+            }
+        }
+
+        try {
+            $final = ($this->becoming)(new AdminLoginInput(
+                loginId: $values['loginId'],
+                password: $values['password'],
+            ));
+        } catch (SemanticVariableException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            [$field, $message] = self::semanticError($e);
+
+            return $this->rejectForm($values, [$field => $message]);
+        } catch (AdminLoginFailedException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            return $this->rejectForm(
+                $values,
+                ['loginId' => self::domainMessage($e)],
+                Code::UNAUTHORIZED,
+            );
+        } catch (LoginAttemptsExceededException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            return $this->rejectForm(
+                $values,
+                ['loginId' => self::domainMessage($e)],
+                self::HTTP_TOO_MANY_REQUESTS,
+            );
+        }
 
         assert($final instanceof AdminAuthenticated);
 
@@ -139,7 +190,6 @@ class Login extends ResourceObject
         // next login-context 2FA step. JSON clients still read the
         // authenticated admin proof off the body below, but the trusted
         // identity used by 2FA is the session-backed challenge above.
-        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = $location;
         $this->body = [
             'adminId' => $final->adminId,
@@ -147,19 +197,96 @@ class Login extends ResourceObject
             'name' => $final->name,
             'authority' => $final->authority,
         ];
+        if ($browserForm) {
+            // Browser form submit (decided by the formSubmission port, not
+            // raw client input): 303 See Other so the browser actually
+            // navigates (a 200 + Location response leaves browsers on the
+            // login page). JSON/Resource clients keep 200 OK with the body.
+            $this->code = Code::SEE_OTHER;
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
 
         return $this;
     }
 
-    private function prefilledLoginForm(): AdminLoginForm
+    /** @param array{loginId: string, password: string} $values */
+    private function formErrors(array $values): array
+    {
+        $errors = [];
+        foreach ([
+            'loginId' => '入力してください。',
+            'password' => '入力してください。',
+        ] as $field => $message) {
+            if (trim($values[$field]) === '') {
+                $errors[$field] = $message;
+            }
+        }
+
+        return $errors;
+    }
+
+    /** @param array{loginId: string, password: string} $values */
+    private function rejectForm(array $values, array $errors, int $code = Code::BAD_REQUEST): static
+    {
+        $this->code = $code;
+        $this->body = [
+            'transitionId' => 'goAdminLogin',
+            'fields' => ['loginId', 'password', 'csrfToken'],
+            'submitTo' => [
+                'method' => 'POST',
+                'href' => 'page://self/admin/login',
+            ],
+            'csrfToken' => $this->csrf->token,
+            'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
+            'errors' => $errors,
+            'form' => $this->failedForm($values, $errors),
+        ];
+
+        return $this;
+    }
+
+    /** @param array{loginId: string, password: string} $values */
+    private function failedForm(array $values, array $errors): AdminLoginForm
     {
         $form = $this->formFactory->newInstance(AdminLoginForm::class);
         assert($form instanceof AdminLoginForm);
 
-        $form->fillValues([
-            'loginId' => self::POC_LOGIN_ID,
-            'password' => self::POC_LOGIN_PASSWORD,
-        ]);
+        $form->fillValues(['loginId' => $values['loginId']]);
+        foreach ($errors as $field => $message) {
+            $form->setDomainError($field, $message);
+        }
+
+        return $form;
+    }
+
+    /** @return array{0: string, 1: string} */
+    private static function semanticError(SemanticVariableException $e): array
+    {
+        $exception = $e->getErrors()->exceptions[0] ?? null;
+        $message = $e->getErrors()->getMessages('ja')[0] ?? '入力内容を確認してください。';
+
+        $field = $exception instanceof PasswordFormatException ? 'password' : 'loginId';
+
+        return [$field, $message];
+    }
+
+    /** ja text carried by the rejection's #[Message]; the fallback keeps either case non-enumerating. */
+    private static function domainMessage(AdminLoginFailedException|LoginAttemptsExceededException $e): string
+    {
+        $message = (new ValidationMessageHandler())->getMessage($e, 'ja');
+
+        return $message !== '' && $message !== 'Validation error'
+            ? $message
+            : 'ログインIDまたはパスワードが正しくありません。';
+    }
+
+    private function emptyLoginForm(): AdminLoginForm
+    {
+        $form = $this->formFactory->newInstance(AdminLoginForm::class);
+        assert($form instanceof AdminLoginForm);
 
         return $form;
     }

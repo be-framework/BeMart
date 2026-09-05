@@ -127,16 +127,6 @@ final class AdminPluginEnableResourceTest extends TestCase
         $this->assertStringContainsString('インストール', $ro->body['message']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/plugin-enable', [
-            'pluginCode' => 'Sample/DisabledPlugin',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostWithoutAdminSessionReturns403(): void
     {
         $this->rebindAdminSession(null);

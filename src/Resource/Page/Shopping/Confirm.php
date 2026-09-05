@@ -12,9 +12,11 @@ use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
+use MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException;
 use MyVendor\BeMart\Be\Final\OrderConfirmed;
 use MyVendor\BeMart\Be\Final\OrderConfirmFailed;
 use MyVendor\BeMart\Be\Input\ConfirmOrderInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -39,6 +41,12 @@ use function assert;
  * Final; the resource forwards the customer to the ShoppingError state
  * (`goShoppingError`), mirroring EC-CUBE's controller behaviour.
  *
+ * Failure mapping mirrors {@see Checkout}, the other consumer of the same
+ * pre-order ownership rule:
+ *   - PreOrderNotFoundException           → 404 (the pre-order never existed)
+ *   - UnauthorizedPreOrderAccessException → 403 (not the owner)
+ *   - SemanticVariableException           → 400 (preOrderId malformed)
+ *
  * Maps to `page://self/shopping/confirm`. The submit target is
  * doCheckout (`page://self/shopping/checkout`).
  */
@@ -46,6 +54,7 @@ class Confirm extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -101,6 +110,11 @@ class Confirm extends ResourceObject
             $this->body = ['message' => 'Pre-order not found.', 'preOrderId' => $preOrderId];
 
             return $this;
+        } catch (UnauthorizedPreOrderAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この注文を参照する権限がありません。'];
+
+            return $this;
         }
 
 
@@ -139,11 +153,7 @@ class Confirm extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/shopping/checkout',
             ],
-            'csrfToken' => null,
-            'links' => [
-                'doCheckout' => 'page://self/shopping/checkout',
-                'goShoppingError' => 'page://self/shopping/error',
-            ],
+            'csrfToken' => $this->csrf->token,
         ];
 
         return $this;

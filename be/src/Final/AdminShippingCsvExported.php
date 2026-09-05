@@ -30,11 +30,8 @@ use function stream_get_contents;
  *   AdminSession::$adminId === null → UnauthorizedAdminAccess (403)
  *
  * Format: RFC 4180. One header row + one row per recorded shipping
- * address. `trackingNumber` column is exposed empty for the Wave 9η
- * iteration — Phase 2 will materialise it once
- * {@see \MyVendor\BeMart\Be\Reason\Entity\ShippingAddressEntity} grows
- * the field. The empty column is intentional: it keeps the import
- * shape stable across the export → fill → import workflow.
+ * address. `trackingNumber` is included so the admin export -> fill
+ * offline -> import -> export readback workflow can prove persistence.
  */
 final readonly class AdminShippingCsvExported
 {
@@ -104,10 +101,7 @@ final readonly class AdminShippingCsvExported
             'addr01' => $row->addr01,
             'addr02' => $row->addr02,
             'phoneNumber' => $row->phoneNumber,
-            // trackingNumber is exposed empty for this iteration — see
-            // the class docblock; the column stays in the shape so the
-            // export → fill → import round-trip is stable.
-            'trackingNumber' => '',
+            'trackingNumber' => $row->trackingNumber,
         ];
     }
 }

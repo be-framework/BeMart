@@ -25,10 +25,14 @@ final readonly class TemplateInstalled
     public string $templateId;
     public string $templateCode;
     public string $templateName;
+    public string $archiveName;
+    public int $archiveSize;
 
     public function __construct(
         #[Input] string $templateCode,
         #[Input] string $templateName,
+        #[Input] string $archiveName,
+        #[Input] int $archiveSize,
         #[Inject] AdminSession $adminSession,
         #[Inject] TemplateCompatibilityInterface $templates,
     ) {
@@ -36,8 +40,10 @@ final readonly class TemplateInstalled
             throw new UnauthorizedAdminAccessException();
         }
 
-        $this->templateId = $templates->install($templateCode, $templateName);
+        $this->templateId = $templates->install($templateCode, $templateName, $archiveName, $archiveSize);
         $this->templateCode = $templateCode;
         $this->templateName = $templateName;
+        $this->archiveName = $archiveName;
+        $this->archiveSize = $archiveSize;
     }
 }

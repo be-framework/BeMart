@@ -33,7 +33,7 @@ final class CustomerWithdrawnTest extends TestCase
 
     private const ALICE_ID = '0123456789abcdef0123456789abcdef';
     private const ALICE_EMAIL = 'alice@example.com';
-    private const ALICE_DUMMY_EMAIL = 'withdrawn-0123456789abcdef0123456789abcdef@example.invalid';
+    private const ALICE_DUMMY_EMAIL = 'withdrawn-0123456789abcdef0123456789abcdef@example.test';
 
     private BecomingInterface $becoming;
     private CustomerQueryInterface $customerStorage;
@@ -71,7 +71,7 @@ final class CustomerWithdrawnTest extends TestCase
     {
         $this->rebindSession(self::ALICE_ID);
 
-        $final = ($this->becoming)(new WithdrawCustomerInput());
+        $final = ($this->becoming)(new WithdrawCustomerInput(sessionPrefix: 'session-prefix-1'));
 
         $this->assertInstanceOf(CustomerWithdrawn::class, $final);
         $this->assertSame(self::ALICE_ID, $final->customerId);
@@ -99,7 +99,7 @@ final class CustomerWithdrawnTest extends TestCase
             'Pre-condition: alice must hold at least one cart under session-prefix-1.',
         );
 
-        ($this->becoming)(new WithdrawCustomerInput());
+        ($this->becoming)(new WithdrawCustomerInput(sessionPrefix: 'session-prefix-1'));
 
         $this->assertSame(
             [],
@@ -113,7 +113,7 @@ final class CustomerWithdrawnTest extends TestCase
         $this->rebindSession(self::ALICE_ID);
 
         $before = count($this->mailer->withdrawConfirmations);
-        ($this->becoming)(new WithdrawCustomerInput());
+        ($this->becoming)(new WithdrawCustomerInput(sessionPrefix: 'session-prefix-1'));
 
         $after = $this->mailer->withdrawConfirmations;
         $this->assertCount($before + 1, $after);
@@ -127,13 +127,13 @@ final class CustomerWithdrawnTest extends TestCase
     {
         $this->rebindSession(self::ALICE_ID);
 
-        ($this->becoming)(new WithdrawCustomerInput());
+        ($this->becoming)(new WithdrawCustomerInput(sessionPrefix: 'session-prefix-1'));
         $mailsAfterFirst = count($this->mailer->withdrawConfirmations);
 
         // Replay — the customer record is already STATUS_WITHDRAWN, so
         // the Final must short-circuit: no second mail, no second
         // cart-clear, no re-replace.
-        $final = ($this->becoming)(new WithdrawCustomerInput());
+        $final = ($this->becoming)(new WithdrawCustomerInput(sessionPrefix: 'session-prefix-1'));
 
         $this->assertInstanceOf(CustomerWithdrawn::class, $final);
         $this->assertSame(self::ALICE_DUMMY_EMAIL, $final->dummyEmail);
@@ -151,7 +151,7 @@ final class CustomerWithdrawnTest extends TestCase
         $this->rebindSession(null);
 
         $this->expectException(UnauthenticatedException::class);
-        ($this->becoming)(new WithdrawCustomerInput());
+        ($this->becoming)(new WithdrawCustomerInput(sessionPrefix: 'session-prefix-1'));
     }
 
     public function testSessionPointsToMissingCustomerRaisesUnauthenticated(): void
@@ -159,6 +159,6 @@ final class CustomerWithdrawnTest extends TestCase
         $this->rebindSession('nonexistent-customer-id-zzzz9999');
 
         $this->expectException(UnauthenticatedException::class);
-        ($this->becoming)(new WithdrawCustomerInput());
+        ($this->becoming)(new WithdrawCustomerInput(sessionPrefix: 'session-prefix-1'));
     }
 }

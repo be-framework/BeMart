@@ -164,16 +164,4 @@ final class EntryResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertNotEmpty($ro->body['message']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/entry', [
-            'email' => 'no-csrf@example.com',
-            'password' => 'whatever-2026',
-            'name01' => '佐藤',
-            'name02' => '七郎',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

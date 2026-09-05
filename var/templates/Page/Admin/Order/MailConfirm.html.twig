@@ -1,68 +1,156 @@
 {#
-  BeMart admin order-mail confirm — EC-CUBE admin-theme
-  `Order/mail_confirm.twig`.
+  BeMart admin — 受注メール送信確認 (goAdminOrderMailConfirm)
 
-  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Order/mail_confirm.twig`
-  — the 受注メール確認 step between the mail composer and the actual
-  send. It extends the admin frame (`admin-base.html.twig`).
+  Resource contract (src/Resource/Page/Admin/Order/MailConfirm.php):
+    GET  body.orderNo  — 注文番号 (string, required)
+    Link doSendOrderMail → POST /admin/order/send-mail
+         fields: csrfToken (hidden), orderNo (hidden)
+    Link goOrderMail  → GET /admin/order/send-mail (メール作成画面へ戻る)
 
-  Tier-2 port note: EC-CUBE renders the composed subject / body as a
-  read-only preview here. The Be domain re-sends the order-confirmation
-  mail keyed by orderNo only, so the composed-content preview is Phase
-  2 scope — the page renders the confirm-and-send shell, and the
-  composed-content block is dropped as an enumerated residual.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+  UX design decisions (clean-room — no EC-CUBE mirror):
+  - This is a focused confirmation gate between "compose" and "send".
+    The resource carries only orderNo; no mail preview content exists at
+    this stage (Phase 2 scope). The page is honest about that: it names
+    the order being acted on and asks for explicit confirmation.
+  - Narrow centered card (max 520 px). Nothing belongs in a sidebar on a
+    single-purpose confirmation step.
+  - Visual hierarchy: order badge (the subject of the action) first, then
+    a plain confirmation statement, then two actions clearly separated by
+    the toolbar. No ambiguity about what is about to happen.
+  - The send button uses idea-admin-action--primary. No JS required.
+  - Hidden `mode` field removed — the Be domain does not read it.
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-order-mail-confirm' %}
-{% set title = '受注メール確認' %}
+{% set route    = 'admin-order-mail-confirm' %}
+{% set title    = 'メール送信確認' %}
 {% set sub_title = '受注管理' %}
 
+{% block stylesheet %}
+<style>
+/* ── narrow centered confirmation card ─────────────────────────── */
+.idea-admin-mail-confirm-card {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* ── order identity badge inside the card ──────────────────────── */
+.idea-admin-mail-confirm-order {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  background: var(--idea-surface-soft);
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-badge);
+  padding: .28rem .85rem;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--idea-ink);
+  letter-spacing: .03em;
+  margin-bottom: 1rem;
+}
+.idea-admin-mail-confirm-order i {
+  color: var(--idea-muted);
+  font-size: .78rem;
+}
+
+/* ── confirmation statement ────────────────────────────────────── */
+.idea-admin-mail-confirm-statement {
+  font-size: .96rem;
+  color: var(--idea-ink);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── send intent indicator ─────────────────────────────────────── */
+.idea-admin-mail-confirm-intent {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  background: var(--idea-surface-soft);
+  border-left: 3px solid var(--idea-olive);
+  border-radius: 0 var(--idea-admin-radius-input) var(--idea-admin-radius-input) 0;
+  padding: .75rem 1rem;
+  margin-top: 1.1rem;
+  font-size: .88rem;
+  color: var(--idea-muted);
+}
+.idea-admin-mail-confirm-intent i {
+  color: var(--idea-olive);
+  margin-top: .12rem;
+  flex-shrink: 0;
+}
+</style>
+{% endblock %}
+
 {% block main %}
-    <form role="form" method="post" action="/admin/order/send-mail?orderNo={{ orderNo }}" id="mail_confirm_form" name="form1" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
-        <input type="hidden" name="mode" value="complete">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">送信内容の確認</span>
-                        </div>
-                        <div class="card-body">
-                            <p>以下の内容でメールを送信します。よろしければ「送信する」を押してください。</p>
-                            <div class="bg-light p-4 bg-ec-formGray" id="mail_confirm_body" style="word-wrap: break-word; word-break:break-all"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="idea-admin-mail-confirm-card">
+
+  {# The form wraps the entire card so the submit button in the toolbar
+     can reference it via form="mail_confirm_form". #}
+  <form
+    id="mail_confirm_form"
+    method="post"
+    action="/admin/order/send-mail"
+    novalidate
+    aria-label="メール送信確認フォーム"
+  >
+    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+    <input type="hidden" name="orderNo"   value="{{ orderNo|default('') }}">
+
+    <section class="idea-admin-panel" aria-labelledby="mail-confirm-heading">
+
+      <div class="idea-admin-panel__head">
+        <h3 id="mail-confirm-heading">
+          <i class="fa fa-envelope" aria-hidden="true"></i>
+          送信内容の確認
+        </h3>
+      </div>
+
+      <div class="idea-admin-panel__body">
+
+        {# Order identity — the subject of this send action #}
+        <div>
+          <span class="idea-admin-mail-confirm-order">
+            <i class="fa fa-receipt" aria-hidden="true"></i>
+            注文番号: {{ orderNo|default('—') }}
+          </span>
         </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/order/send-mail?orderNo={{ orderNo }}">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">送信する</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+        <p class="idea-admin-mail-confirm-statement">
+          この注文に対して受注確認メールを送信します。<br>
+          送信後の取り消しはできません。内容を確認のうえ、送信ボタンを押してください。
+        </p>
+
+        <div class="idea-admin-mail-confirm-intent" role="note">
+          <i class="fa fa-circle-info" aria-hidden="true"></i>
+          <span>送信するメール内容はメール作成画面で設定したテンプレートに基づきます。</span>
         </div>
-    </form>
+
+      </div>
+    </section>
+
+  </form>
+
+</div>{# /.idea-admin-mail-confirm-card #}
+
+{# ── Fixed bottom toolbar ───────────────────────────────────────── #}
+<div class="idea-admin-toolbar" role="toolbar" aria-label="フォーム操作">
+  <div class="idea-admin-toolbar__back">
+    <a href="/admin/order/send-mail?orderNo={{ orderNo|default('')|url_encode }}" rel="goOrderMail">
+      <i class="fa fa-angle-left" aria-hidden="true"></i>
+      メール作成へ戻る
+    </a>
+  </div>
+  <div class="idea-admin-toolbar__actions">
+    <button
+      type="submit"
+      form="mail_confirm_form"
+      class="idea-admin-action idea-admin-action--primary"
+    >
+      <i class="fa fa-paper-plane" aria-hidden="true"></i>
+      メールを送信
+    </button>
+  </div>
+</div>
 {% endblock %}

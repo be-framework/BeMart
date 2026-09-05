@@ -1,100 +1,373 @@
 {#
-  BeMart admin order-shipping editor — EC-CUBE admin-theme
-  `Order/shipping.twig`.
+  BeMart admin — 配送先変更 (Order / ShippingAddress)
+  Clean-room build: idea-admin design language only.
 
-  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Order/shipping.twig`
-  — the ~709-line per-order 出荷登録 / 配送先編集 screen. It extends the
-  admin frame (`admin-base.html.twig`).
+  DATA CONTRACT (src/Resource/Page/Admin/Order/ShippingAddress.php onGet):
+    form      AdminOrderShippingForm — pre-filled renderer
+                fields: name01 (required), name02 (required),
+                        postalCode, pref (select), addr01, addr02, phoneNumber
+    orderNo   string — target order identifier
 
-  Tier-2 port note: EC-CUBE's editor wires a Shipping collection (one
-  panel per shipment), each with a delivery-slot / delivery-date select
-  and an OrderItem collection. The Be domain edits the order's single
-  shipping target ({@see \MyVendor\BeMart\Be\Input\AdminUpdateShippingAddressInput}:
-  name / postalCode / pref / addr01 / addr02 / phoneNumber), so the
-  port renders the shipping-address panel. The per-shipment delivery
-  slot / date / item collection is Phase 2 scope — dropped as an
-  enumerated residual.
+  ACTIONS (derived from #[Link] annotations on ShippingAddress resource):
+    PUT  /admin/order/shipping-address  _method=put   — doUpdateShippingAddress
+    POST /admin/order/shipping-address               — doSelectShippingAddress (address-book pick)
+    GET  /admin/order                                — goOrder (back nav)
 
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
-     AdminOrderShippingForm leaf fields (Ray.WebFormModule).
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+  idea-admin vocabulary:
+    idea-admin-layout / idea-admin-primary — single-column focused editor
+    idea-admin-panel / idea-admin-panel__head / idea-admin-panel__body
+    idea-admin-field / idea-admin-field__label / idea-admin-field__input
+    idea-admin-required / idea-admin-error
+    idea-admin-toolbar / idea-admin-toolbar__back / idea-admin-toolbar__actions
+    idea-admin-action / idea-admin-action--primary
+    idea-admin-notice / idea-admin-notice--info
+    idea-admin-dialog-backdrop / idea-admin-dialog — address-book picker dialog
 #}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-order-shipping-address' %}
-{% set title = '出荷登録' %}
+{% set title = '配送先変更' %}
 {% set sub_title = '受注管理' %}
 
+{% block stylesheet %}
+<style>
+/* ── page-local additions (idea-admin-* namespace) ────────────────────── */
+
+/* prefecture select — inherit panel width */
+.idea-admin-field__input select.idea-admin-pref-select {
+  width: 100%;
+  max-width: 20rem;
+}
+
+/* address-book picker trigger */
+.idea-admin-pick-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .82rem;
+  color: var(--idea-blue);
+  background: none;
+  border: 1px solid var(--idea-blue);
+  border-radius: var(--idea-admin-radius-button);
+  padding: .3rem .75rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.idea-admin-pick-trigger:hover {
+  background: var(--idea-blue);
+  color: var(--idea-surface);
+}
+
+/* order-no context strip */
+.idea-admin-order-context {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .84rem;
+  color: var(--idea-muted);
+  margin-bottom: 1.25rem;
+}
+.idea-admin-order-context__no {
+  font-weight: 700;
+  color: var(--idea-ink);
+}
+
+/* address-book form inside dialog */
+.idea-admin-dialog__addr-field {
+  margin-top: .75rem;
+}
+.idea-admin-dialog__addr-field label {
+  display: block;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--idea-muted);
+  margin-bottom: .25rem;
+}
+.idea-admin-dialog__addr-field input {
+  width: 100%;
+  padding: .4rem .6rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  font-size: .9rem;
+  background: var(--idea-surface);
+  color: var(--idea-ink);
+}
+.idea-admin-dialog__addr-field input:focus {
+  outline: 2px solid var(--idea-focus);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+</style>
+{% endblock %}
+
 {% block main %}
-    <form role="form" method="post" action="/admin/order/shipping-address?orderNo={{ orderNo }}" id="shipping_form" name="form1" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">お届け先</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3"><span>お名前</span><span class="badge bg-primary ms-1">必須</span></div>
-                                <div class="col">
-                                    <div class="row">
-                                        <div class="col-6">{{ form.input('name01')|raw }}</div>
-                                        <div class="col-6">{{ form.input('name02')|raw }}</div>
-                                    </div>
-                                    {% if form.error('name01') %}<span class="invalid-feedback d-block">{{ form.error('name01') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>郵便番号</span></div>
-                                <div class="col-4">{{ form.input('postal_code')|raw }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>都道府県</span></div>
-                                <div class="col-4">{{ form.input('pref')|raw }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>市区町村名</span></div>
-                                <div class="col">{{ form.input('addr01')|raw }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>番地・ビル名</span></div>
-                                <div class="col">{{ form.input('addr02')|raw }}</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>電話番号</span></div>
-                                <div class="col-4">{{ form.input('phone_number')|raw }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+{# ── Order context strip ───────────────────────────────────────────────── #}
+{% if orderNo is defined and orderNo is not empty %}
+<div class="idea-admin-order-context" aria-label="対象受注番号">
+  <i class="fa fa-receipt fa-fw" aria-hidden="true"></i>
+  <span>受注番号</span>
+  <span class="idea-admin-order-context__no">{{ orderNo }}</span>
+</div>
+{% endif %}
+
+{# ── Notice: pref is read-only metadata (options not loaded) ──────────── #}
+<div class="idea-admin-notice idea-admin-notice--info" role="note">
+  都道府県は番号で入力してください（1=北海道〜47=沖縄）。リスト形式は次フェーズで対応します。
+</div>
+
+{# ─────────────────────────────────────────────────────────────────────── #}
+{# PUT form — direct address edit                                          #}
+{# ─────────────────────────────────────────────────────────────────────── #}
+<form
+  id="shipping_address_form"
+  role="form"
+  method="post"
+  action="/admin/order/shipping-address?orderNo={{ orderNo|default('')|url_encode }}"
+  novalidate
+>
+  <input type="hidden" name="_method" value="put">
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
+
+  <div class="idea-admin-layout">
+    <div class="idea-admin-primary">
+
+      {# ── Panel: 届け先 ───────────────────────────────────────────────── #}
+      <section class="idea-admin-panel" aria-labelledby="section-delivery-address">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-delivery-address">
+            <i class="fa fa-map-marker-alt fa-fw" aria-hidden="true"></i>
+            届け先
+          </h3>
+          <button
+            type="button"
+            class="idea-admin-pick-trigger"
+            id="open-addr-picker"
+            aria-haspopup="dialog"
+            aria-controls="addr-picker-dialog"
+          >
+            <i class="fa fa-address-book fa-fw" aria-hidden="true"></i>
+            アドレス帳から選ぶ
+          </button>
         </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/order/edit?orderNo={{ orderNo }}">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>受注編集へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="idea-admin-panel__body">
+
+          {# 氏名 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shipping_name_name01">氏名</label>
+              <span class="idea-admin-required">必須</span>
             </div>
+            <div class="idea-admin-field__input">
+              <div style="display:flex;gap:.5rem;">
+                {{ form.input('name01')|raw }}
+                {{ form.input('name02')|raw }}
+              </div>
+              {% if form.error('name01') %}
+              <span class="idea-admin-error">{{ form.error('name01') }}</span>
+              {% endif %}
+              {% if form.error('name02') %}
+              <span class="idea-admin-error">{{ form.error('name02') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# 郵便番号 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shipping_postal_code">郵便番号</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('postalCode')|raw }}
+              {% if form.error('postalCode') %}
+              <span class="idea-admin-error">{{ form.error('postalCode') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# 都道府県 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shipping_address_pref">都道府県</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {#
+                pref is rendered via the form object which defines an empty
+                select (options not available from the resource body —
+                enumerated residual; see AdminOrderShippingForm::init()).
+                We render it via form.input() for framework-consistent behaviour.
+              #}
+              {{ form.input('pref')|raw }}
+              {% if form.error('pref') %}
+              <span class="idea-admin-error">{{ form.error('pref') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# 市区町村 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shipping_address_addr01">市区町村</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('addr01')|raw }}
+              {% if form.error('addr01') %}
+              <span class="idea-admin-error">{{ form.error('addr01') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# 番地・建物名 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shipping_address_addr02">番地・建物名</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('addr02')|raw }}
+              {% if form.error('addr02') %}
+              <span class="idea-admin-error">{{ form.error('addr02') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# 電話番号 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shipping_phone_number">電話番号</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('phoneNumber')|raw }}
+              {% if form.error('phoneNumber') %}
+              <span class="idea-admin-error">{{ form.error('phoneNumber') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>{# /.idea-admin-panel__body #}
+      </section>
+
+    </div>{# /.idea-admin-primary #}
+  </div>{# /.idea-admin-layout #}
+
+  {# ── Action toolbar ───────────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/order?orderNo={{ orderNo|default('')|url_encode }}" rel="goOrder">
+        <i class="fa fa-backward" aria-hidden="true"></i>
+        受注詳細に戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-save" aria-hidden="true"></i>
+        配送先を保存
+      </button>
+    </div>
+  </div>
+
+</form>{# /shipping_address_form (PUT) #}
+
+{# ─────────────────────────────────────────────────────────────────────── #}
+{# Address-book picker — POST doSelectShippingAddress                      #}
+{# Opens as a modal dialog; vanilla JS only.                               #}
+{# ─────────────────────────────────────────────────────────────────────── #}
+<div
+  class="idea-admin-dialog-backdrop"
+  id="addr-picker-dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="addr-picker-title"
+  hidden
+>
+  <div class="idea-admin-dialog">
+    <div class="idea-admin-dialog__head">
+      <span class="idea-admin-dialog__title" id="addr-picker-title">
+        <i class="fa fa-address-book fa-fw" aria-hidden="true"></i>
+        アドレス帳から配送先を選ぶ
+      </span>
+    </div>
+    <form
+      id="shipping_address_pick_form"
+      method="post"
+      action="/admin/order/shipping-address"
+      novalidate
+    >
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
+
+      <div class="idea-admin-dialog__body">
+        <p style="font-size:.85rem;color:var(--idea-muted);margin-bottom:.75rem;">
+          顧客のアドレス帳に登録された住所IDを入力すると、その住所をこの受注の配送先に設定します。
+        </p>
+        <div class="idea-admin-dialog__addr-field">
+          <label for="addr-picker-id">住所ID</label>
+          <input
+            type="text"
+            id="addr-picker-id"
+            name="addressId"
+            required
+            autocomplete="off"
+            placeholder="例: addr-001"
+          >
         </div>
+      </div>
+
+      <div class="idea-admin-dialog__foot">
+        <button
+          type="button"
+          class="idea-admin-action"
+          id="close-addr-picker"
+        >キャンセル</button>
+        <button
+          type="submit"
+          class="idea-admin-action idea-admin-action--primary"
+        >
+          <i class="fa fa-check fa-fw" aria-hidden="true"></i>
+          この住所を設定
+        </button>
+      </div>
     </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  var backdrop = document.getElementById('addr-picker-dialog');
+  var openBtn  = document.getElementById('open-addr-picker');
+  var closeBtn = document.getElementById('close-addr-picker');
+
+  function openDialog() {
+    backdrop.hidden = false;
+    var firstInput = backdrop.querySelector('input:not([type=hidden])');
+    if (firstInput) { firstInput.focus(); }
+  }
+
+  function closeDialog() {
+    backdrop.hidden = true;
+    if (openBtn) { openBtn.focus(); }
+  }
+
+  if (openBtn)  { openBtn.addEventListener('click', openDialog); }
+  if (closeBtn) { closeBtn.addEventListener('click', closeDialog); }
+
+  /* close on backdrop click */
+  if (backdrop) {
+    backdrop.addEventListener('click', function (e) {
+      if (e.target === backdrop) { closeDialog(); }
+    });
+  }
+
+  /* close on Escape */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && backdrop && !backdrop.hidden) { closeDialog(); }
+  });
+}());
+</script>
 {% endblock %}

@@ -48,9 +48,6 @@ class Error extends ResourceObject
                 'title' => '購入エラー',
                 'sections' => [],
             ],
-            'links' => [
-                'goCart' => 'page://self/cart',
-            ],
         ];
 
         return $this;

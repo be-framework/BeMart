@@ -1,310 +1,765 @@
-{#
-  BeMart admin レイアウト編集 — EC-CUBE goLayout (レイアウトデザイナー).
-
-  PORT of EC-CUBE 4.3 admin-theme `Content/layout.twig`
-  (src/Eccube/Resource/template/admin/Content/layout.twig).
-
-  FORM/CRUD page (the drag-and-drop layout designer). Extends the admin
-  frame (`admin-base.html.twig`). The markup skeleton + `c-*` / `ec-*` /
-  Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
-  bindings are rebound.
-
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md): the
-  Layout resource (src/Resource/Page/Admin/Layout/Layout.php — `onGet`
-  renders the NEW-layout case, see its port header) exposes an
-  {@see \MyVendor\BeMart\Form\AdminLayoutForm} as `body['form']`. The
-  layout-name input renders through that real form object:
-    {{ form.input('name')|raw }}     <- real <input> id `admin_layout_name`
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - `form_widget(form.DeviceType)` -> the device-type select. The
-     AdminLayoutForm declares only `name` (the new-layout case renders a
-     select EC-CUBE builds from the DeviceType master, out of the Wave 9
-     CMS slice); the select cell renders empty. Enumerated as residual.
-   - `Layout.id` -> falsy here (the new-layout case): the preview-button
-     JS block and the page-preview select are gated on `Layout.id` and
-     are OMITTED. The conversion-area + designer canvas render with all
-     sections empty (drag-and-drop placeholders).
-   - `Layout.getBlockPositionsByTargetId(...)` / `UnusedBlocks` -> the
-     per-layout block-position join is out of the Wave 9 CMS slice; every
-     section loop falls through to its `{% else %}` placeholder, and the
-     unused-block panel renders empty. Enumerated as residual —
-     MISSING-BODY-FIELD: `Layout.blockPositions` / `unusedBlocks`.
-   - `constant('Eccube\\Entity\\Layout::TARGET_ID_*')` -> EC-CUBE's
-     section-id constants are inlined as their literal integer values
-     (HEAD 1, BODY_AFTER 2, HEADER 3, CONTENTS_TOP 4, SIDE_LEFT 5,
-     MAIN_TOP 6, MAIN_BOTTOM 7, SIDE_RIGHT 8, CONTENTS_BOTTOM 9,
-     FOOTER 10, DRAWER 11, CLOSE_BODY_BEFORE 12, UNUSED 13).
-   - the `layout_design.js` drag-drop runtime + the context-menu / modal
-     JS -> client-side designer runtime; the markup shells are kept, the
-     `{% block javascript %}` is reduced to the static section labels.
-   - `{% form_theme %}` and the `auto_render` entity-extension loop ->
-     Symfony form-theme / EC-CUBE entity-extension runtime. Dropped.
-#}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-layout-layout-list' %}
-{% set title = 'レイアウト管理' %}
+{#
+  DATA CONTRACT  src/Resource/Page/Admin/Layout/Layout.php  onGet / onPut
+  ──────────────────────────────────────────────────────────────────────────
+  layoutId    string|null   既存レイアウトID (新規作成時は null)
+  layoutName  string        編集可能な表示名
+  deviceType  int|null      10 = PC, 2 = モバイル (null = 新規)
+  csrfToken   string        CSRF トークン
+  form        AdminLayoutForm (form.input('name') / form.error('name'))
+
+  ACTION  src/Resource/Page/Admin/Layout/Layout.php  onPut
+  ──────────────────────────────────────────────────────────────────────────
+  PUT /admin/layout/layout
+    layoutId    — hidden
+    name        — テキスト入力 (admin_layout_name)
+    csrfToken   — hidden
+
+  LINKS  #[Link] annotations on onGet
+  ──────────────────────────────────────────────────────────────────────────
+  goLayoutList  GET /admin/layout/layout-list
+
+  SECTIONS  (EC-CUBE dtb_block_position.target_id の意味)
+  ──────────────────────────────────────────────────────────────────────────
+  1  = <head> 内       2  = <body> 直後     3  = #header
+  4  = #contents_top   5  = #side_left      6  = #main_top
+  7  = #main_bottom    8  = #side_right     9  = #contents_bottom
+  10 = #footer         11 = #drawer         12 = </body> 直前
+  13 = 未割り当て (パレット)
+
+  NOTE: ブロック配置データ (blockPositions / unusedBlocks) は Wave 9 Phase 2 で
+  導入予定。現時点では Resource が提供しないため、デザイナー領域は構造プレースホルダー。
+  ブロック DnD は将来 fetch/JSON で動作する設計とし、バニラ JS の枠のみ設置。
+#}
+
+{% set route     = 'admin-layout-layout-list' %}
+{% set title     = 'レイアウト編集' %}
 {% set sub_title = 'コンテンツ管理' %}
 
-{% block javascript %}
-    <script>
-        var sections = {
-            13 : '未使用ブロック',
-            1 : '<head></head>タグ内',
-            2 : '<body>タグ直後',
-            3 : '#header',
-            4 : '#contents_top',
-            5 : '#side_left',
-            6 : '#main_top',
-            7 : '#main_bottom',
-            8 : '#side_right',
-            9 : '#contents_bottom',
-            10 : '#footer',
-            11 : '#drawer',
-            12 : '</body>タグ直前'
-        };
-    </script>
-{% endblock javascript %}
+{% block stylesheet %}
+<style>
+/* ── Section drop-zone ─────────────────────────────────────────────── */
+.idea-admin-layout-designer {
+  border: 1px solid rgba(205, 191, 170, .45);
+  border-radius: var(--idea-admin-radius-panel);
+  background: var(--idea-surface);
+  overflow: hidden;
+}
+.idea-admin-section {
+  border-bottom: 1px solid rgba(205, 191, 170, .32);
+}
+.idea-admin-section:last-child {
+  border-bottom: none;
+}
+.idea-admin-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .52rem .85rem;
+  background: var(--idea-surface-soft);
+  border-bottom: 1px solid rgba(205, 191, 170, .25);
+}
+.idea-admin-section__label {
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--idea-muted);
+  font-family: monospace;
+}
+.idea-admin-section__drop {
+  min-height: 3.5rem;
+  padding: .6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  align-items: flex-start;
+}
+.idea-admin-section__drop.is-drag-over {
+  background: rgba(82, 107, 85, .06);
+  outline: 2px dashed rgba(82, 107, 85, .38);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+.idea-admin-section__empty {
+  width: 100%;
+  text-align: center;
+  color: var(--idea-stone-2);
+  font-size: .78rem;
+  padding: .6rem 0;
+  pointer-events: none;
+}
+
+/* ── Block chip (draggable) ────────────────────────────────────────── */
+.idea-admin-block-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .28rem .62rem;
+  border: 1px solid rgba(205, 191, 170, .55);
+  border-radius: 6px;
+  background: var(--idea-surface);
+  color: var(--idea-ink);
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow .13s, border-color .13s;
+}
+.idea-admin-block-chip:active { cursor: grabbing; }
+.idea-admin-block-chip:hover {
+  border-color: var(--idea-stone-2);
+  box-shadow: 0 2px 6px rgba(41, 37, 31, .08);
+}
+.idea-admin-block-chip.is-dragging {
+  opacity: .45;
+  box-shadow: none;
+}
+.idea-admin-block-chip__grab {
+  color: var(--idea-stone-2);
+  font-size: .7rem;
+}
+
+/* ── Palette (未割り当てブロック) ──────────────────────────────────── */
+.idea-admin-palette {
+  min-height: 4rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  align-items: flex-start;
+  padding: .65rem;
+}
+
+/* ── Section grid: main area 3-column ──────────────────────────────── */
+.idea-admin-section--3col .idea-admin-section__drop {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: .4rem;
+}
+.idea-admin-section--3col .idea-admin-section__drop > * { min-width: 0; }
+
+/* ── Move dialog ────────────────────────────────────────────────────── */
+.idea-admin-move-dialog {
+  display: grid;
+  gap: .75rem;
+}
+.idea-admin-move-dialog select {
+  width: 100%;
+  min-height: 2.4rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: rgba(255, 253, 248, .95);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: .88rem;
+  padding: .4rem .65rem;
+  outline: none;
+}
+.idea-admin-move-dialog select:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .15);
+}
+</style>
+{% endblock %}
 
 {% block main %}
-    <form name="form1" id="form1" method="post" action="/admin/layout/layout">
-        <input type="hidden" id="admin_layout__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8"><span class="card-title">レイアウト概要</span></div>
-                                <div class="col-4 text-end"><a data-bs-toggle="collapse" href="#layoutOverview" aria-expanded="false" aria-controls="layoutOverview"><i class="fa fa-angle-up fa-lg"></i></a></div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="layoutOverview">
-                            <div class="card-body">
-                                <div class="row mb-2">
-                                    <div class="col-3 pe-0"><span>レイアウト名</span><span class="badge bg-primary ms-1">必須</span></div>
-                                    <div class="col">
-                                        {{ form.input('name')|raw }}
-                                        {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3 pe-0"><span>端末種別</span></div>
-                                    <div class="col">
-                                        <span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="テンプレートのセクションごとにブロックをドラッグ＆ドロップで配置することができます。"><span class="card-title">レイアウト編集</span><i class="fa fa-question-circle fa-lg ms-1"></i></div>
-                                </div>
-                                <div class="col-4 text-end"><a data-bs-toggle="collapse" href="#layoutBlockEdit" aria-expanded="false" aria-controls="layoutBlockEdit"><i class="fa fa-angle-up fa-lg"></i></a></div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="layoutBlockEdit">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col p-2">
-                                        <div class="d-block border border-ec-gray">
-                                            <div id="position_1"
-                                                 class="d-block p-3 border border-ec-gray border-top-0 border-end-0 border-start-0 ui-sortable">
-                                                <p class="fw-bold mb-2"><head></head>タグ内</p>
-                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                            </div>
-                                            <div id="position_2"
-                                                 class="d-block p-3 border border-ec-gray border-top-0 border-end-0 border-start-0 ui-sortable">
-                                                <p class="fw-bold mb-2"><body>タグ直後</p>
-                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                            </div>
-                                            <div id="position_3"
-                                                 class="d-block p-3 border border-ec-gray border-top-0 border-end-0 border-start-0 ui-sortable">
-                                                <p class="fw-bold mb-2">#header</p>
-                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                            </div>
-                                            <div id="position_4"
-                                                 class="d-block p-3 border border-ec-gray border-top-0 border-end-0 border-start-0 ui-sortable">
-                                                <p class="fw-bold mb-2">#contents_top</p>
-                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                            </div>
-                                            <div class="d-block ps-3 pe-3">
-                                                <div class="row">
-                                                    <div class="col align-items-start p-3 border border-ec-gray border-top-0 border-start-0">
-                                                        <div id="position_5"
-                                                             class="d-block ui-sortable">
-                                                            <p class="fw-bold mb-2">#side_left</p>
-                                                            <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col align-items-start ps-0 pe-0 border border-ec-gray border-top-0 border-start-0 border-bottom-0">
-                                                        <div class="d-block h-100">
-                                                            <div id="position_6"
-                                                                 class="d-block p-3 border border-ec-gray border-top-0 border-start-0 border-end-0 ui-sortable">
-                                                                <p class="fw-bold mb-2">#main_top</p>
-                                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                                            </div>
-                                                            <div class="d-block p-3 border border-ec-gray border-top-0 border-start-0 border-end-0 bg-ec-lightGray">
-                                                                <div class="d-block text-center p-3">
-                                                                    <p class="fw-bold mb-2">Main</p>
-                                                                </div>
-                                                            </div>
-                                                            <div id="position_7"
-                                                                 class="d-block p-3 border border-ec-gray border-top-0 border-start-0 border-end-0 ui-sortable">
-                                                                <p class="fw-bold mb-2">#main_bottom</p>
-                                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col align-items-start ps-0 border border-ec-gray border-top-0 border-start-0 border-end-0">
-                                                        <div id="position_8"
-                                                             class="d-block p-3 h-100 ui-sortable">
-                                                            <p class="fw-bold mb-2">#side_right</p>
-                                                            <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="d-block border border-ec-gray border-top-0 border-end-0 border-start-0">
-                                                <div id="position_9"
-                                                     class="d-block p-3 ui-sortable">
-                                                    <p class="fw-bold mb-2">#contents_bottom</p>
-                                                    <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                                </div>
-                                            </div>
-                                            <div class="d-block border border-ec-gray border-top-0 border-end-0 border-start-0">
-                                                <div id="position_10"
-                                                     class="d-block p-3 ui-sortable">
-                                                    <p class="fw-bold mb-2">#footer</p>
-                                                    <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                                </div>
-                                            </div>
-                                            <div class="d-block border border-ec-gray border-top-0 border-end-0 border-start-0">
-                                                <div id="position_11"
-                                                     class="d-block p-3 ui-sortable">
-                                                    <p class="fw-bold mb-2">#drawer</p>
-                                                    <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                                </div>
-                                            </div>
-                                            <div class="d-block">
-                                                <div id="position_12"
-                                                     class="d-block p-3 border-top-0 border-end-0 border-start-0 ui-sortable">
-                                                    <p class="fw-bold mb-2"></body>タグ直前</p>
-                                                    <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-3 p-2">
-                                        <div id="unused-block" class="d-block border border-ec-gray">
-                                            <div id="position_13" class="d-block p-3 ui-sortable">
-                                                <p class="fw-bold mb-2">未使用ブロック</p>
-                                                <div class="mb-3">
-                                                    <div class="row">
-                                                        <div class="col">
-                                                            <div class="input-group mb-3">
-                                                                <div class="input-group-text">
-                                                                    <span id="basic-addon1"><i class="fa fa-search"></i></span>
-                                                                </div>
-                                                                <input id="search-block" class="form-control" type="search" aria-label="Search">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal fade" id="clickStreamConfirm" tabindex="-1" role="dialog" aria-labelledby="clickStreamConfirm" aria-hidden="true">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">ブロックを移動</h5>
-                                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>ブロックの移動先を選択してください</p>
-                                                <div>
-                                                    <select id="move-section" class="form-select">
-                                                    </select>
-                                                    <input type="hidden" id="target-block" />
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button class="btn btn-ec-regular w-25" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                                <button id="move-to-section" class="btn btn-ec-conversion w-25" type="button" data-bs-dismiss="modal">移動</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal fade" id="codePreview" tabindex="-1" role="dialog" aria-labelledby="codePreview" aria-hidden="true">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">ブロックのコードプレビュー</h5>
-                                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>編集が必要な場合はブロック編集画面から編集してください（この時レイアウト設定は保存されません）</p>
-                                                <div id="block-source-code" class="d-block border bg-ec-lightGray p-2"></div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button class="btn btn-ec-regular" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                                <button id="block-edit" class="btn btn-ec-conversion w-25" type="button" data-bs-dismiss="modal">コードを編集</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="context-menu" style="display: none">
-                                    <div class='list-group'>
-                                        <a href='javascript:;' class='context-moveup list-group-item list-group-item-action border-0'>
-                                            <i class='fa fa-long-arrow-up me-1'></i>上に移動
-                                        </a>
-                                        <a href='javascript:;' class='context-movedown list-group-item list-group-item-action border-0'>
-                                            <i class='fa fa-long-arrow-down me-1'></i>下に移動
-                                        </a>
-                                        <a href='javascript:;' class='context-movesection list-group-item list-group-item-action border-0'>
-                                            <i class='fa fa-arrows me-1'></i>セクションに移動
-                                        </a>
-                                        <a href='javascript:;' class='context-preview list-group-item list-group-item-action border-0'>
-                                            <i class='fa fa-code me-1'></i>コードプレビュー
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="target-placeholder" style="display: none"><div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div></div>
-            <div class="c-conversionArea">
-                <div class="c-conversionArea__container">
-                    <div class="row justify-content-between align-items-center">
-                        <div class="col-6">
-                            <div class="c-conversionArea__leftBlockItem">
-                                <a class="c-baseLink" href="/admin/layout/layout-list"><i class="fa fa-backward" aria-hidden="true"></i><span>レイアウト管理</span></a>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                                <div class="col-auto">
-                                    <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+{# ── hidden serialized block positions (submitted with the form) ──── #}
+{# populated by JS before submit; empty until Phase 2 block data lands #}
+
+<form
+  id="layout-editor-form"
+  method="post"
+  action="/admin/layout/layout{% if layoutId is defined and layoutId %}?layoutId={{ layoutId }}&_method=put{% endif %}"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  {% if layoutId is defined and layoutId %}
+  <input type="hidden" name="layoutId" value="{{ layoutId }}">
+  {% endif %}
+  {# serialized block positions — filled by JS on submit #}
+  <input type="hidden" id="layout-positions-payload" name="blockPositions" value="">
+
+  <div class="idea-admin-layout">
+
+    {# ════════════════════════════════════════════════════════════
+       Primary column — name + designer
+    ════════════════════════════════════════════════════════════ #}
+    <div class="idea-admin-primary">
+
+      {# ── 1. レイアウト概要 ──────────────────────────────────── #}
+      <section class="idea-admin-panel" aria-labelledby="section-overview">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-overview">
+            <i class="fa fa-th-large fa-fw" aria-hidden="true"></i>
+            レイアウト概要
+          </h3>
         </div>
-    </form>
+        <div class="idea-admin-panel__body">
+
+          {# レイアウト名 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_layout_name">レイアウト名</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('name')|raw }}
+              {% if form.error('name') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('name') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# デバイス種別 (読み取り専用) #}
+          {% if deviceType is defined and deviceType is not null %}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label>デバイス種別</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {% if deviceType == 10 %}
+              <span class="idea-admin-badge idea-admin-badge--public">
+                <i class="fa fa-desktop" aria-hidden="true"></i>
+                PC
+              </span>
+              {% elseif deviceType == 2 %}
+              <span class="idea-admin-badge idea-admin-badge--private">
+                <i class="fa fa-mobile" aria-hidden="true"></i>
+                モバイル
+              </span>
+              {% else %}
+              <span class="idea-admin-badge">
+                <i class="fa fa-question-circle" aria-hidden="true"></i>
+                タイプ {{ deviceType }}
+              </span>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+          {# Layout ID — read-only reference #}
+          {% if layoutId is defined and layoutId %}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label>レイアウトID</label>
+            </div>
+            <div class="idea-admin-field__input">
+              <span id="layout-id-display"
+                    style="font-family:monospace;font-size:.84rem;color:var(--idea-muted);">
+                {{ layoutId }}
+              </span>
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+      </section>
+
+      {# ── 2. ブロック配置デザイナー ──────────────────────────── #}
+      <section class="idea-admin-panel" aria-labelledby="section-designer">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-designer">
+            <i class="fa fa-columns fa-fw" aria-hidden="true"></i>
+            ブロック配置
+          </h3>
+          <p class="idea-admin-panel__hint">
+            ブロックをドラッグしてセクションに割り当てます。
+          </p>
+        </div>
+
+        <div class="idea-admin-panel__body" id="layout-designer" aria-label="ブロック配置デザイナー">
+
+          {#
+            Section order mirrors page rendering order (top to bottom).
+            data-section-id maps to EC-CUBE dtb_block_position.target_id.
+          #}
+          <div class="idea-admin-layout-designer">
+
+            {# 1 — <head> タグ内 #}
+            <div class="idea-admin-section" data-section-id="1">
+              <div class="idea-admin-section__head">
+                <span class="idea-admin-section__label">&lt;head&gt; タグ内</span>
+              </div>
+              <div class="idea-admin-section__drop" data-section="1" aria-label="head タグ内 ドロップゾーン">
+                <span class="idea-admin-section__empty">ブロックをここにドラッグ</span>
+              </div>
+            </div>
+
+            {# 2 — <body> 直後 #}
+            <div class="idea-admin-section" data-section-id="2">
+              <div class="idea-admin-section__head">
+                <span class="idea-admin-section__label">&lt;body&gt; 直後</span>
+              </div>
+              <div class="idea-admin-section__drop" data-section="2" aria-label="body 直後 ドロップゾーン">
+                <span class="idea-admin-section__empty">ブロックをここにドラッグ</span>
+              </div>
+            </div>
+
+            {# 3 — #header #}
+            <div class="idea-admin-section" data-section-id="3">
+              <div class="idea-admin-section__head">
+                <span class="idea-admin-section__label">#header</span>
+              </div>
+              <div class="idea-admin-section__drop" data-section="3" aria-label="#header ドロップゾーン">
+                <span class="idea-admin-section__empty">ブロックをここにドラッグ</span>
+              </div>
+            </div>
+
+            {# 4 — #contents_top #}
+            <div class="idea-admin-section" data-section-id="4">
+              <div class="idea-admin-section__head">
+                <span class="idea-admin-section__label">#contents_top</span>
+              </div>
+              <div class="idea-admin-section__drop" data-section="4" aria-label="#contents_top ドロップゾーン">
+                <span class="idea-admin-section__empty">ブロックをここにドラッグ</span>
+              </div>
+            </div>
+
+            {# 5/6/7/8 — 3カラムエリア (side_left + main + side_right) #}
+            <div class="idea-admin-section idea-admin-section--3col" data-section-id="main-area">
+              <div class="idea-admin-section__head">
+                <span class="idea-admin-section__label">メインエリア</span>
+                <span style="font-size:.72rem;color:var(--idea-stone-2);">side_left / main_top・main_bottom / side_right</span>
+              </div>
+              <div class="idea-admin-section__drop" style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:.4rem;align-items:start;">
+
+                {# side_left #}
+                <div class="idea-admin-section__drop" data-section="5"
+                     style="background:rgba(245,237,224,.45);border-radius:6px;min-height:6rem;"
+                     aria-label="#side_left ドロップゾーン">
+                  <div style="font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--idea-stone-2);padding:.25rem .4rem;">#side_left</div>
+                  <span class="idea-admin-section__empty">ドラッグ</span>
+                </div>
+
+                {# main_top + main_bottom stacked #}
+                <div style="display:grid;gap:.35rem;">
+                  <div class="idea-admin-section__drop" data-section="6"
+                       style="background:rgba(245,237,224,.45);border-radius:6px;min-height:3rem;"
+                       aria-label="#main_top ドロップゾーン">
+                    <div style="font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--idea-stone-2);padding:.25rem .4rem;">#main_top</div>
+                    <span class="idea-admin-section__empty">ドラッグ</span>
+                  </div>
+                  <div style="background:rgba(205,191,170,.2);border-radius:6px;padding:.5rem;text-align:center;color:var(--idea-muted);font-size:.8rem;font-weight:700;">
+                    <i class="fa fa-align-center" aria-hidden="true"></i> Main
+                  </div>
+                  <div class="idea-admin-section__drop" data-section="7"
+                       style="background:rgba(245,237,224,.45);border-radius:6px;min-height:3rem;"
+                       aria-label="#main_bottom ドロップゾーン">
+                    <div style="font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--idea-stone-2);padding:.25rem .4rem;">#main_bottom</div>
+                    <span class="idea-admin-section__empty">ドラッグ</span>
+                  </div>
+                </div>
+
+                {# side_right #}
+                <div class="idea-admin-section__drop" data-section="8"
+                     style="background:rgba(245,237,224,.45);border-radius:6px;min-height:6rem;"
+                     aria-label="#side_right ドロップゾーン">
+                  <div style="font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--idea-stone-2);padding:.25rem .4rem;">#side_right</div>
+                  <span class="idea-admin-section__empty">ドラッグ</span>
+                </div>
+
+              </div>
+            </div>
+
+            {# 9 — #contents_bottom #}
+            <div class="idea-admin-section" data-section-id="9">
+              <div class="idea-admin-section__head">
+                <span class="idea-admin-section__label">#contents_bottom</span>
+              </div>
+              <div class="idea-admin-section__drop" data-section="9" aria-label="#contents_bottom ドロップゾーン">
+                <span class="idea-admin-section__empty">ブロックをここにドラッグ</span>
+              </div>
+            </div>
+
+            {# 10 — #footer #}
+            <div class="idea-admin-section" data-section-id="10">
+              <div class="idea-admin-section__head">
+                <span class="idea-admin-section__label">#footer</span>
+              </div>
+              <div class="idea-admin-section__drop" data-section="10" aria-label="#footer ドロップゾーン">
+                <span class="idea-admin-section__empty">ブロックをここにドラッグ</span>
+              </div>
+            </div>
+
+            {# 11 — #drawer #}
+            <div class="idea-admin-section" data-section-id="11">
+              <div class="idea-admin-section__head">
+                <span class="idea-admin-section__label">#drawer</span>
+              </div>
+              <div class="idea-admin-section__drop" data-section="11" aria-label="#drawer ドロップゾーン">
+                <span class="idea-admin-section__empty">ブロックをここにドラッグ</span>
+              </div>
+            </div>
+
+            {# 12 — </body> 直前 #}
+            <div class="idea-admin-section" data-section-id="12">
+              <div class="idea-admin-section__head">
+                <span class="idea-admin-section__label">&lt;/body&gt; 直前</span>
+              </div>
+              <div class="idea-admin-section__drop" data-section="12" aria-label="/body 直前 ドロップゾーン">
+                <span class="idea-admin-section__empty">ブロックをここにドラッグ</span>
+              </div>
+            </div>
+
+          </div>{# end .idea-admin-layout-designer #}
+
+        </div>{# end panel body #}
+      </section>
+
+    </div>{# end primary #}
+
+    {# ════════════════════════════════════════════════════════════
+       Side panel — palette + navigation
+    ════════════════════════════════════════════════════════════ #}
+    <aside class="idea-admin-side" aria-label="ブロックパレット">
+
+      {# ── 未割り当てブロック パレット ──────────────────────── #}
+      <section class="idea-admin-panel" aria-labelledby="section-palette">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-palette">
+            <i class="fa fa-th fa-fw" aria-hidden="true"></i>
+            未割り当てブロック
+          </h3>
+          <p class="idea-admin-panel__hint">セクションにドラッグして配置</p>
+        </div>
+
+        {# block filter search #}
+        <div style="padding:.55rem .65rem;border-bottom:1px solid rgba(205,191,170,.28);">
+          <input
+            id="block-search"
+            type="search"
+            placeholder="ブロックを検索..."
+            aria-label="ブロック検索"
+            style="width:100%;min-height:2.1rem;border:1px solid var(--idea-stone);border-radius:var(--idea-admin-radius-input);background:rgba(255,253,248,.95);color:var(--idea-ink);font:inherit;font-size:.84rem;padding:.35rem .6rem;outline:none;"
+          >
+        </div>
+
+        <div class="idea-admin-palette" id="block-palette" data-section="13" aria-label="未割り当てブロック一覧">
+          {#
+            Phase 2: populate from resource blockList.
+            Until then show placeholder hint.
+          #}
+          <div class="idea-admin-empty" style="padding:1.5rem .75rem;">
+            <i class="fa fa-cube fa-2x" aria-hidden="true"></i>
+            <p class="idea-admin-empty__title" style="font-size:.86rem;">ブロックデータ未取得</p>
+            <p style="font-size:.75rem;">Phase 2 でブロック一覧が表示されます。</p>
+          </div>
+        </div>
+      </section>
+
+      {# ── ナビゲーション ──────────────────────────────────── #}
+      <section class="idea-admin-panel" aria-labelledby="section-nav">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-nav">
+            <i class="fa fa-link fa-fw" aria-hidden="true"></i>
+            関連
+          </h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <nav aria-label="関連ページ" style="display:grid;gap:.5rem;">
+            <a class="idea-admin-action"
+               href="/admin/layout/layout-list"
+               rel="goLayoutList">
+              <i class="fa fa-list fa-fw" aria-hidden="true"></i>
+              レイアウト一覧
+            </a>
+            <a class="idea-admin-action"
+               href="/admin/content/block">
+              <i class="fa fa-puzzle-piece fa-fw" aria-hidden="true"></i>
+              ブロック管理
+            </a>
+          </nav>
+        </div>
+      </section>
+
+    </aside>
+
+  </div>{# end idea-admin-layout #}
+
+  {# ── Action toolbar ──────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/layout/layout-list" rel="goLayoutList">
+        <i class="fa fa-backward" aria-hidden="true"></i>
+        レイアウト一覧に戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button
+        class="idea-admin-action idea-admin-action--primary"
+        type="submit"
+        id="layout-save-btn"
+      >
+        <i class="fa fa-save" aria-hidden="true"></i>
+        保存
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{# ── ブロック移動ダイアログ ───────────────────────────────────────── #}
+<div id="block-move-dialog-backdrop"
+     class="idea-admin-dialog-backdrop"
+     hidden
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="block-move-dialog-title">
+  <div class="idea-admin-dialog">
+    <div class="idea-admin-dialog__head">
+      <h4 class="idea-admin-dialog__title" id="block-move-dialog-title">
+        <i class="fa fa-arrows fa-fw" aria-hidden="true"></i>
+        ブロックを移動
+      </h4>
+      <button
+        type="button"
+        class="idea-admin-icon-btn"
+        id="block-move-dialog-close"
+        aria-label="閉じる"
+      ><i class="fa fa-times" aria-hidden="true"></i></button>
+    </div>
+    <div class="idea-admin-dialog__body">
+      <div class="idea-admin-move-dialog">
+        <label for="block-move-select" style="font-size:.86rem;font-weight:700;">移動先セクション</label>
+        <select id="block-move-select" aria-label="移動先セクションを選択">
+          <option value="13">未割り当て（パレットに戻す）</option>
+          <option value="1">&lt;head&gt; タグ内</option>
+          <option value="2">&lt;body&gt; 直後</option>
+          <option value="3">#header</option>
+          <option value="4">#contents_top</option>
+          <option value="5">#side_left</option>
+          <option value="6">#main_top</option>
+          <option value="7">#main_bottom</option>
+          <option value="8">#side_right</option>
+          <option value="9">#contents_bottom</option>
+          <option value="10">#footer</option>
+          <option value="11">#drawer</option>
+          <option value="12">&lt;/body&gt; 直前</option>
+        </select>
+      </div>
+    </div>
+    <div class="idea-admin-dialog__foot">
+      <button type="button" class="idea-admin-action" id="block-move-cancel">キャンセル</button>
+      <button type="button" class="idea-admin-action idea-admin-action--primary" id="block-move-confirm">
+        <i class="fa fa-check" aria-hidden="true"></i>
+        移動
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /* ──────────────────────────────────────────────────────────────────
+     Section registry
+     Maps section id (string) -> drop-zone element.
+  ────────────────────────────────────────────────────────────────── */
+  var sections = {};
+  document.querySelectorAll('[data-section]').forEach(function (el) {
+    sections[el.getAttribute('data-section')] = el;
+  });
+
+  /* ──────────────────────────────────────────────────────────────────
+     Drag and drop — HTML5 native
+  ────────────────────────────────────────────────────────────────── */
+  var draggedChip = null;
+
+  function onChipDragStart(e) {
+    draggedChip = e.currentTarget;
+    draggedChip.classList.add('is-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggedChip.getAttribute('data-block-id'));
+  }
+
+  function onChipDragEnd() {
+    if (draggedChip) {
+      draggedChip.classList.remove('is-dragging');
+    }
+    draggedChip = null;
+    document.querySelectorAll('.idea-admin-section__drop').forEach(function (z) {
+      z.classList.remove('is-drag-over');
+    });
+  }
+
+  function onZoneDragOver(e) {
+    if (!draggedChip) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('is-drag-over');
+  }
+
+  function onZoneDragLeave(e) {
+    e.currentTarget.classList.remove('is-drag-over');
+  }
+
+  function onZoneDrop(e) {
+    e.preventDefault();
+    var zone = e.currentTarget;
+    zone.classList.remove('is-drag-over');
+    if (!draggedChip) return;
+    appendChipToZone(draggedChip, zone);
+  }
+
+  /* Remove placeholder text when a chip enters, restore when zone empties */
+  function appendChipToZone(chip, zone) {
+    zone.appendChild(chip);
+    zone.querySelectorAll('.idea-admin-section__empty').forEach(function (ph) {
+      ph.style.display = 'none';
+    });
+    /* Check siblings: if all chips removed from old zone, restore placeholder */
+    var oldPlaceholders = document.querySelectorAll('[data-section] .idea-admin-section__empty');
+    oldPlaceholders.forEach(function (ph) {
+      var parentZone = ph.closest('[data-section]');
+      if (!parentZone) return;
+      var hasChips = parentZone.querySelector('.idea-admin-block-chip');
+      ph.style.display = hasChips ? 'none' : '';
+    });
+  }
+
+  /* Wire drop zones */
+  document.querySelectorAll('.idea-admin-section__drop').forEach(function (zone) {
+    zone.addEventListener('dragover', onZoneDragOver);
+    zone.addEventListener('dragleave', onZoneDragLeave);
+    zone.addEventListener('drop', onZoneDrop);
+  });
+
+  /* ──────────────────────────────────────────────────────────────────
+     Block chip factory (called when block data arrives in Phase 2)
+  ────────────────────────────────────────────────────────────────── */
+  function createBlockChip(blockId, blockName) {
+    var chip = document.createElement('div');
+    chip.className = 'idea-admin-block-chip';
+    chip.setAttribute('draggable', 'true');
+    chip.setAttribute('data-block-id', blockId);
+    chip.setAttribute('data-block-name', blockName);
+    chip.setAttribute('role', 'listitem');
+    chip.setAttribute('aria-label', blockName);
+    chip.innerHTML =
+      '<i class="fa fa-grip-vertical idea-admin-block-chip__grab" aria-hidden="true"></i>' +
+      '<span>' + escapeHtml(blockName) + '</span>' +
+      '<button type="button" class="idea-admin-icon-btn idea-admin-block-chip__menu" ' +
+              'aria-label="' + escapeHtml(blockName) + ' のオプション" ' +
+              'style="width:1.4rem;height:1.4rem;font-size:.68rem;">' +
+        '<i class="fa fa-ellipsis-v" aria-hidden="true"></i>' +
+      '</button>';
+    chip.addEventListener('dragstart', onChipDragStart);
+    chip.addEventListener('dragend', onChipDragEnd);
+
+    /* Options button -> move dialog */
+    chip.querySelector('.idea-admin-block-chip__menu').addEventListener('click', function (e) {
+      e.stopPropagation();
+      openMoveDialog(chip);
+    });
+
+    return chip;
+  }
+
+  function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(str));
+    return d.innerHTML;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     Move dialog
+  ────────────────────────────────────────────────────────────────── */
+  var moveDialogBackdrop = document.getElementById('block-move-dialog-backdrop');
+  var moveSelect         = document.getElementById('block-move-select');
+  var activeChipForMove  = null;
+
+  function openMoveDialog(chip) {
+    activeChipForMove = chip;
+    /* Pre-select current section */
+    var currentZone = chip.closest('[data-section]');
+    if (currentZone) {
+      moveSelect.value = currentZone.getAttribute('data-section');
+    }
+    moveDialogBackdrop.hidden = false;
+    moveSelect.focus();
+  }
+
+  function closeMoveDialog() {
+    moveDialogBackdrop.hidden = true;
+    activeChipForMove = null;
+  }
+
+  document.getElementById('block-move-dialog-close').addEventListener('click', closeMoveDialog);
+  document.getElementById('block-move-cancel').addEventListener('click', closeMoveDialog);
+  moveDialogBackdrop.addEventListener('click', function (e) {
+    if (e.target === moveDialogBackdrop) closeMoveDialog();
+  });
+
+  document.getElementById('block-move-confirm').addEventListener('click', function () {
+    if (!activeChipForMove) { closeMoveDialog(); return; }
+    var targetSectionId = moveSelect.value;
+    var targetZone = sections[targetSectionId];
+    if (targetZone) {
+      appendChipToZone(activeChipForMove, targetZone);
+    }
+    closeMoveDialog();
+  });
+
+  /* ──────────────────────────────────────────────────────────────────
+     Palette block search filter
+  ────────────────────────────────────────────────────────────────── */
+  var blockSearchInput = document.getElementById('block-search');
+  if (blockSearchInput) {
+    blockSearchInput.addEventListener('input', function () {
+      var q = blockSearchInput.value.trim().toLowerCase();
+      var palette = document.getElementById('block-palette');
+      if (!palette) return;
+      palette.querySelectorAll('.idea-admin-block-chip').forEach(function (chip) {
+        var name = (chip.getAttribute('data-block-name') || '').toLowerCase();
+        chip.style.display = (!q || name.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     Serialize block positions before form submit
+  ────────────────────────────────────────────────────────────────── */
+  document.getElementById('layout-editor-form').addEventListener('submit', function () {
+    var payload = {};
+    document.querySelectorAll('[data-section]').forEach(function (zone) {
+      var sectionId = zone.getAttribute('data-section');
+      var chips = zone.querySelectorAll('.idea-admin-block-chip');
+      if (chips.length === 0) return;
+      payload[sectionId] = Array.from(chips).map(function (c, idx) {
+        return { blockId: c.getAttribute('data-block-id'), sortNo: idx + 1 };
+      });
+    });
+    document.getElementById('layout-positions-payload').value = JSON.stringify(payload);
+  });
+
+  /* ──────────────────────────────────────────────────────────────────
+     Phase 2 hook: call window.BeMartLayout.loadBlocks(sections, palette)
+     with block data from the server to populate the designer.
+     Example shape:
+       [{ blockId: "bl-01", blockName: "ヘッダー", sectionId: 3, sortNo: 0 }, ...]
+  ────────────────────────────────────────────────────────────────── */
+  window.BeMartLayout = window.BeMartLayout || {};
+  window.BeMartLayout.loadBlocks = function (blockList) {
+    var paletteEl = document.getElementById('block-palette');
+    /* Clear placeholder */
+    var existing = paletteEl.querySelector('.idea-admin-empty');
+    if (existing) existing.remove();
+
+    blockList.forEach(function (b) {
+      var chip = createBlockChip(b.blockId, b.blockName);
+      var targetSectionId = String(b.sectionId || 13);
+      var zone = sections[targetSectionId] || paletteEl;
+      appendChipToZone(chip, zone);
+    });
+  };
+
+}());
+</script>
 {% endblock %}

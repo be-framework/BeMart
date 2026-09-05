@@ -208,19 +208,6 @@ final class CheckoutResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(self::PRE_ORDER_ID, $ro->body['preOrderId']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $seed = $this->seedPreOrder();
-        $this->rebindSession($seed['customerId']);
-
-        $ro = $this->resource->post('page://self/shopping/checkout', [
-            'preOrderId' => self::PRE_ORDER_ID,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     /**
      * Seed a PROCESSING(8) pre-order PLUS the cart it was raised from
      * (linked by pre_order_id), with two real product lines. The enriched

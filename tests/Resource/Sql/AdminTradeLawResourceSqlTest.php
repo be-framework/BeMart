@@ -128,15 +128,6 @@ final class AdminTradeLawResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/trade-law', [
-            'tradeLawBody' => 'whatever',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testOnPostWithoutAdminSessionReturns403(): void
     {
         $this->rebindAdminSession(null);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Exception\CategoryNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
@@ -37,6 +38,7 @@ final readonly class CategoryDeleted
         #[Input] string $categoryId,
         #[Inject] AdminSession $adminSession,
         #[Inject] CategoryStorageInterface $categories,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
@@ -47,6 +49,8 @@ final readonly class CategoryDeleted
         }
 
         $categories->delete($categoryId);
+
+        $cacheInvalidator->invalidateCorpus();
 
         $this->categoryId = $categoryId;
     }

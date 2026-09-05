@@ -37,8 +37,6 @@ final class IndexResourceTest extends TestCase
         // staticContent is null on goTop — actual content (shopMessage /
         // newArrivals / recommendedProducts / categoryNav) is left as TODO.
         $this->assertNull($ro->body['staticContent']);
-        $this->assertArrayHasKey('goLogin', $ro->body['links']);
-        $this->assertArrayHasKey('goHelpAbout', $ro->body['links']);
-        $this->assertArrayHasKey('goCart', $ro->body['links']);
+        $this->assertArrayNotHasKey('links', $ro->body);
     }
 }

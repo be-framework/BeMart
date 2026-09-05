@@ -105,6 +105,50 @@
             "title": "明細件数",
             "description": "/mypage のレスポンスで返す明細件数。一覧・集計・処理結果の規模を表す非負整数。",
             "example": 1
+          },
+          "items": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "title": "注文商品一覧",
+            "description": "/mypage の最近の注文で表示する商品明細スナップショット。注文履歴詳細と同じく、注文時点の商品コード・商品名・数量・単価を返す。",
+            "items": {
+              "type": "object",
+              "title": "注文商品",
+              "properties": {
+                "productCode": {
+                  "type": "string",
+                  "minLength": 0,
+                  "maxLength": 64,
+                  "title": "商品コード",
+                  "description": "SKU/品番。EC-CUBE の dtb_order_item.product_code は NULL 許容（商品削除後は空になる）ため、明細スナップショットでは空文字を許可する。",
+                  "example": "sample-001"
+                },
+                "productName": {
+                  "type": "string",
+                  "minLength": 0,
+                  "maxLength": 128,
+                  "title": "商品名",
+                  "description": "商品の表示名。注文時点の明細スナップショットとして保持する。",
+                  "example": "サンプル商品 A"
+                },
+                "quantity": {
+                  "$ref": "#/$defs/quantity"
+                },
+                "unitPrice": {
+                  "$ref": "#/$defs/price"
+                }
+              },
+              "required": [
+                "productCode",
+                "productName",
+                "quantity",
+                "unitPrice"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 0
           }
         },
         "additionalProperties": false,

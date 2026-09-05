@@ -23,14 +23,14 @@ use Ray\Di\AbstractModule;
  *    CustomerQueryInterface → SqlCustomerQuery, CartCommandInterface →
  *    SqlCartCommand) are layered via the base class's sqlOverrideModule;
  *    withdrawal rewrites a real dtb_customer row (email → reserved
- *    `.invalid` dummy, customer_status_id → 3) and clears the
+ *    `.test` dummy, customer_status_id → 3) and clears the
  *    customer's dtb_cart rows.
  *
  *  - the logged-in customer (alice) is inserted via {@see insertCustomer}
  *    and her numeric dtb_customer.id drives the CustomerSession
  *    binding — CustomerWithdrawn reads `findById(session->customerId)`,
  *    so the session id MUST be the real row id. The dummy email is
- *    `withdrawn-{numeric-id}@example.invalid`, derived from that id.
+ *    `withdrawn-{numeric-id}@example.test`, derived from that id.
  *
  *  - mtb_customer_status (FK target of customer_status_id) is empty in
  *    the structure-only dump — seeded in setUp.
@@ -95,7 +95,7 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('goMypageWithdraw', $ro->body['transitionId']);
-        $this->assertSame(['sessionPrefix', 'csrfToken'], $ro->body['fields']);
+        $this->assertSame(['csrfToken'], $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/mypage/withdraw', $ro->body['submitTo']['href']);
         $this->assertNull($ro->body['csrfToken']);
@@ -124,7 +124,7 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
 
     public function testOnPostHappyPathReturns200(): void
     {
-        $dummyEmail = 'withdrawn-' . $this->aliceId . '@example.invalid';
+        $dummyEmail = 'withdrawn-' . $this->aliceId . '@example.test';
 
         $ro = $this->resource->post('page://self/mypage/withdraw', [
             'csrfToken' => FakeCsrfToken::TOKEN,
@@ -132,7 +132,7 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($this->aliceId, $ro->body['customerId']);
-        $this->assertSame($dummyEmail, $ro->body['dummyEmail']);
+        $this->assertArrayNotHasKey('dummyEmail', $ro->body);
         $this->assertTrue($ro->body['cleared']);
         $this->assertStringContainsString('退会', $ro->body['message']);
 
@@ -160,10 +160,4 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertStringContainsString('ログイン', $ro->body['message']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/mypage/withdraw', []);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
 }

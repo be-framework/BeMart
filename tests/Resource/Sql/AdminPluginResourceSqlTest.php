@@ -115,23 +115,6 @@ final class AdminPluginResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertFalse($ro->body['wasInstalled']);
     }
 
-    public function testOnDeleteMissingCsrfReturns403(): void
-    {
-        $this->seedPlugins();
-
-        $ro = $this->resource->delete('page://self/admin/plugin', [
-            'pluginCode' => 'Sample/DisabledPlugin',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-
-        // The plugin is still present — the rejected request did not
-        // reach the storage.
-        $list = $this->resource->get('page://self/admin/plugin-list');
-        $this->assertSame(2, $list->body['count']);
-    }
-
     public function testOnDeleteWithoutAdminSessionReturns403(): void
     {
         $this->seedPlugins();

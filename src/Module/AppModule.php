@@ -11,11 +11,20 @@ use BEAR\Resource\Module\JsonSchemaModule;
 use BEAR\Resource\ResourceObject;
 use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use Be\Framework\Module\BeModule;
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
+use MyVendor\BeMart\Cache\ProductCacheInvalidator;
+use MyVendor\BeMart\Auth\AdminSessionWriterInterface;
+use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
+use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
+use MyVendor\BeMart\Auth\NoopAdminSessionWriter;
+use MyVendor\BeMart\Auth\NoopCartSessionPrefix;
+use MyVendor\BeMart\Auth\NoopCustomerSessionWriter;
 use MyVendor\BeMart\Be\Reason\Provider\AddressIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\AdminIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\BlockIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\CategoryIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\CalendarHolidayIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\ClassCategoryIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\ClassNameIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
@@ -33,6 +42,7 @@ use MyVendor\BeMart\Be\Reason\Query\Factory\AdminFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\CartFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\CustomerFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\FinalizedOrderFactory;
+use MyVendor\BeMart\Be\Reason\Query\Factory\LoginHistoryFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\OrderFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\OrderHistoryFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\OrderItemFactory;
@@ -47,6 +57,7 @@ use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClientIpInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface;
@@ -58,12 +69,15 @@ use MyVendor\BeMart\Be\Reason\Service\OrderPdfCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
+use MyVendor\BeMart\Be\Reason\Service\PreOrderClaimInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
+use MyVendor\BeMart\Be\Reason\Service\SqlPreOrderClaim;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\TemplateCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeCacheClearer;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeClassCsvCompatibility;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeClientIp;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeCustomizeAssetWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeMaintenanceMode;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeMasterDataWriter;
@@ -73,7 +87,13 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Interceptor\CsrfProtectedInterceptor;
+use MyVendor\BeMart\Provide\Transfer\ApiDownloadContentTypePolicy;
+use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\DownloadResponder;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
+use MyVendor\BeMart\Support\Resource\ApiMutationResponse;
+use MyVendor\BeMart\Support\Resource\ExplicitAdminLoginFormSubmission;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Ray\Di\Scope;
 use Ray\WebFormModule\FormFactory;
 
@@ -92,6 +112,7 @@ final class AppModule extends AbstractAppModule
         AddressIdProvider::class,
         AdminIdProvider::class,
         BlockIdProvider::class,
+        CalendarHolidayIdProvider::class,
         CategoryIdProvider::class,
         ClassCategoryIdProvider::class,
         ClassNameIdProvider::class,
@@ -112,6 +133,7 @@ final class AppModule extends AbstractAppModule
         CartFactory::class,
         CustomerFactory::class,
         FinalizedOrderFactory::class,
+        LoginHistoryFactory::class,
         OrderFactory::class,
         OrderHistoryFactory::class,
         OrderItemFactory::class,
@@ -125,11 +147,24 @@ final class AppModule extends AbstractAppModule
         $this->install(new PackageModule());
         $this->override(new AppErrorModule());
         $this->override(new CanonicalResourceRouterModule());
+        $this->bind(ApiDownloadContentTypePolicy::class);
+        $this->bind(DownloadContentTypePolicyInterface::class)->to(ApiDownloadContentTypePolicy::class);
         $this->bind(TransferInterface::class)->to(DownloadResponder::class);
+        $this->bind(MutationResponseInterface::class)->to(ApiMutationResponse::class);
+        $this->bind(AdminLoginFormSubmissionInterface::class)->to(ExplicitAdminLoginFormSubmission::class);
         // PackageModule does not bind @AppName by itself; BEAR\Package\Module
         // factory normally overrides it. Install explicitly so tests can use
         // `new Injector(new *Module(...))` without the factory.
         $this->override(new AppMetaModule($this->appMeta));
+
+        // Admin ログ表示 viewer reads this FIXED application-log path. It is
+        // pinned in the module rather than resolved from the per-context
+        // `logDir` — loading this (production-neutral) module IS the context
+        // choice, so the module simply states where its log lives. A prod
+        // context module may override it with the deployment's log location.
+        $this->bind()->annotatedWith('adminLogPath')->toInstance(
+            $this->appMeta->appDir . '/var/log/bemart.json',
+        );
 
         $this->install(
             new JsonSchemaModule(
@@ -150,7 +185,12 @@ final class AppModule extends AbstractAppModule
         $this->install(new BeModule('MyVendor\\BeMart\\Be\\Semantic'));
 
         $this->bind(PasswordHasherInterface::class)->to(NativePasswordHasher::class);
+        // A Final announces a product change; this is what turns the announcement into cache work
+        $this->bind(ProductCacheInvalidatorInterface::class)->to(ProductCacheInvalidator::class);
         $this->bind(HtmlAdminLoginChallengeAdapter::class);
+        $this->bind(CustomerSessionWriterInterface::class)->to(NoopCustomerSessionWriter::class)->in(Scope::SINGLETON);
+        $this->bind(AdminSessionWriterInterface::class)->to(NoopAdminSessionWriter::class)->in(Scope::SINGLETON);
+        $this->bind(CartSessionPrefixInterface::class)->to(NoopCartSessionPrefix::class)->in(Scope::SINGLETON);
 
         // Production-safe defaults for external domain services. FakeModule
         // overrides these with deterministic recording fakes; prod keeps the
@@ -158,6 +198,7 @@ final class AppModule extends AbstractAppModule
         // leaking test doubles into production.
         $this->bind(InventoryAllocatorInterface::class)->to(NoopInventoryAllocator::class)->in(Scope::SINGLETON);
         $this->bind(PaymentGatewayInterface::class)->to(NoopPaymentGateway::class)->in(Scope::SINGLETON);
+        $this->bind(PreOrderClaimInterface::class)->to(SqlPreOrderClaim::class)->in(Scope::SINGLETON);
         $this->bind(MailerInterface::class)->to(NoopMailer::class)->in(Scope::SINGLETON);
         $this->bind(CustomerInitialPointInterface::class)->to(FixedCustomerInitialPoint::class)->in(Scope::SINGLETON);
         $this->bind(PurchaseFlowInterface::class)->to(DefaultPurchaseFlow::class)->in(Scope::SINGLETON);
@@ -171,6 +212,7 @@ final class AppModule extends AbstractAppModule
         $this->bind(MasterDataWriterInterface::class)->to(EccubeMasterDataWriter::class)->in(Scope::SINGLETON);
         $this->bind(ClassCsvCompatibilityInterface::class)->to(EccubeClassCsvCompatibility::class)->in(Scope::SINGLETON);
         $this->bind(TemplateCompatibilityInterface::class)->to(EccubeTemplateCompatibility::class)->in(Scope::SINGLETON);
+        $this->bind(ClientIpInterface::class)->to(EccubeClientIp::class)->in(Scope::SINGLETON);
 
         // Shared registry over master storage interfaces. The storage
         // implementations come from the active persistence module (Fake or SQL).

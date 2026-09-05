@@ -73,25 +73,6 @@
       "maxLength": 96,
       "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
       "example": "doAddCartItem"
-    },
-    "links": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "title": "ALPS遷移リンク集合",
-      "description": "/entry/activate のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。",
-      "properties": {
-        "goTop": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goTop` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "goTop"
-      ]
     }
   },
   "additionalProperties": false,

@@ -71,10 +71,6 @@ class ShippingEdit extends ResourceObject
                 'href' => 'page://self/shopping/shipping-edit',
             ],
             'staticContent' => null,
-            'links' => [
-                'doUpdateShippingAddress' => 'page://self/shopping/shipping-edit',
-                'goShoppingShipping' => 'page://self/shopping/shipping',
-            ],
             'csrfToken' => null,
             // Phase 3: an empty ShoppingShippingEditForm for the HTML
             // port to render the address inputs. JSON contexts ignore it.

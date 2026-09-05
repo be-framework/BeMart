@@ -10,6 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminCsvConfigForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -49,6 +50,7 @@ final class AdminCsvConfigResourceTest extends TestCase
             protected function configure(): void
             {
                 $this->bind(AdminSession::class)->toInstance($this->session);
+                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
             }
         };
         $base->override($override);
@@ -63,7 +65,7 @@ final class AdminCsvConfigResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertInstanceOf(AdminCsvConfigForm::class, $ro->body['form']);
-        $this->assertSame(1, $ro->body['csvType']);
+        $this->assertSame(3, $ro->body['csvType']);
         $this->assertArrayHasKey('orderNo', $ro->body['outputColumns']);
         $this->assertArrayHasKey('paymentMethod', $ro->body['notOutputColumns']);
     }
@@ -81,7 +83,7 @@ final class AdminCsvConfigResourceTest extends TestCase
     public function testOnPostHappyPathPersistsColumnVector(): void
     {
         $ro = $this->resource->post('page://self/admin/csv-config', [
-            'csvType' => 3, // product
+            'csvType' => 1, // product
             'columns' => [
                 ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
                 ['columnName' => 'productName', 'enabled' => true, 'sortNo' => 2],
@@ -91,7 +93,7 @@ final class AdminCsvConfigResourceTest extends TestCase
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame(3, $ro->body['csvType']);
+        $this->assertSame(1, $ro->body['csvType']);
         $this->assertSame(3, $ro->body['count']);
 
         // Persistence read-back belongs to the SQL suite. Fake context is
@@ -127,7 +129,7 @@ final class AdminCsvConfigResourceTest extends TestCase
     public function testOnPostMissingCsrfReturns403(): void
     {
         $ro = $this->resource->post('page://self/admin/csv-config', [
-            'csvType' => 3,
+            'csvType' => 1,
             'columns' => [
                 ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
             ],
@@ -144,7 +146,7 @@ final class AdminCsvConfigResourceTest extends TestCase
         $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
 
         $this->resource->post('page://self/admin/csv-config', [
-            'csvType' => 3,
+            'csvType' => 1,
             'columns' => [
                 ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
             ],

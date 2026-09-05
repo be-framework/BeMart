@@ -1,159 +1,204 @@
-{#
-  BeMart admin News edit — EC-CUBE goNews (新着情報登録/編集).
-
-  PORT of EC-CUBE 4.3 admin-theme `Content/news_edit.twig`
-  (src/Eccube/Resource/template/admin/Content/news_edit.twig).
-
-  This is the admin pilot's FORM/CRUD page. It extends the admin frame
-  (`admin-base.html.twig`), not the storefront `base.html.twig`. The
-  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
-  from EC-CUBE; only the dynamic bindings are rebound.
-
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md):
-  the News resource (src/Resource/Page/Admin/News/News.php) exposes an
-  {@see \MyVendor\BeMart\Form\AdminNewsForm} as `body['form']`, pre-filled
-  with the persisted row. The inputs render through that real form
-  object:
-
-    {{ form.input('title')|raw }}       <- real <input> w/ id/attrs/value
-    {{ form.error('title') }}           <- inline Be-domain error, if any
-
-  EC-CUBE renders the same inputs through the Symfony FormView
-  (`form_widget(form.title)`); Ray.WebFormModule is BeMart's
-  BEAR-idiomatic equivalent. `AdminNewsForm::init()` ports the field
-  names / ids / attributes from EC-CUBE's `NewsType` (block prefix
-  `/admin/news/news`) so the rendered markup carries EC-CUBE's form shape.
-
-  VALIDATION AUTHORITY STAYS WITH the Be Framework Becoming chain — the
-  form is a field-definition + renderer. On a domain rejection the News
-  resource repopulates `form` and exposes `body.message`.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - `form_widget(form.visible)` (公開 / 非公開 display-status select)
-     -> NOT carried by the AdminNewsFetched projection (EC-CUBE's
-     dtb_news.visible was out of the Wave 9 CMS slice). The conversion-
-     area visible select is OMITTED, not invented. Enumerated as residual.
-   - `{% form_theme %}` and the `auto_render` entity-extension loop ->
-     Symfony form-theme / EC-CUBE entity-extension runtime. No BeMart
-     equivalent; dropped. EC-CUBE-runtime only — enumerated as residual.
-#}
 {% extends 'admin-base.html.twig' %}
 
+{#
+  BeMart admin News editor — idea-admin clean-room build.
+
+  DATA CONTRACT (src/Resource/Page/Admin/News/News.php onGet):
+    newsId          string|null — opaque news identifier; null/empty = create mode
+    newsTitle       string      — headline text (maxLength 32)
+    newsDescription string|null — body text (maxLength 2000)
+    newsUrl         string|null — optional link target (maxLength 2048)
+    publishDate     string      — ISO-8601 publication datetime
+    linkMethod      bool        — false=same window, true=target="_blank"
+    csrfToken       string      — per-request CSRF token
+    form            AdminNewsForm — pre-filled renderer (HTML context only)
+
+  FORM CONTRACT (src/Form/AdminNewsForm.php):
+    publishDate     text      id=admin_news_publish_date   required
+    newsTitle       text      id=admin_news_title          required
+    newsUrl         text      id=admin_news_url
+    linkMethod      checkbox  id=admin_news_link_method    value="1"
+    newsDescription textarea  id=admin_news_description    rows=8
+
+  ACTIONS (derived from resource #[Link] annotations):
+    POST   /admin/news/news-list                             — doCreateNews (new)
+    PUT    /admin/news/news?newsId=<id>&_method=put          — doUpdateNews (edit)
+    DELETE /admin/news/news?newsId=<id>&_method=delete       — doDeleteNews (edit)
+
+  Back link (#[Link] rel=goNewsList): /admin/news/news-list
+
+  idea-admin vocabulary used:
+    idea-admin-layout       two-column editor shell
+    idea-admin-primary      main editor column
+    idea-admin-panel        section card
+    idea-admin-panel__head  section header
+    idea-admin-panel__body  section content area
+    idea-admin-field        label + input row
+    idea-admin-field__label label cell
+    idea-admin-field__input input cell
+    idea-admin-required     required badge
+    idea-admin-error        inline validation message
+    idea-admin-notice       page-level alert strip
+    idea-admin-toolbar      action bar
+    idea-admin-toolbar__back back-nav link
+    idea-admin-toolbar__actions submit + delete cluster
+    idea-admin-action       button/link affordance
+    idea-admin-panel__hint  supplementary hint text
+#}
+
+{% set isEdit = newsId is defined and newsId is not empty %}
 {% set route = 'admin-news-news' %}
-{% set title = '新着情報管理' %}
+{% set title = '新着情報' %}
 {% set sub_title = 'コンテンツ管理' %}
 
 {% block main %}
-    <form role="form" class="form-horizontal" name="form1" id="form1" method="post" action="?">
-        <input type="hidden" id="news__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8">
-                                    <span class="card-title">新着情報登録</span></div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#newsForm"
-                                                                 aria-expanded="true" aria-controls="newsForm"><i class="fa fa-lg fa-angle-up"></i></a></div>
-                            </div>
-                        </div>
-                        <div class="ec-cardCollapse collapse show" id="newsForm" style="">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-3">
-                                        <span>公開日時</span>
-                                        <span class="badge bg-primary ms-1">
-                                                必須
-                                        </span>
-                                    </div>
 
-                                    <div class="col mb-2">
-                                        {{ form.input('publish_date')|raw }}
-                                        {% if form.error('publish_date') %}<span class="invalid-feedback d-block">{{ form.error('publish_date') }}</span>{% endif %}
-                                    </div>
-                                </div>
+{% if message is defined and message %}
+<div class="idea-admin-notice idea-admin-notice--error" role="alert">
+  <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+  {{ message }}
+</div>
+{% endif %}
 
-                                <div class="row">
-                                    <div class="col-3">
-                                        <span>タイトル</span>
-                                        <span class="badge bg-primary ms-1">
-                                                必須
-                                        </span>
-                                    </div>
-                                    <div class="col mb-2">
-                                        {{ form.input('title')|raw }}
-                                        {% if form.error('title') %}<span class="invalid-feedback d-block">{{ form.error('title') }}</span>{% endif %}
-                                    </div>
-                                </div>
+<form
+  id="news_form"
+  role="form"
+  method="post"
+  action="{{ isEdit ? '/admin/news/news?newsId=' ~ newsId|url_encode ~ '&_method=put' : '/admin/news/news-list' }}"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
-                                <div class="row">
-                                    <div class="col-3">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="リンク先のURLを入力してください。">
-                                            <span>URL</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col mb-2">
-                                        {{ form.input('url')|raw }}
-                                        {% if form.error('url') %}<span class="invalid-feedback d-block">{{ form.error('url') }}</span>{% endif %}
-                                    </div>
-                                </div>
+  <div class="idea-admin-layout">
 
-                                <div class="row">
-                                    <div class="col-3">&nbsp;</div>
-                                    <div class="col mb-2">
-                                        {{ form.input('link_method')|raw }}
-                                        {% if form.error('link_method') %}<span class="invalid-feedback d-block">{{ form.error('link_method') }}</span>{% endif %}
-                                    </div>
-                                </div>
+    {# ── Primary column ─────────────────────────────────────────── #}
+    <div class="idea-admin-primary">
 
-                                <div class="row">
-                                    <div class="col-3">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="本文を入力してください。">
-                                            <span>本文</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col mb-2">
-                                        {{ form.input('description')|raw }}
-                                        {% if form.error('description') %}<span class="invalid-feedback d-block">{{ form.error('description') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="c-conversionArea">
-                    <div class="c-conversionArea__container">
-                        <div class="row justify-content-between align-items-center">
-                            <div class="col-6">
-                                <div class="c-conversionArea__leftBlockItem">
-                                    <a class="c-baseLink" href="/admin/news/news-list">
-                                        <i class="fa fa-backward" aria-hidden="true"></i>
-                                        <span>新着情報管理</span></a>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                                    <div class="col-auto">
-                                        <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      {# Section: 記事情報 #}
+      <section class="idea-admin-panel" aria-labelledby="section-news-info">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-news-info">記事情報</h3>
         </div>
-    </form>
+        <div class="idea-admin-panel__body">
 
-    {% if message is defined and message %}
-        <p class="ec-errorMessage">{{ message }}</p>
-    {% endif %}
+          {# 公開日時 — required #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_news_publish_date">公開日時</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('publishDate')|raw }}
+              {% if form.error('publishDate') %}
+              <span class="idea-admin-error">{{ form.error('publishDate') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# タイトル — required #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_news_title">タイトル</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('newsTitle')|raw }}
+              {% if form.error('newsTitle') %}
+              <span class="idea-admin-error">{{ form.error('newsTitle') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# URL — optional #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_news_url">URL</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('newsUrl')|raw }}
+              {% if form.error('newsUrl') %}
+              <span class="idea-admin-error">{{ form.error('newsUrl') }}</span>
+              {% endif %}
+              <p class="idea-admin-panel__hint">リンク先のURLを入力してください。</p>
+            </div>
+          </div>
+
+          {# linkMethod — checkbox: open in new window #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label>リンク</label>
+            </div>
+            <div class="idea-admin-field__input">
+              <input type="hidden" name="linkMethod" value="0">
+              <label for="admin_news_link_method">
+                <input id="admin_news_link_method" type="checkbox" name="linkMethod" value="1"{% if linkMethod|default(false) %} checked{% endif %}>
+                別ウィンドウで開く
+              </label>
+              {% if form.error('linkMethod') %}
+              <span class="idea-admin-error">{{ form.error('linkMethod') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# 本文 — optional textarea #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_news_description">本文</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('newsDescription')|raw }}
+              {% if form.error('newsDescription') %}
+              <span class="idea-admin-error">{{ form.error('newsDescription') }}</span>
+              {% endif %}
+              <p class="idea-admin-panel__hint">本文を入力してください。</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>{# /idea-admin-primary #}
+
+  </div>{# /idea-admin-layout #}
+
+  {# ── Action toolbar ──────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/news/news-list">
+        <i class="fa fa-backward" aria-hidden="true"></i>
+        一覧に戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      {% if isEdit %}
+      <button
+        class="idea-admin-action idea-admin-action--destructive"
+        type="button"
+        onclick="document.getElementById('news-delete-form').submit();"
+      >
+        <i class="fa fa-trash" aria-hidden="true"></i>
+        削除
+      </button>
+      {% endif %}
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-save" aria-hidden="true"></i>
+        {{ isEdit ? '保存' : '登録' }}
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{# Delete affordance — separate form for clean method routing #}
+{% if isEdit %}
+<form
+  id="news-delete-form"
+  method="post"
+  action="/admin/news/news?newsId={{ newsId|url_encode }}&_method=delete"
+  aria-hidden="true"
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+</form>
+{% endif %}
+
 {% endblock %}

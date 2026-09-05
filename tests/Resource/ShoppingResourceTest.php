@@ -108,11 +108,7 @@ final class ShoppingResourceTest extends TestCase
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('/shopping/login', $ro->headers['Location']);
         $this->assertSame('goCheckoutEntry', $ro->body['transitionId']);
-        $this->assertSame('page://self/shopping/login', $ro->body['links']['goShoppingLogin']);
-        $this->assertSame('page://self/shopping/non-member', $ro->body['links']['goShoppingNonMember']);
-        $this->assertSame('page://self/cart', $ro->body['links']['goCart']);
-        $this->assertArrayNotHasKey('doConfirmOrder', $ro->body['links']);
-        $this->assertArrayNotHasKey('doCheckout', $ro->body['links']);
+        $this->assertArrayNotHasKey('links', $ro->body);
         $this->assertArrayNotHasKey('href', $ro->body['_links']['doConfirmOrder']);
         $this->assertArrayNotHasKey('doCheckout', $ro->body['_links']);
     }

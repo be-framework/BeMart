@@ -6,6 +6,8 @@ namespace MyVendor\BeMart\Tests\Auth;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use MyVendor\BeMart\Auth\HtmlCartSessionPrefix;
 use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
@@ -13,8 +15,6 @@ use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
-use function getenv;
-use function putenv;
 use function session_cache_limiter;
 use function session_destroy;
 use function session_id;
@@ -29,31 +29,26 @@ use const PHP_SESSION_ACTIVE;
 
 final class HtmlSessionAdapterTest extends TestCase
 {
-    private string|false $appContextBefore;
-
     protected function setUp(): void
     {
-        $this->appContextBefore = getenv('APP_CONTEXT');
-        unset($_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY]);
+        unset(
+            $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY],
+            $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY],
+        );
     }
 
     protected function tearDown(): void
     {
-        unset($_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY]);
+        unset(
+            $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY],
+            $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY],
+        );
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION = [];
             session_destroy();
             session_write_close();
             session_id('');
         }
-
-        if ($this->appContextBefore === false) {
-            putenv('APP_CONTEXT');
-
-            return;
-        }
-
-        putenv('APP_CONTEXT=' . $this->appContextBefore);
     }
 
     public function testReturnsCustomerIdFromSession(): void
@@ -95,7 +90,6 @@ final class HtmlSessionAdapterTest extends TestCase
     public function testHtmlContextLoginWritesCustomerIdToSession(): void
     {
         $this->startActiveSession();
-        putenv('APP_CONTEXT=html-test-hal-app');
 
         $ro = $this->htmlResource()->post('page://self/login', [
             'email' => 'login-test@example.com',
@@ -112,16 +106,56 @@ final class HtmlSessionAdapterTest extends TestCase
     public function testHtmlContextLogoutClearsCustomerIdAndRedirectsHome(): void
     {
         $this->startActiveSession();
-        putenv('APP_CONTEXT=html-test-hal-app');
         $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = '10000000aaaa1111bbbb2222cccc3333';
 
         $ro = $this->htmlResource()->post('page://self/logout', [
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertArrayNotHasKey(HtmlSessionAdapter::CUSTOMER_ID_KEY, $_SESSION);
         $this->assertSame('/', $ro->headers['Location']);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testHtmlContextLoginRegeneratesSessionIdAndRotatesCsrfReference(): void
+    {
+        $this->startActiveSession();
+        $sessionIdBeforeLogin = session_id();
+        // Pinned while anonymous: the cart rows keyed by this prefix must stay
+        // reachable after the id rotates.
+        $cartPrefix = (new HtmlCartSessionPrefix())->prefix();
+        $anonymousToken = (new EccubeSharedCsrfTokenAdapter())->token;
+
+        $ro = $this->htmlResource()->post('page://self/login', [
+            'email' => 'login-test@example.com',
+            'password' => 'local-dev-member-password',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame($sessionIdBeforeLogin, $cartPrefix);
+        $this->assertNotSame($sessionIdBeforeLogin, session_id());
+        $this->assertFalse((new EccubeSharedCsrfTokenAdapter())->isValid($anonymousToken));
+        $this->assertSame($cartPrefix, (new HtmlCartSessionPrefix())->prefix());
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testHtmlContextLogoutRetiresSessionIdAndCsrfReference(): void
+    {
+        $this->startActiveSession();
+        $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = '10000000aaaa1111bbbb2222cccc3333';
+        $sessionIdBeforeLogout = session_id();
+        $tokenBeforeLogout = (new EccubeSharedCsrfTokenAdapter())->token;
+
+        $this->htmlResource()->post('page://self/logout', [
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertNotSame($sessionIdBeforeLogout, session_id());
+        $this->assertFalse((new EccubeSharedCsrfTokenAdapter())->isValid($tokenBeforeLogout));
     }
 
     private function htmlResource(): ResourceInterface

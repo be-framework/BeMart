@@ -1,0 +1,12 @@
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}{{ code }} {{ statusText }} | IDEA STORE{% endblock %}
+{% block content %}
+<section class="idea-container idea-section">
+  <div class="idea-empty idea-error-panel" style="max-width:36rem;margin:0 auto;text-align:center;">
+    <p class="idea-eyebrow">Error {{ code }}</p>
+    <h1 class="idea-section-title">{{ statusText }}</h1>
+    <p class="idea-muted" style="margin:1rem 0 2rem;">{{ message }}</p>
+    <a class="idea-button" href="/">トップへ戻る</a>
+  </div>
+</section>
+{% endblock %}

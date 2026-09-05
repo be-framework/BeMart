@@ -11,7 +11,7 @@ use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
-use MyVendor\BeMart\Auth\HtmlCartSession;
+use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use MyVendor\BeMart\Be\Final\ShoppingFetched;
 use MyVendor\BeMart\Be\Input\GetShoppingInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
@@ -60,6 +60,7 @@ class Shopping extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
         private readonly CsrfToken $csrf,
+        private readonly CartSessionPrefixInterface $cartSessionPrefix,
     ) {
     }
 
@@ -76,7 +77,7 @@ class Shopping extends ResourceObject
     {
         try {
             $final = ($this->becoming)(new GetShoppingInput(
-                sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+                sessionPrefix: $this->cartSessionPrefix->prefix() ?? $sessionPrefix,
             ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
@@ -122,11 +123,6 @@ class Shopping extends ResourceObject
         $this->body = [
             'transitionId' => 'goCheckoutEntry',
             'message' => '購入手続きに進むにはログインまたはゲスト購入を選択してください。',
-            'links' => [
-                'goShoppingLogin' => 'page://self/shopping/login',
-                'goShoppingNonMember' => 'page://self/shopping/non-member',
-                'goCart' => 'page://self/cart',
-            ],
             '_links' => [
                 // Suppress method-level doConfirmOrder for anonymous 303 HAL; entries without href are not rendered.
                 'doConfirmOrder' => [],

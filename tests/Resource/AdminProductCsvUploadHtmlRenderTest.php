@@ -13,15 +13,14 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 
 /**
- * Phase 3 — HTML render check for the four admin CSV-upload Product
- * Tier-2 pages (`csv_product`, `csv_category`, `csv_class_name`,
- * `csv_class_category`).
+ * HTML render verification for the four admin CSV-upload pages
+ * (csv-product, csv-category, csv-class-name, csv-class-category).
  *
- * Render-smoke standard: each page renders a full admin-frame HTML
- * document through {@see HtmlModule} with the body shape supplied by
- * the {@see \MyVendor\BeMart\Support\Resource\AbstractCsvUpload}
- * subclasses. The EC-CUBE residual-diff fidelity check is a follow-up
- * gated on the EC-CUBE 4.3 reference clone (`tools/ec-cube-source/`).
+ * Assertion tiers
+ * ---------------
+ * L1 — required data present in rendered HTML (csvTitle, field, column spec).
+ * L2 — action endpoint, HTTP method, and back-link semantics.
+ * Frame — idea-admin shell landmarks present (shell / content).
  */
 final class AdminProductCsvUploadHtmlRenderTest extends TestCase
 {
@@ -29,14 +28,30 @@ final class AdminProductCsvUploadHtmlRenderTest extends TestCase
 
     private ResourceInterface $resource;
 
-    /** @return list<array{string, string}> uri, page-specific form-id marker */
+    /** @return list<array{string, string, string}> uri, form-action, page-title-fragment */
     public static function csvPageProvider(): array
     {
         return [
-            ['page://self/admin/product/csv-product', 'id="csv_product_form"'],
-            ['page://self/admin/product/csv-category', 'id="csv_category_form"'],
-            ['page://self/admin/product/csv-class-name', 'id="csv_class_name_form"'],
-            ['page://self/admin/product/csv-class-category', 'id="csv_class_category_form"'],
+            [
+                'page://self/admin/product/csv-product',
+                '/admin/product-csv',
+                '商品CSV登録',
+            ],
+            [
+                'page://self/admin/product/csv-category',
+                '/admin/category/csv',
+                'カテゴリCSV登録',
+            ],
+            [
+                'page://self/admin/product/csv-class-name',
+                '/admin/product/csv-class-name',
+                '規格CSV登録',
+            ],
+            [
+                'page://self/admin/product/csv-class-category',
+                '/admin/product/csv-class-category',
+                '規格分類CSV登録',
+            ],
         ];
     }
 
@@ -57,24 +72,101 @@ final class AdminProductCsvUploadHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    /** @dataProvider csvPageProvider */
-    public function testCsvUploadRendersAsHtmlDocument(string $uri, string $formIdMarker): void
+    /**
+     * L1 — required data: HTTP 200, full HTML document, csvTitle, file input.
+     *
+     * @dataProvider csvPageProvider
+     */
+    public function testL1RequiredDataPresent(string $uri, string $action, string $titleFragment): void
     {
-        $ro = $this->resource->get($uri);
-
-        $this->assertSame(Code::OK, $ro->code);
-
+        $ro   = $this->resource->get($uri);
         $html = $ro->toString();
 
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
+
+        // Full HTML document
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
         $this->assertStringContainsString('</body>', $html);
-        $this->assertStringContainsString('<header class="c-headerBar">', $html);
-        $this->assertStringContainsString('<div class="c-contentsArea">', $html);
-        $this->assertStringContainsString($formIdMarker, $html);
-        $this->assertStringContainsString('CSVファイルフォーマット', $html);
 
-        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
+        // L1: page title visible
+        $this->assertStringContainsString($titleFragment, $html);
+
+        // L1: file-upload field rendered
+        $this->assertStringContainsString('type="file"', $html);
+        $this->assertStringContainsString('import_file', $html);
+
+        // L1: column spec reference present (rendered as <table> or <dl> depending on template)
+        $this->assertTrue(
+            str_contains($html, '<table') || str_contains($html, '<dl'),
+            'Column spec markup (<table> or <dl>) must be present',
+        );
+    }
+
+    /**
+     * L2 — action endpoint and HTTP method, back-link semantics.
+     *
+     * @dataProvider csvPageProvider
+     */
+    public function testL2ActionAndLinks(string $uri, string $action, string $titleFragment): void
+    {
+        $html = $this->resource->get($uri)->toString();
+
+        // L2: form posts to the correct endpoint
+        $this->assertStringContainsString('method="post"', $html);
+        $this->assertStringContainsString('action="' . $action . '"', $html);
+
+        // L2: multipart encoding declared for file upload
+        $this->assertStringContainsString('enctype="multipart/form-data"', $html);
+
+        // L2: CSRF field present
+        $this->assertStringContainsString('name="csrfToken"', $html);
+
+        // L2: back-link to product list with rel=goProductList
+        $this->assertStringContainsString('href="/admin/product-list"', $html);
+        $this->assertStringContainsString('rel="goProductList"', $html);
+    }
+
+    /**
+     * Frame — idea-admin shell landmarks.
+     *
+     * @dataProvider csvPageProvider
+     */
+    public function testFrameLandmarks(string $uri, string $action, string $titleFragment): void
+    {
+        $html = $this->resource->get($uri)->toString();
+
+        $this->assertStringContainsString('class="idea-admin-shell"', $html);
+        $this->assertStringContainsString('class="idea-admin-content"', $html);
+    }
+
+    // ── csv-category dedicated functional assertions ──────────────────────────
+
+    /** L1: all four column names from AbstractCsvUpload::columns() are rendered. */
+    public function testCsvCategoryAllColumnNamesRendered(): void
+    {
+        $html = $this->resource->get('page://self/admin/product/csv-category')->toString();
+
+        $this->assertStringContainsString('カテゴリID', $html);
+        $this->assertStringContainsString('カテゴリ名', $html);
+        $this->assertStringContainsString('親カテゴリID', $html);
+        $this->assertStringContainsString('カテゴリ削除フラグ', $html);
+    }
+
+    /** L2: upload form carries a stable id; skeleton download link present with rel. */
+    public function testCsvCategoryFormIdAndSkeletonLink(): void
+    {
+        $html = $this->resource->get('page://self/admin/product/csv-category')->toString();
+
+        // stable form id for E2E targeting
+        $this->assertStringContainsString('id="category-csv-upload-form"', $html);
+
+        // skeleton CSV download href and rel attribute
+        $this->assertStringContainsString('href="/admin/category/csv"', $html);
+        $this->assertMatchesRegularExpression(
+            '/<a\s[^>]*rel="admin_product_csv_category_skeleton"[^>]*>/',
+            $html,
+        );
     }
 }

@@ -8,12 +8,9 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Entity\LayoutEntity;
 use BEAR\Dev\Http\AbstractWorkflowTest;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
-use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowFixtureBoundary;
 use PHPUnit\Framework\Attributes\Depends;
-use Ray\Di\InjectorInterface;
 
 use function assert;
 use function bin2hex;
@@ -29,28 +26,17 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
 
     private static string $suffix;
     private static WorkflowDbSession|null $dbSession = null;
-    private static WorkflowFixtureBoundary|null $fixtures = null;
 
     public static function setUpBeforeClass(): void
     {
         self::$suffix = bin2hex(random_bytes(4));
-        self::$dbSession = WorkflowDbSession::startForAdmin(
-            self::ADMIN_ID,
-            self::CSRF_TOKEN,
-            static function (InjectorInterface $injector): void {
-                self::$fixtures = WorkflowFixtureBoundary::fromInjector($injector);
-                self::$fixtures->makeLayoutVisible(new LayoutEntity('1', 'Workflow Seed Layout', 10));
-            },
-        );
+        self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
     }
 
     public static function tearDownAfterClass(): void
     {
-        self::$dbSession?->restore(static function (): void {
-            self::$fixtures?->cleanup();
-        });
+        self::$dbSession?->restore();
         self::$dbSession = null;
-        self::$fixtures = null;
 
         parent::tearDownAfterClass();
     }
@@ -76,7 +62,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     #[Depends('testNewsList')]
     public function testCreatesNews(ResourceObject $response): ResourceObject
     {
-        $created = $this->resource->post('page://self/admin/news/news-list', [
+        $created = $this->resource->post($this->linkHref($response, 'doCreateNews'), [
             'newsTitle' => 'Workflow News ' . self::$suffix,
             'publishDate' => '2027-03-01 00:00:00',
             'newsDescription' => 'Created by flow-admin-content-publish.',
@@ -104,8 +90,9 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     {
         $newsId = $this->bodyValue($response, 'newsId');
         $this->assertIsString($newsId);
+        $newsList = $this->follow($response, 'goNewsList');
 
-        $updated = $this->resource->put('page://self/admin/news/news', [
+        $updated = $this->resource->put($this->linkHref($newsList, 'doUpdateNews'), [
             'newsId' => $newsId,
             'newsTitle' => 'Workflow News Updated ' . self::$suffix,
             'publishDate' => '2027-03-02 00:00:00',
@@ -119,6 +106,10 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         $this->assertSame($newsId, $this->bodyValue($updated, 'newsId'));
         $this->assertSame('Workflow News Updated ' . self::$suffix, $this->bodyValue($updated, 'newsTitle'));
 
+        $readback = $this->follow($updated, 'goNews', ['newsId' => $newsId]);
+        $this->assertSame('Workflow News Updated ' . self::$suffix, $this->bodyValue($readback, 'newsTitle'));
+        $this->assertSame('Updated by flow-admin-content-publish.', $this->bodyValue($readback, 'newsDescription'));
+
         return $updated;
     }
 
@@ -128,14 +119,22 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     {
         $newsId = $this->bodyValue($response, 'newsId');
         $this->assertIsString($newsId);
+        $news = $this->follow($response, 'goNews', ['newsId' => $newsId]);
+        $newsList = $this->follow($news, 'goNewsList');
 
-        $deleted = $this->resource->delete('page://self/admin/news/news', [
+        $deleted = $this->resource->delete($this->linkHref($newsList, 'doDeleteNews'), [
             'newsId' => $newsId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $deleted->code);
         $this->assertSame($newsId, $this->bodyValue($deleted, 'newsId'));
+
+        $readbackList = $this->follow($deleted, 'goNewsList');
+        foreach ((array) ($readbackList->body['news'] ?? []) as $newsItem) {
+            $news = (array) $newsItem;
+            $this->assertNotSame($newsId, (string) ($news['newsId'] ?? ''));
+        }
 
         return $deleted;
     }
@@ -151,7 +150,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     #[Depends('testPageList')]
     public function testCreatesPage(ResourceObject $response): ResourceObject
     {
-        $created = $this->resource->post('page://self/admin/page/page-list', [
+        $created = $this->resource->post($this->linkHref($response, 'doCreatePage'), [
             'pageName' => 'Workflow Page ' . self::$suffix,
             'pageUrl' => 'workflow-page-' . self::$suffix,
             'pageFileName' => 'workflow_page_' . self::$suffix,
@@ -170,8 +169,9 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     {
         $pageId = $this->bodyValue($response, 'pageId');
         $this->assertIsString($pageId);
+        $pageList = $this->follow($response, 'goPageList');
 
-        $updated = $this->resource->put('page://self/admin/page/page', [
+        $updated = $this->resource->put($this->linkHref($pageList, 'doUpdatePage'), [
             'pageId' => $pageId,
             'pageName' => 'Workflow Page Updated ' . self::$suffix,
             'pageUrl' => 'workflow-page-updated-' . self::$suffix,
@@ -183,6 +183,10 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         $this->assertSame($pageId, $this->bodyValue($updated, 'pageId'));
         $this->assertSame('Workflow Page Updated ' . self::$suffix, $this->bodyValue($updated, 'pageName'));
 
+        $readback = $this->follow($updated, 'goPage', ['pageId' => $pageId]);
+        $this->assertSame('Workflow Page Updated ' . self::$suffix, $this->bodyValue($readback, 'pageName'));
+        $this->assertSame('workflow-page-updated-' . self::$suffix, $this->bodyValue($readback, 'pageUrl'));
+
         return $updated;
     }
 
@@ -192,14 +196,22 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     {
         $pageId = $this->bodyValue($response, 'pageId');
         $this->assertIsString($pageId);
+        $page = $this->follow($response, 'goPage', ['pageId' => $pageId]);
+        $pageList = $this->follow($page, 'goPageList');
 
-        $deleted = $this->resource->delete('page://self/admin/page/page', [
+        $deleted = $this->resource->delete($this->linkHref($pageList, 'doDeletePage'), [
             'pageId' => $pageId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $deleted->code);
         $this->assertSame($pageId, $this->bodyValue($deleted, 'pageId'));
+
+        $readbackList = $this->follow($deleted, 'goPageList');
+        foreach ((array) ($readbackList->body['pages'] ?? []) as $pageItem) {
+            $page = (array) $pageItem;
+            $this->assertNotSame($pageId, (string) ($page['pageId'] ?? ''));
+        }
 
         return $deleted;
     }
@@ -215,7 +227,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     #[Depends('testBlockList')]
     public function testCreatesBlock(ResourceObject $response): ResourceObject
     {
-        $created = $this->resource->post('page://self/admin/block/block-list', [
+        $created = $this->resource->post($this->linkHref($response, 'doCreateBlock'), [
             'blockName' => 'Workflow Block ' . self::$suffix,
             'blockFileName' => 'workflow_block_' . self::$suffix,
             'csrfToken' => self::CSRF_TOKEN,
@@ -227,14 +239,26 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         return $created;
     }
 
-    #[Alps('doUpdateBlock')]
+    #[Alps('goBlock')]
     #[Depends('testCreatesBlock')]
+    public function testOpensCreatedBlock(ResourceObject $response): ResourceObject
+    {
+        $opened = $this->followLocation($response);
+        $this->assertSame($this->bodyValue($response, 'blockId'), $this->bodyValue($opened, 'blockId'));
+        $this->assertSame('Workflow Block ' . self::$suffix, $this->bodyValue($opened, 'blockName'));
+
+        return $opened;
+    }
+
+    #[Alps('doUpdateBlock')]
+    #[Depends('testOpensCreatedBlock')]
     public function testUpdatesBlock(ResourceObject $response): ResourceObject
     {
         $blockId = $this->bodyValue($response, 'blockId');
         $this->assertIsString($blockId);
+        $blockList = $this->follow($response, 'goBlockList');
 
-        $updated = $this->resource->put('page://self/admin/block/block', [
+        $updated = $this->resource->put($this->linkHref($blockList, 'doUpdateBlock'), [
             'blockId' => $blockId,
             'blockName' => 'Workflow Block Updated ' . self::$suffix,
             'blockFileName' => 'workflow_block_updated_' . self::$suffix,
@@ -254,8 +278,9 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     {
         $blockId = $this->bodyValue($response, 'blockId');
         $this->assertIsString($blockId);
+        $blockList = $this->follow($response, 'goBlockList');
 
-        $deleted = $this->resource->delete('page://self/admin/block/block', [
+        $deleted = $this->resource->delete($this->linkHref($blockList, 'doDeleteBlock'), [
             'blockId' => $blockId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -273,9 +298,9 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         return $this->follow($response, 'goLayoutList');
     }
 
-    #[Alps('doUpdateLayout')]
+    #[Alps('goLayout')]
     #[Depends('testLayoutList')]
-    public function testUpdatesLayout(ResourceObject $response): ResourceObject
+    public function testOpensLayout(ResourceObject $response): ResourceObject
     {
         $layouts = $this->bodyValue($response, 'layouts');
         $this->assertIsArray($layouts);
@@ -285,14 +310,27 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         $this->assertArrayHasKey('layoutId', $layout);
         $this->assertIsString($layout['layoutId']);
 
-        $updated = $this->resource->put('page://self/admin/layout/layout', [
-            'layoutId' => $layout['layoutId'],
+        $layoutForm = $this->follow($response, 'goLayout', ['layoutId' => $layout['layoutId']]);
+        $this->assertSame($layout['layoutId'], $this->bodyValue($layoutForm, 'layoutId'));
+
+        return $layoutForm;
+    }
+
+    #[Alps('doUpdateLayout')]
+    #[Depends('testOpensLayout')]
+    public function testUpdatesLayout(ResourceObject $response): ResourceObject
+    {
+        $layoutId = $this->bodyValue($response, 'layoutId');
+        $this->assertIsString($layoutId);
+
+        $updated = $this->resource->put($this->linkHref($response, 'doUpdateLayout'), [
+            'layoutId' => $layoutId,
             'layoutName' => 'Workflow Layout ' . self::$suffix,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $updated->code);
-        $this->assertSame($layout['layoutId'], $this->bodyValue($updated, 'layoutId'));
+        $this->assertSame($layoutId, $this->bodyValue($updated, 'layoutId'));
         $this->assertSame('Workflow Layout ' . self::$suffix, $this->bodyValue($updated, 'layoutName'));
 
         return $updated;
@@ -309,7 +347,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     #[Depends('testTradeLawList')]
     public function testUpdatesTradeLaw(ResourceObject $response): ResourceObject
     {
-        $updated = $this->resource->post('page://self/admin/trade-law', [
+        $updated = $this->resource->post($this->linkHref($response, 'doUpdateTradeLaw'), [
             'tradeLawBody' => "販売業者: Workflow Company\n所在地: Workflow City\n連絡先: 03-1234-5678",
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -331,7 +369,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     #[Depends('testContentCss')]
     public function testUpdatesContentCss(ResourceObject $response): ResourceObject
     {
-        $updated = $this->resource->put('page://self/admin/content/css', [
+        $updated = $this->resource->put($this->linkHref($response, 'doUpdateContentCss'), [
             'css' => '.workflow-content-' . self::$suffix . ' { color: #123456; }',
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -353,7 +391,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     #[Depends('testContentJs')]
     public function testUpdatesContentJs(ResourceObject $response): void
     {
-        $updated = $this->resource->put('page://self/admin/content/js', [
+        $updated = $this->resource->put($this->linkHref($response, 'doUpdateContentJs'), [
             'js' => 'window.workflowContent' . self::$suffix . ' = true;',
             'csrfToken' => self::CSRF_TOKEN,
         ]);

@@ -6,69 +6,28 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
-use MyVendor\BeMart\Tests\Resource\Admin\ContentJaMessages;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
-use Twig\Environment;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
 
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
-use function dirname;
-use function explode;
-use function http_build_query;
-use function implode;
-use function in_array;
-use function is_dir;
-use function preg_replace;
 use function str_contains;
-use function trim;
 
 /**
- * Phase 3 — fidelity check for the admin Page-list HTML port (the
- * Content section's `Content/page.twig` DATA/LIST page).
+ * Functional / semantic render verification for the admin Page-list HTML template.
  *
- * Same residual-diff standard as the admin pilot {@see AdminNewsListHtmlRenderTest}:
- * BeMart's templates are PORTS of EC-CUBE 4.3's admin Twig. The page
- * extends `admin-base.html.twig` (the port of EC-CUBE's admin-theme
- * `default_frame.twig`), served via {@see EcCubeAdminStubLoader}.
+ * Checks three layers:
+ *   L1 — required data is present in output (pageName, pageUrl, pageFileName)
+ *   L2 — actions are reachable at the correct href / method / rel
+ *   Frame — idea-admin shell landmarks present
+ *
+ * EC-CUBE reference-parity tests have been removed; this endpoint is
+ * a clean-room redesign (idea-admin design language, no EC-CUBE markup).
  */
 final class AdminPageListHtmlRenderTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
-
-    /**
-     * EC-CUBE lines with no BeMart counterpart and vice versa. Each entry
-     * is a whitespace-collapsed line; the comment states WHY it is
-     * acceptable.
-     *
-     * @var list<string>
-     */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        "'ECCUBE-CSRF-TOKEN': $('meta[name=\"eccube-csrf-token\"]').attr('content')",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>ページ管理 コンテンツ管理 - BeMart</title>',
-        '<title>ページ管理 コンテンツ管理 - EC-CUBE</title>',
-        // Page list fake corpus includes user pages whose URL/file-name
-        // labels are not present in the sparse EC-CUBE reference fixture.
-    ];
 
     private ResourceInterface $resource;
 
@@ -89,219 +48,158 @@ final class AdminPageListHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testPageListRendersAsHtmlDocument(): void
+    // ── Frame landmark ────────────────────────────────────────────────────────
+
+    /** The response is a full HTML document with the idea-admin shell. */
+    public function testFrameLandmarks(): void
     {
         $ro = $this->resource->get('page://self/admin/page/page-list');
 
         $this->assertSame(Code::OK, $ro->code);
 
         $html = $ro->toString();
-
+        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
+        $this->assertStringContainsString('idea-admin-shell', $html);
+        $this->assertStringContainsString('idea-admin-content', $html);
         $this->assertStringContainsString('</body>', $html);
-
-        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testPageListPreservesEcCubeAdminMarkupStructure(): void
+    // ── L1: required data present ─────────────────────────────────────────────
+
+    /**
+     * The fake seed includes a system page (ホームページ / homepage / index).
+     * Its pageName, pageUrl, and pageFileName must appear in the output.
+     */
+    public function testL1SystemPageDataRendered(): void
     {
         $html = $this->resource->get('page://self/admin/page/page-list')->toString();
 
-        foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-mainNavArea">',
-            '<div class="c-contentsArea">',
-            '<div class="c-contentsArea__cols">',
-            'class="c-primaryCol"',
-            'class="table table-sm"',
-            'id="search-page"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
-    }
-
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
-    public function testPageListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
-    {
-        $beMart = $this->resource->get('page://self/admin/page/page-list')->toString();
-        $ecCube = $this->renderEcCube();
-
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-        $hasUserPageResidual = in_array('company', [...$onlyInEcCube, ...$onlyInBeMart], true)
-            && in_array('foo', [...$onlyInEcCube, ...$onlyInBeMart], true);
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line)
-                // Keep bare user-page labels tied to the page-list fixture
-                // seed pair rather than globally allowlisting either label.
-                && ! ($hasUserPageResidual && in_array($line, ['company', 'foo'], true)),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's admin Page-list HTML diverged from EC-CUBE's beyond "
-            . "the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
-        );
-
-        $this->assertLessThanOrEqual(
-            40,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
-    }
-
-    private static function isResidual(string $line): bool
-    {
-        if (RenderDiffResiduals::isAdminListEnrichment($line)) {
-            return true;
-        }
-
-        if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
-            return true;
-        }
-
-        foreach ([
-            // EC-CUBE-runtime <head> furniture.
-            'eccube-csrf-token',
-            '<title>',
-            'c-headerBar__shopTitle',
-            // Admin frame: the logged-in-operator header user-menu.
-            'c-headerBar__userMenu',
-            'data-bs-content',
-            'last_login',
-            // Admin frame: the DYNAMIC sidebar nav (eccubeNav tree).
-            'nav-',
-            'data-bs-toggle="collapse"',
-            'fa-fw',
-            // Page list: EC-CUBE's ルーティング名 cell uses the Symfony
-            // router (`router.routecollection.get(...)`); BeMart has no
-            // router, so the cell shows the bare pageUrl (EC-CUBE's
-            // `{% else %}` branch). The router lookup line has no port
-            // counterpart.
-            'router.routecollection',
-            // Page list: EC-CUBE's レイアウト名 column iterates
-            // `Page.layouts` (the page->layout join). The
-            // AdminPageListFetched projection carries no layout join (out
-            // of the Wave 9 CMS slice); the column renders empty —
-            // MISSING-BODY-FIELD: pages[].layouts.
-            'fa-desktop',
-            'fa-mobile',
-            // Page list: EC-CUBE adds `csrfcsrfToken_for_anchor()` to the
-            // delete <a>. BeMart's html context has no CSRF widget.
-            'csrfcsrfToken',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function renderEcCube(): string
-    {
-        $adminTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/admin';
-        if (! is_dir($adminTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
-
-        $twig = new Environment(new EcCubeAdminStubLoader($adminTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-        $this->registerEcCubeStubs($twig);
-
-        // The same logical page list as BeMart's PageStorageInterface seed:
-        // the system homepage (edit_type 2 = EDIT_TYPE_DEFAULT).
-        $page = new EcCubeStub([
-            'id' => 'pg-homepage',
-            'name' => 'ホームページ',
-            'url' => 'homepage',
-            'file_name' => 'index',
-            'edit_type' => 2,
-            'layouts' => [],
-        ]);
-
-        return $twig->render('Content/page.twig', [
-            'Pages' => [$page],
-            'router' => new EcCubeStub(['routecollection' => new EcCubeStub([])]),
-            'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
-            'eccube_config' => [
-                'locale' => 'ja',
-                'eccube_official_site_url' => 'https://www.ec-cube.net/',
-                'eccube_community_site_url' => 'https://xoo.ps/eccube/',
-                'eccube_document_url' => 'https://doc4.ec-cube.net/',
-                'eccube_manual_url' => 'https://www.ec-cube.net/product/',
-            ],
-            'eccubeNav' => [],
-            'menus' => ['content', 'page'],
-            'plugin_assets' => [],
-            'plugin_snippets' => [],
-            'app' => new EcCubeStub([
-                'user' => new EcCubeStub([
-                    'name' => '管理者',
-                    'login_date' => '2026-05-20 10:00:00',
-                    'two_factor_auth_enabled' => false,
-                ]),
-                'request' => new EcCubeStub(['_route' => 'admin_content_page']),
-            ]),
-            'subtitle' => 'コンテンツ管理',
-            'sub_title' => 'コンテンツ管理',
-            'title' => 'ページ管理',
-        ]);
-    }
-
-    private function registerEcCubeStubs(Environment $twig): void
-    {
-        $messages = AdminJaMessages::forSection(ContentJaMessages::keys());
-        $trans = static function (string $key, array $params = []) use ($messages): string {
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('date_sec', static fn ($d): string => (string) $d));
-        $twig->addFilter(new TwigFilter('date_min', static fn ($d): string => (string) $d));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
+        $this->assertStringContainsString('ホームページ', $html, 'pageName must render');
+        $this->assertStringContainsString('homepage', $html, 'pageUrl must render');
+        $this->assertStringContainsString('index.twig', $html, 'pageFileName with .twig suffix must render');
     }
 
     /**
-     * @return list<string>
+     * The count value from the resource body must appear somewhere in the
+     * rendered output (KPI or footer).
      */
-    private function normalize(string $html): array
+    public function testL1CountRendered(): void
     {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
+        $ro  = $this->resource->get('page://self/admin/page/page-list');
+        $cnt = (string) ($ro->body['count'] ?? '');
+        $html = $ro->toString();
+
+        if ($cnt !== '' && $cnt !== '0') {
+            $this->assertStringContainsString($cnt, $html, 'count must appear in output');
+        } else {
+            $this->assertTrue(true); // empty list is acceptable
+        }
+    }
+
+    // ── L2: actions / links ───────────────────────────────────────────────────
+
+    /**
+     * The "create page" form must post to the correct endpoint.
+     * rel="doCreatePage" is expressed implicitly via form action.
+     */
+    public function testL2CreateFormAction(): void
+    {
+        $html = $this->resource->get('page://self/admin/page/page-list')->toString();
+
+        $this->assertStringContainsString('action="/admin/page/page-list"', $html, 'create form must post to page-list');
+        $this->assertStringContainsString('method="post"', $html, 'create form must use POST');
+        $this->assertStringContainsString('name="pageName"', $html, 'pageName field must be present');
+        $this->assertStringContainsString('name="pageUrl"', $html, 'pageUrl field must be present');
+        $this->assertStringContainsString('name="pageFileName"', $html, 'pageFileName field must be present');
+    }
+
+    /**
+     * Each page row must contain a goPage link pointing to the edit endpoint.
+     */
+    public function testL2GoPageLinks(): void
+    {
+        $ro   = $this->resource->get('page://self/admin/page/page-list');
+        $html = $ro->toString();
+
+        foreach (($ro->body['pages'] ?? []) as $page) {
+            $pageId = (string) ($page['pageId'] ?? '');
+            if ($pageId === '') {
+                continue;
+            }
+
+            $this->assertTrue(
+                str_contains($html, '/admin/page/page?pageId=' . $pageId),
+                "goPage link for pageId={$pageId} must be present",
+            );
+        }
+    }
+
+    /**
+     * Delete affordance must exist for user pages (pageEditType 0) and must
+     * be absent for system pages (pageEditType >= 2).
+     */
+    public function testL2DeleteAffordanceRespectsEditType(): void
+    {
+        $ro   = $this->resource->get('page://self/admin/page/page-list');
+        $html = $ro->toString();
+
+        foreach (($ro->body['pages'] ?? []) as $page) {
+            $pageId   = (string) ($page['pageId'] ?? '');
+            $editType = (int) ($page['pageEditType'] ?? -1);
+            if ($pageId === '') {
+                continue;
+            }
+
+            $hasDelete = str_contains($html, 'del-dlg-' . $pageId);
+
+            if ($editType === 0) {
+                $this->assertTrue($hasDelete, "Delete dialog must exist for user page pageId={$pageId}");
+            } elseif ($editType >= 2) {
+                $this->assertFalse($hasDelete, "Delete dialog must NOT exist for system page pageId={$pageId}");
             }
         }
+    }
 
-        return $lines;
+    /**
+     * The delete form must submit to /admin/page/page via POST + _method=delete
+     * and carry the pageId of the target user page.
+     */
+    public function testL2DeleteFormMethod(): void
+    {
+        $ro   = $this->resource->get('page://self/admin/page/page-list');
+        $html = $ro->toString();
+
+        foreach (($ro->body['pages'] ?? []) as $page) {
+            $pageId   = (string) ($page['pageId'] ?? '');
+            $editType = (int) ($page['pageEditType'] ?? -1);
+            if ($pageId === '' || $editType !== 0) {
+                continue;
+            }
+
+            $this->assertStringContainsString('action="/admin/page/page"', $html, 'delete form must target /admin/page/page');
+            $this->assertStringContainsString('name="_method" value="delete"', $html, 'delete must tunnel via _method=delete');
+            $this->assertStringContainsString('name="pageId" value="' . $pageId . '"', $html, 'pageId must be in delete form');
+            // Only check the first user page to avoid repetitive assertions.
+            break;
+        }
+    }
+
+    // ── EC-CUBE parity tests (archived) ──────────────────────────────────────
+
+    /**
+     * The PageList template is a clean-room redesign (idea-admin design
+     * language). EC-CUBE reference markup comparison is not applicable.
+     *
+     * @group ec-cube-parity-archived
+     */
+    public function testPageListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE parity check archived: PageList.html.twig is a clean-room '
+            . 'redesign using the idea-admin design language. '
+            . 'EC-CUBE c-* / Bootstrap class structure is intentionally absent.',
+        );
     }
 }

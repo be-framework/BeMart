@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Exception\CategoryNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\CategoryEntity;
@@ -42,6 +43,7 @@ final readonly class CategoryUpdated
         #[Input] string|null $parentId,
         #[Inject] AdminSession $adminSession,
         #[Inject] CategoryStorageInterface $categories,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
@@ -64,6 +66,8 @@ final readonly class CategoryUpdated
         );
 
         $categories->put($merged);
+
+        $cacheInvalidator->invalidateCorpus();
 
         $this->categoryId = $merged->categoryId;
         $this->categoryName = $merged->categoryName;

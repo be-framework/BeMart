@@ -1,33 +1,25 @@
 {#
-  EC-CUBE default-theme Block/category_nav_pc.twig static first slice.
+  BeMart storefront Block — category sub-navigation strip (PC).
 
-  EC-CUBE normally renders this from the Category repository. Until the
-  category resource is wired into the shared frame, keep the EC-CUBE
-  default fixture categories as static links. The destination is still a
-  real BeMart product list URL; category_id is preserved as a harmless
-  query parameter and will become active when category filtering lands.
+  Self-contained include; no extends. Rendered inside the shared frame
+  header region directly after Block/logo.html.twig.
+
+  Data contract: src/Resource/Page/Products.php
+    goProductList  →  /products?category_id={id}
+    category_id values and their names are fixed in
+    Products::categoryName() (ids 1-6).
+
+  IdeaStore vocabulary: idea-chip-row, idea-chip-row a (pill links).
+  No ec-* classes. No EC-CUBE runtime bindings.
 #}
-<div class="ec-categoryNaviRole">
-    <div class="ec-itemNav">
-        <ul class="ec-itemNav__nav">
-            <li>
-                <a href="/products?category_id=2">新入荷</a>
-            </li>
-            <li>
-                <a href="/products?category_id=1">ジェラート</a>
-            </li>
-            <li>
-                <a href="/products?category_id=3">彩のデザート</a>
-            </li>
-            <li>
-                <a href="/products?category_id=4">CUBE</a>
-            </li>
-            <li>
-                <a href="/products?category_id=5">アイスサンド</a>
-            </li>
-            <li>
-                <a href="/products?category_id=6">フルーツ</a>
-            </li>
-        </ul>
-    </div>
-</div>
+<nav class="idea-container" aria-label="カテゴリで絞り込む">
+  <div class="idea-chip-row idea-chip-row--toolbar">
+    <a href="/products" rel="goProductList">すべて</a>
+    <a href="/products?name={{ '収納'|url_encode }}" rel="goProductList">収納</a>
+    <a href="/products?name={{ '台所'|url_encode }}" rel="goProductList">台所</a>
+    <a href="/products?name={{ '家具'|url_encode }}" rel="goProductList">家具</a>
+    <a href="/products?name={{ '本と雑誌'|url_encode }}" rel="goProductList">本</a>
+    <a href="/products?name={{ '音楽'|url_encode }}" rel="goProductList">音楽</a>
+    <a href="/products?name={{ '工作の道具'|url_encode }}" rel="goProductList">工作</a>
+  </div>
+</nav>

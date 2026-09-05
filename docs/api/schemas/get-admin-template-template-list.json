@@ -63,6 +63,15 @@
             "title": "テンプレート名",
             "description": "テンプレートの表示名 Fake観察文字長 10〜11; 観察値 'デフォルト (PC)', 'デフォルト (スマホ)'。",
             "example": "デフォルト (PC)"
+          },
+          "active": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "title": "適用中テンプレート",
+            "description": "現在適用されているテンプレートかどうか。TemplateCompatibility の runtime readback 境界から導出され、HTML radio の checked 状態に対応する。",
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -70,24 +79,8 @@
       },
       "minItems": 0
     },
-    "links": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "title": "ALPS遷移リンク集合",
-      "description": "/admin/template/template-list のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。",
-      "properties": {
-        "goTemplateAdd": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goTemplateAdd` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "goTemplateAdd"
-      ]
+    "csrfToken": {
+      "$ref": "#/$defs/csrfToken"
     }
   },
   "additionalProperties": false,

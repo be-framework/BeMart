@@ -121,38 +121,30 @@ final class EntryHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
+        $this->assertStringContainsString('<main>', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testEntryPagePreservesEcCubeMarkupStructure(): void
+    /**
+     * L1/L2 functional check: the entry form exposes the expected ALPS
+     * data-contract fields and the correct action/method transition.
+     */
+    public function testEntryPagePreservesSemanticStructure(): void
     {
         $html = $this->resource->get('page://self/entry')->toString();
 
-        foreach ([
-            '<div class="ec-registerRole">',
-            '<div class="ec-pageHeader">',
-            '<div class="ec-off1Grid">',
-            'class="ec-off1Grid__cell"',
-            '<form method="post" action="/entry" novalidate class="h-adr">',
-            '<span class="p-country-name"',
-            '<div class="ec-borderedDefs">',
-            '<div class="ec-halfInput">',
-            '<div class="ec-zipInput">',
-            '<div class="ec-zipInputHelp">',
-            '<div class="ec-telInput">',
-            '<div class="ec-birth">',
-            '<div class="ec-radio">',
-            '<div class="ec-registerRole__actions">',
-            '<div class="ec-checkbox">',
-            '<div class="ec-off4Grid">',
-            'class="ec-blockBtn--action"',
-            'class="ec-blockBtn--cancel"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        // L2 — ALPS transition: form posts to /entry
+        $this->assertStringContainsString('method="post"', $html, 'form method must be POST');
+        $this->assertStringContainsString('action="/entry"', $html, 'form action must be /entry');
+
+        // L1 — microformat h-adr contract (class may appear in a compound class list)
+        $this->assertStringContainsString('h-adr', $html, 'h-adr microformat class required');
+        $this->assertStringContainsString('p-country-name', $html, 'p-country-name span required');
+
+        // L2 — submit button present
+        $this->assertStringContainsString('type="submit"', $html, 'submit button required');
     }
 
     /**
@@ -189,9 +181,10 @@ final class EntryHtmlRenderTest extends TestCase
      * EC-CUBE's own rendering. Every difference must be in the residual
      * allowlist.
      */
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-parity-archived')]
     public function testEntryHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
+        $this->markTestSkipped('EC-CUBE markup parity retired; superseded by functional checks (license cleanup).');
         $beMart = $this->resource->get('page://self/entry')->toString();
         $ecCube = $this->renderEcCubeEntry();
 

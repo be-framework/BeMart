@@ -1,0 +1,43 @@
+# BeMart one-command quickstart: `docker compose up --build` → http://localhost:8080
+#
+# Self-contained: a MySQL 8.0 service plus the BeMart app image. On first boot the
+# app seeds the IdeaStore themed catalog (3000 products), a demo member and a demo
+# admin. Data persists in the named volume, so later `up` runs skip re-seeding.
+name: bemart-quickstart
+
+services:
+  db:
+    image: mysql:8.0
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_bin"]
+    environment:
+      # Dev-only: empty-password root reachable from the app container. The db
+      # port is NOT published to the host, so this stays on the compose network.
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_HOST: "%"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - bemart-db-data:/var/lib/mysql
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # `prod` selects BEAR's ProdModule: production error page (no stack
+      # traces in responses), OPTIONS introspection disabled, compiled DI.
+      APP_CONTEXT: "prod-html-eccube-sql-hal-app"
+      DATABASE_URL: "mysql://root@db:3306/eccubedb?charset=utf8mb4"
+      # The built-in server is single-process by default, so one slow request
+      # blocks every visitor. Workers do not make it a production server —
+      # they keep a slow page from taking the whole site down.
+      PHP_CLI_SERVER_WORKERS: "4"
+    ports:
+      - "8080:8080"
+
+volumes:
+  bemart-db-data:

@@ -21,13 +21,13 @@ final class AdminDeliveryForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('name', 'text')
+        $this->setField('deliveryName', 'text')
             ->setAttribs(['id' => 'delivery_name', 'class' => 'form-control']);
         $this->setField('visible', 'checkbox')
             ->setAttribs(['id' => 'delivery_visible'])
             ->setOptions(['1' => '']);
 
-        $this->filter->validate('name')->isNotBlank();
+        $this->filter->validate('deliveryName')->isNotBlank();
     }
 
     /**

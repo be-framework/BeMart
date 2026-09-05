@@ -38,6 +38,8 @@ use function sprintf;
 #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class ReorderedTest extends TestCase
 {
+    private const SESSION_PREFIX = 'session-prefix-1';
+
     private BecomingInterface $becoming;
     private CartQueryInterface $cartQuery;
 
@@ -77,6 +79,7 @@ final class ReorderedTest extends TestCase
         //   sample-002 × 1 (price02=9800, stockUnlimited, saleTypeId=1)
         $final = ($this->becoming)(new ReorderInput(
             orderNo: 'past0000000000000000000000000001',
+            sessionPrefix: self::SESSION_PREFIX,
         ));
 
         $this->assertInstanceOf(Reordered::class, $final);
@@ -128,7 +131,7 @@ final class ReorderedTest extends TestCase
             ),
         ]);
 
-        $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo));
+        $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo, sessionPrefix: self::SESSION_PREFIX));
 
         assert($final instanceof Reordered);
         $this->assertSame(1, $final->addedCount);
@@ -164,7 +167,7 @@ final class ReorderedTest extends TestCase
             ),
         ]);
 
-        $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo));
+        $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo, sessionPrefix: self::SESSION_PREFIX));
 
         assert($final instanceof Reordered);
         $this->assertSame(1, $final->addedCount);
@@ -185,6 +188,7 @@ final class ReorderedTest extends TestCase
         $this->expectException(UnauthorizedOrderAccessException::class);
         ($this->becoming)(new ReorderInput(
             orderNo: 'past0000000000000000000000000001',
+            sessionPrefix: self::SESSION_PREFIX,
         ));
     }
 
@@ -195,6 +199,7 @@ final class ReorderedTest extends TestCase
         $this->expectException(UnauthenticatedException::class);
         ($this->becoming)(new ReorderInput(
             orderNo: 'past0000000000000000000000000001',
+            sessionPrefix: self::SESSION_PREFIX,
         ));
     }
 
@@ -203,6 +208,7 @@ final class ReorderedTest extends TestCase
         $this->expectException(OrderNotFoundException::class);
         ($this->becoming)(new ReorderInput(
             orderNo: 'never00000000000000000000000000z',
+            sessionPrefix: self::SESSION_PREFIX,
         ));
     }
 

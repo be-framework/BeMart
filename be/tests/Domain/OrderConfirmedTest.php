@@ -10,11 +10,15 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\PaymentMethodIdFormatException;
 use MyVendor\BeMart\Be\Exception\PreOrderIdFormatException;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
+use MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException;
 use MyVendor\BeMart\Be\Final\OrderConfirmed;
 use MyVendor\BeMart\Be\Final\OrderConfirmFailed;
 use MyVendor\BeMart\Be\Input\ConfirmOrderInput;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
@@ -25,10 +29,28 @@ final class OrderConfirmedTest extends TestCase
 
     protected function setUp(): void
     {
-        $injector = new Injector(
-            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
-            dirname(__DIR__, 2) . '/var/tmp/test',
-        );
+        // The `deadbeef…a` / `deadbeef…b` pre-orders belong to customer-001;
+        // cases on another buyer's fixture call loginAs() explicitly.
+        $this->loginAs('customer-001');
+    }
+
+    /** Rebuild the chain with the given session customer (null = anonymous). */
+    private function loginAs(string|null $customerId): void
+    {
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base->override(new class (new FakeSession($customerId)) extends AbstractModule {
+            public function __construct(private readonly FakeSession $session)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(CustomerSession::class)->toInstance($this->session);
+            }
+        });
+
+        $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->becoming = $injector->getInstance(BecomingInterface::class);
     }
 
@@ -81,6 +103,7 @@ final class OrderConfirmedTest extends TestCase
     {
         // aceface…a11ce — alice, クレジットカード(2): sample-001 ×2 @1200
         // + preorder-2026-spring-bag ×1 @13500.
+        $this->loginAs('0123456789abcdef0123456789abcdef');
         $final = ($this->becoming)(new ConfirmOrderInput(
             preOrderId: 'aceface0000000000000000000000000000a11ce',
             paymentMethodId: 2,
@@ -114,9 +137,36 @@ final class OrderConfirmedTest extends TestCase
         $this->assertSame(13500, $final->items[1]['totalPrice']);
     }
 
+    public function testGuestConfirmScreenProjectionUsesOrderCustomerSnapshot(): void
+    {
+        // feedface… carries no customerId. Non-member checkout must render the
+        // order-time buyer snapshot instead of requiring a customer row.
+        $this->loginAs(null);
+        $final = ($this->becoming)(new ConfirmOrderInput(
+            preOrderId: 'feedfacefeedfacefeedfacefeedfacefeedface',
+            paymentMethodId: 2,
+        ));
+
+        $this->assertInstanceOf(OrderConfirmed::class, $final);
+        $this->assertSame(1200, $final->subtotal);
+        $this->assertSame(120, $final->tax);
+        $this->assertSame(500, $final->deliveryFeeTotal);
+        $this->assertSame(1820, $final->total);
+        $this->assertSame('クレジットカード', $final->paymentMethodName);
+        $this->assertSame('非会員', $final->customer['name01']);
+        $this->assertSame('花子', $final->customer['name02']);
+        $this->assertSame('guest-confirm@example.com', $final->customer['email']);
+        $this->assertSame('1000001', $final->customer['postalCode']);
+        $this->assertSame(13, $final->customer['pref']);
+        $this->assertCount(1, $final->items);
+        $this->assertSame('サンプル商品 A', $final->items[0]['productName']);
+        $this->assertSame(1200, $final->items[0]['totalPrice']);
+    }
+
     public function testVerifyFailureBranchesToOrderConfirmFailed(): void
     {
         // paymentMethodId=9 routes to the fake payment failure handler.
+        $this->loginAs('customer-002');
         $final = ($this->becoming)(new ConfirmOrderInput(
             preOrderId: 'deadbeefcafe1234567890abcdef01234567890c',
             paymentMethodId: 9,
@@ -126,6 +176,32 @@ final class OrderConfirmedTest extends TestCase
         $this->assertSame('deadbeefcafe1234567890abcdef01234567890c', $final->preOrderId);
         $this->assertSame(9, $final->paymentMethodId);
         $this->assertSame(['Card validation failed'], $final->errors);
+    }
+
+    public function testForeignCustomerCannotResolveAnotherShoppersPreOrder(): void
+    {
+        // aceface…a11ce belongs to alice. Knowing the id is not owning it:
+        // resolving it would hand over her name, email and address.
+        $this->loginAs('customer-002');
+
+        $this->expectException(UnauthorizedPreOrderAccessException::class);
+        ($this->becoming)(new ConfirmOrderInput(
+            preOrderId: 'aceface0000000000000000000000000000a11ce',
+            paymentMethodId: 2,
+        ));
+    }
+
+    public function testMemberSessionCannotResolveGuestPreOrder(): void
+    {
+        // The guest carve-out is anonymous-only: a logged-in shopper has no
+        // claim on a non-member pre-order.
+        $this->loginAs('customer-001');
+
+        $this->expectException(UnauthorizedPreOrderAccessException::class);
+        ($this->becoming)(new ConfirmOrderInput(
+            preOrderId: 'feedfacefeedfacefeedfacefeedfacefeedface',
+            paymentMethodId: 2,
+        ));
     }
 
     public function testMissingPreOrderThrows(): void

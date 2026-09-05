@@ -46,6 +46,7 @@ ALPS `goClassCategoryList` に対応する GET 操作。
 | doCreateClassCategory | [<code>page://self/admin/class-category/class-category-list</code>](/admin/class-category/class-category-list.md) |
 | doUpdateClassCategory | [<code>page://self/admin/class-category/class-category</code>](/admin/class-category/class-category.md) |
 | doDeleteClassCategory | [<code>page://self/admin/class-category/class-category</code>](/admin/class-category/class-category.md) |
+| goClassNameList | [<code>page://self/admin/class-name/class-name-list</code>](/admin/class-name/class-name-list.md) |
 ## POST
 ALPS `doCreateClassCategory` に対応する POST 操作。
 

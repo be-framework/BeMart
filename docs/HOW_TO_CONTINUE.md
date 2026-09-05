@@ -78,22 +78,17 @@ PHP 8.5 で開発・テストしている。
 
 SQL テストスイートと本番 context は `malt` の DB を使う。
 `DATABASE_URL` 未設定なら SQL スイートは clean skip するので、ドメイン層だけ触るなら不要。
-現行 `malt.json` は MySQL 8.0 を起動するため、MariaDB target の SQL suite は skip が正しい。
+現行 `malt.json` は MySQL 8.0 を起動する。SQL suite は MySQL 8.0 を baseline とする。
 
 ```bash
 malt start
 source <(malt env)
-mysql --protocol=TCP -h127.0.0.1 -P3306 -uroot <<'SQL'
-CREATE USER IF NOT EXISTS 'dbuser'@'localhost' IDENTIFIED BY 'secret';
-CREATE USER IF NOT EXISTS 'dbuser'@'127.0.0.1' IDENTIFIED BY 'secret';
-GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'localhost';
-GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'127.0.0.1';
-FLUSH PRIVILEGES;
-SQL
+export DATABASE_URL='mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=8.0.0'
+sql/setup-db.sh "$DATABASE_URL"
 ```
 
 本番 DB の再現可能なセットアップ手順・seed は `sql/README.md` と `sql/setup-db.sh` を参照。
-デフォルト接続は host `127.0.0.1` / port `3306` / user `dbuser` / pass `secret`。
+開発用 DB 接続の基本は host `127.0.0.1` / port `3306` / user `root` / pass なし。
 
 ### 1.4 動作確認
 
@@ -126,7 +121,7 @@ composer psalm-taint                        # taint mode
 おおまかな優先度順:
 
 1. **Compatibility fidelity residuals** — `goExportOrderPdf` は到達・download header・`%PDF-` 生成まで進んだが、帳票レイアウト、`dtb_order_pdf` 保存設定、複数配送テンプレート再現は残る。CSV/Mail/Template/MasterData も byte/副作用互換は別境界として扱う。
-2. **Domain residuals** — `doCreateOrder` / `doCheckout` は PurchaseFlow + `dtb_order_item` snapshot writes まで実装済み。残るのは `order_item_register.sql` の MariaDB 10.11 target-engine 検証または `JSON_TABLE` なしの INSERT への置換。`doImportProductCsv` はこの移植では export-only として意図的に未移植。`doInstallPlugin` は plugin runtime out-of-scope。`doUpdateCsv` は column config の保存後、それを消費する export fidelity が残る。
+2. **Domain residuals** — `doCreateOrder` / `doCheckout` は PurchaseFlow + `dtb_order_item` snapshot writes まで実装済み。残るのは `order_item_register.sql` の MySQL 8.0 での検証または `JSON_TABLE` なしの INSERT への置換。`doImportProductCsv` はこの移植では export-only として意図的に未移植。`doInstallPlugin` は plugin runtime out-of-scope。`doUpdateCsv` は column config の保存後、それを消費する export fidelity が残る。
 3. **HTML enrichment backlog** — Mypage dashboard、Favorite、Address、Contact。各ページは Cart-style の re-derive（ALPS → Entity/SQL/Fake enrich → template wiring）で進める。
 4. **Production DB bring-up / cutover** — seed script と prod `SqlModule` binding はある。実DBでの bring-up、運用データ投入、cutover 手順の検証は未完。
 5. **Verification when touching presentation** — admin ページ移植のレシピは `var/templates/README.md`、画面マトリクスは `docs/html-screen-migration-matrix.md`、route/function 状態は `docs/eccube-feature-alps-status.html` を参照する。
@@ -255,7 +250,7 @@ composer psalm / composer psalm-taint       # 型 / taint 解析
 ### SQL スイートが skip / fail する
 
 `DATABASE_URL` 未設定なら clean skip（正常）。設定済みでサーバ不達なら fail-fast。
-まず `malt status` と `dbuser` のグラント（§1.3）を確認。malt が MySQL 8.0 の場合、MariaDB target mismatch として全 skip される。
+まず `malt status` と `root` / パスワードなし接続（§1.3）を確認。`DATABASE_URL` の `serverVersion` が DB の実バージョンと合っているか確認すること。
 
 ### テンプレート編集が反映されない
 

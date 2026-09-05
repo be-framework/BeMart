@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Reason\Csv\CsvFormulaGuard;
 use MyVendor\BeMart\Be\Reason\Entity\CategoryEntity;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
@@ -27,7 +28,10 @@ use function stream_get_contents;
  *
  * Format is RFC 4180 — header row + one row per category. Encoded
  * via PHP's native fputcsv() so quoting / escaping is identical to
- * what EC-CUBE downstream tooling would expect.
+ * what EC-CUBE downstream tooling would expect. Cells go through
+ * {@see CsvFormulaGuard} — the same neutralisation the layout-driven
+ * exports get from {@see \MyVendor\BeMart\Be\Reason\Csv\CsvColumnLayout::project()},
+ * which this Final predates and does not use.
  */
 final readonly class CategoryCsvExported
 {
@@ -56,10 +60,10 @@ final readonly class CategoryCsvExported
         foreach ($rows as $row) {
             \assert($row instanceof CategoryEntity);
             fputcsv($handle, [
-                $row->categoryId,
-                $row->categoryName,
-                $row->parentId ?? '',
-                (string) $row->sortNo,
+                CsvFormulaGuard::neutralize($row->categoryId),
+                CsvFormulaGuard::neutralize($row->categoryName),
+                CsvFormulaGuard::neutralize($row->parentId ?? ''),
+                CsvFormulaGuard::neutralize((string) $row->sortNo),
             ], ',', '"', '');
         }
 

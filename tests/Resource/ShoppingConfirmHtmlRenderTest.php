@@ -6,7 +6,10 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
 use Twig\Environment;
 use Twig\Markup;
 use Twig\TwigFilter;
@@ -123,11 +126,25 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         '指定なし',
     ];
 
+    /** The confirm-screen pre-order fixture `aceface…a11ce` belongs to alice. */
+    private const ALICE_CUSTOMER_ID = '0123456789abcdef0123456789abcdef';
+
     private ResourceInterface $resource;
 
     protected function setUp(): void
     {
-        $injector = HtmlTestInjector::getInstance();
+        $session = new FakeSession(self::ALICE_CUSTOMER_ID);
+        $injector = HtmlTestInjector::getOverrideInstance(new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeSession $session)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(CustomerSession::class)->toInstance($this->session);
+            }
+        });
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
@@ -141,36 +158,46 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
+        $this->assertStringContainsString('<main>', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testShoppingConfirmPreservesEcCubeMarkupStructure(): void
+    /**
+     * L1/L2 functional check: the confirm page renders the order-review
+     * heading and the checkout transition form with the correct action/method.
+     */
+    public function testShoppingConfirmPreservesSemanticStructure(): void
     {
         $html = $this->resource->get('page://self/shopping/confirm')->toString();
 
-        foreach ([
-            '<h1>ご注文内容のご確認</h1>',
-            '<ul class="ec-progress">',
-            // Slice 9: url('shopping_checkout') now resolves through canonical Resource path.
-            '<form id="shopping-form" method="post" action="/shopping/checkout">',
-            '<div class="ec-orderRole">',
-            '<div class="ec-orderAccount">',
-            '<div class="ec-orderDelivery">',
-            '<div class="ec-orderPayment">',
-            '<div class="ec-orderConfirm">',
-            '<div class="ec-totalBox">',
-            'class="ec-blockBtn--action"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        // L1 — page heading identifies the confirm screen
+        $this->assertStringContainsString('注文内容の確認', $html, 'confirm heading required');
+
+        // L2 — ALPS transition: checkout form posts to /shopping/checkout.
+        // The action carries ?mode=complete so the browser POST triggers the
+        // PRG redirect to /shopping/complete (Checkout gates on uri->query mode).
+        $this->assertStringContainsString('method="post"', $html, 'form method must be POST');
+        $this->assertStringContainsString('action="/shopping/checkout', $html, 'form action must target /shopping/checkout');
+
+        // L1 — key hidden fields that drive the checkout becoming chain
+        $this->assertStringContainsString('name="preOrderId"', $html, 'preOrderId hidden field required');
+        $this->assertStringContainsString('name="paymentMethodId"', $html, 'paymentMethodId hidden field required');
+
+        // L1 — order-summary section headings present
+        $this->assertStringContainsString('お客様情報', $html, 'customer-info section required');
+        $this->assertStringContainsString('ご注文商品', $html, 'items section required');
+        $this->assertStringContainsString('お支払い方法', $html, 'payment section required');
+
+        // L2 — submit button present
+        $this->assertStringContainsString('type="submit"', $html, 'submit button required');
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-parity-archived')]
     public function testShoppingConfirmHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
+        $this->markTestSkipped('EC-CUBE markup parity retired; superseded by functional checks (license cleanup).');
         $beMart = $this->resource->get('page://self/shopping/confirm')->toString();
         $ecCube = $this->renderEcCube();
 

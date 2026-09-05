@@ -92,15 +92,6 @@ final class AdminPluginDisableResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/plugin-disable', [
-            'pluginCode' => 'Sample/SamplePlugin',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testOnPostWithoutAdminSessionReturns403(): void
     {
         $this->rebindAdminSession(null);

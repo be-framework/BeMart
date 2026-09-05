@@ -1,155 +1,121 @@
-{#
-  BeMart Shopping shipping-multiple-edit page — EC-CUBE
-  goShoppingShippingMultipleEdit.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}お届け先の追加 | IDEA STORE{% endblock %}
+{% block content %}
 
-  PORT of EC-CUBE 4.3 default-theme `Shopping/shipping_multiple_edit.twig`
-  (src/Eccube/Resource/template/default/Shopping/shipping_multiple_edit.twig).
+<nav class="idea-container idea-breadcrumb" aria-label="パンくずリスト">
+  <a href="/">ホーム</a><span>/</span>
+  <a href="/cart">カート</a><span>/</span>
+  <a href="/shopping/shipping-multiple">複数配送先の指定</a><span>/</span>
+  <span aria-current="page">お届け先の追加</span>
+</nav>
 
-  FORM page (Ray.WebFormModule) — see var/templates/README.md. This is
-  the "新規お届け先を追加する" form reached from the multi-destination
-  screen (`Shopping/shipping_multiple.twig`). EC-CUBE renders its address
-  inputs through the SAME `CustomerAddressType` used by
-  `Shopping/shipping_edit.twig`, so the BeMart port reuses the same
-  `ShoppingShippingEditForm` (an AbstractForm) — the two pages differ
-  only in the submit-target route + the page header text.
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-shipping-multiple-edit-heading">
+  <div>
+    <p class="idea-eyebrow">Add delivery address</p>
+    <h1 id="idea-shipping-multiple-edit-heading" class="idea-title idea-title--compact">お届け先の追加</h1>
+    <p class="idea-muted">新しいお届け先を入力してください。登録後、複数配送先の指定画面で各商品のお届け先として選択できます。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Multiple shipping</span>
+    <strong>New address</strong>
+    <small>IDEA STORE</small>
+  </div>
+</section>
 
-  Markup skeleton, the `ec-role` / `ec-pageHeader` / `ec-registerRole` /
-  `ec-off1Grid` / `ec-borderedDefs` / `ec-halfInput` / `ec-zipInput` /
-  `ec-select` / `ec-input` / `ec-telInput` / `ec-registerRole__actions`
-  classes + the `<dl>`/`<dt>`/`<dd>` definition-list structure are kept
-  verbatim from EC-CUBE.
+<div class="idea-container idea-checkout-progress" aria-label="購入ステップ">
+  <span><b>1</b>カート</span>
+  <span><b>2</b>ログイン</span>
+  <span class="is-active"><b>3</b>お届け先</span>
+  <span><b>4</b>ご注文確認</span>
+  <span><b>5</b>完了</span>
+</div>
 
-  The ShippingMultipleEdit resource exposes a real
-  `ShoppingShippingEditForm` as `body.form`; the inputs are rendered
-  through it:
+<section class="idea-container idea-section">
+  {# rel=doAddMultipleShippingAddress → page://self/shopping/shipping-multiple-edit POST #}
+  <form class="idea-checkout-panel idea-address-form h-adr"
+        method="post"
+        action="/shopping/shipping-multiple-edit"
+        novalidate>
+    <span class="p-country-name" aria-hidden="true">Japan</span>
+    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
-    {{ form.input('name01')|raw }}   <- real <input> w/ name/attrs
-    {{ form.error('name01') }}       <- inline Be-domain error, if any
-
-  EC-CUBE's `CustomerAddressType` nests fields under compound types, but
-  BeMart's body carries them FLAT (mirrors ALPS `#ShoppingShippingEdit`),
-  so the form declares them flat. The render-diff test stubs EC-CUBE's
-  `form_widget` / `form_label` to delegate to the SAME form so the inputs
-  + labels diff to ZERO. Validation authority stays with the Be Becoming
-  chain.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `form._token` — Symfony CSRF widget; kept as the hidden `_token`
-     input bound to the body's `csrfToken` (null in the html context).
-   - `has_errors(...)` — request-validation runtime; resolves false on a
-     fresh form, so the conditional ` error` class never appears.
-   - The `{% for f in form|filter(...) %}` entity-extension auto-render
-     loop is OMITTED — a core install has no such extensions.
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'other_page' %}
-{% set route = 'shopping-shipping-multiple-edit' %}
-{% set title = 'お届け先の追加' %}
-
-{% block javascript %}
-    <script src="//yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
-{% endblock javascript %}
-
-{% block main %}
-    <div class="ec-registerRole">
-        <div class="ec-pageHeader">
-            <h1>お届け先の追加</h1>
-        </div>
-        <div class="ec-off1Grid">
-            <div class="ec-off1Grid__cell">
-                    <form method="post" action="/shopping/shipping-multiple-edit" class="h-adr">
-                        <span class="p-country-name" style="display:none;">Japan</span>
-                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                        <div class="ec-borderedDefs">
-                            <dl>
-                                <dt>
-                                    <label class="ec-label">お名前</label>
-                                </dt>
-                                <dd>
-                                    <div class="ec-halfInput">
-                                        {{ form.input('name01')|raw }}
-                                        {{ form.input('name02')|raw }}
-                                        {{ form.error('name01') }}
-                                        {{ form.error('name02') }}
-                                    </div>
-                                </dd>
-                            </dl>
-                            <dl>
-                                <dt>
-                                    <label class="ec-label">お名前(カナ)</label>
-                                </dt>
-                                <dd>
-                                    <div class="ec-halfInput">
-                                        {{ form.input('kana01')|raw }}
-                                        {{ form.input('kana02')|raw }}
-                                        {{ form.error('kana01') }}
-                                        {{ form.error('kana02') }}
-                                    </div>
-                                </dd>
-                            </dl>
-                            <dl>
-                                <dt>
-                                    <label class="ec-label">会社名</label>
-                                </dt>
-                                <dd>
-                                    <div class="ec-halfInput">
-                                        {{ form.input('companyName')|raw }}
-                                        {{ form.error('companyName') }}
-                                    </div>
-                                </dd>
-                            </dl>
-                            <dl>
-                                <dt>
-                                    <label class="ec-label">住所</label>
-                                </dt>
-                                <dd>
-                                    <div class="ec-zipInput"><span>〒</span>
-                                        {{ form.input('postalCode')|raw }}
-                                        <div class="ec-zipInputHelp">
-                                            <div class="ec-zipInputHelp__icon">
-                                                <div class="ec-icon"><img src="{{ asset('assets/icon/question-white.svg') }}" alt=""></div>
-                                            </div><a href="https://www.post.japanpost.jp/zipcode/" target="_blank"><span>郵便番号検索</span></a>
-                                        </div>
-                                        {{ form.error('postalCode') }}
-                                    </div>
-                                    <div class="ec-select">
-                                        {{ form.input('pref')|raw }}
-                                        {{ form.error('pref') }}
-                                    </div>
-                                    <div class="ec-input">
-                                        {{ form.input('addr01')|raw }}
-                                        {{ form.error('addr01') }}
-                                    </div>
-                                    <div class="ec-input">
-                                        {{ form.input('addr02')|raw }}
-                                        {{ form.error('addr02') }}
-                                    </div>
-                                </dd>
-                            </dl>
-                            <dl>
-                                <dt>
-                                    <label class="ec-label">電話番号</label>
-                                </dt>
-                                <dd>
-                                    <div class="ec-telInput">
-                                        {{ form.input('phoneNumber')|raw }}
-                                        {{ form.error('phoneNumber') }}
-                                    </div>
-                                </dd>
-                            </dl>
-                        </div>
-                        <div class="ec-registerRole__actions">
-                            <div class="ec-off4Grid">
-                                <div class="ec-off4Grid__cell">
-                                    <button type="submit" class="ec-blockBtn--action">登録する</button>
-                                    <a href="/shopping/shipping-multiple" class="ec-blockBtn--cancel">戻る</a>
-                                </div>
-                            </div>
-                        </div>
-                </form>
-            </div>
-        </div>
+    <div class="idea-panel-head">
+      <div>
+        <p class="idea-eyebrow">Name</p>
+        <h2 class="idea-section-title">お名前・フリガナ</h2>
+      </div>
+      {# rel=goShoppingShippingMultiple → page://self/shopping/shipping-multiple #}
+      <a class="idea-link" href="/shopping/shipping-multiple">複数配送先の指定に戻る</a>
     </div>
+
+    <div class="idea-form-grid idea-form-grid--two">
+      <label class="idea-field">
+        <span>姓</span>
+        {{ form.input('name01')|raw }}
+        <span class="idea-form-error">{{ form.error('name01') }}</span>
+      </label>
+      <label class="idea-field">
+        <span>名</span>
+        {{ form.input('name02')|raw }}
+        <span class="idea-form-error">{{ form.error('name02') }}</span>
+      </label>
+      <label class="idea-field">
+        <span>セイ</span>
+        {{ form.input('kana01')|raw }}
+        <span class="idea-form-error">{{ form.error('kana01') }}</span>
+      </label>
+      <label class="idea-field">
+        <span>メイ</span>
+        {{ form.input('kana02')|raw }}
+        <span class="idea-form-error">{{ form.error('kana02') }}</span>
+      </label>
+      <label class="idea-field idea-field--full">
+        <span>会社名（任意）</span>
+        {{ form.input('companyName')|raw }}
+        <span class="idea-form-error">{{ form.error('companyName') }}</span>
+      </label>
+    </div>
+
+    <div class="idea-panel-head idea-panel-head--inner">
+      <div>
+        <p class="idea-eyebrow">Address</p>
+        <h2 class="idea-section-title">ご住所</h2>
+      </div>
+    </div>
+
+    <div class="idea-form-grid idea-form-grid--two">
+      <label class="idea-field">
+        <span>郵便番号</span>
+        {{ form.input('postalCode')|raw }}
+        <span class="idea-form-error">{{ form.error('postalCode') }}</span>
+      </label>
+      <label class="idea-field">
+        <span>都道府県</span>
+        {{ form.input('pref')|raw }}
+        <span class="idea-form-error">{{ form.error('pref') }}</span>
+      </label>
+      <label class="idea-field">
+        <span>市区町村</span>
+        {{ form.input('addr01')|raw }}
+        <span class="idea-form-error">{{ form.error('addr01') }}</span>
+      </label>
+      <label class="idea-field">
+        <span>番地・建物名</span>
+        {{ form.input('addr02')|raw }}
+        <span class="idea-form-error">{{ form.error('addr02') }}</span>
+      </label>
+      <label class="idea-field">
+        <span>電話番号</span>
+        {{ form.input('phoneNumber')|raw }}
+        <span class="idea-form-error">{{ form.error('phoneNumber') }}</span>
+      </label>
+    </div>
+
+    <div class="idea-form-actions">
+      <button class="idea-button" type="submit">お届け先を登録する</button>
+      <a class="idea-link" href="/shopping/shipping-multiple">戻る</a>
+    </div>
+  </form>
+</section>
+
 {% endblock %}

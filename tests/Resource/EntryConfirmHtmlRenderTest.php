@@ -6,87 +6,28 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Form\EntryConfirmForm;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
-use Ray\WebFormModule\FormFactory;
-use Twig\Environment;
-use Twig\Markup;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
-
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
-use function dirname;
-use function explode;
-use function http_build_query;
-use function implode;
-use function in_array;
-use function is_dir;
-use function is_string;
-use function nl2br;
-use function preg_replace;
-use function str_contains;
-use function str_replace;
-use function str_starts_with;
-use function trim;
 
 /**
- * Phase 3 — fidelity check for the Entry confirm
- * (goCustomerRegistrationConfirm) HTML port.
+ * Functional render test for the Entry confirm page (goCustomerRegistrationConfirm).
  *
- * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
- * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
+ * Template: var/templates/Page/Entry/Confirm.html.twig
+ * Resource: src/Resource/Page/Entry/Confirm.php (thin pure renderer).
  *
- * `Entry/confirm.twig` is the registration-CONFIRM screen — it re-shows
- * the entered registration values as plain text AND carries them forward
- * as HIDDEN inputs (`form_widget(form.name.name01, { type : 'hidden' })`)
- * so the final "会員登録をする" submit re-posts the full payload to
- * `doRegisterCustomer`.
+ * The confirm screen re-shows the entered registration values as plain text
+ * AND carries them forward as HIDDEN inputs so the final submit re-posts the
+ * full payload to doRegisterCustomer (POST /entry).
  *
- * FORM page — the Ray.WebFormModule form-page recipe (see
- * var/templates/README.md). The Confirm resource
- * (src/Resource/Page/Entry/Confirm.php) is a thin pure renderer (a NEW
- * resource — EC-CUBE keeps the confirm step on the same controller
- * action via the `mode` POST param; BeMart's Pilot 4 collapsed the
- * flow). It exposes an {@see EntryConfirmForm} — every registration
- * field declared `hidden` — as `body.form`. This test renders EC-CUBE's
- * `form_widget(form.<field>, { type : 'hidden' })` calls through the
- * SAME EntryConfirmForm, so the hidden carriers diff to ZERO.
+ * Test layers:
+ *   L1 — Required fields present and data output rendered (semantic contract).
+ *   L2 — form action/method and link href integrity.
  *
- * MISSING BODY FIELD residual — a pure `onGet` renderer has no submitted
- * payload, so the plain-text `form.<field>.vars.data` value cells render
- * empty. This test feeds EC-CUBE's confirm.twig empty `vars.data` so
- * both sides render empty value cells; the difference contributes
- * nothing to the diff. Recorded as the page's known data gap — flagged
- * for a follow-up vertical slice (a `mode=confirm` POST handler).
+ * The EC-CUBE parity diff test is archived — see the @group
+ * ec-cube-parity-archived method below.
  */
 final class EntryConfirmHtmlRenderTest extends TestCase
 {
-    /** @var list<string> */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>BeMart / 新規会員登録(確認)</title>',
-        '<title>EC-CUBE / 新規会員登録(確認)</title>',
-        '<meta name="author" content="">',
-
-        // --- confirm form: CSRF hidden input ----------------------------
-        // EC-CUBE's hidden csrfToken carries a live form CSRF token; BeMart's
-        // html context has no CSRF widget, so the value is empty.
-        '<input type="hidden" name="csrfToken" value="">',
-    ];
-
     private ResourceInterface $resource;
 
     protected function setUp(): void
@@ -94,6 +35,10 @@ final class EntryConfirmHtmlRenderTest extends TestCase
         $injector = HtmlTestInjector::getInstance();
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
+
+    // -------------------------------------------------------------------------
+    // L0: document well-formedness
+    // -------------------------------------------------------------------------
 
     public function testEntryConfirmPageRendersAsHtmlDocument(): void
     {
@@ -105,32 +50,103 @@ final class EntryConfirmHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testEntryConfirmPagePreservesEcCubeMarkupStructure(): void
+    // -------------------------------------------------------------------------
+    // L1: required fields and semantic structure
+    // -------------------------------------------------------------------------
+
+    /**
+     * The page must carry the IDEA STORE brand identity in the title.
+     */
+    public function testTitleContainsIdeastoreBrand(): void
+    {
+        $html = $this->resource->get('page://self/entry/confirm')->toString();
+
+        $this->assertStringContainsString('IDEA STORE', $html);
+    }
+
+    /**
+     * All registration field labels must be present so the user can
+     * review what they entered before submitting.
+     */
+    public function testRequiredFieldLabelsArePresent(): void
     {
         $html = $this->resource->get('page://self/entry/confirm')->toString();
 
         foreach ([
-            '<div class="ec-registerRole">',
-            '<div class="ec-pageHeader">',
-            '<h1>新規会員登録(確認)</h1>',
-            '<div class="ec-off1Grid">',
-            'class="ec-off1Grid__cell"',
-            '<form method="post" action="/entry">',
-            '<div class="ec-borderedDefs">',
-            '<div class="ec-registerRole__actions">',
-            '<div class="ec-off4Grid">',
-            'class="ec-blockBtn--action"',
-            'class="ec-blockBtn--cancel"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
+            'お名前',
+            'メールアドレス',
+            'パスワード',
+            '住所',
+            '電話番号',
+            '生年月日',
+            '性別',
+        ] as $label) {
+            $this->assertStringContainsString($label, $html, "Field label missing: {$label}");
         }
     }
+
+    /**
+     * The password must not be echoed back in any form; only a mask may appear.
+     */
+    public function testPasswordIsNotEchoedInPlainText(): void
+    {
+        $html = $this->resource->get('page://self/entry/confirm')->toString();
+
+        // The page must show SOME password placeholder (mask characters),
+        // but the actual hidden input must carry the name without exposing value.
+        $this->assertStringContainsString('<input type="hidden" name="password"', $html);
+        // No value attribute should expose a password value in visible content.
+        $this->assertStringNotContainsString('value="password"', $html);
+    }
+
+    // -------------------------------------------------------------------------
+    // L1: IdeaStore design language — idea-* class presence
+    // -------------------------------------------------------------------------
+
+    /**
+     * The template must use IdeaStore design language (idea-* classes) and
+     * must not carry any EC-CUBE legacy class names.
+     */
+    public function testUsesIdeaStoreDesignLanguage(): void
+    {
+        $html = $this->resource->get('page://self/entry/confirm')->toString();
+
+        foreach ([
+            'idea-container',
+            'idea-section',
+            'idea-checkout-panel',
+            'idea-panel-head',
+            'idea-info-list',
+            'idea-button',
+            'idea-form-actions',
+        ] as $class) {
+            $this->assertStringContainsString($class, $html, "IdeaStore class missing: {$class}");
+        }
+    }
+
+    public function testNoEcCubeLegacyClasses(): void
+    {
+        $html = $this->resource->get('page://self/entry/confirm')->toString();
+
+        foreach ([
+            'ec-registerRole',
+            'ec-pageHeader',
+            'ec-off1Grid',
+            'ec-borderedDefs',
+            'ec-blockBtn',
+        ] as $class) {
+            $this->assertStringNotContainsString($class, $html, "EC-CUBE legacy class must not appear: {$class}");
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // L1: hidden form carriers (payload forwarding)
+    // -------------------------------------------------------------------------
 
     /**
      * The registration payload is carried forward as real hidden inputs
@@ -146,251 +162,69 @@ final class EntryConfirmHtmlRenderTest extends TestCase
         $this->assertStringContainsString('<input type="hidden" name="user_policy_check"', $html);
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
-    public function testEntryConfirmHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    /**
+     * All 20 registration fields declared in EntryConfirmForm must be
+     * present as hidden inputs so the full payload is forwarded.
+     */
+    public function testAllPayloadFieldsAreCarriedAsHiddenInputs(): void
     {
-        $beMart = $this->resource->get('page://self/entry/confirm')->toString();
-        $ecCube = $this->renderEcCube();
-
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's entry-confirm HTML diverged from EC-CUBE's beyond "
-            . "the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
-        );
-
-        // With the 20 hidden carriers + the 9 field labels rendered by a
-        // real EntryConfirmForm / ported `form_label` on both sides, the
-        // residual is the shared <head> / <title> / inline-CSRF-script
-        // frame material + the empty CSRF hidden value, none form-related.
-        $this->assertLessThanOrEqual(
-            13,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
-    }
-
-    private static function isResidual(string $line): bool
-    {
-        if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
-            return true;
-        }
+        $html = $this->resource->get('page://self/entry/confirm')->toString();
 
         foreach ([
-            'eccube-csrf-token',
-            '<title>',
-            'meta name="author"',
-            // EC-CUBE renders each field label through the Symfony
-            // FormView `form_label` helper (a <label> element); BeMart
-            // authors the `<label class="ec-label">` plainly. Same label
-            // text, FormView-runtime markup only — stubbed to a
-            // `[form_label:...]` marker.
-            'form_label:',
-            // EC-CUBE's entity-extension auto-render loop emits `form_row`
-            // for plugin/Doctrine extensions; a core install has none.
-            'form_row',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
+            'name01', 'name02', 'kana01', 'kana02',
+            'companyName', 'postalCode', 'pref', 'addr01', 'addr02',
+            'phoneNumber', 'email', 'email_confirm',
+            'password', 'password_confirm',
+            'birth_year', 'birth_month', 'birth_day',
+            'sex', 'job', 'user_policy_check',
+        ] as $field) {
+            $this->assertStringContainsString(
+                "name=\"{$field}\"",
+                $html,
+                "Hidden carrier missing for field: {$field}",
+            );
         }
+    }
 
-        // BeMart-side counterpart of the `[form_label:...]` family.
-        if (str_starts_with($line, '<label class="ec-label">')) {
-            return true;
-        }
+    // -------------------------------------------------------------------------
+    // L2: form action / method integrity
+    // -------------------------------------------------------------------------
 
-        return false;
+    /**
+     * The form must submit via POST to /entry (doRegisterCustomer).
+     * Source of truth: Entry/Confirm.php #[Link] + submitTo body field.
+     */
+    public function testFormActionAndMethodMatchResourceContract(): void
+    {
+        $html = $this->resource->get('page://self/entry/confirm')->toString();
+
+        $this->assertStringContainsString('method="post"', $html);
+        $this->assertStringContainsString('action="/entry"', $html);
     }
 
     /**
-     * Render EC-CUBE 4.3's real Entry/confirm.twig + default_frame.twig
-     * from the gitignored clone, with EC-CUBE's Twig API stubbed.
-     *
-     * `form_widget(form.<field>, { type : 'hidden' })` delegates to the
-     * real {@see EntryConfirmForm} so the hidden carriers are
-     * byte-identical to BeMart's port. EC-CUBE's `EntryType` nests fields
-     * under compound types; each compound leaf is a stub carrying both
-     * the EntryConfirmForm field name (`__fieldName`) and an empty
-     * `vars.data` (the plain-text value cell — empty for a pure renderer).
+     * The breadcrumb must link back to /entry so the user can navigate
+     * to the registration form.
      */
-    private function renderEcCube(): string
+    public function testBreadcrumbLinksToEntryForm(): void
     {
-        $ecCubeTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/default';
-        if (! is_dir($ecCubeTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
+        $html = $this->resource->get('page://self/entry/confirm')->toString();
 
-        $twig = new Environment(new EcCubeStubLoader($ecCubeTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-        $this->registerEcCubeStubs($twig);
-
-        return $twig->render('Entry/confirm.twig', [
-            'form' => new EcCubeStub([
-                'name' => new EcCubeStub([
-                    'name01' => self::leaf('name01'),
-                    'name02' => self::leaf('name02'),
-                ]),
-                'kana' => new EcCubeStub([
-                    'kana01' => self::leaf('kana01'),
-                    'kana02' => self::leaf('kana02'),
-                ]),
-                'company_name' => self::leaf('companyName'),
-                'postal_code' => self::leaf('postalCode'),
-                'address' => new EcCubeStub([
-                    'pref' => self::leaf('pref'),
-                    'addr01' => self::leaf('addr01'),
-                    'addr02' => self::leaf('addr02'),
-                ]),
-                'phone_number' => self::leaf('phoneNumber'),
-                'email' => new EcCubeStub([
-                    'vars' => new EcCubeStub(['data' => '']),
-                    'first' => self::leaf('email'),
-                    'second' => self::leaf('email_confirm'),
-                ]),
-                'plain_password' => new EcCubeStub([
-                    'first' => self::leaf('password'),
-                    'second' => self::leaf('password_confirm'),
-                ]),
-                'birth' => new EcCubeStub([
-                    'vars' => new EcCubeStub(['data' => '']),
-                    'year' => self::leaf('birth_year'),
-                    'month' => self::leaf('birth_month'),
-                    'day' => self::leaf('birth_day'),
-                ]),
-                'sex' => self::leaf('sex'),
-                'job' => self::leaf('job'),
-                'user_policy_check' => self::leaf('user_policy_check'),
-                'csrfToken' => '_csrfToken__',
-            ]),
-            'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
-            'eccube_config' => ['locale' => 'ja'],
-            'Page' => new EcCubeStub([
-                'meta_tags' => '', 'description' => '', 'author' => '',
-                'keyword' => '', 'meta_robots' => '',
-            ]),
-            'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
-                'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
-                'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
-                'ColumnNum' => 1,
-            ]),
-            'app' => new EcCubeStub(['session' => new EcCubeStub([
-                'flashbag' => new EcCubeFlashBag(),
-            ]), 'request' => new EcCubeStub(['_route' => 'entry_confirm'])]),
-            'subtitle' => '新規会員登録(確認)',
-            'title' => '新規会員登録(確認)',
-        ]);
+        $this->assertStringContainsString('href="/entry"', $html);
     }
+
+    // -------------------------------------------------------------------------
+    // EC-CUBE parity test — archived
+    // -------------------------------------------------------------------------
 
     /**
-     * A compound-leaf stub: carries the EntryConfirmForm field name (for
-     * `form_widget` delegation) and an empty `vars.data` (the plain-text
-     * value cell — empty for the pure renderer).
+     * @group ec-cube-parity-archived
      */
-    private static function leaf(string $fieldName): EcCubeStub
+    public function testEntryConfirmHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
-        return new EcCubeStub([
-            '__fieldName' => $fieldName,
-            'vars' => new EcCubeStub(['data' => '']),
-        ]);
-    }
-
-    private function registerEcCubeStubs(Environment $twig): void
-    {
-        $trans = static function (string $key, array $params = []): string {
-            $messages = EcCubeStub::jaMessages();
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('nl2br', static fn (string $s): string => nl2br($s), ['is_safe' => ['html']]));
-        $twig->addFilter(new TwigFilter('number_format', static fn ($n): string => number_format((float) $n)));
-        $twig->addFilter(new TwigFilter('price', static function ($n): string {
-            $f = new \NumberFormatter('ja_JP', \NumberFormatter::CURRENCY);
-
-            return (string) $f->formatCurrency((float) ($n ?? 0), 'JPY');
-        }));
-        $twig->addFilter(new TwigFilter('date_day', static fn ($d): string => (string) $d));
-        $twig->addFilter(new TwigFilter('filter', static fn ($it, $f): array => []));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
-
-        // FORM-PAGE recipe: EC-CUBE's `form_widget(form.<field>,
-        // { type : 'hidden' })` calls delegate to BeMart's real
-        // EntryConfirmForm so the hidden carriers are byte-identical to
-        // BeMart's port. The first arg the stub receives is the
-        // compound-leaf stub carrying `__fieldName`. `_csrfToken__` is the
-        // hidden CSRF widget — rendered as the plain empty hidden input.
-        $confirmForm = (new FormFactory())->newInstance(EntryConfirmForm::class);
-        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($confirmForm): Markup {
-            if ($field === '_csrfToken__') {
-                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
-            }
-
-            if ($field instanceof EcCubeStub) {
-                $name = $field['__fieldName'];
-                if ($confirmForm instanceof EntryConfirmForm && $name !== null) {
-                    return new Markup($confirmForm->input((string) $name), 'UTF-8');
-                }
-            }
-
-            return new Markup('', 'UTF-8');
-        }));
-        // EC-CUBE's `form_label` renders a Symfony FormView <label>;
-        // BeMart authors the same `<label class="ec-label">ja</label>`.
-        $twig->addFunction(new TwigFunction('form_label', static function ($f = '', $l = '', $o = []) use ($trans): Markup {
-            $text = is_string($l) ? $trans($l) : '';
-
-            return new Markup('<label class="ec-label">' . $text . '</label>', 'UTF-8');
-        }));
-        $twig->addFunction(new TwigFunction('form_errors', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('form_rest', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('form_row', static fn ($f = '', $o = []): string => '[form_row]'));
-        $twig->addFunction(new TwigFunction('has_errors', static fn (...$f): bool => false));
-    }
-
-    /** @return list<string> */
-    private function normalize(string $html): array
-    {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
-        }
-
-        return $lines;
+        $this->markTestSkipped(
+            'EC-CUBE DOM-parity check archived: template rebuilt in IdeaStore design language. '
+            . 'Functional and semantic coverage is provided by the L1/L2 tests above.',
+        );
     }
 }

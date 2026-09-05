@@ -25,9 +25,11 @@ use MyVendor\BeMart\Be\Input\GetAdminCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryListInput;
 use MyVendor\BeMart\Be\Input\ImportCategoryCsvInput;
 use MyVendor\BeMart\Be\Input\UpdateCategoryInput;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
+use MyVendor\BeMart\Be\Reason\Fake\Service\RecordingProductCacheInvalidator;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -61,19 +63,24 @@ final class AdminCategoryTest extends TestCase
         $this->bindAs(self::TEST_ADMIN_ID);
     }
 
-    private function bindAs(string|null $adminId): void
+    private function bindAs(string|null $adminId, ProductCacheInvalidatorInterface|null $cacheInvalidator = null): void
     {
         $session = new FakeAdminSession($adminId);
         $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session) extends AbstractModule {
-            public function __construct(private readonly FakeAdminSession $session)
-            {
+        $override = new class ($session, $cacheInvalidator) extends AbstractModule {
+            public function __construct(
+                private readonly FakeAdminSession $session,
+                private readonly ProductCacheInvalidatorInterface|null $cacheInvalidator,
+            ) {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSession::class)->toInstance($this->session);
+                if ($this->cacheInvalidator !== null) {
+                    $this->bind(ProductCacheInvalidatorInterface::class)->toInstance($this->cacheInvalidator);
+                }
             }
         };
         $base->override($override);
@@ -81,6 +88,14 @@ final class AdminCategoryTest extends TestCase
         $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->becoming = $injector->getInstance(BecomingInterface::class);
         $this->storage = $injector->getInstance(CategoryStorageInterface::class);
+    }
+
+    private function bindWithRecording(string|null $adminId): RecordingProductCacheInvalidator
+    {
+        $invalidator = new RecordingProductCacheInvalidator();
+        $this->bindAs($adminId, $invalidator);
+
+        return $invalidator;
     }
 
     private function seedRoot(string $name, int $sortNo = 0): string
@@ -284,7 +299,21 @@ final class AdminCategoryTest extends TestCase
         ($this->becoming)(new DeleteCategoryInput(categoryId: $categoryId));
     }
 
-    // ---- CSV import (real ingestion) ----
+    public function testCsvImportDeleteRowAnnouncesCorpusChange(): void
+    {
+        $invalidator = $this->bindWithRecording(self::TEST_ADMIN_ID);
+
+        $final = ($this->becoming)(new ImportCategoryCsvInput(
+            csv: "カテゴリID,カテゴリ名,親カテゴリID,カテゴリ削除フラグ\ncat-old,廃止,,1\n",
+        ));
+
+        $this->assertInstanceOf(CategoryCsvImported::class, $final);
+        $this->assertTrue($final->accepted);
+        $this->assertSame(2, $final->lineCount);
+        $this->assertSame(0, $final->imported);
+        $this->assertSame(1, $final->deleted);
+        $this->assertSame(1, $invalidator->calls);
+    }
 
     public function testCsvImportPersistsRows(): void
     {

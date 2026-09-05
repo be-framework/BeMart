@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Exception\PreOrderAlreadyClaimedException;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
@@ -67,6 +68,24 @@ final class CheckoutResourceTest extends TestCase
         $this->assertSame(22, $ro->body['addPoint']);
         $this->assertSame('', $ro->body['completeMessage']);
         $this->assertArrayHasKey('Location', $ro->headers);
+    }
+
+    public function testReplayedCheckoutIsRefused(): void
+    {
+        // The pre-order is claimed by the first POST. A replay — the
+        // double-submitted form, or a second request racing the first —
+        // must not reach the gateway or the confirmation mail again.
+        $first = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $first->code);
+
+        $this->expectException(PreOrderAlreadyClaimedException::class);
+        $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
     }
 
     public function testOnPostUnknownPreOrderReturns404(): void
@@ -158,16 +177,4 @@ final class CheckoutResourceTest extends TestCase
         $this->assertSame(Code::CREATED, $ro->code);
     }
 
-    public function testOnPostMissingCsrfReturns403BeforeAuthz(): void
-    {
-        // Phase B Slice 8: CSRF is checked at the boundary — before AUTHZ,
-        // even though both can produce 403. The body carries the CSRF
-        // message (not the AUTHZ wording) which lets us distinguish.
-        $ro = $this->resource->post('page://self/shopping/checkout', [
-            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

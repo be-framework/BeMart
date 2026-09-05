@@ -1,50 +1,39 @@
-{#
-  BeMart Customer-registration-complete page — EC-CUBE
-  goCustomerRegistrationComplete.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}仮登録完了 | IDEA STORE{% endblock %}
 
-  PORT of EC-CUBE 4.3 default-theme `Entry/complete.twig`
-  (src/Eccube/Resource/template/default/Entry/complete.twig).
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><span>仮登録完了</span>
+</nav>
 
-  DATA page (no form) — the data-page recipe (see var/templates/
-  README.md). EC-CUBE shows this static confirmation after a successful
-  provisional `doRegisterCustomer` (the email-verification-ON branch).
-  Markup skeleton, `ec-role` / `ec-pageHeader` / `ec-registerCompleteRole`
-  / `ec-reportHeading` / `ec-off3Grid` / `ec-text-ac` /
-  `ec-reportDescription` / `ec-off4Grid` classes + the block structure
-  are kept verbatim from EC-CUBE.
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-entry-complete-title">
+  <div>
+    <p class="idea-eyebrow">Member registration</p>
+    <h1 id="idea-entry-complete-title" class="idea-title idea-title--compact">ご登録ありがとうございます</h1>
+    <p class="idea-muted">仮登録が完了しました。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Registration</span>
+    <strong>Pending</strong>
+    <small>メール確認が必要です</small>
+  </div>
+</section>
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml. The
-     `front.entry.complete_message__temporary` value is a multi-line YAML
-     literal; EC-CUBE prints it through `nl2br`, so the port substitutes
-     the literal text verbatim and applies the same `nl2br`.
-   - `canonical-url 'homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'registration_page' %}
-{% set route = 'entry-complete' %}
-{% set title = '新規会員登録(仮登録完了)' %}
-
-{% block main %}
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1>新規会員登録(仮登録完了)</h1>
-        </div>
+<div class="idea-container idea-section">
+  <div class="idea-checkout-panel" role="status" aria-live="polite">
+    <div class="idea-panel-head">
+      <div>
+        <p class="idea-eyebrow">Next step</p>
+        <h2 class="idea-section-title">確認メールをお送りしました</h2>
+      </div>
     </div>
-    <div class="ec-registerCompleteRole">
-        <div class="ec-reportHeading">
-            <h2>会員登録ありがとうございます</h2>
-        </div>
-        <div class="ec-off3Grid ec-text-ac">
-            <div class="ec-off3Grid__cell">
 
-                <p class="ec-reportDescription">{{ "現在、仮会員の状態です。ただいま、ご入力いただいたメールアドレス宛に、ご本人様確認用のメールをお送りいたしました。\nメール本文内のURLをクリックすると、本会員登録が完了となります。\n"|nl2br }}</p>
+    <p>ご登録いただいたメールアドレス宛に確認メールを送信しました。メール内のリンクをクリックして、本登録を完了してください。</p>
+    <p class="idea-muted">メールが届かない場合は、迷惑メールフォルダをご確認ください。</p>
 
-            </div>
-        </div>
-        <div class="ec-off4Grid">
-            <div class="ec-off4Grid__cell"><a class="ec-blockBtn--cancel" href="/">トップページへ</a></div>
-        </div>
+    <div class="idea-form-actions" style="margin-top:2rem;">
+      <a class="idea-button" href="{{ _links.goTop.href|default('/') }}" rel="goTop">トップページへ戻る</a>
     </div>
+  </div>
+</div>
 {% endblock %}

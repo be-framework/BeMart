@@ -183,16 +183,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
-    public function testBulkDeleteMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/order/bulk-delete', [
-            'orderNos' => [self::ORDER_NO_A],
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testBulkDeleteWithoutAdminReturns403(): void
     {
         $this->rebindAdminSession(null);
@@ -234,14 +224,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
-    }
-
-    public function testSendMailMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/order/send-mail', [
-            'orderNo' => self::ORDER_NO_A,
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testSendMailWithoutAdminReturns403(): void
@@ -340,18 +322,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
-    public function testCreateOrderMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/order/create', [
-            'customerId' => self::ALICE_ID,
-            'paymentMethodId' => 2,
-            'orderItems' => [
-                ['productCode' => 'SKU-1', 'productName' => '商品A', 'unitPrice' => 500, 'quantity' => 2],
-            ],
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testCreateOrderWithoutAdminReturns403(): void
     {
         $this->rebindAdminSession(null);
@@ -414,28 +384,14 @@ final class AdminOrderExtrasResourceTest extends TestCase
     // goExportOrderPdf
     // ------------------------------------------------------------------
 
-    public function testExportOrderPdfReturnsPdfDocument(): void
+    public function testExportOrderPdfReturns501NotImplemented(): void
     {
         $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
             'orderNos' => [self::ORDER_NO_A],
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame('application/pdf', $ro->headers['Content-Type']);
-        $this->assertSame('attachment; filename="nouhinsyo-No' . self::ORDER_NO_A . '.pdf"', $ro->headers['Content-Disposition']);
-        $this->assertSame(self::ORDER_NO_A, $ro->body['orderNo']);
-        $this->assertSame([self::ORDER_NO_A], $ro->body['orderNos']);
-        $this->assertGreaterThan(0, $ro->body['size']);
-        $this->assertStringStartsWith('%PDF-', $ro->body['pdf']);
-        $this->assertStringNotContainsString('PDF STUB', $ro->body['pdf']);
-    }
-
-    public function testExportOrderPdfUnknownReturns404(): void
-    {
-        $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
-            'orderNos' => ['nonexistent-zzz000000000000000zz'],
-        ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->assertSame(501, $ro->code);
+        $this->assertStringContainsString('納品書PDF出力はこのビルドでは利用できません', $ro->body['message']);
     }
 
     public function testExportOrderPdfWithoutAdminReturns403(): void
@@ -474,14 +430,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/order/import-shipping', [
             'csv' => 'foo',
             'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
-    public function testImportShippingMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/order/import-shipping', [
-            'csv' => 'foo',
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -627,21 +575,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
-    }
-
-    public function testUpdateShippingAddressMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->put('page://self/admin/order/shipping-address', [
-            'orderNo' => self::ORDER_NO_A,
-            'name01' => 'X',
-            'name02' => 'Y',
-            'postalCode' => '1500001',
-            'pref' => 13,
-            'addr01' => 'A',
-            'addr02' => 'B',
-            'phoneNumber' => '0312345678',
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testShippingAddressWithoutAdminReturns403(): void

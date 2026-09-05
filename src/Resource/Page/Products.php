@@ -5,17 +5,15 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Annotation\Embed;
+use BEAR\Resource\Annotation\JsonSchema;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
+use BEAR\Resource\RequestInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
-use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
-use MyVendor\BeMart\Support\ProductImageCatalog;
-use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
-use function array_map;
 use function array_slice;
 use function array_values;
 use function count;
@@ -43,7 +41,6 @@ use function usort;
 class Products extends ResourceObject
 {
     public function __construct(
-        private readonly ProductQueryInterface $productQuery,
         private readonly CsrfToken $csrf,
     ) {
     }
@@ -59,6 +56,7 @@ class Products extends ResourceObject
      */
     #[Alps('goProductList')]
     #[JsonSchema(schema: 'get-products.json', params: 'get-products.param.json')]
+    #[Embed(rel: 'productSource', src: 'app://self/products{?nameKeyword,name}')]
     #[Link(rel: 'goProduct', href: 'page://self/product')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'goTop', href: 'page://self/')]
@@ -73,19 +71,15 @@ class Products extends ResourceObject
         string|null $orderby = null,
     ): static
     {
-        $keyword = $nameKeyword ?? $name;
         $dispNumber = $this->normalizeDispNumber($disp_number, $limit);
         $pageNo = max(1, (int) ($pageno ?? '1'));
 
-        $products = $keyword === null || $keyword === ''
-            ? $this->productQuery->list(500, 0)
-            : $this->productQuery->search($keyword, 500);
+        // #[Embed] put the request in the body before this method ran; the response shape is
+        // fixed (additionalProperties: false), so it is consumed here rather than rendered.
+        $source = $this->body['productSource'] ?? null;
+        $rows = $source instanceof RequestInterface ? (array) (($source())->body['products'] ?? []) : [];
 
-        $visibleProducts = array_values(array_filter(
-            $products,
-            static fn (ProductEntity $product): bool => $product->productStatus === ProductEntity::STATUS_VISIBLE,
-        ));
-        $visibleProducts = $this->filterByCategory($visibleProducts, $category_id);
+        $visibleProducts = $this->filterByCategory(array_values($rows), $category_id);
         $this->sortProducts($visibleProducts, $orderby);
         $totalItemCount = count($visibleProducts);
         $pagedProducts = array_slice(
@@ -98,7 +92,7 @@ class Products extends ResourceObject
         $this->body = [
             'transitionId' => 'goProductList',
             'totalItemCount' => $totalItemCount,
-            'products' => array_map($this->productRow(...), $pagedProducts),
+            'products' => $pagedProducts,
             'csrfToken' => $this->csrf->token,
             'filters' => [
                 'name' => $name,
@@ -110,41 +104,15 @@ class Products extends ResourceObject
                 'pageno' => (string) $pageNo,
             ],
             'pager' => $this->pager($totalItemCount, $pageNo, $dispNumber),
-            'links' => [
-                'goProduct' => 'page://self/product',
-                'goCart' => 'page://self/cart',
-                'goTop' => 'page://self/',
-            ],
         ];
 
         return $this;
     }
 
-    /** @return array{id: string, productCode: string, name: string, productName: string, price02: int, stock: int|null, stockFind: bool, descriptionList: string, mainListImage: string, categoryNames: list<string>, tagNames: list<string>} */
-    private function productRow(ProductEntity $product): array
-    {
-        return [
-            // EC-CUBE templates call this `Product.id`. In BeMart the
-            // stable public identity is the product code, so expose it
-            // under both names for the template and for JSON clients.
-            'id' => $product->productCode,
-            'productCode' => $product->productCode,
-            'name' => $product->productName,
-            'productName' => $product->productName,
-            'price02' => $product->price02,
-            'stock' => $product->stock,
-            'stockFind' => $product->stock === null || $product->stock > 0,
-            'descriptionList' => $product->description ?? '',
-            'mainListImage' => $product->imagePath ?? ProductImageCatalog::forProductCode($product->productCode),
-            'categoryNames' => $product->categoryNames,
-            'tagNames' => $product->tagNames,
-        ];
-    }
-
     /**
-     * @param list<ProductEntity> $products
+     * @param list<array<string, mixed>> $products rows from app://self/products
      *
-     * @return list<ProductEntity>
+     * @return list<array<string, mixed>>
      */
     private function filterByCategory(array $products, string|null $categoryId): array
     {
@@ -155,21 +123,21 @@ class Products extends ResourceObject
 
         return array_values(array_filter(
             $products,
-            static fn (ProductEntity $product): bool => in_array($categoryName, $product->categoryNames, true),
+            static fn (array $product): bool => in_array($categoryName, (array) ($product['categoryNames'] ?? []), true),
         ));
     }
 
-    /** @param list<ProductEntity> $products */
+    /** @param list<array<string, mixed>> $products */
     private function sortProducts(array &$products, string|null $orderby): void
     {
         if ($orderby === 'price_low' || $orderby === 'price_asc' || $orderby === '2') {
-            usort($products, static fn (ProductEntity $a, ProductEntity $b): int => $a->price02 <=> $b->price02);
+            usort($products, static fn (array $a, array $b): int => (int) $a['price02'] <=> (int) $b['price02']);
 
             return;
         }
 
         if ($orderby === 'price_high' || $orderby === 'price_desc' || $orderby === '3') {
-            usort($products, static fn (ProductEntity $a, ProductEntity $b): int => $b->price02 <=> $a->price02);
+            usort($products, static fn (array $a, array $b): int => (int) $b['price02'] <=> (int) $a['price02']);
 
             return;
         }

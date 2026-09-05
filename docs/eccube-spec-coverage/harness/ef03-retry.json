@@ -1,0 +1,203 @@
+[
+  {
+    "area": "EF03",
+    "item_id": "EF0301-UC01-T02",
+    "title": "カート（[x]ボタン押下）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "1"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000004"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "1"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.ec-icon[data-message]"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0301-UC01-T03",
+    "title": "カート（数量の変更）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "1"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form.ec-cartRow__amountUpForm"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0302-UC01-T01",
+    "title": "ログインユーザ購入（通常パターン）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "local-dev-member-password"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"shopping_login\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "clickText",
+        "text": "確認する"
+      },
+      {
+        "action": "clickText",
+        "text": "注文する"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC05-T01",
+    "title": "お届け先の追加",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "local-dev-member-password"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"shopping_login\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "clickText",
+        "text": "確認する"
+      },
+      {
+        "action": "clickText",
+        "text": "注文する"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC07-T01",
+    "title": "複数配送 - ログインしてカートをマージ",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "local-dev-member-password"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"shopping_login\"] button[type=\"submit\"]"
+      }
+    ]
+  }
+]

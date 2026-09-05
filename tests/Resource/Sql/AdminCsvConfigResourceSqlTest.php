@@ -8,6 +8,7 @@ use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -60,6 +61,7 @@ final class AdminCsvConfigResourceSqlTest extends AbstractResourceSqlTestCase
             {
                 $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
+                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
             }
         };
     }
@@ -82,7 +84,7 @@ final class AdminCsvConfigResourceSqlTest extends AbstractResourceSqlTestCase
         $this->seedCsvTypes();
 
         $ro = $this->resource->post('page://self/admin/csv-config', [
-            'csvType' => 3, // product
+            'csvType' => 1, // product
             'columns' => [
                 ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
                 ['columnName' => 'productName', 'enabled' => true, 'sortNo' => 2],
@@ -134,7 +136,7 @@ final class AdminCsvConfigResourceSqlTest extends AbstractResourceSqlTestCase
         $this->seedCsvTypes();
 
         $ro = $this->resource->post('page://self/admin/csv-config', [
-            'csvType' => 3,
+            'csvType' => 1,
             'columns' => [
                 ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
             ],
@@ -150,7 +152,7 @@ final class AdminCsvConfigResourceSqlTest extends AbstractResourceSqlTestCase
         $this->rebindAdminSession(null);
 
         $ro = $this->resource->post('page://self/admin/csv-config', [
-            'csvType' => 3,
+            'csvType' => 1,
             'columns' => [
                 ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
             ],

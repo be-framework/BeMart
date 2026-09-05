@@ -21,10 +21,9 @@ anonymous client is a no-op success — the response body simply
 carries `wasLoggedIn=false`. The resource MUST NOT treat the absence
 of a session as an error.
 
-In the html context this resource clears the flat customer session key
-read by HtmlSessionAdapter. The clear is guarded by an html APP_CONTEXT
-and PHP_SESSION_ACTIVE so app/test/prod contexts keep their existing
-session behaviour.
+In the html context the session-writer port ends the browser session behind
+this resource. Non-html contexts bind a no-op writer, so Resource code does
+not branch on environment or touch PHP session storage.
 
 
 

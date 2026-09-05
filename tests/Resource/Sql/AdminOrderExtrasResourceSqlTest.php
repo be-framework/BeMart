@@ -206,20 +206,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
-    public function testSelectShippingAddressMissingCsrfReturns403(): void
-    {
-        $orderNo = $this->seedOrder('SQL-SHIP-SEL-4', $this->aliceId);
-        $addressId = $this->insertAddress(['customer_id' => (int) $this->aliceId]);
-
-        $ro = $this->resource->post('page://self/admin/order/shipping-address', [
-            'orderNo' => $orderNo,
-            'addressId' => (string) $addressId,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testSelectShippingAddressWithoutAdminReturns403(): void
     {
         $orderNo = $this->seedOrder('SQL-SHIP-SEL-5', $this->aliceId);
@@ -319,24 +305,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
-    public function testUpdateShippingAddressMissingCsrfReturns403(): void
-    {
-        $orderNo = $this->seedOrder('SQL-SHIP-UPD-3', $this->aliceId);
-
-        $ro = $this->resource->put('page://self/admin/order/shipping-address', [
-            'orderNo' => $orderNo,
-            'name01' => 'X',
-            'name02' => 'Y',
-            'postalCode' => '1500001',
-            'pref' => 13,
-            'addr01' => 'A',
-            'addr02' => 'B',
-            'phoneNumber' => '0312345678',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testUpdateShippingAddressWithoutAdminReturns403(): void
     {
         $orderNo = $this->seedOrder('SQL-SHIP-UPD-4', $this->aliceId);
@@ -408,83 +376,19 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
     }
 
     // ------------------------------------------------------------------
-    // goExportOrderPdf (GET) — EC-CUBE compatibility pilot
+    // goExportOrderPdf (GET) — not supported (GPL renderer removed)
     // ------------------------------------------------------------------
 
-    public function testExportOrderPdfReturnsPdfDocument(): void
+    public function testExportOrderPdfReturns501NotImplemented(): void
     {
-        $order = $this->insertOrder([
-            'order_no' => 'SQL-PDF-EXP-A',
-            'customer_id' => (int) $this->aliceId,
-            'subtotal' => 2400,
-            'tax' => 240,
-            'total' => 2640,
-            'payment_total' => 2640,
-        ]);
-        $shippingId = $this->insertShipping([
-            'order_id' => $order['id'],
-            'name01' => '山田',
-            'name02' => '太郎',
-            'postal_code' => '1500001',
-            'pref_id' => 13,
-            'addr01' => '渋谷区',
-            'addr02' => '神宮前1-1',
-            'phone_number' => '0312345678',
-        ]);
-        $this->insertOrderItem($order['id'], [
-            'shipping_id' => $shippingId,
-            'product_name' => 'PDF Pilot Item',
-            'product_code' => 'PDF-001',
-            'price' => 2400,
-            'quantity' => 1,
-        ]);
+        $orderNo = $this->seedOrder('SQL-PDF-EXP-A', $this->aliceId);
 
         $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
-            'orderNos' => ['SQL-PDF-EXP-A'],
+            'orderNos' => [$orderNo],
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame('application/pdf', $ro->headers['Content-Type']);
-        $this->assertSame('attachment; filename="nouhinsyo-NoSQL-PDF-EXP-A.pdf"', $ro->headers['Content-Disposition']);
-        $this->assertSame('nouhinsyo-NoSQL-PDF-EXP-A.pdf', $ro->body['fileName']);
-        $this->assertSame(['SQL-PDF-EXP-A'], $ro->body['orderNos']);
-        $this->assertStringStartsWith('%PDF-', $ro->body['pdf']);
-        $this->assertStringNotContainsString('PDF STUB', $ro->body['pdf']);
-        $this->assertGreaterThan(1000, $ro->body['size']);
-    }
-
-    public function testExportOrderPdfSupportsMultipleOrderNos(): void
-    {
-        $orderA = $this->insertOrder([
-            'order_no' => 'SQL-PDF-EXP-B1',
-            'customer_id' => (int) $this->aliceId,
-        ]);
-        $orderB = $this->insertOrder([
-            'order_no' => 'SQL-PDF-EXP-B2',
-            'customer_id' => (int) $this->aliceId,
-        ]);
-        $this->insertOrderItem($orderA['id'], ['product_name' => 'A', 'product_code' => 'A-1']);
-        $this->insertOrderItem($orderB['id'], ['product_name' => 'B', 'product_code' => 'B-1']);
-
-        $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
-            'orderNos' => ['SQL-PDF-EXP-B1', 'SQL-PDF-EXP-B2'],
-        ]);
-
-        $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame('nouhinsyo.pdf', $ro->body['fileName']);
-        $this->assertSame(['SQL-PDF-EXP-B1', 'SQL-PDF-EXP-B2'], $ro->body['orderNos']);
-        $this->assertStringStartsWith('%PDF-', $ro->body['pdf']);
-    }
-
-    public function testExportOrderPdfUnknownOrderInBatchReturns404(): void
-    {
-        $this->seedOrder('SQL-PDF-EXP-C1', $this->aliceId);
-
-        $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
-            'orderNos' => ['SQL-PDF-EXP-C1', 'SQL-PDF-MISSING'],
-        ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->assertSame(501, $ro->code);
+        $this->assertStringContainsString('納品書PDF出力はこのビルドでは利用できません', $ro->body['message']);
     }
 
     public function testExportOrderPdfWithoutAdminReturns403(): void

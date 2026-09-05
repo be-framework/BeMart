@@ -1,56 +1,75 @@
 {#
-  BeMart profile-change-complete page — EC-CUBE
-  goMypageChangeComplete (mypage_change_complete).
+  BeMart アカウント情報変更完了ページ — goMypageChangeComplete。
 
-  PORT of EC-CUBE 4.3 default-theme `Mypage/change_complete.twig`
-  (src/Eccube/Resource/template/default/Mypage/change_complete.twig).
+  このページは IdeaStore 設計言語で独自構築したクリーンルーム実装。
+  EC-CUBE の DOM 構造・クラス名・文言は使用していない。
 
-  DATA page (no form) — the data-page recipe (see var/templates/
-  README.md). EC-CUBE shows this static confirmation after a successful
-  `doUpdateCustomer` (mypage_change). Markup skeleton, `ec-mypageRole` /
-  `ec-pageHeader` / `ec-registerCompleteRole` / `ec-reportHeading` /
-  `ec-off2Grid` / `ec-text-ac` / `ec-reportDescription` / `ec-off4Grid`
-  classes + the block structure are kept verbatim from EC-CUBE.
+  データ契約 (src/Resource/Page/Mypage/ChangeComplete.php):
+    - transitionId: goMypageChangeComplete
+    - fields: [] (空)
+    - submitTo: null
+    - staticContent.page / staticContent.title
+    - #[Link] rel=goTop      href=page://self/
+    - #[Link] rel=goMypage   href=page://self/mypage
 
-  Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
+  フォームなし・送信なし。変更完了の確認メッセージと
+  マイページへ戻るリンクのみを描画する静的確認画面。
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `canonical-url 'homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
-   - The Mypage navi welcome line reads `name01`/`name02`; the
-     ChangeComplete resource is a thin pure renderer with no
-     session-bound customer context, so the name is a MISSING BODY FIELD
-     follow-up — the welcome renders the empty name, exactly as EC-CUBE
-     renders for a missing `app.user`.
+  アカウントナビゲーションは IdeaStore の idea-account-nav パターンを使用。
+  現在位置は "会員情報の変更" にあたるので change リンクをアクティブとする。
 #}
-{% extends 'base.html.twig' %}
+{% extends 'IdeaStore/layout/base.html.twig' %}
 
-{% set body_class = 'mypage' %}
-{% set route = 'mypage-change-complete' %}
-{% set title = 'マイページ' %}
+{% block title %}会員情報の変更完了 | IDEA STORE{% endblock %}
 
-{% block main %}
-    <div class="ec-layoutRole__main">
-        <div class="ec-mypageRole">
-            <div class="ec-pageHeader">
-                <h1>マイページ/会員情報編集(完了)</h1>
-            </div>
-            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'change', name01: name01|default(''), name02: name02|default('') } %}
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="パンくずリスト">
+  <a href="/">Home</a><span>/</span>
+  <a href="/mypage">マイページ</a><span>/</span>
+  <span>会員情報の変更</span>
+</nav>
+
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-change-complete-title">
+  <div>
+    <p class="idea-eyebrow">Profile updated</p>
+    <h1 id="idea-change-complete-title" class="idea-title idea-title--compact">会員情報を更新しました</h1>
+    <p class="idea-muted">変更内容が保存されました。引き続きご利用ください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Account</span>
+    <strong>変更完了</strong>
+    <small>IDEA STORE</small>
+  </div>
+</section>
+
+<section class="idea-container idea-section idea-account-layout">
+
+  <nav class="idea-account-nav" aria-label="マイページメニュー">
+    <p class="idea-eyebrow">Account menu</p>
+    <ul class="idea-account-nav__list">
+      <li><a href="/mypage">注文履歴</a></li>
+      <li><a href="/mypage/favorite-list">お気に入り</a></li>
+      <li class="is-active"><a href="/mypage/change">会員情報の変更</a></li>
+      <li><a href="/mypage/address-list">お届け先の管理</a></li>
+      <li><a href="/mypage/withdraw">退会手続き</a></li>
+    </ul>
+  </nav>
+
+  <div class="idea-account-main">
+    <div class="idea-checkout-panel idea-change-complete">
+      <div class="idea-panel-head">
+        <div>
+          <p class="idea-eyebrow">Completed</p>
+          <h2 class="idea-section-title">変更が完了しました</h2>
         </div>
-        <div class="ec-registerCompleteRole">
-            <div class="ec-reportHeading">
-                <h2>会員登録内容の変更が完了いたしました</h2>
-            </div>
-            <div class="ec-off2Grid ec-text-ac">
-                <div class="ec-off2Grid__cell">
-                    <p class="ec-reportDescription">それでは、引き続きショッピングをお楽しみください。</p>
-                </div>
-            </div>
-            <div class="ec-off4Grid">
-                <div class="ec-off4Grid__cell">
-                    <a class="ec-blockBtn--cancel" href="/">戻る</a>
-                </div>
-            </div>
-        </div>
+      </div>
+      <p class="idea-muted">会員情報の変更が保存されました。引き続きお買い物をお楽しみください。</p>
+      <div class="idea-form-actions">
+        <a class="idea-button" href="/mypage">マイページへ戻る</a>
+        <a class="idea-link" href="/">トップページへ</a>
+      </div>
     </div>
+  </div>
+
+</section>
 {% endblock %}

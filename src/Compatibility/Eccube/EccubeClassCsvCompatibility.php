@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Compatibility\Eccube;
 
+use MyVendor\BeMart\Be\Reason\Csv\CsvFormulaGuard;
 use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
 use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
+use MyVendor\BeMart\Be\Reason\Provider\ClassCategoryIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\ClassNameIdProvider;
 use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsvDocument;
 use Override;
 
-use function array_filter;
-use function array_values;
-use function count;
+use function array_shift;
+use function ctype_digit;
 use function explode;
 use function implode;
-use function max;
 use function preg_match;
+use function str_getcsv;
 use function str_replace;
 use function trim;
 
@@ -31,16 +33,17 @@ use function trim;
  * corrupting the column layout — the same correctness the sibling exporters
  * get from {@see fputcsv} ({@see \MyVendor\BeMart\Be\Final\AdminProductCsvExported}
  * et al.), done here with a pure encoder so there is no per-row stream. Import
- * parses + counts the uploaded rows; the destructive persistence (upsert of
- * every parsed row) is the production cutover residual (migration-status §4)
- * — by design the upload is validated/counted on the safe side rather than
- * reproducing EC-CUBE's CsvImportService.
+ * parses EC-CUBE-style rows and upserts them through the same storage boundary
+ * as the admin form flows, so browser uploads can be read back from the master
+ * list screens.
  */
 final class EccubeClassCsvCompatibility implements ClassCsvCompatibilityInterface
 {
     public function __construct(
         private readonly ClassNameStorageInterface $classNames,
         private readonly ClassCategoryStorageInterface $classCategories,
+        private readonly ClassNameIdProvider $classNameIds,
+        private readonly ClassCategoryIdProvider $classCategoryIds,
     ) {
     }
 
@@ -75,13 +78,55 @@ final class EccubeClassCsvCompatibility implements ClassCsvCompatibilityInterfac
     #[Override]
     public function importClassName(string $csv): int
     {
-        return $this->countDataRows($csv);
+        $imported = 0;
+        foreach ($this->dataRows($csv) as $row) {
+            $id = trim((string) ($row[0] ?? ''));
+            $name = trim((string) ($row[1] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $classNameId = $id === '' ? $this->classNameIds->get() : $id;
+            if (! ctype_digit($classNameId)) {
+                continue;
+            }
+
+            $this->classNames->put(new ClassNameEntity(
+                classNameId: $classNameId,
+                name: $name,
+            ));
+            $imported++;
+        }
+
+        return $imported;
     }
 
     #[Override]
     public function importClassCategory(string $csv): int
     {
-        return $this->countDataRows($csv);
+        $imported = 0;
+        foreach ($this->dataRows($csv) as $row) {
+            $id = trim((string) ($row[0] ?? ''));
+            $classNameId = trim((string) ($row[1] ?? ''));
+            $name = trim((string) ($row[2] ?? ''));
+            if ($classNameId === '' || $name === '' || ! ctype_digit($classNameId)) {
+                continue;
+            }
+
+            $classCategoryId = $id === '' ? $this->classCategoryIds->get() : $id;
+            if (! ctype_digit($classCategoryId)) {
+                continue;
+            }
+
+            $this->classCategories->put(new ClassCategoryEntity(
+                classCategoryId: $classCategoryId,
+                classNameId: $classNameId,
+                name: $name,
+            ));
+            $imported++;
+        }
+
+        return $imported;
     }
 
     /**
@@ -102,29 +147,47 @@ final class EccubeClassCsvCompatibility implements ClassCsvCompatibilityInterfac
     }
 
     /**
-     * RFC-4180 quote a single field: only when it contains the delimiter,
-     * the enclosure, CR or LF, wrap it in double-quotes and double any
-     * embedded double-quote. Byte-identical to fputcsv(escape: '') for these
-     * inputs, but pure — no per-row php://memory stream and so no
-     * malformed-output fallback path.
+     * Neutralise CSV formula injection ({@see CsvFormulaGuard} — the same
+     * rule {@see \MyVendor\BeMart\Be\Reason\Csv\CsvColumnLayout::project()}
+     * applies to the layout-driven exports), then RFC-4180 quote: only
+     * when the field contains the delimiter, the enclosure, CR or LF, wrap
+     * it in double-quotes and double any embedded double-quote.
+     * Byte-identical to fputcsv(escape: '') for these inputs, but pure — no
+     * per-row php://memory stream and so no malformed-output fallback path.
      */
     private function quoteField(string $field): string
     {
-        if (preg_match('/[",\r\n]/', $field) === 1) {
-            return '"' . str_replace('"', '""', $field) . '"';
+        $guarded = (string) CsvFormulaGuard::neutralize($field);
+
+        if (preg_match('/[",\r\n]/', $guarded) === 1) {
+            return '"' . str_replace('"', '""', $guarded) . '"';
         }
 
-        return $field;
+        return $guarded;
     }
 
-    private function countDataRows(string $csv): int
+    /**
+     * @return list<list<string|null>>
+     */
+    private function dataRows(string $csv): array
     {
-        $lines = array_values(array_filter(
-            explode("\n", trim($csv)),
-            static fn (string $line): bool => trim($line) !== '',
-        ));
+        $trimmed = trim($csv);
+        if ($trimmed === '') {
+            return [];
+        }
 
-        // Every non-empty line except the header row is a data row.
-        return max(0, count($lines) - 1);
+        $lines = explode("\n", $trimmed);
+        array_shift($lines);
+
+        $rows = [];
+        foreach ($lines as $line) {
+            if (trim($line) === '') {
+                continue;
+            }
+
+            $rows[] = str_getcsv($line, ',', '"', '\\');
+        }
+
+        return $rows;
     }
 }

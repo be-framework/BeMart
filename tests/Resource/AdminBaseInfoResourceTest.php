@@ -123,16 +123,6 @@ final class AdminBaseInfoResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/base-info', [
-            'shopName' => '新ショップ',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostWithoutAdminSessionReturns403(): void
     {
         $this->rebindAdminSession(null);

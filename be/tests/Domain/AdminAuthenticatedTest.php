@@ -63,6 +63,18 @@ final class AdminAuthenticatedTest extends TestCase
         ));
     }
 
+    public function testDeprovisionedAdminRaisesAdminLoginFailed(): void
+    {
+        // `deleted-admin` is soft-deleted (work=0) but keeps a password
+        // hash that still verifies. Same exception as wrong-password —
+        // no admin enumeration.
+        $this->expectException(AdminLoginFailedException::class);
+        ($this->becoming)(new AdminLoginInput(
+            loginId: 'deleted-admin',
+            password: 'local-dev-admin-password',
+        ));
+    }
+
     public function testShortPasswordRejected(): void
     {
         $this->expectException(SemanticVariableException::class);

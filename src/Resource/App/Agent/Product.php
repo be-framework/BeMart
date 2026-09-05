@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\App\Agent;
 
+use BEAR\RepositoryModule\Annotation\Cacheable;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\ToolUse\Attribute\Tool;
@@ -12,6 +13,7 @@ use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Support\ProductImageCatalog;
 
 /** LLM-readable product detail lookup for BEAR.ToolUse agents. */
+#[Cacheable(expirySecond: 30)]
 final class Product extends ResourceObject
 {
     public function __construct(

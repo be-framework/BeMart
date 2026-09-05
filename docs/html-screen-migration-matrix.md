@@ -52,7 +52,7 @@ HTML移植の残差を「エンティティがある/ない」だけで判断す
 | Storefront | 商品一覧 → `/product?productCode=...` | HTTP到達可 | 画像・カテゴリ・タグ・規格名をFake/SQL bodyに追加。SEO JSON-LDは残差 |
 | Storefront | 商品詳細 → カート投入 → `/cart` | 修正済み | CSRF hiddenを追加、成功時は303でカートへ遷移。カートの増減/削除リンクは残差 |
 | Storefront | 匿名MYページ系 → ログイン誘導 | 修正済み | `/mypage`、お気に入り、配送先、会員編集は匿名時 `/login` へ303。戻り先復元は残差 |
-| Admin | `/admin/login` | HTTP/Browser到達可 | ローカル比較用に `test-admin` / `local-dev-admin-password` をprefill |
+| Admin | `/admin/login` | HTTP/Browser到達可 | ローカル比較用に `test-admin` をprefill |
 | Admin | `/admin/index` | HTTP/Browser到達可 | ダッシュボードKPIは空プレースホルダ |
 | Admin | `/admin/product-list` | HTTP/Browser到達可 | 商品登録ボタン追加済み |
 | Admin | `/admin/product/new` | 追加済み | 初回は既存Input項目に限定（画像/カテゴリ/タグ/規格/税/商品クラスは別タスク） |
@@ -62,6 +62,12 @@ HTML移植の残差を「エンティティがある/ない」だけで判断す
 | Admin | `/admin/category/category-list` | HTTP到達可 | カテゴリ一覧/編集のHTML画面を追加 |
 | 共通 | 未定義Resource / MethodNotAllowed / 必須param不足 | 修正済み | raw Fatal + HTTP 200は禁止。HTMLは専用エラー、JSONはHTTPコード付き |
 | 共通 | EC-CUBE route名リンク | 修正中 | 142 routeのうち99は実導線、43は非画面アクション中心の未対応alert + 501 fallback。 |
+
+## Web+DB完成判定との差分（2026-06-10）
+
+このマトリクスはHTML画面移植とroute到達のベースラインであり、Web+DBの完成判定そのものではない。最新の完成判定は `docs/web-e2e/20260610-web-db-all-routes-report.md` と `docs/web-e2e/feature-implementation-matrix.md` を正とする。
+
+20260610 run では、画面表示は多くのrouteで安定しているが、Admin の unsafe CRUD/update は実フォーム・実リンク・`Location`・ALPS rel から副作用を実行し、readback できるところまで確認できていないため fail として残した。画面があることと、業務状態をWeb/HTTP affordanceで変更できることは分けて扱う。
 
 ## Route変換マトリクス
 

@@ -1,30 +1,49 @@
-{#
-  BeMart Help — ご利用ガイド (EC-CUBE goHelpGuide).
+{% extends 'IdeaStore/layout/base.html.twig' %}
 
-  PORT of EC-CUBE 4.3 default-theme `Help/guide.twig`
-  (src/Eccube/Resource/template/default/Help/guide.twig).
+{% block title %}ご利用ガイド | IDEA STORE{% endblock %}
 
-  Markup skeleton, `ec-role` / `ec-pageHeader` classes and structure
-  are kept verbatim from EC-CUBE. EC-CUBE's `Help/guide.twig` carries
-  no data binding at all — it renders only the page header; the body
-  is admin-editable content surfaced through the layout block system,
-  which BeMart has no equivalent for. The Help/Guide resource
-  (src/Resource/Page/Help/Guide.php) is a pure renderer carrying an
-  empty `staticContent.sections`, so this port is the header-only page
-  exactly as EC-CUBE's default install renders it.
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="パンくずリスト">
+  <a href="/">Home</a>
+  <span aria-hidden="true">/</span>
+  <span aria-current="page">ご利用ガイド</span>
+</nav>
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'front.guide.title'|trans }}` -> the ja literal "ご利用ガイド".
-#}
-{% extends 'base.html.twig' %}
+<section class="idea-container idea-section idea-section--tight" aria-labelledby="idea-guide-title">
+  <header>
+    <p class="idea-eyebrow">Shopping guide</p>
+    <h1 id="idea-guide-title" class="idea-section-title">
+      {{ staticContent.title|default('ご利用ガイド') }}
+    </h1>
+  </header>
 
-{% set route = 'help-guide' %}
-{% set title = 'ご利用ガイド' %}
-
-{% block main %}
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1>ご利用ガイド</h1>
+  {% if staticContent.sections is defined and staticContent.sections|length > 0 %}
+    <dl class="idea-spec-list" id="idea-guide-sections">
+      {% for section in staticContent.sections %}
+        <div class="idea-spec-row">
+          {% if section.title is defined and section.title %}
+            <dt>{{ section.title }}</dt>
+          {% else %}
+            <dt></dt>
+          {% endif %}
+          <dd>
+            {% if section.body is defined and section.body %}
+              {{ section.body|nl2br }}
+            {% elseif section.content is defined and section.content %}
+              {{ section.content|nl2br }}
+            {% endif %}
+          </dd>
         </div>
-    </div>
+      {% endfor %}
+    </dl>
+  {% else %}
+    <p class="idea-muted" id="idea-guide-empty">
+      ショッピングガイドは準備中です。
+    </p>
+  {% endif %}
+
+  <div class="idea-actions" style="margin-top:2rem;">
+    <a class="idea-button idea-button--light" href="/" rel="goTop">トップへ戻る</a>
+  </div>
+</section>
 {% endblock %}

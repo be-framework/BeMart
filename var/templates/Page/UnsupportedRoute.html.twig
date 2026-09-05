@@ -1,14 +1,49 @@
-{% extends 'base.html.twig' %}
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}準備中のページ | IDEA STORE{% endblock %}
 
-{% set route = routeName|default('unsupported-route') %}
-{% set title = '利用できないルート' %}
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><span>準備中のページ</span>
+</nav>
 
-{% block main %}
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1>利用できないルート</h1>
-        </div>
-        <p>このルートはまだ BeMart 側に実装されていません。</p>
-        <p><code>{{ routeName|default('') }}</code></p>
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-unsupported-title">
+  <div>
+    <p class="idea-eyebrow">Coming soon</p>
+    <h1 id="idea-unsupported-title" class="idea-title idea-title--compact">このページは現在ご利用いただけません</h1>
+    <p class="idea-muted">ご不便をおかけします。対応準備が整い次第ご利用いただけるようになります。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Route</span>
+    <strong>Unavailable</strong>
+    <small>IDEA STORE</small>
+  </div>
+</section>
+
+<div class="idea-container idea-section">
+  <div class="idea-checkout-panel">
+    <div class="idea-panel-head">
+      <div>
+        <p class="idea-eyebrow">Status</p>
+        <h2 class="idea-section-title">ページの状態</h2>
+      </div>
     </div>
+
+    {% if routeName is defined and routeName %}
+      <dl class="idea-spec-list">
+        <div class="idea-spec-row">
+          <dt>対象ルート</dt>
+          <dd><code>{{ routeName }}</code></dd>
+        </div>
+      </dl>
+    {% endif %}
+
+    {% if message is defined and message %}
+      <p class="idea-muted" role="status" aria-live="polite">{{ message }}</p>
+    {% endif %}
+
+    <div class="idea-form-actions" style="margin-top:2rem;">
+      <a class="idea-button" href="/">トップページへ戻る</a>
+    </div>
+  </div>
+</div>
 {% endblock %}

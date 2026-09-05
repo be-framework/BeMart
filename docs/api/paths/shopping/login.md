@@ -7,7 +7,7 @@ Pure form-info endpoint: no Be Framework, no domain logic, no Reasons.
 Anonymous-accessible (this IS the unauthenticated branch of the
 checkout flow). Maps to `page://self/shopping/login`.
 
-Reached when an anonymous visitor hits `goShopping`. Three exits:
+Reached when an anonymous visitor hits `goCheckoutEntry`. Three exits:
 member login (doLogin), customer registration (goCustomerRegistration),
 or non-member purchase (goShoppingNonMember). The page itself carries a
 login form (the same `CustomerLoginType` shape as the standalone
@@ -48,7 +48,6 @@ _No parameters required_
 | submitTo | string|null | フォーム送信先リンク - /shopping/login のフォーム送信に使う送信先リンク。HTTPメソッドと遷移先をまとめ、unsafe操作の入口を明示する。 | Optional | {"minLength":0,"maxLength":255} |  |
 | staticContent | string|null | 静的コンテンツ - /shopping/login で表示する規約・ヘルプ・エラー等の静的ページ本文とセクション情報。 | Optional | {"minLength":0,"maxLength":255} |  |
 | transitionId | string | ALPS遷移ID - このレスポンス/操作が対応するALPS遷移ID。クライアントの状態遷移追跡に使う。 | Required | {"minLength":2,"maxLength":96,"pattern":"^(go|do)[A-Z][A-Za-z0-9]*$"} | doAddCartItem |
-| links | object|null | ALPS遷移リンク集合 - /shopping/login のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。 | Optional | {"properties":{"doLogin":{"$ref":"#/$defs/uriReference","title":"ALPS\u9077\u79fb\u30ea\u30f3\u30af","description":"ALPS `doLogin` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"},"goCustomerRegistration":{"$ref":"#/$defs/uriReference","title":"ALPS\u9077\u79fb\u30ea\u30f3\u30af","description":"ALPS `goCustomerRegistration` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"},"goShoppingNonMember":{"$ref":"#/$defs/uriReference","title":"ALPS\u9077\u79fb\u30ea\u30f3\u30af","description":"ALPS `goShoppingNonMember` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"}},"additionalProperties":false,"required":["doLogin","goCustomerRegistration","goShoppingNonMember"]} |  |
 
 #### Links
 

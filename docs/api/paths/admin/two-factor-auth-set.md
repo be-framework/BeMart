@@ -55,11 +55,13 @@ _No parameters required_
 | shopName | string|null | ショップ名 - ショップの表示名。フロント画面のヘッダやメールに表示 Fake観察文字長 12〜12; 観察値 'EC-CUBE SHOP'。 | Required | {"minLength":0,"maxLength":32} | EC-CUBE SHOP |
 | transitionId | string | ALPS遷移ID - このレスポンス/操作が対応するALPS遷移ID。クライアントの状態遷移追跡に使う。 | Required | {"minLength":2,"maxLength":96,"pattern":"^(go|do)[A-Z][A-Za-z0-9]*$"} | doAddCartItem |
 | authKey | string|null | 二要素認証キー - /admin/two-factor-auth-set のレスポンスで扱う二要素認証キー。数値演算対象ではなく、照合・URL・配送追跡などに使う不透明な文字列識別子。 | Optional | {"minLength":0,"maxLength":128,"$comment":"\u30ad\u30fc/\u8ffd\u8de1\u756a\u53f7\u306f\u7167\u5408\u7528\u306e\u4e0d\u900f\u660e\u6587\u5b57\u5217\u3067\u3001\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u3044\u3002"} |  |
+| csrfToken | string |  | Optional | {"$ref":"#/$defs/csrfToken"} |  |
 
 #### Links
 
 | Relation | URL |
 |----------|-----|
+| doSetTwoFactorAuth | [<code>page://self/admin/two-factor-auth-set</code>](/admin/two-factor-auth-set.md) |
 | goAdminLogin | [<code>page://self/admin/login</code>](/admin/login.md) |
 ## PUT
 Registers the TOTP device after confirming the first code
@@ -87,6 +89,7 @@ Failure mapping:
 | deviceToken | string | 二要素認証デバイストークン（入力） - /admin/two-factor-auth-set のレスポンスで扱う二要素認証デバイストークン。数値演算対象ではなく、照合・URL・配送追跡などに使う不透明な文字列識別子。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
 | loginId | string | ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。 この値は2FAログインチャレンジでは互換入力としてのみ受け取り、信頼しない。 |  | Optional | {"minLength":0,"maxLength":128,"$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | test-admin |
 | authKey | string | 二要素認証キー（入力） - /admin/two-factor-auth-set のレスポンスで扱う二要素認証キー。数値演算対象ではなく、照合・URL・配送追跡などに使う不透明な文字列識別子。 この値は2FA設定では互換入力としてのみ受け取り、信頼しない。 |  | Optional | {"minLength":0,"maxLength":128,"$comment":"\u30ad\u30fc/\u8ffd\u8de1\u756a\u53f7\u306f\u7167\u5408\u7528\u306e\u4e0d\u900f\u660e\u6587\u5b57\u5217\u3067\u3001\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
+| mode | string | フォーム送信モード - HTMLフォーム送信をResource/JSON境界と区別するための任意パラメータ。2FAデバイス登録画面では browser の 303 リダイレクト判定にだけ使う。 |  | Optional | {"minLength":0,"maxLength":32} | set |
 
 
 ### Response

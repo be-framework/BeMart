@@ -15,6 +15,46 @@
       "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
       "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
     },
+    "csrfToken": {
+      "type": "string",
+      "title": "CSRFトークン",
+      "description": "フォーム送信元を検証するトークン。管理者向けマスタデータ選択フォームに使用。",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "submitTo": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "title": "送信先",
+      "description": "/admin/master-data のフォーム送信先。unsafe 操作はこの action から辿る。",
+      "additionalProperties": false,
+      "properties": {
+        "rel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "PUT"
+          ]
+        },
+        "href": {
+          "type": "string",
+          "format": "uri-reference",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      },
+      "required": [
+        "rel",
+        "method",
+        "href"
+      ]
+    },
     "masterTypes": {
       "type": [
         "array",
@@ -96,9 +136,9 @@
               "null"
             ],
             "minLength": 0,
-            "maxLength": 32,
+            "maxLength": 255,
             "title": "処理表示名",
-            "description": "Fake観察文字長 1〜7; 観察値 'テスト管理者', '副管理者', '店舗オーナー', '削除済み管理者', 'Red', 'Blue', 'S', 'Color'。",
+            "description": "マスタ行の表示名。支払方法、配送方法、ニュース、規格など複数のSQL-backed masterを代表するため、Fake観察値だけでなくEC-CUBE側の表示名上限に合わせる。",
             "example": "テスト管理者"
           },
           "id": {

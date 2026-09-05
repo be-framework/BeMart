@@ -72,6 +72,7 @@ class Order extends ResourceObject
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'doUpdateOrder', href: 'page://self/admin/order', method: 'put')]
     #[Link(rel: 'doUpdateOrderStatus', href: 'page://self/admin/order-status', method: 'post')]
+    #[Link(rel: 'goOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'get')]
     public function onGet(string $orderNo): static
     {
         $final = ($this->becoming)(new GetAdminOrderInput(orderNo: $orderNo));
@@ -126,6 +127,7 @@ class Order extends ResourceObject
     #[Alps('doUpdateOrder')]
     #[JsonSchema(schema: 'put-admin-order.json', params: 'put-admin-order.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
+    #[Link(rel: 'doUpdateOrderStatus', href: 'page://self/admin/order-status', method: 'post')]
     #[CsrfProtected]
     public function onPut(
         string $orderNo,

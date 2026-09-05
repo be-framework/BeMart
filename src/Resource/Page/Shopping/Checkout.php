@@ -19,6 +19,7 @@ use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Input\CheckoutInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
+use function array_key_exists;
 use function assert;
 
 /**
@@ -34,6 +35,8 @@ use function assert;
  * Failure mapping (per `be/docs/pilot5/alps-analyze.md` §例外フロー):
  *   - PreOrderNotFoundException           → 404 (the pre-order never existed)
  *   - UnauthorizedPreOrderAccessException → 403 (not the owner; Pilot 5 F-1)
+ *   - PreOrderAlreadyClaimedException     → 409 (another request is already
+ *                                            completing this pre-order)
  *   - InsufficientStockException          → 422 (stock cannot fulfill the order)
  *   - PaymentDeclinedException            → 422 (gateway refused the charge)
  *   - SemanticVariableException           → 400 (preOrderId malformed)
@@ -70,7 +73,8 @@ class Checkout extends ResourceObject
 
         assert($final instanceof CheckoutCompleted);
 
-        $this->code = Code::CREATED;
+        $browserForm = array_key_exists('mode', $this->uri->query);
+        $this->code = $browserForm ? Code::SEE_OTHER : Code::CREATED;
         $this->headers['Location'] = '/shopping/complete?orderNo=' . $final->orderNo;
         $this->body = [
             'orderNo' => $final->orderNo,

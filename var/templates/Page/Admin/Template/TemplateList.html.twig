@@ -1,165 +1,253 @@
-{#
-  BeMart admin Template list — EC-CUBE goTemplateList (テンプレート一覧).
-
-  PORT of EC-CUBE 4.3 admin-theme `Store/template.twig`
-  (src/Eccube/Resource/template/admin/Store/template.twig).
-
-  Store section, DATA/LIST page. It extends the admin frame
-  (`admin-base.html.twig`, the port of EC-CUBE's admin `default_frame.twig`),
-  not the storefront `base.html.twig`. The markup skeleton + `c-*` / `ec-*`
-  / Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
-  bindings are rebound to the TemplateList resource body
-  (src/Resource/Page/Admin/Template/TemplateList.php — body carries
-  `count` + `templates`, a list of {templateId, templateName,
-  deviceType}).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `{% for Template in Templates %}` -> the resource body's
-     `templates` list. EC-CUBE keys the per-row action `<a>`s by the
-     numeric `Template.id` and reads `Template.code` for the save path /
-     active-template check; the AdminTemplateListFetched projection
-     surfaces `templateId` (used as the row key) and `templateName`, but
-     NOT a separate template `code`. The save-path `<li>`s
-     (`app/template/{code}`, `html/template/{code}`) therefore render
-     with `templateId` in place of `code`. FLAGGED missing-body-field.
-   - `Template.default_template` (the "デフォルトテンプレートは削除でき
-     ません" delete-disable guard) -> NOT carried by the projection; the
-     delete `<a>` is never `disabled`. FLAGGED missing-body-field.
-   - `eccube_config.eccube_theme_code` (the currently-active template,
-     used for the `checked` radio + the delete-disable guard) -> BeMart's
-     html context exposes no `eccube_config`; the radio is never
-     pre-checked. Enumerated as residual.
-   - `template.twig` is technically a Symfony form page — it wraps the
-     table in a `<form>` with `form_widget(form._token)` (CSRF) and
-     `form_widget(form.selected)` (a hidden field carrying the chosen
-     radio value). The TemplateList resource is a list-only endpoint
-     (ALPS exposes no template select/delete affordance — see the
-     resource doc), so it carries no `body['form']`. The page is ported
-     as a DATA page: the surrounding `<form>` markup is kept verbatim,
-     the radio `<input>`s (which EC-CUBE itself emits as literal markup,
-     not `form_widget`) port unchanged, and only the two `form_widget`
-     calls become enumerated residuals — exactly as the News-list pilot
-     treats `csrf_token_for_anchor()`.
-   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE
-     per-request CSRF widget. OMITTED exactly as the storefront ports
-     omit it. EC-CUBE-runtime only — enumerated as residual.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-template-template-list' %}
 {% set title = 'テンプレート一覧' %}
 {% set sub_title = 'オーナーズストア' %}
 
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/Template/TemplateList.php onGet):
+    count       int  — total templates returned
+    templates   list<{templateId: string, templateName: string, deviceType: int, active: bool}>
+    csrfToken   string — CSRF token (select PUT + delete DELETE forms)
+
+  ACTIONS (derived from #[Link] annotations on TemplateList):
+    GET  /admin/template/template-list                                  — goTemplateList (this page)
+    GET  /admin/template/template-add                                   — goTemplateAdd / goTemplateInstall
+    PUT  /admin/template/template-list?_method=put                     — doSelectTemplate (activate)
+    POST /admin/template/template-list?templateId=…                    — doDownloadTemplate
+    DELETE /admin/template/template-list?templateId=…&_method=delete   — doDeleteTemplate
+
+  deviceType values: 2=スマホ, 10=PC
+
+  idea-admin vocabulary used:
+    idea-admin-list-toolbar / idea-admin-list-toolbar__left / __right
+    idea-admin-count         — result count chip
+    idea-admin-action        — button / link affordance
+    idea-admin-action--primary, idea-admin-action--destructive
+    idea-admin-table-wrap    — overflow container
+    idea-admin-table         — data table
+    idea-admin-table__actions — action cell (right-aligned)
+    idea-admin-icon-btn      — icon-only button
+    idea-admin-badge         — status chip
+    idea-admin-badge--public — active / positive state
+    idea-admin-dialog-backdrop / idea-admin-dialog / __head / __body / __foot
+    idea-admin-dialog__title — dialog heading
+    idea-admin-empty         — zero-result state
+    idea-admin-empty__title
+#}
+
 {% block javascript %}
-    <script>
-        $(function () {
-            $('#form1').on('submit', function () {
-                $('#form_selected').val($('input[name=template]:checked').val());
-            });
-        });
-    </script>
+<script>
+(function () {
+    /* Submit the activate-template form carrying the selected radio value. */
+    var form = document.getElementById('template-select-form');
+    if (!form) { return; }
+    form.addEventListener('submit', function () {
+        var checked = form.querySelector('input[name="template"]:checked');
+        var hidden  = document.getElementById('template-id-hidden');
+        if (checked && hidden) { hidden.value = checked.value; }
+    });
+}());
+</script>
 {% endblock javascript %}
 
 {% block main %}
-    <form name="form1" id="form1" method="post" action="/admin/template/template-list?_method=put">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="d-block mb-3">
-                        <a class="btn btn-ec-regular" href="/admin/template/template-add">新規作成</a>
-                    </div>
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header"><span class="card-title">テンプレート一覧</span></div>
-                        <div class="card-body p-0">
-                            <table class="table">
-                                <thead>
-                                <tr>
-                                    <th class="border-top-0 align-middle text-center">選択</th>
-                                    <th class="border-top-0 align-middle text-center">テンプレート名</th>
-                                    <th class="border-top-0 align-middle text-center">保存先</th>
-                                    <th class="border-top-0"></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for Template in templates %}
-                                    <tr>
-                                        <td class="align-middle text-center">
-                                            <input type="radio" name="template" value="{{ Template.templateId }}"/>
-                                        </td>
-                                        <td class="align-middle text-center">{{ Template.templateName }}</td>
-                                        <td class="align-middle text-center">
-                                            <ul>
-                                                <li>app/template/{{ Template.templateId }}</li>
-                                                <li>html/template/{{ Template.templateId }}</li>
-                                            </ul>
-                                        </td>
-                                        <td class="align-middle text-center icon_edit">
-                                            <div class="row justify-content-end">
-                                                <div class="col-auto text-center">
-                                                    <a href="/admin/template/template-list?templateId={{ Template.templateId }}"
-                                                       class="btn btn-ec-actionIcon action-download" data-bs-toggle="tooltip" data-bs-placement="top"
-                                                       title="ダウンロード">
-                                                        <i class="fa fa-cloud-download fa-lg text-secondary" aria-hidden="true"></i>
-                                                    </a>
-                                                </div>
-                                                <div class="col-auto text-center">
-                                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="削除">
-                                                        <a class="btn btn-ec-actionIcon action-delete"
-                                                           data-bs-toggle="modal" data-bs-target="#confirmModal-{{ loop.index }}">
-                                                            <i class="fa fa-close fa-lg text-secondary" aria-hidden="true"></i></a>
-                                                    </div>
-                                                    <div class="modal fade" id="confirmModal-{{ loop.index }}" tabindex="-1" role="dialog" aria-labelledby="confirmModal-{{ loop.index }}" aria-hidden="true">
-                                                        <div class="modal-dialog" role="document">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title fw-bold">削除します</h5>
-                                                                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                </div>
-                                                                <div class="modal-body text-start">
-                                                                    <p class="text-start">この操作はあとから取り消すことができません。「{{ Template.templateName }}」を削除してよろしいですか？</p>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                                                    <a class="btn btn-ec-delete" data-confirm="false"
-                                                                       href="/admin/template/template-list?templateId={{ Template.templateId }}&_method=delete">
-                                                                        削除
-                                                                    </a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+{# ── Toolbar: count + upload link ── #}
+<div class="idea-admin-list-toolbar">
+  <div class="idea-admin-list-toolbar__left">
+    <span class="idea-admin-count">{{ count }}件</span>
+  </div>
+  <div class="idea-admin-list-toolbar__right">
+    <a class="idea-admin-action idea-admin-action--primary"
+       href="/admin/template/template-add">
+      <i class="fa fa-upload" aria-hidden="true"></i>
+      テンプレートをアップロード
+    </a>
+  </div>
+</div>
+
+{# ── Template table / empty state ── #}
+{% if count %}
+
+{#
+  doSelectTemplate: PUT /admin/template/template-list
+  The radio <input>s select the target; the hidden field carries the chosen
+  templateId on submit. csrfToken conveyed as a hidden field per the
+  resource contract.
+#}
+<form
+  id="template-select-form"
+  method="post"
+  action="/admin/template/template-list?_method=put"
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" id="template-id-hidden" name="templateId" value="">
+
+  <div class="idea-admin-table-wrap">
+    <table class="idea-admin-table" aria-label="テンプレート一覧">
+      <thead>
+        <tr>
+          <th scope="col" style="width:3rem;">適用</th>
+          <th scope="col">テンプレート名</th>
+          <th scope="col">種別</th>
+          <th scope="col">保存先</th>
+          <th scope="col" class="idea-admin-table__actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for template in templates %}
+        <tr id="row-{{ template.templateId }}">
+
+          <td style="text-align:center;">
+            <input
+              type="radio"
+              name="template"
+              value="{{ template.templateId }}"
+              aria-label="{{ template.templateName }}を適用"
+              {% if template.active|default(false) %} checked{% endif %}
+            >
+          </td>
+
+          <td>
+            {{ template.templateName }}
+            {% if template.active|default(false) %}
+              <span class="idea-admin-badge idea-admin-badge--public">適用中</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if template.deviceType is same as(10) %}
+              <span class="idea-admin-badge">PC</span>
+            {% elseif template.deviceType is same as(2) %}
+              <span class="idea-admin-badge">スマホ</span>
+            {% else %}
+              <span class="idea-admin-badge">—</span>
+            {% endif %}
+          </td>
+
+          <td>
+            <ul style="margin:0;padding:0 0 0 1.1em;font-size:.84rem;">
+              <li>app/template/{{ template.templateId }}</li>
+              <li>html/template/{{ template.templateId }}</li>
+            </ul>
+          </td>
+
+          <td class="idea-admin-table__actions">
+            {# doDownloadTemplate: POST /admin/template/template-list #}
+            <form
+              method="post"
+              action="/admin/template/template-list?templateId={{ template.templateId }}"
+              style="display:contents;"
+            >
+              <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+              <input type="hidden" name="templateId" value="{{ template.templateId }}">
+              <button
+                class="idea-admin-icon-btn"
+                type="submit"
+                aria-label="{{ template.templateName }}をダウンロード"
+              >
+                <i class="fa fa-cloud-download" aria-hidden="true"></i>
+              </button>
+            </form>
+
+            {# doDeleteTemplate trigger — opens confirmation dialog #}
+            <button
+              class="idea-admin-icon-btn idea-admin-action--destructive"
+              type="button"
+              aria-label="{{ template.templateName }}を削除"
+              aria-haspopup="dialog"
+              onclick="document.getElementById('delete-dialog-{{ loop.index }}').hidden=false"
+            >
+              <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# ── Activate submit bar ── #}
+  <div class="idea-admin-toolbar" style="margin-top:1rem;">
+    <div class="idea-admin-toolbar__actions" style="justify-content:flex-end;">
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-check" aria-hidden="true"></i>
+        テンプレートを適用
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{# ── Delete confirmation dialogs (one per row) ── #}
+{% for template in templates %}
+<div
+  id="delete-dialog-{{ loop.index }}"
+  class="idea-admin-dialog-backdrop"
+  hidden
+  role="presentation"
+>
+  <div class="idea-admin-dialog" role="dialog"
+       aria-labelledby="delete-title-{{ loop.index }}"
+       aria-modal="true">
+    <div class="idea-admin-dialog__head">
+      <h5 id="delete-title-{{ loop.index }}" class="idea-admin-dialog__title">
+        テンプレートの削除
+      </h5>
+      <button
+        type="button"
+        class="idea-admin-text-btn"
+        aria-label="閉じる"
+        onclick="document.getElementById('delete-dialog-{{ loop.index }}').hidden=true"
+      >
+        <i class="fa fa-times" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="idea-admin-dialog__body">
+      <p>
+        <strong>{{ template.templateName }}</strong>
+        を削除しますか？この操作は取り消せません。
+      </p>
+    </div>
+    <div class="idea-admin-dialog__foot">
+      <button
+        type="button"
+        class="idea-admin-action"
+        onclick="document.getElementById('delete-dialog-{{ loop.index }}').hidden=true"
+      >キャンセル</button>
+      {# doDeleteTemplate: DELETE /admin/template/template-list #}
+      <form
+        method="post"
+        action="/admin/template/template-list?templateId={{ template.templateId }}&_method=delete"
+        style="display:contents;"
+      >
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="templateId" value="{{ template.templateId }}">
+        <button class="idea-admin-action idea-admin-action--destructive" type="submit">
+          削除
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% else %}
+
+<div class="idea-admin-empty" role="status">
+  <i class="fa fa-th-large fa-2x" aria-hidden="true"></i>
+  <p class="idea-admin-empty__title">テンプレートが登録されていません</p>
+  <p style="font-size:.84rem;">
+    <a class="idea-admin-action idea-admin-action--primary"
+       href="/admin/template/template-add">
+      <i class="fa fa-upload" aria-hidden="true"></i>
+      テンプレートをアップロード
+    </a>
+  </p>
+</div>
+
+{% endif %}
+
 {% endblock %}

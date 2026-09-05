@@ -1,104 +1,69 @@
-{#
-  BeMart Password-reset page — EC-CUBE goResetPassword.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}パスワード再設定 | IDEA STORE{% endblock %}
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><a href="/login" rel="goLogin">ログイン</a><span>/</span><span>パスワード再設定</span>
+</nav>
 
-  PORT of EC-CUBE 4.3 default-theme `Forgot/reset.twig`
-  (src/Eccube/Resource/template/default/Forgot/reset.twig).
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-reset-title">
+  <div>
+    <p class="idea-eyebrow">Password reset</p>
+    <h1 id="idea-reset-title" class="idea-title idea-title--compact">パスワード再設定</h1>
+    <p class="idea-muted">新しいパスワードを入力してください。8文字以上32文字以下の半角英数字・記号で設定できます。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Secure</span>
+    <strong>New password</strong>
+    <small>IDEA STORE</small>
+  </div>
+</section>
 
-  Markup skeleton, `ec-registerRole` / `ec-pageHeader` / `ec-off1Grid` /
-  `ec-borderedDefs` / `ec-input` / `ec-registerRole__actions` /
-  `ec-off4Grid` classes + the <dl>/<dt>/<dd> definition-list structure
-  are kept verbatim from EC-CUBE.
+<section class="idea-container idea-section">
+  <article class="idea-checkout-panel idea-auth-panel">
+    <p class="idea-eyebrow">Account security</p>
+    <h2 class="idea-section-title">新しいパスワードを設定</h2>
 
-  Phase 3 — FORM page (Ray.WebFormModule). The Reset resource exposes a
-  real `ResetForm` (an AbstractForm) as `body.form`; the inputs are
-  rendered through it:
+    {% if message is defined and message %}
+      <p class="idea-form-error" role="alert">{{ message }}</p>
+    {% endif %}
 
-    {{ form.input('password')|raw }}   <- real <input> w/ name/attrs
-    {{ form.error('password') }}       <- inline Be-domain error
+    <form class="idea-auth-form" method="post" action="/reset" novalidate>
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="resetKey" value="{{ resetKey|default('') }}">
 
-  EC-CUBE renders the same inputs through the Symfony FormView
-  (`form_widget(form.password.first)`); the render-diff test stubs
-  EC-CUBE's `form_widget` to delegate to the SAME ResetForm, so the
-  inputs diff to ZERO. Validation authority stays with the Be Framework
-  Becoming chain (ResetPasswordInput Semantics + ResetKeyInvalid).
+      <label class="idea-field">メールアドレス
+        {% if form is defined %}
+          {{ form.input('email')|raw }}
+          <span class="idea-form-error">{{ form.error('email') }}</span>
+        {% else %}
+          <input type="text" name="email" autocomplete="email" placeholder="ご登録のメールアドレス">
+        {% endif %}
+      </label>
 
-  MISSING-FIELD NOTE — EC-CUBE's `PasswordResetType` has a `email`
-  field (the confirmation email the user re-enters). BeMart's
-  `ResetPasswordInput` models `resetKey` + `password`, NOT email — the
-  reset is keyed by `resetKey`. The `email` <dl> row is rendered
-  for fidelity (ResetForm declares the field as a renderer field) but has
-  no BeMart body field; flagged as a missing-body-field residual.
+      <label class="idea-field">新しいパスワード
+        {% if form is defined %}
+          {{ form.input('password')|raw }}
+          <span class="idea-form-error">{{ form.error('password') }}</span>
+        {% else %}
+          <input type="password" name="password" autocomplete="new-password" placeholder="半角英数記号8〜32文字">
+        {% endif %}
+      </label>
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `form._token` — Symfony CSRF widget; kept as a hidden input with an
-     empty value (BeMart's html context has no CSRF widget).
-   - `resetKey` — carried from the emailed reset link's query param into
-     a hidden field for the POST. The Login.html.twig pilot keeps the
-     same hidden-input convention.
-   - `error` — EC-CUBE's reset template shows a top-level `error` block;
-     BeMart renders the form-level `message` (set by Reset::onPost on a
-     domain rejection) in the same `ec-errorMessage` <p>.
-   - `has_errors(...)` — request-validation runtime; false on a fresh
-     form, so the conditional ` error` class never appears.
-#}
-{# EC-CUBE's Forgot/reset.twig does NOT set body_class, so the
-   default_frame.twig default `other_page` applies. #}
-{% extends 'base.html.twig' %}
+      <label class="idea-field">新しいパスワード（確認）
+        {% if form is defined %}
+          {{ form.input('password_confirm')|raw }}
+          <span class="idea-form-error">{{ form.error('password_confirm') }}</span>
+        {% else %}
+          <input type="password" name="password_confirm" autocomplete="new-password" placeholder="確認のためもう一度入力してください">
+        {% endif %}
+      </label>
 
-{% set route = 'reset' %}
-{% set title = 'パスワード再発行(再設定)' %}
+      <button class="idea-button idea-button--wide" type="submit">パスワードを変更する</button>
 
-{% block main %}
-    <div class="ec-registerRole">
-        <div class="ec-pageHeader">
-            <h1>パスワード再発行(再設定)</h1>
-        </div>
-        <div class="ec-off1Grid">
-            <div class="ec-off1Grid__cell">
-                <form id="form1" method="post" novalidate>
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                    <input type="hidden" name="resetKey" value="{{ resetKey|default('') }}">
-                    <div class="ec-borderedDefs">
-                        <dl>
-                            <dt>
-                                <label class="ec-label">メールアドレス</label>
-                            </dt>
-                            <dd>
-                                <div class="ec-input">
-                                    {{ form.input('email')|raw }}
-                                    {{ form.error('email') }}
-                                    {% if message is defined and message %}
-                                        <p class="ec-errorMessage">{{ message }}</p>
-                                    {% endif %}
-                                </div>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>
-                                <label class="ec-label">パスワード</label>
-                            </dt>
-                            <dd>
-                                <div class="ec-input">
-                                    {{ form.input('password')|raw }}
-                                    {{ form.error('password') }}
-                                </div>
-                                <div class="ec-input">
-                                    {{ form.input('password_confirm')|raw }}
-                                    {{ form.error('password_confirm') }}
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                    <div class="ec-registerRole__actions">
-                        <div class="ec-off4Grid">
-                            <div class="ec-off4Grid__cell">
-                                <button class="ec-blockBtn--action" type="submit">登録する</button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+      <div class="idea-auth-links">
+        <a class="idea-link" href="/login" rel="goLogin">ログインページへ戻る</a>
+      </div>
+    </form>
+  </article>
+</section>
 {% endblock %}

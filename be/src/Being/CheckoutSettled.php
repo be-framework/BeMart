@@ -11,38 +11,47 @@ use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\PurchaseTotals;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
+use MyVendor\BeMart\Be\Reason\Service\PreOrderClaimInterface;
 use MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
 /**
- * Stage 2 Being — inventory reserved, payment charged, order number issued.
+ * Stage 2 Being — pre-order claimed, inventory reserved, payment charged.
  *
- * Three Reasons converge on a single Being, executed in strict sequence:
+ * Four Reasons converge on a single Being, executed in strict sequence:
  *
- *   1. `InventoryAllocatorInterface::allocate()` — decrements on-hand stock
+ *   1. `OrderNoProvider::get()` — issues the customer-facing order number.
+ *      It runs first because it doubles as the claim token below.
+ *   2. `PreOrderClaimInterface::claim()` — the concurrency arbiter. Stage 1
+ *      only proves the pre-order WAS in PROCESSING when it was read; two
+ *      requests can both hold that proof. The claim lets exactly one of
+ *      them stamp its order number on the row, and reports the winner so
+ *      the losers stop with `PreOrderAlreadyClaimedException` before
+ *      anything irreversible happens. Without it a replayed or concurrent
+ *      checkout charged the card twice, registered the line items twice
+ *      and mailed two confirmations against one order row.
+ *   3. `InventoryAllocatorInterface::allocate()` — decrements on-hand stock
  *      atomically. Throws `InsufficientStockException` if any line item
  *      exceeds the available count. No partial commits.
- *   2. `PaymentGatewayInterface::checkout()` — settles the payment with the
- *      gateway. Runs ONLY after inventory has been reserved (so we never
- *      charge for stock we cannot fulfill). Throws
+ *   4. `PaymentGatewayInterface::checkout()` — settles the payment with the
+ *      gateway. Runs last, and only for the request that holds the claim,
+ *      so we never charge for stock we cannot fulfill nor for an order
+ *      another request is already completing. Throws
  *      `PaymentDeclinedException` on decline.
- *   3. `OrderNoProvider::get()` — issues the customer-
- *      facing order number. Runs last because there is no point allocating
- *      a number for a checkout that already failed.
  *
- * Existence of this object proves: stock is reserved AND payment is
- * captured AND an order number has been allocated. The Final's job is to
- * make these effects durable (persist + mail + cart-clear).
+ * Existence of this object proves: this request owns the completion AND
+ * stock is reserved AND payment is captured AND an order number has been
+ * allocated. The Final's job is to make these effects durable
+ * (persist + mail + cart-clear).
  *
- * Note: this Being executes side effects in its constructor (gateway
- * charge, stock decrement). Failures in the Final after this point leave
- * the system in a state where the customer's card has been charged but
- * the order row is missing. Production Phase 2 will move the cascade
- * inside a single DB transaction with the gateway call placed last under
- * `register_shutdown_function()`; for Pilot 5 the in-memory fakes make
- * this acceptable.
+ * Residual: the claim bounds duplication, not partial failure. A crash
+ * between the charge here and the writes in the Final still leaves a
+ * charged card without line items, and the claim is not released — the
+ * pre-order stays out of PROCESSING and the customer cannot retry. Making
+ * that atomic needs the whole cascade inside one transaction with the
+ * gateway call deferred, which is a larger change than this guard.
  */
 #[Be(CheckoutCompleted::class)]
 final readonly class CheckoutSettled
@@ -55,16 +64,20 @@ final readonly class CheckoutSettled
         #[Input] public string $preOrderId,
         #[Input] public OrderEntity $order,
         #[Input] public PurchaseTotals $totals,
+        #[Inject] OrderNoProvider $orderNumbers,
+        #[Inject] PreOrderClaimInterface $claim,
         #[Inject] InventoryAllocatorInterface $inventory,
         #[Inject] PaymentGatewayInterface $gateway,
-        #[Inject] OrderNoProvider $orderNumbers,
     ) {
+        $orderNo = $orderNumbers->get();
+        $claim->claim($preOrderId, $orderNo)->assertHeldBy($orderNo);
+
         $inventory->allocate($order);
         // Payment method is sourced from the persisted order, not from the
         // client request — see CheckoutInput docblock for the rationale.
         $gateway->checkout($preOrderId, $order->paymentMethodId, $totals->paymentTotal);
 
-        $this->orderNo = $orderNumbers->get();
+        $this->orderNo = $orderNo;
         $now = (new DateTimeImmutable())->format(DateTimeInterface::ATOM);
         $this->orderDate = $now;
         $this->paymentDate = $now;

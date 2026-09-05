@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\CategoryNotFoundException;
@@ -22,6 +23,8 @@ use MyVendor\BeMart\Be\Input\UpdateCategoryInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function sprintf;
+use function urlencode;
 
 /**
  * EC-CUBE goCategory + doUpdateCategory + doDeleteCategory —
@@ -38,6 +41,7 @@ class Category extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -48,6 +52,8 @@ class Category extends ResourceObject
     #[Alps('goCategory')]
     #[JsonSchema(schema: 'get-admin-category-category.json', params: 'get-admin-category-category.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
+    #[Link(rel: 'doUpdateCategory', href: 'page://self/admin/category/category', method: 'put')]
+    #[Link(rel: 'doDeleteCategory', href: 'page://self/admin/category/category', method: 'delete')]
     public function onGet(string $categoryId): static
     {
         $final = ($this->becoming)(new GetAdminCategoryInput(categoryId: $categoryId));
@@ -91,7 +97,7 @@ class Category extends ResourceObject
 
         assert($final instanceof CategoryUpdated);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, sprintf('/admin/category/category?categoryId=%s', urlencode($final->categoryId)));
         $this->body = [
             'categoryId' => $final->categoryId,
             'categoryName' => $final->categoryName,
@@ -103,10 +109,10 @@ class Category extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdateCategory` に対応する DELETE 操作。
+     * ALPS `doDeleteCategory` に対応する DELETE 操作。
      * @psalm-taint-source input $categoryId
      */
-    #[Alps('doUpdateCategory')]
+    #[Alps('doDeleteCategory')]
     #[JsonSchema(schema: 'delete-admin-category-category.json', params: 'delete-admin-category-category.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     #[CsrfProtected]
@@ -116,7 +122,7 @@ class Category extends ResourceObject
 
         assert($final instanceof CategoryDeleted);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, '/admin/category/category-list');
         $this->body = [
             'categoryId' => $final->categoryId,
         ];

@@ -1550,7 +1550,7 @@ Wave 2 net: +29 tests (159 → 188)、新 transition 4 件。
 
 #### doWithdrawCustomer (Agent G)
 - **Multi-side-effect Final** (Pilot 5 convention): capture-original-email → replace-record → clear-carts → send-mail の strict order
-- **Dummy email**: `withdrawn-{customerId}@example.invalid` (RFC 2606 reserved `.invalid` TLD)
+- **Dummy email**: `withdrawn-{customerId}@example.test` (RFC 2606 reserved `.test` TLD)
 - **`customerStatus=3` = withdrawn** を const として publish — `FinalizedOrderEntity::STATUS_NEW` パターン踏襲
 - Idempotency short-circuit: 既に status=3 なら mail 再送なし。`cleared=true` は idempotent replay 時も維持 (UI 区別なし)
 
@@ -1896,7 +1896,7 @@ Phase A は全ストレージを `Fake*Storage`（in-memory）で実装してい
 ### スコープと成果
 
 - **2a — SQL スモーク + フレームワーク確立**（`b5eb4e5` 〜 `fd96242`）
-  - EC-CUBE 4.3 の MySQL スキーマを `sql/schema/ec-cube-4.3-mysql-mysqldump.sql`（65 テーブル）にダンプ
+  - EC-CUBE 4.3 の MySQL スキーマを `sql/schema/ec-cube-4.3-mysql-mysqldump.sql`（65 テーブル）にダンプ（初期; 後に `bemart-schema.sql` へ置換 — 下記注記参照）
   - BeMart Entity ↔ EC-CUBE テーブルの差分レポート `sql/diff/entity-vs-eccube.md` を作成（8 grade-A 1:1 / 8 grade-B JOIN / 5 grade-C スキーマ差）
   - 最初の Sql 実装 `SqlCustomerQuery` + SQL テストフレームワーク（`be/tests/Sql/`）を確立
   - goCustomer end-to-end・Cart family（`SqlCartQuery` / `SqlCartCommand`）まで縦に通す
@@ -1914,7 +1914,9 @@ Phase A は全ストレージを `Fake*Storage`（in-memory）で実装してい
 - **厳密移植の field alignment** — Sql 化の前段（Phase A）で、BeMart Entity が EC-CUBE スキーマに無いフィールド（`sortNo`, `feeBase`, `body`/`htmlBody`, `mailAddress` 等）を持っている箇所を**先に削る**。EC-CUBE 完全移植を優先し、Entity をスキーマに合わせる。
 - **SQL 実装は素の prepared statement** — `be/src/Reason/Query/Sql*.php` は Doctrine を使わず PDO の prepared statement のみ。Be の Reason 層の framework-agnostic 性を保つ。
 - **テストは 3 面**（`sql/README.md` 参照）— storage unit（Injector 無し）/ Final-direct integration / Resource hypermedia。`bemart-sql` テストスイートは毎回 `eccubedb_test` を drop + 再作成し、各テストはトランザクション内で rollback。`DATABASE_URL` 未設定なら clean skip。
-- **スキーマロードの FK 回避** — ダンプは bare `CREATE TABLE` + 跨テーブル FK を持つが pragma が無いため、`SET FOREIGN_KEY_CHECKS=0/1` でラップしてロードする（`setup-db.sh` と `be/tests/Sql/bootstrap.php` で共通）。
+- **スキーマロードの FK 回避** — bare `CREATE TABLE` + 跨テーブル FK を持つが pragma が無いため、`SET FOREIGN_KEY_CHECKS=0/1` でラップしてロードする（`setup-db.sh` と `be/tests/Sql/bootstrap.php` で共通）。
+
+> **現行スキーマファイルについての注記（license-cleanup ブランチ）**: Phase 2a で使っていた EC-CUBE mysqldump 由来の `sql/schema/ec-cube-4.3-mysql-mysqldump.sql` および `sql/schema/ec-cube-4.3-mysql.sql` は、著作権上の懸念から `sql/schema/bemart-schema.sql`（`sql/diff/entity-vs-eccube.md` の構造情報を元に first principles から著作した 65 テーブル定義）へ置き換えた。`setup-db.sh` の `SCHEMA_FILE` 変数、`be/tests/Sql/bootstrap.php` のロードパス、および各ドキュメントのファイル名参照はすべて `bemart-schema.sql` を指すよう更新済み。
 
 ### 積み残し
 

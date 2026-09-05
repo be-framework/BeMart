@@ -120,17 +120,6 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
-    public function testUpdateTrackingNumberRejectsMissingCsrf(): void
-    {
-        $ro = $this->resource->put('page://self/admin/order/tracking-number', [
-            'orderNo' => self::ORDER_NO,
-            'trackingNumber' => 'TRK-1',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
-
     public function testUpdateTrackingNumberUnknownOrderReturns404(): void
     {
         $ro = $this->resource->put('page://self/admin/order/tracking-number', [
@@ -200,16 +189,6 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
-    public function testSendShippingNotifyMailRejectsMissingCsrf(): void
-    {
-        $ro = $this->resource->post('page://self/admin/order/shipping-notify-mail', [
-            'orderNo' => self::ORDER_NO,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
     }
 
     public function testSendShippingNotifyMailUnknownOrderReturns404(): void

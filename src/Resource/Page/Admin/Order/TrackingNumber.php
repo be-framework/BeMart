@@ -64,7 +64,9 @@ class TrackingNumber extends ResourceObject
         assert($final instanceof TrackingNumberUpdated);
 
         $this->code = Code::OK;
+        $this->headers['Content-Type'] = 'application/json; charset=utf-8';
         $this->body = [
+            'status' => 'OK',
             'orderNo' => $final->orderNo,
             'trackingNumber' => $final->trackingNumber,
             'message' => '伝票番号を更新しました。',

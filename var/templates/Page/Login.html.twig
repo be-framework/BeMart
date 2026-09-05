@@ -1,92 +1,61 @@
-{#
-  BeMart Login page — EC-CUBE goLogin.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}ログイン | IDEA STORE{% endblock %}
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><span>ログイン</span>
+</nav>
 
-  PORT of EC-CUBE 4.3 default-theme `Mypage/login.twig`
-  (src/Eccube/Resource/template/default/Mypage/login.twig).
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-login-title">
+  <div>
+    <p class="idea-eyebrow">Member login</p>
+    <h1 id="idea-login-title" class="idea-title idea-title--compact">ログイン</h1>
+    <p class="idea-muted">登録済みのメールアドレスとパスワードでログインしてください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Secure</span>
+    <strong>Sign in</strong>
+    <small>IDEA STORE</small>
+  </div>
+</section>
 
-  Markup skeleton, `ec-role` / `ec-pageHeader` / `ec-off2Grid` /
-  `ec-login` / `ec-grid2` classes and structure are kept verbatim from
-  EC-CUBE. Only the dynamic bindings are rebound to the Login resource
-  body (src/Resource/Page/Login.php).
+<section class="idea-container idea-section">
+  <article class="idea-checkout-panel idea-auth-panel">
+    <p class="idea-eyebrow">Account</p>
+    <h2 class="idea-section-title">メールアドレスでログイン</h2>
 
-  Phase 3 — FORM page (Ray.WebFormModule pilot). The login inputs are
-  now rendered through a real form object — `LoginForm` (an
-  AbstractForm), exposed by the Login resource as `body.form`:
+    {% if message is defined and message %}
+      <p class="idea-form-error" role="alert">{{ message }}</p>
+    {% endif %}
 
-    {{ form.input('email') }}   <- real <input> w/ id/attrs/value
-    {{ form.error('email') }}   <- inline Be-domain error, if any
+    <form class="idea-auth-form" name="login_mypage" id="login_mypage" method="post" action="/login" novalidate>
+      <input type="hidden" name="mode" value="login">
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
-  EC-CUBE renders the same inputs through the Symfony FormView
-  (`form_widget(form.email)`); Ray.WebFormModule (Aura.Input +
-  Aura.Html) is BeMart's BEAR-idiomatic equivalent. The field names /
-  ids / attributes in LoginForm::init() are ported from EC-CUBE's
-  `CustomerLoginType` + the template's `form_widget` `attr` options, so
-  the rendered markup carries EC-CUBE's `ec-*` form shape.
+      <label class="idea-field">メールアドレス
+        {% if form is defined %}
+          {{ form.input('email')|raw }}
+          <span class="idea-form-error">{{ form.error('email') }}</span>
+        {% else %}
+          <input type="text" name="email" id="email" autocomplete="email" placeholder="メールアドレス">
+        {% endif %}
+      </label>
 
-  Validation authority stays with the Be Framework Becoming chain — the
-  form is a field-definition + renderer. On a domain rejection the Login
-  resource repopulates `form` (entered email) and the resource body
-  carries the form-level `message`, rendered below in the EC-CUBE
-  `ec-errorMessage` <p> exactly as EC-CUBE's `error` block does.
+      <label class="idea-field">パスワード
+        {% if form is defined %}
+          {{ form.input('password')|raw }}
+          <span class="idea-form-error">{{ form.error('password') }}</span>
+        {% else %}
+          <input type="password" name="password" id="password" autocomplete="current-password" placeholder="パスワード">
+        {% endif %}
+      </label>
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `csrf_token('authenticate')` — EC-CUBE per-request CSRF widget.
-     BeMart keeps the hidden `_csrf_token` input and fills it from the
-     dev/html fake CSRF token so a browser submit reaches the login POST
-     path. EC-CUBE-runtime token generation remains a residual.
-   - `app.session.flashBag.*`, `is_granted(...)`, `BaseInfo.*`
-     — request-flash / auth-state / BaseInfo runtime. The remember-me
-     checkbox depends on `BaseInfo.option_remember_me`; BeMart has no
-     BaseInfo, so it is OMITTED (never invented) and noted as residual.
-#}
-{% extends 'base.html.twig' %}
+      <button class="idea-button idea-button--wide" type="submit">ログイン</button>
 
-{% set body_class = 'mypage' %}
-{% set route = 'login' %}
-{% set title = 'ログイン' %}
-
-{% block main %}
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1>ログイン</h1>
-        </div>
-        <div class="ec-off2Grid">
-            <div class="ec-off2Grid__cell">
-                <form name="login_mypage" id="login_mypage" method="post" action="/login">
-                    <div class="ec-login">
-                        <div class="ec-login__icon">
-                            <div class="ec-icon"><img src="{{ asset('assets/icon/user.svg') }}" alt=""></div>
-                        </div>
-                        <div class="ec-login__input">
-                            <div class="ec-input">
-                                {{ form.input('email')|raw }}
-                                {{ form.input('password')|raw }}
-                            </div>
-                            {% if message is defined and message %}
-                                <p class="ec-errorMessage">{{ message }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="ec-grid2">
-                            <div class="ec-grid2__cell">
-                                <div class="ec-login__actions">
-                                    <button type="submit"
-                                            class="ec-blockBtn--cancel">ログイン</button>
-                                </div>
-                            </div>
-                            <div class="ec-grid2__cell">
-                                <div class="ec-login__link"><a class="ec-link"
-                                                               href="/forgot-password">ログイン情報をお忘れですか？</a>
-                                </div>
-                                <div class="ec-login__link"><a class="ec-link"
-                                                               href="/entry">新規会員登録</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                </form>
-            </div>
-        </div>
-    </div>
+      <div class="idea-auth-links">
+        <a class="idea-link" href="/forgot-password">パスワードをお忘れの方</a>
+        <a class="idea-link" href="/entry">新規会員登録</a>
+      </div>
+    </form>
+  </article>
+</section>
 {% endblock %}

@@ -40,6 +40,7 @@ title: "docs/ — ドキュメント索引"
 | [`HANDOVER.md`](HANDOVER.md) | 構築プロセスの記録。Phase A / Phase 2 / Phase 3 の決定ログ、Pilot/Wave 報告、skill gap 発見の経緯。 |
 | [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) | 引き継ぎ手順。再開時に読むファイル順・次にやること・リポジトリ構造。`migration-status.md` を正として読む。 |
 | [`tag.md`](tag.md) | タグ分類体系（`flow-*` / `src-*` 等、ワークフロー・ドメイン・アクター・情報源の命名規則）。 |
+| [`demo-operation.md`](demo-operation.md) | 公開デモの運用。資格情報を環境変数で与える方法と、seed 状態へ戻す定期リセット（systemd timer）。 |
 
 ## Published / Generated Files
 
@@ -54,7 +55,7 @@ title: "docs/ — ドキュメント索引"
 |---|---|
 | [`methodology/`](methodology/) | 再利用可能な方法論・原則。`standard-first-rule.md`（BEAR境界を触る前の標準参照ルール）、`architecture-audit-baseline.md`（BEAR境界標準逸脱の監査baseline）、`ai-standardization-retrospective.md`（AI独自実装の反省）、`hypermedia-test-principle.md`（状態遷移契約を PHP Resource / HTTP / HTML affordance へ投影する考え方）、`FRAMEWORK_REVIEW.md`（元139 transition sliceの歴史的フレームワーク実務レビュー）、`be-bear-ai-era.md`（Be + BEAR の AI コーディング時代における潜在能力の論評）。 |
 | [`alps-doc/`](alps-doc/) | ALPS descriptor の `link rel="describedby"` から参照される長文補足の正本。root の `../alps-doc` は既存の `alps.json` 相対リンクを保つための互換 symlink。 |
-| [`web-e2e/`](web-e2e/) | 実DB/prod context のWeb E2E証跡。機能表、run report、結果JSON、最新runのスクリーンショットを保持する。 |
+| [`web-e2e/`](web-e2e/) | 実DB/prod context のWeb E2E証跡。`completion-evidence-rules.md`（完成判定の証跡ルール）、`repeated-failure-patterns.md`（再発防止メモ）、機能表、run report、結果JSON、最新runのスクリーンショットを保持する。 |
 | [`phases/`](phases/) | フェーズ別の成果物。`alps-audit-phase3.md`（Phase 3 準備の ALPS 監査）、`admin-fanout-plan.md`（admin 移植のファンアウト計画）。 |
 | [`skills/`](skills/) | 移植で発見した skill gap（G-14 〜 G-25）。各エントリは独立して読める移植知見。索引は [`skills/index.md`](skills/index.md)。 |
 | [`quality/`](quality/) | Phase 1 の ALPS 監査ノート（`verify-*.md` / `improvements-*.md`）。 |

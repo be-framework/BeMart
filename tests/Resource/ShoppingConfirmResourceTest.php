@@ -7,8 +7,11 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
@@ -18,21 +21,39 @@ use function is_array;
  * Phase 3 enrichment — covers the Confirm resource's JSON body.
  *
  * The Confirm resource drives the doConfirmOrder Be Becoming chain
- * (ConfirmOrderInput → … → OrderConfirmed). It needs no session — the
- * chain resolves the pre-order by id — so the AppModule default binding
- * suffices. `onGet` with no args defaults to the alice confirm-screen
- * pre-order fixture (`aceface…a11ce`).
+ * (ConfirmOrderInput → … → OrderConfirmed). The chain resolves the
+ * pre-order by id and then proves the session owns it, so every case binds
+ * the session of the fixture's buyer. `onGet` with no args defaults to the
+ * alice confirm-screen pre-order fixture (`aceface…a11ce`).
  */
 final class ShoppingConfirmResourceTest extends TestCase
 {
+    private const ALICE_CUSTOMER_ID = '0123456789abcdef0123456789abcdef';
+
     private ResourceInterface $resource;
 
     protected function setUp(): void
     {
-        $injector = new Injector(
-            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
-            dirname(__DIR__, 2) . '/var/tmp/test',
-        );
+        $this->loginAs(self::ALICE_CUSTOMER_ID);
+    }
+
+    /** Rebuild the resource client with the given session customer (null = anonymous). */
+    private function loginAs(string|null $customerId): void
+    {
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base->override(new class (new FakeSession($customerId)) extends AbstractModule {
+            public function __construct(private readonly FakeSession $session)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(CustomerSession::class)->toInstance($this->session);
+            }
+        });
+
+        $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
@@ -111,6 +132,7 @@ final class ShoppingConfirmResourceTest extends TestCase
     {
         // paymentMethodId 9 routes to the verify-failing fake; the chain
         // produces OrderConfirmFailed → the resource bounces to /error.
+        $this->loginAs('customer-002');
         $ro = $this->resource->get('page://self/shopping/confirm', [
             'preOrderId' => 'deadbeefcafe1234567890abcdef01234567890c',
             'paymentMethodId' => 9,
@@ -118,5 +140,34 @@ final class ShoppingConfirmResourceTest extends TestCase
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('/shopping/error', $ro->headers['Location']);
+    }
+
+    public function testOnGetForeignPreOrderReturns403(): void
+    {
+        // A logged-in shopper guessing another shopper's pre-order id must
+        // not receive the owner's name, email and address.
+        $this->loginAs('customer-002');
+        $ro = $this->resource->get('page://self/shopping/confirm', [
+            'preOrderId' => 'aceface0000000000000000000000000000a11ce',
+            'paymentMethodId' => 2,
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertIsArray($ro->body);
+        $this->assertArrayNotHasKey('customer', $ro->body);
+    }
+
+    public function testOnGetGuestPreOrderResolvesForAnonymousSession(): void
+    {
+        // Non-member checkout: no session customer, `customerId === ''` on
+        // the pre-order. The ownership check must not lock guests out.
+        $this->loginAs(null);
+        $ro = $this->resource->get('page://self/shopping/confirm', [
+            'preOrderId' => 'feedfacefeedfacefeedfacefeedfacefeedface',
+            'paymentMethodId' => 2,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('guest-confirm@example.com', $ro->body['customer']['email']);
     }
 }

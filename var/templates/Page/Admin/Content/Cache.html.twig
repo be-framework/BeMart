@@ -1,27 +1,34 @@
 {#
-  BeMart admin キャッシュ管理 — EC-CUBE goCache.
+  BeMart admin キャッシュ管理 — doClearCache (ALPS idempotent action).
 
-  PORT of EC-CUBE 4.3 admin-theme `Content/cache.twig`
-  (src/Eccube/Resource/template/admin/Content/cache.twig).
+  DATA CONTRACT (src/Resource/Page/Admin/Content/Cache.php onGet):
+    csrfToken    string|null   — CSRF token for the PUT form
 
-  DATA page with a single action button. Extends the admin frame
-  (`admin-base.html.twig`). The markup skeleton + `c-*` / `ec-*` /
-  Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
-  bindings are rebound.
+  ACTIONS (src/Resource/Page/Admin/Content/Cache.php):
+    doClearCache   PUT  /admin/content/cache
+                   body: csrfToken (hidden) + mode=content_operation_form
+                   → 303 redirect to /admin/content/cache on success
 
-  The Cache resource (src/Resource/Page/Admin/Content/Cache.php) is a
-  thin HTML renderer — see its port header (the cache-clear POST is an
-  operational action, not a domain mutation).
+  LINKS:
+    goMaintenance  GET  /admin/content/maintenance
 
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - the `{% block javascript %}` `app.flashes(...)` maintenance-mode
-     auto-disable script -> EC-CUBE flash + maintenance runtime. Dropped.
-   - `{% form_theme %}` -> Symfony form-theme runtime. Dropped.
+  DESIGN VOCABULARY (public/assets/idea-store/css/idea-admin.css):
+    idea-admin-panel / idea-admin-panel__head / idea-admin-panel__body
+    idea-admin-action / idea-admin-action--primary / idea-admin-action--destructive
+    idea-admin-notice / idea-admin-notice--info / idea-admin-notice--warning
+    idea-admin-toolbar / idea-admin-toolbar__back / idea-admin-toolbar__actions
+    idea-admin-dialog-backdrop / idea-admin-dialog
+
+  UX RATIONALE:
+    - Cache clear is a zero-payload idempotent action; the entire page
+      revolves around a single confirm-then-submit flow.
+    - A confirmation dialog adds appropriate friction for a destructive op.
+    - Post-clear success state is shown via URL flag (?cleared=1) so the
+      redirect lands with visible feedback without a session flash.
+    - The impact notice is presented *before* the action button to prime
+      the admin before they can click.
+    - Bottom toolbar keeps the primary action visible and follows the
+      editor-page pattern used across the admin UI.
 #}
 {% extends 'admin-base.html.twig' %}
 
@@ -29,33 +36,221 @@
 {% set title = 'キャッシュ管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
+{% block stylesheet %}
+<style>
+.idea-admin-cache-impact {
+    display: grid;
+    gap: .6rem;
+    padding: .9rem 1rem;
+    font-size: .88rem;
+    color: var(--idea-ink);
+}
+.idea-admin-cache-impact__row {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+}
+.idea-admin-cache-impact__icon {
+    flex: 0 0 1.25rem;
+    text-align: center;
+    color: var(--idea-muted);
+    padding-top: .06rem;
+}
+.idea-admin-cache-impact__text {
+    flex: 1;
+    line-height: 1.55;
+}
+.idea-admin-cache-impact__text strong {
+    font-weight: 700;
+    color: var(--idea-ink);
+}
+</style>
+{% endblock %}
+
 {% block main %}
-    <form method="post" action="/admin/content/cache?_method=put">
-        <input type="hidden" id="cache__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col"><span class="card-title">キャッシュ管理</span></div>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-auto">
-                                    <span>本番環境にFTPなどでTwigファイルをアップロードして入れ替えた場合、画面を反映させるにはTwigキャッシュを削除する必要があります。</span>
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-auto">
-                                    <button type="submit" class="btn btn-ec-conversion">キャッシュ削除</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+{# ── Post-clear success notice (shown when redirected back with ?cleared=1) ─ #}
+<div id="js-cleared-notice"
+     class="idea-admin-notice"
+     role="status"
+     aria-live="polite"
+     style="display:none">
+    <i class="fa fa-check-circle fa-fw" aria-hidden="true"></i>
+    キャッシュを削除しました。次回アクセス時に再生成されます。
+</div>
+
+{# ── Main panel ─────────────────────────────────────────────────────────────── #}
+<section class="idea-admin-panel" aria-labelledby="cache-panel-title">
+
+    <div class="idea-admin-panel__head">
+        <h3 id="cache-panel-title">
+            <i class="fa fa-recycle fa-fw" aria-hidden="true"></i>
+            アプリケーションキャッシュ
+        </h3>
+    </div>
+
+    <div class="idea-admin-cache-impact">
+
+        <div class="idea-admin-notice idea-admin-notice--info" role="note">
+            <i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>
+            <span>キャッシュを削除すると、テンプレートの変更・設定の更新がフロントに反映されます。
+            次回アクセス時にキャッシュは自動的に再生成されます。</span>
         </div>
-    </form>
+
+        <div class="idea-admin-notice idea-admin-notice--warning" role="note">
+            <i class="fa fa-triangle-exclamation fa-fw" aria-hidden="true"></i>
+            <span>削除中は一時的にレスポンスが遅くなる場合があります。
+            アクセスの少ない時間帯に実行することを推奨します。</span>
+        </div>
+
+        <div class="idea-admin-cache-impact__row">
+            <span class="idea-admin-cache-impact__icon">
+                <i class="fa fa-file-code fa-fw" aria-hidden="true"></i>
+            </span>
+            <span class="idea-admin-cache-impact__text">
+                <strong>Twig テンプレートキャッシュ</strong> —
+                コンパイル済みテンプレートを削除します。
+                FTP 等でテンプレートを差し替えた後に実行してください。
+            </span>
+        </div>
+
+        <div class="idea-admin-cache-impact__row">
+            <span class="idea-admin-cache-impact__icon">
+                <i class="fa fa-layer-group fa-fw" aria-hidden="true"></i>
+            </span>
+            <span class="idea-admin-cache-impact__text">
+                <strong>アプリケーションキャッシュ</strong> —
+                ルーティング・DIコンテナ・設定のキャッシュを削除します。
+                プラグインや設定を変更した場合に実行してください。
+            </span>
+        </div>
+
+    </div>
+
+</section>
+
+{# ── Confirmation dialog (vanilla JS, no jQuery/Bootstrap) ──────────────────── #}
+<div id="js-confirm-dialog"
+     class="idea-admin-dialog-backdrop"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="dialog-title"
+     hidden>
+    <div class="idea-admin-dialog">
+        <div class="idea-admin-dialog__head">
+            <h4 class="idea-admin-dialog__title" id="dialog-title">
+                <i class="fa fa-triangle-exclamation fa-fw" aria-hidden="true"></i>
+                キャッシュの削除を確認
+            </h4>
+            <button type="button"
+                    class="idea-admin-icon-btn"
+                    id="js-dialog-cancel"
+                    aria-label="キャンセル">
+                <i class="fa fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="idea-admin-dialog__body">
+            すべてのアプリケーションキャッシュを削除します。
+            この操作は取り消せません。続行しますか？
+        </div>
+        <div class="idea-admin-dialog__foot">
+            <button type="button"
+                    class="idea-admin-action"
+                    id="js-dialog-cancel-2">
+                キャンセル
+            </button>
+            <button type="button"
+                    class="idea-admin-action idea-admin-action--destructive"
+                    id="js-dialog-confirm">
+                <i class="fa fa-recycle fa-fw" aria-hidden="true"></i>
+                削除する
+            </button>
+        </div>
+    </div>
+</div>
+
+{# ── PUT form (submitted programmatically from dialog confirm) ───────────────── #}
+<form id="js-cache-form"
+      method="post"
+      action="/admin/content/cache?_method=put">
+    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+    <input type="hidden" name="mode" value="content_operation_form">
+</form>
+
+{# ── Bottom action toolbar ───────────────────────────────────────────────────── #}
+<div class="idea-admin-toolbar">
+    <div class="idea-admin-toolbar__back">
+        <a href="/admin/content/maintenance">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+            メンテナンス管理
+        </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+        <button type="button"
+                class="idea-admin-action idea-admin-action--destructive"
+                id="js-open-dialog"
+                aria-haspopup="dialog">
+            <i class="fa fa-recycle fa-fw" aria-hidden="true"></i>
+            キャッシュを削除
+        </button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+    'use strict';
+
+    /* ── Success notice from ?cleared=1 redirect ─────────────────────────── */
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('cleared') === '1') {
+        var notice = document.getElementById('js-cleared-notice');
+        if (notice) {
+            notice.style.display = '';
+            /* Remove query param from URL without reload */
+            history.replaceState(null, '', window.location.pathname);
+        }
+    }
+
+    /* ── Confirmation dialog ─────────────────────────────────────────────── */
+    var backdrop  = document.getElementById('js-confirm-dialog');
+    var openBtn   = document.getElementById('js-open-dialog');
+    var cancelBtn = document.getElementById('js-dialog-cancel');
+    var cancel2   = document.getElementById('js-dialog-cancel-2');
+    var confirmBtn = document.getElementById('js-dialog-confirm');
+    var cacheForm  = document.getElementById('js-cache-form');
+
+    function openDialog() {
+        backdrop.hidden = false;
+        /* Move focus into dialog for accessibility */
+        confirmBtn.focus();
+    }
+
+    function closeDialog() {
+        backdrop.hidden = true;
+        openBtn.focus();
+    }
+
+    openBtn.addEventListener('click', openDialog);
+    cancelBtn.addEventListener('click', closeDialog);
+    cancel2.addEventListener('click', closeDialog);
+
+    /* Close on backdrop click (outside dialog box) */
+    backdrop.addEventListener('click', function (e) {
+        if (e.target === backdrop) { closeDialog(); }
+    });
+
+    /* Close on Escape */
+    backdrop.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeDialog(); }
+    });
+
+    confirmBtn.addEventListener('click', function () {
+        backdrop.hidden = true;
+        cacheForm.submit();
+    });
+}());
+</script>
 {% endblock %}

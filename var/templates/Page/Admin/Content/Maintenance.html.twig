@@ -1,70 +1,219 @@
-{#
-  BeMart admin メンテナンス管理 — EC-CUBE goMaintenance.
-
-  PORT of EC-CUBE 4.3 admin-theme `Content/maintenance.twig`
-  (src/Eccube/Resource/template/admin/Content/maintenance.twig).
-
-  DATA page with a single toggle button. Extends the admin frame
-  (`admin-base.html.twig`). The markup skeleton + `c-*` / `ec-*` /
-  Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
-  bindings are rebound.
-
-  The Maintenance resource (src/Resource/Page/Admin/Content/Maintenance.php)
-  is a thin HTML renderer — see its port header (the toggle POST is an
-  operational action, not a domain mutation). `body['isMaintenance']`
-  drives which toggle button shows; it defaults to false (the
-  fresh-install off-state).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
-   - `{{ '...'|trans|nl2br }}` -> the ja literal with the `nl2br` Twig
-     builtin kept (the maintenance message is multi-line).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-#}
 {% extends 'admin-base.html.twig' %}
+{#
+  BeMart admin — Maintenance mode control
+  Clean-room: idea-admin vocabulary only. No EC-CUBE markup.
 
-{% set route = 'admin-content-maintenance' %}
-{% set title = 'メンテナンス管理' %}
+  DATA CONTRACT (src/Resource/Page/Admin/Content/Maintenance.php onGet):
+    isMaintenance  bool|null  — current maintenance-mode state (schema: get-admin-content-maintenance.json)
+    csrfToken      string|null
+
+  ACTION (doToggleMaintenance — ALPS idempotent):
+    PUT  /admin/content/maintenance?_method=put
+    body: enabled (0|1), csrfToken, mode=content_operation_form
+
+  LINK (after action):
+    rel=goSystemInfo  href=/admin/system
+
+  DESIGN:
+    Status-first layout — the current state (ON/OFF) is the hero signal.
+    Single action panel: enable or disable in one click, no ambiguity.
+    Warning notice when entering maintenance (site goes offline for shoppers).
+    No form class — the toggle has no editable fields, just hidden inputs.
+#}
+
+{% set route    = 'admin-content-maintenance' %}
+{% set title    = 'メンテナンス管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
+{% block stylesheet %}
+<style>
+.idea-admin-maintenance-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+  padding: 1.5rem 1.5rem 1.75rem;
+}
+.idea-admin-maintenance-state {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.idea-admin-maintenance-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+.idea-admin-maintenance-state__icon--on {
+  background: rgba(169, 71, 46, .12);
+  color: #a9472e;
+}
+.idea-admin-maintenance-state__icon--off {
+  background: rgba(82, 107, 85, .12);
+  color: var(--idea-olive);
+}
+.idea-admin-maintenance-state__label {
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--idea-muted);
+  margin-bottom: .2rem;
+}
+.idea-admin-maintenance-state__value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+}
+.idea-admin-maintenance-state__value--on  { color: #a9472e; }
+.idea-admin-maintenance-state__value--off { color: var(--idea-olive); }
+.idea-admin-maintenance-divider {
+  width: 100%;
+  border: none;
+  border-top: 1px solid rgba(205, 191, 170, .4);
+  margin: 0;
+}
+.idea-admin-maintenance-action {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+</style>
+{% endblock %}
+
 {% block main %}
-    <form method="post" action="/admin/content/maintenance?_method=put">
-        <input type="hidden" id="maintenance__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col"><span class="card-title">メンテナンスモード</span></div>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-auto">
-                                    <span>{{ 'メンテナンスモードを有効にすると、SHOPの機能を一時的に停止し、管理画面のみアクセス可能な状態となります。
-※プラグインのインストール/有効/無効/削除時には、自動的にメンテナンスモードに切り替わります。
-'|nl2br }}</span>
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-auto">
-                                    {% if isMaintenance %}
-                                    <input type="hidden" name="maintenance" value="off">
-                                    <button type="submit" class="btn btn-ec-conversion">無効にする</button>
-                                    {% else %}
-                                    <input type="hidden" name="maintenance" value="on">
-                                    <button type="submit" class="btn btn-ec-conversion">有効にする</button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+{# ── Status panel ───────────────────────────────────────────────────────── #}
+<section
+  class="idea-admin-panel"
+  aria-labelledby="maintenance-panel-title"
+  style="max-width:640px"
+>
+  <div class="idea-admin-panel__head">
+    <h3 id="maintenance-panel-title">
+      <i class="fa fa-wrench fa-fw" aria-hidden="true"></i>
+      メンテナンスモード
+    </h3>
+    {# Live status badge — always visible #}
+    {% if isMaintenance %}
+      <span class="idea-admin-badge idea-admin-badge--discontinued" aria-live="polite">
+        <i class="fa fa-circle fa-fw" aria-hidden="true"></i>
+        有効
+      </span>
+    {% else %}
+      <span class="idea-admin-badge idea-admin-badge--public" aria-live="polite">
+        <i class="fa fa-circle fa-fw" aria-hidden="true"></i>
+        無効
+      </span>
+    {% endif %}
+  </div>
+
+  <div class="idea-admin-maintenance-hero">
+
+    {# Current state hero #}
+    <div class="idea-admin-maintenance-state" aria-label="現在の状態">
+      <div class="idea-admin-maintenance-state__icon {% if isMaintenance %}idea-admin-maintenance-state__icon--on{% else %}idea-admin-maintenance-state__icon--off{% endif %}">
+        <i class="fa {% if isMaintenance %}fa-lock{% else %}fa-globe{% endif %}" aria-hidden="true"></i>
+      </div>
+      <div>
+        <div class="idea-admin-maintenance-state__label">現在の状態</div>
+        {% if isMaintenance %}
+          <div class="idea-admin-maintenance-state__value idea-admin-maintenance-state__value--on">
+            メンテナンス中
+          </div>
+        {% else %}
+          <div class="idea-admin-maintenance-state__value idea-admin-maintenance-state__value--off">
+            通常営業中
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="idea-admin-maintenance-divider" aria-hidden="true">
+
+    {# Contextual notice — shown only when maintenance is ON (shoppers are blocked) #}
+    {% if isMaintenance %}
+    <div class="idea-admin-notice idea-admin-notice--warning" role="status" aria-atomic="true">
+      <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+      ショップは現在、一般ユーザーからアクセスできない状態です。管理画面のみ利用可能です。
+    </div>
+    {% endif %}
+
+    {# Action — single-purpose form; enabled is the explicit target state #}
+    <form
+      method="post"
+      action="/admin/content/maintenance?_method=put"
+      aria-label="メンテナンスモード切替"
+    >
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="mode"      value="content_operation_form">
+
+      <div class="idea-admin-maintenance-action">
+        {% if isMaintenance %}
+          {# Target state = off → send enabled=0 #}
+          <input type="hidden" name="enabled" value="0">
+          <button
+            type="submit"
+            class="idea-admin-action idea-admin-action--primary"
+            aria-label="メンテナンスモードを無効にしてショップを再開する"
+          >
+            <i class="fa fa-play-circle fa-fw" aria-hidden="true"></i>
+            ショップを再開する
+          </button>
+        {% else %}
+          {# Target state = on → send enabled=1 #}
+          <input type="hidden" name="enabled" value="1">
+          <button
+            type="submit"
+            class="idea-admin-action idea-admin-action--destructive"
+            aria-label="メンテナンスモードを有効にしてショップを一時停止する"
+            onclick="return confirm('メンテナンスモードを有効にすると、ショップの一般アクセスが停止します。続行しますか？')"
+          >
+            <i class="fa fa-pause-circle fa-fw" aria-hidden="true"></i>
+            ショップを一時停止する
+          </button>
+        {% endif %}
+      </div>
     </form>
+
+  </div>{# /.idea-admin-maintenance-hero #}
+
+</section>
+
+{# ── Effect explanation panel ──────────────────────────────────────────── #}
+<section
+  class="idea-admin-panel"
+  aria-labelledby="maintenance-info-title"
+  style="max-width:640px;margin-top:1rem"
+>
+  <div class="idea-admin-panel__head">
+    <h3 id="maintenance-info-title">
+      <i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>
+      メンテナンスモードの効果
+    </h3>
+  </div>
+  <div class="idea-admin-panel__body">
+    <dl class="idea-admin-spec-list">
+      <div class="idea-admin-spec-row">
+        <dt>一般ユーザー</dt>
+        <dd>ショップフロントへのアクセスが停止。メンテナンス画面を表示します。</dd>
+      </div>
+      <div class="idea-admin-spec-row">
+        <dt>管理画面</dt>
+        <dd>管理者は引き続き通常どおり操作できます。</dd>
+      </div>
+      <div class="idea-admin-spec-row">
+        <dt>冪等性</dt>
+        <dd>同じ状態を繰り返し送信しても副作用は発生しません（PUT）。</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
 {% endblock %}

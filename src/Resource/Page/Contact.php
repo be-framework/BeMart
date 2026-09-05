@@ -11,6 +11,10 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Be\Exception\ContactContentsFormatException;
+use MyVendor\BeMart\Be\Exception\EmailFormatException;
+use MyVendor\BeMart\Be\Exception\Name01FormatException;
+use MyVendor\BeMart\Be\Exception\Name02FormatException;
 use MyVendor\BeMart\Be\Final\ContactSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitContactInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
@@ -19,7 +23,9 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
+use function array_values;
 use function assert;
+use function trim;
 use function rawurlencode;
 
 /**
@@ -94,17 +100,42 @@ class Contact extends ResourceObject
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfProtected]
     public function onPost(
-        string $contactName01,
-        string $contactName02,
-        string $contactEmail,
-        string $contactContents,
+        string|null $contactName01 = null,
+        string|null $contactName02 = null,
+        string|null $contactEmail = null,
+        string|null $contactContents = null,
+        string|null $mode = null,
     ): static {
-        $final = ($this->becoming)(new SubmitContactInput(
-            contactName01: $contactName01,
-            contactName02: $contactName02,
-            contactEmail: $contactEmail,
-            contactContents: $contactContents,
-        ));
+        $values = [
+            'contactName01' => $contactName01 ?? '',
+            'contactName02' => $contactName02 ?? '',
+            'contactEmail' => $contactEmail ?? '',
+            'contactContents' => $contactContents ?? '',
+        ];
+        $browserForm = $mode !== null;
+        if ($browserForm) {
+            $errors = $this->formErrors($values);
+            if ($errors !== []) {
+                return $this->rejectForm($values, $errors);
+            }
+        }
+
+        try {
+            $final = ($this->becoming)(new SubmitContactInput(
+                contactName01: $values['contactName01'],
+                contactName02: $values['contactName02'],
+                contactEmail: $values['contactEmail'],
+                contactContents: $values['contactContents'],
+            ));
+        } catch (SemanticVariableException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            [$field, $message] = self::semanticError($e);
+
+            return $this->rejectForm($values, [$field => $message]);
+        }
 
         assert($final instanceof ContactSubmitted);
 
@@ -126,6 +157,51 @@ class Contact extends ResourceObject
         return $this;
     }
 
+    /** @param array<string, string> $values */
+    private function formErrors(array $values): array
+    {
+        $errors = [];
+        foreach ([
+            'contactName01' => '入力してください。',
+            'contactName02' => '入力してください。',
+            'contactEmail' => '入力してください。',
+            'contactContents' => '入力してください。',
+        ] as $field => $message) {
+            if (trim($values[$field]) === '') {
+                $errors[$field] = $message;
+            }
+        }
+
+        return $errors;
+    }
+
+    /** @param array<string, string> $values */
+    private function rejectForm(array $values, array $errors): static
+    {
+        $this->code = Code::BAD_REQUEST;
+        $this->body = [
+            'transitionId' => 'goContactForm',
+            'fields' => [
+                'contactName01',
+                'contactName02',
+                'contactEmail',
+                'contactContents',
+                'csrfToken',
+            ],
+            'submitTo' => [
+                'rel' => 'doSubmitContact',
+                'method' => 'POST',
+                'href' => 'page://self/contact',
+            ],
+            'csrfToken' => $this->csrf->token,
+            'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
+            'errors' => $errors,
+            'form' => $this->failedForm($values, $errors),
+        ];
+
+        return $this;
+    }
+
     /**
      * Builds a ContactForm reflecting a rejected POST.
      *
@@ -134,24 +210,39 @@ class Contact extends ResourceObject
      * entered values and the inline error. Validation authority remains
      * with Be — the form is a renderer here, never a validator.
      */
-    private function failedForm(
-        string $contactName01,
-        string $contactName02,
-        string $contactEmail,
-        string $contactContents,
-        string $message,
-    ): ContactForm {
+    /** @param array<string, string> $values */
+    private function failedForm(array $values, array $errors): ContactForm
+    {
         $form = $this->formFactory->newInstance(ContactForm::class);
         assert($form instanceof ContactForm);
 
         $form->fillValues(array_filter([
-            'contactName01' => $contactName01,
-            'contactName02' => $contactName02,
-            'contactEmail' => $contactEmail,
-            'contactContents' => $contactContents,
+            'contactName01' => $values['contactName01'],
+            'contactName02' => $values['contactName02'],
+            'contactEmail' => $values['contactEmail'],
+            'contactContents' => $values['contactContents'],
         ], static fn (string $v): bool => $v !== ''));
-        $form->setDomainError('contactEmail', $message);
+        foreach ($errors as $field => $message) {
+            $form->setDomainError($field, $message);
+        }
 
         return $form;
+    }
+
+    /** @return array{0: string, 1: string} */
+    private static function semanticError(SemanticVariableException $e): array
+    {
+        $exception = $e->getErrors()->exceptions[0] ?? null;
+        $message = $e->getErrors()->getMessages('ja')[0] ?? '入力内容を確認してください。';
+
+        $field = match (true) {
+            $exception instanceof Name01FormatException => 'contactName01',
+            $exception instanceof Name02FormatException => 'contactName02',
+            $exception instanceof EmailFormatException => 'contactEmail',
+            $exception instanceof ContactContentsFormatException => 'contactContents',
+            default => 'contactEmail',
+        };
+
+        return [$field, $message];
     }
 }

@@ -1,134 +1,488 @@
 {#
-  BeMart admin shop base-info editor — EC-CUBE Setting/Shop/shop_master.twig.
+  BeMart admin shop base-info editor — idea-admin clean-room build.
+
+  DATA CONTRACT (src/Resource/Page/Admin/BaseInfo.php onGet / onPost):
+    shopName     string        required — shop display name
+    shopKana     string|null   — shop name in katakana
+    shopNameEng  string|null   — shop name in English
+    companyName  string|null   — legal company name
+    postalCode   string|null   — postal code (e.g. 000-0000)
+    pref         int|null      — prefecture id (mtb_pref)
+    addr01       string|null   — address line 1 (city/ward/town)
+    addr02       string|null   — address line 2 (building/room)
+    phoneNumber  string|null   — contact phone number
+    businessHour string|null   — business hours free-form text
+    shopEmail01  string|null   — shop contact email
+    shopMessage  string|null   — shop message shown to customers
+    changed      bool          — present on POST result only; false = no-op idempotent
+    form         AdminShopMasterForm — pre-filled form renderer (HTML context)
+
+  FORM FIELDS (src/Form/AdminShopMasterForm.php):
+    shop_name     text      required
+    shop_kana     text
+    shop_name_eng text
+    company_name  text
+    postal_code   text
+    pref          select    (options populated server-side from mtb_pref)
+    addr01        text
+    addr02        text
+    phone_number  text
+    business_hour text
+    email01       text
+    shop_message  textarea  rows=6
+
+  ACTION (src/Resource/Page/Admin/BaseInfo.php #[Link]):
+    POST /admin/base-info  — doUpdateBaseInfo (CsrfProtected)
+
+  LINKS:
+    goPaymentList  page://self/admin/payment/payment-list
+    goProductList  page://self/admin/product-list
+    goOrderList    page://self/admin/order-list
+
+  idea-admin vocabulary used:
+    idea-admin-layout       two-column editor (primary + side)
+    idea-admin-panel        section card
+    idea-admin-panel__head  section heading strip
+    idea-admin-panel__body  section content grid
+    idea-admin-field        label + input row
+    idea-admin-field__label label cell (with optional required badge)
+    idea-admin-field__input input cell (error slot below)
+    idea-admin-required     required badge
+    idea-admin-error        inline validation message
+    idea-admin-notice       page-level alert strip
+    idea-admin-toolbar      fixed action bar at bottom
+    idea-admin-toolbar__back back-nav link
+    idea-admin-toolbar__actions submit cluster
+    idea-admin-spec-list    read-only summary rows (side panel)
+    idea-admin-spec-row     one key/value row
+    idea-admin-action       button / link affordance
+    idea-admin-badge        status chip
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-base-info' %}
-{% set title = '店舗基本情報' %}
-{% set sub_title = '店舗設定' %}
+{% set route     = 'admin-base-info' %}
+{% set title     = '基本設定' %}
+{% set sub_title = '設定' %}
+
+{% block stylesheet %}
+<style>
+/* postal_code + pref rendered side-by-side inside a single field row */
+.idea-admin-field__input--split-2 {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  gap: .5rem;
+  align-items: start;
+}
+.idea-admin-field__input--split-2 > div {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+/* Live-preview value cell in the side panel */
+.idea-admin-preview-value {
+  font-size: .86rem;
+  color: var(--idea-ink);
+  word-break: break-word;
+  min-height: 1.2em;
+}
+.idea-admin-preview-value:empty::after {
+  content: '—';
+  color: var(--idea-stone-2);
+}
+</style>
+{% endblock %}
 
 {% block main %}
-    <form role="form" method="post" action="/admin/base-info" id="shop_master_form" name="form1" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">店舗情報</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>会社名</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('company_name')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>店名</span>
-                                    <span class="badge bg-primary ms-1">必須</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('shop_name')|raw }}
-                                    {% if form.error('shop_name') %}<span class="invalid-feedback d-block">{{ form.error('shop_name') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>店名(カナ)</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('shop_kana')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>店名(英語)</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('shop_name_eng')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>郵便番号</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('postal_code')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>都道府県</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('pref')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>住所</span>
-                                </div>
-                                <div class="col">
-                                    <div class="mb-2">{{ form.input('addr01')|raw }}</div>
-                                    <div>{{ form.input('addr02')|raw }}</div>
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>電話番号</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('phone_number')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>営業時間</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('business_hour')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>メールアドレス</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('email01')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>ショップからのメッセージ</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('shop_message')|raw }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<form
+  id="base_info_form"
+  role="form"
+  method="post"
+  action="/admin/base-info"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+  {# ── Page-level notices ──────────────────────────────────────── #}
+  {% if changed is defined and changed == false %}
+  <div class="idea-admin-notice" role="status" aria-live="polite">
+    <i class="fa fa-check-circle" aria-hidden="true"></i>
+    変更はありませんでした（保存済みの値と同一です）。
+  </div>
+  {% endif %}
+
+  {% if changed is defined and changed == true %}
+  <div class="idea-admin-notice" role="status" aria-live="polite">
+    <i class="fa fa-check-circle" aria-hidden="true"></i>
+    店舗基本情報を保存しました。
+  </div>
+  {% endif %}
+
+  {% if message is defined and message %}
+  <div class="idea-admin-notice idea-admin-notice--error" role="alert">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    {{ message }}
+  </div>
+  {% endif %}
+
+  <div class="idea-admin-layout">
+
+    {# ════════════════════════════════════════════════════════════
+       Primary column — editable panels
+    ════════════════════════════════════════════════════════════ #}
+    <div class="idea-admin-primary">
+
+      {# ── Panel 1: 店舗名 ────────────────────────────────────── #}
+      <section class="idea-admin-panel" aria-labelledby="section-identity">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-identity">
+            <i class="fa fa-store fa-fw" aria-hidden="true"></i>
+            店舗名
+          </h3>
+          <p class="idea-admin-panel__hint">お客様が目にする名称を設定します。</p>
         </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem"></div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="idea-admin-panel__body">
+
+          {# shop_name — required #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shop_master_shop_name">店舗名</label>
+              <span class="idea-admin-required">必須</span>
             </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('shop_name')|raw }}
+              {% if form.error('shop_name') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('shop_name') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# shop_kana #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shop_master_shop_kana">店舗名（カナ）</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('shop_kana')|raw }}
+              {% if form.error('shop_kana') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('shop_kana') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# shop_name_eng #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shop_master_shop_name_eng">英語表記</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('shop_name_eng')|raw }}
+              {% if form.error('shop_name_eng') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('shop_name_eng') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# company_name #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shop_master_company_name">法人名</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('company_name')|raw }}
+              {% if form.error('company_name') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('company_name') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
         </div>
-    </form>
+      </section>
+
+      {# ── Panel 2: 所在地 ────────────────────────────────────── #}
+      <section class="idea-admin-panel" aria-labelledby="section-address">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-address">
+            <i class="fa fa-map-marker-alt fa-fw" aria-hidden="true"></i>
+            所在地
+          </h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          {# postal_code + pref — inline layout #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shop_master_postal_code">郵便番号</label>
+            </div>
+            <div class="idea-admin-field__input idea-admin-field__input--split-2">
+              <div>
+                {{ form.input('postal_code')|raw }}
+                {% if form.error('postal_code') %}
+                <span class="idea-admin-error" role="alert">{{ form.error('postal_code') }}</span>
+                {% endif %}
+              </div>
+              <div>
+                {{ form.input('pref')|raw }}
+                {% if form.error('pref') %}
+                <span class="idea-admin-error" role="alert">{{ form.error('pref') }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          {# addr01 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shop_master_addr01">住所（市区町村）</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('addr01')|raw }}
+              {% if form.error('addr01') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('addr01') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# addr02 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shop_master_addr02">住所（建物・部屋番号）</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('addr02')|raw }}
+              {% if form.error('addr02') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('addr02') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# ── Panel 3: 連絡先・営業情報 ──────────────────────────── #}
+      <section class="idea-admin-panel" aria-labelledby="section-contact">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-contact">
+            <i class="fa fa-phone fa-fw" aria-hidden="true"></i>
+            連絡先・営業情報
+          </h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          {# phone_number #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shop_master_phone_number">電話番号</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('phone_number')|raw }}
+              {% if form.error('phone_number') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('phone_number') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# business_hour #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shop_master_business_hour">営業時間</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('business_hour')|raw }}
+              {% if form.error('business_hour') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('business_hour') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# email01 #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="shop_master_email01">メールアドレス</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('email01')|raw }}
+              {% if form.error('email01') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('email01') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# ── Panel 4: 店舗メッセージ ────────────────────────────── #}
+      <section class="idea-admin-panel" aria-labelledby="section-message">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-message">
+            <i class="fa fa-comment-alt fa-fw" aria-hidden="true"></i>
+            店舗メッセージ
+          </h3>
+          <p class="idea-admin-panel__hint">店舗トップページ等に表示されるフリーテキストです。</p>
+        </div>
+        <div class="idea-admin-panel__body">
+          {{ form.input('shop_message')|raw }}
+          {% if form.error('shop_message') %}
+          <span class="idea-admin-error" role="alert">{{ form.error('shop_message') }}</span>
+          {% endif %}
+        </div>
+      </section>
+
+    </div>
+
+    {# ════════════════════════════════════════════════════════════
+       Side panel — read-only summary + quick links
+    ════════════════════════════════════════════════════════════ #}
+    <aside class="idea-admin-side" aria-label="現在の登録内容">
+
+      {# Current values preview #}
+      <section class="idea-admin-panel" aria-labelledby="section-preview">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-preview">
+            <i class="fa fa-eye fa-fw" aria-hidden="true"></i>
+            登録済み内容
+          </h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <dl class="idea-admin-spec-list">
+
+            <div class="idea-admin-spec-row">
+              <dt>店舗名</dt>
+              <dd>
+                <span class="idea-admin-preview-value" id="preview-shop-name">{{ shopName|default('') }}</span>
+              </dd>
+            </div>
+
+            <div class="idea-admin-spec-row">
+              <dt>カナ</dt>
+              <dd>
+                <span class="idea-admin-preview-value" id="preview-shop-kana">{{ shopKana|default('') }}</span>
+              </dd>
+            </div>
+
+            <div class="idea-admin-spec-row">
+              <dt>英語</dt>
+              <dd>
+                <span class="idea-admin-preview-value" id="preview-shop-name-eng">{{ shopNameEng|default('') }}</span>
+              </dd>
+            </div>
+
+            <div class="idea-admin-spec-row">
+              <dt>法人名</dt>
+              <dd>
+                <span class="idea-admin-preview-value" id="preview-company-name">{{ companyName|default('') }}</span>
+              </dd>
+            </div>
+
+            <div class="idea-admin-spec-row">
+              <dt>郵便番号</dt>
+              <dd>
+                <span class="idea-admin-preview-value" id="preview-postal-code">{{ postalCode|default('') }}</span>
+              </dd>
+            </div>
+
+            <div class="idea-admin-spec-row">
+              <dt>電話番号</dt>
+              <dd>
+                <span class="idea-admin-preview-value" id="preview-phone-number">{{ phoneNumber|default('') }}</span>
+              </dd>
+            </div>
+
+            <div class="idea-admin-spec-row">
+              <dt>メール</dt>
+              <dd>
+                <span class="idea-admin-preview-value" id="preview-email">{{ shopEmail01|default('') }}</span>
+              </dd>
+            </div>
+
+            <div class="idea-admin-spec-row">
+              <dt>営業時間</dt>
+              <dd>
+                <span class="idea-admin-preview-value" id="preview-business-hour">{{ businessHour|default('') }}</span>
+              </dd>
+            </div>
+
+          </dl>
+        </div>
+      </section>
+
+      {# Quick navigation #}
+      <section class="idea-admin-panel" aria-labelledby="section-related">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-related">
+            <i class="fa fa-link fa-fw" aria-hidden="true"></i>
+            関連設定
+          </h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <nav aria-label="関連ページへのリンク" style="display:grid;gap:.5rem;">
+            <a class="idea-admin-action" href="/admin/payment/payment-list">
+              <i class="fa fa-credit-card fa-fw" aria-hidden="true"></i>
+              支払方法設定
+            </a>
+            <a class="idea-admin-action" href="/admin/product-list">
+              <i class="fa fa-cube fa-fw" aria-hidden="true"></i>
+              商品一覧
+            </a>
+            <a class="idea-admin-action" href="/admin/order-list">
+              <i class="fa fa-shopping-cart fa-fw" aria-hidden="true"></i>
+              受注一覧
+            </a>
+          </nav>
+        </div>
+      </section>
+
+    </aside>
+
+  </div>
+
+  {# ── Action toolbar ──────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/index">
+        <i class="fa fa-backward" aria-hidden="true"></i>
+        ダッシュボードに戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-save" aria-hidden="true"></i>
+        保存
+      </button>
+    </div>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /**
+   * Live preview: mirror input values into the side-panel summary
+   * as the user types. Bindings use the AdminShopMasterForm field ids.
+   */
+  var bindings = [
+    { inputId: 'shop_master_shop_name',     previewId: 'preview-shop-name' },
+    { inputId: 'shop_master_shop_kana',     previewId: 'preview-shop-kana' },
+    { inputId: 'shop_master_shop_name_eng', previewId: 'preview-shop-name-eng' },
+    { inputId: 'shop_master_company_name',  previewId: 'preview-company-name' },
+    { inputId: 'shop_master_postal_code',   previewId: 'preview-postal-code' },
+    { inputId: 'shop_master_phone_number',  previewId: 'preview-phone-number' },
+    { inputId: 'shop_master_email01',       previewId: 'preview-email' },
+    { inputId: 'shop_master_business_hour', previewId: 'preview-business-hour' },
+  ];
+
+  bindings.forEach(function (b) {
+    var input   = document.getElementById(b.inputId);
+    var preview = document.getElementById(b.previewId);
+    if (!input || !preview) return;
+
+    input.addEventListener('input', function () {
+      preview.textContent = input.value;
+    });
+  });
+}());
+</script>
 {% endblock %}

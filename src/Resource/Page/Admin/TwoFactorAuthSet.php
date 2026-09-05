@@ -18,8 +18,10 @@ use MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured;
 use MyVendor\BeMart\Be\Input\SetTwoFactorAuthInput;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -60,6 +62,8 @@ class TwoFactorAuthSet extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly AdminQueryInterface $adminQuery,
         private readonly TwoFactorAuthInterface $twoFactorAuth,
+        private readonly CsrfToken $csrf,
+        private readonly AdminLoginFormSubmissionInterface $formSubmission,
     ) {
     }
 
@@ -71,25 +75,35 @@ class TwoFactorAuthSet extends ResourceObject
      */
     #[Alps('doSetTwoFactorAuth')]
     #[JsonSchema(schema: 'get-admin-two-factor-auth-set.json')]
+    #[Link(rel: 'doSetTwoFactorAuth', href: 'page://self/admin/two-factor-auth-set', method: 'put')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     public function onGet(): static
     {
         $challenge = $this->setupChallenge();
+        $authKey = $challenge?->authKey ?? '';
+        $form = $this->formFactory->newInstance(AdminTwoFactorAuthForm::class);
+        assert($form instanceof AdminTwoFactorAuthForm);
+        if ($authKey !== '') {
+            $form->fillValues(['authKey' => $authKey]);
+        }
 
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuthSet',
-            'fields' => ['deviceToken', 'authKey'],
+            'fields' => ['deviceToken', 'authKey', 'csrfToken'],
             // The QR-code JS reads authKey. It is present only when a
             // password-verified setup challenge exists; otherwise the empty
             // placeholder keeps anonymous GET render fidelity.
-            'authKey' => $challenge?->authKey ?? '',
-            'memberName' => '',
+            'authKey' => $authKey,
+            // Account label for the authenticator entry (the part after
+            // "BeMart:" in the otpauth URI). The password-verified login
+            // identity is the most identifying value here, so it doubles as
+            // the QR-code account name; empty when no setup challenge exists.
+            'memberName' => $challenge?->loginId ?? '',
             'shopName' => 'BeMart',
-            // Phase 3: an empty AdminTwoFactorAuthForm for the HTML port.
-            'form' => $this->formFactory->newInstance(AdminTwoFactorAuthForm::class),
+            'csrfToken' => $this->csrf->token,
+            'form' => $form,
         ];
-        assert($this->body['form'] instanceof AdminTwoFactorAuthForm);
 
         return $this;
     }
@@ -141,7 +155,7 @@ class TwoFactorAuthSet extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goTwoFactorAuth', href: 'page://self/admin/two-factor-auth')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
-    public function onPut(string $deviceToken, string|null $loginId = null, string|null $authKey = null): static
+    public function onPut(string $deviceToken, string|null $loginId = null, string|null $authKey = null, string|null $mode = null): static
     {
         unset($loginId, $authKey);
 
@@ -162,13 +176,23 @@ class TwoFactorAuthSet extends ResourceObject
         assert($final instanceof TwoFactorAuthConfigured);
         $this->loginChallenge->completeSetup($challenge);
 
-        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doSetTwoFactorAuth',
             'loginId' => $final->loginId,
             'message' => '二要素認証を設定しました。',
         ];
+        if (($this->formSubmission)($mode)) {
+            // Browser form submit (decided by the formSubmission port, not
+            // raw client input): 303 See Other so the browser actually
+            // navigates (a 200 + Location response leaves browsers on the
+            // setup page). JSON/Resource clients keep 200 OK.
+            $this->code = Code::SEE_OTHER;
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
 
         return $this;
     }

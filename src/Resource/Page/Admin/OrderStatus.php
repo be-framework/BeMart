@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderStatusUpdated;
 use MyVendor\BeMart\Be\Input\AdminUpdateOrderStatusInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminOrderStatusForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -61,7 +63,9 @@ class OrderStatus extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
+        private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -90,6 +94,7 @@ class OrderStatus extends ResourceObject
         $this->body = [
             'form' => $form,
             'orderStatuses' => AdminOrderStatusForm::rows(),
+            'csrfToken' => $this->csrf->token,
         ];
 
         return $this;
@@ -123,7 +128,7 @@ class OrderStatus extends ResourceObject
             return $this;
         }
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, '/admin/order-status');
         $this->body = [
             'transitionId' => 'doUpdateOrderStatusList',
             'count' => count($orderStatuses),

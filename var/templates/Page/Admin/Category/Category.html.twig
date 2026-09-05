@@ -1,45 +1,280 @@
-{# EC-CUBE admin category edit — product category detail screen. #}
 {% extends 'admin-base.html.twig' %}
 
+{#
+  BeMart admin — Category editor (single row, clean-room design).
+
+  DATA CONTRACT (src/Resource/Page/Admin/Category/Category.php — onGet):
+    categoryId    string          immutable identifier (read-only display)
+    categoryName  string          display / navigation label
+    parentId      string|null     parent category ID; null means root
+    sortNo        int             position in the listing, lower = earlier
+
+  FORM CONTRACT (src/Form/AdminCategoryForm.php):
+    name          text  required  maps to categoryName
+    parent_id     text            maps to parentId
+    sort_no       text            maps to sortNo
+
+  ACTIONS (src/Resource/Page/Admin/Category/Category.php):
+    PUT    /admin/category/category?categoryId={categoryId}   — update
+    DELETE /admin/category/category?categoryId={categoryId}   — delete
+
+  LINKS:
+    goCategoryList  → /admin/category/category-list           — back to list
+
+  UX RATIONALE
+  ────────────
+  The category entity is intentionally small (name + parent + order).
+  A two-column layout (editor + meta) would waste vertical space for so
+  few fields. Instead we use a single focused column: a read-only identity
+  strip at the top (category ID as KPI chip) followed by the editable
+  fields in one panel, with the danger zone (delete) anchored at the
+  bottom outside the PUT form so it cannot be submitted accidentally.
+  The action toolbar is fixed so admins can save without scrolling.
+#}
+
 {% set route = 'admin-category-category' %}
-{% set title = 'カテゴリ編集' %}
+{% set title = categoryName|default('カテゴリ編集') %}
 {% set sub_title = '商品管理' %}
 
 {% block main %}
-    <form method="post" action="/admin/category/category?categoryId={{ categoryId }}">
-        <input type="hidden" name="_method" value="put">
-        <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_category') }}">
-        <input type="hidden" name="categoryId" value="{{ categoryId }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header"><span class="card-title">カテゴリ情報</span></div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <label class="col-3 col-form-label">カテゴリID</label>
-                                <div class="col"><input class="form-control" value="{{ categoryId }}" readonly></div>
-                            </div>
-                            <div class="row mb-3">
-                                <label class="col-3 col-form-label" for="categoryName">カテゴリ名</label>
-                                <div class="col"><input class="form-control" id="categoryName" name="categoryName" value="{{ categoryName }}" required></div>
-                            </div>
-                            <div class="row mb-0">
-                                <label class="col-3 col-form-label" for="sortNo">並び順</label>
-                                <div class="col"><input class="form-control" id="sortNo" name="sortNo" type="number" value="{{ sortNo }}" min="1"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+{# ── Flash / validation error notice ────────────────────────────────────── #}
+{% if message is defined and message %}
+  <div class="idea-admin-notice idea-admin-notice--error" role="alert">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    {{ message }}
+  </div>
+{% endif %}
+
+{# ── Identity strip ──────────────────────────────────────────────────────── #}
+<div class="idea-admin-kpi-grid idea-admin-category-kpi-strip">
+  <div class="idea-admin-kpi">
+    <div class="idea-admin-kpi__label">カテゴリ ID</div>
+    <div class="idea-admin-kpi__value idea-admin-category-id-value">{{ categoryId }}</div>
+  </div>
+  <div class="idea-admin-kpi">
+    <div class="idea-admin-kpi__label">現在の並び順</div>
+    <div class="idea-admin-kpi__value">{{ sortNo }}</div>
+  </div>
+  <div class="idea-admin-kpi">
+    <div class="idea-admin-kpi__label">親カテゴリ</div>
+    <div class="idea-admin-kpi__value idea-admin-category-id-value">
+      {% if parentId %}
+        <a class="idea-admin-meta__link" href="/admin/category/category?categoryId={{ parentId }}">{{ parentId }}</a>
+      {% else %}
+        <span style="color: var(--idea-muted); font-size: .9rem; font-family: var(--idea-font-sans);">ルート</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{# ── Edit form (PUT) ─────────────────────────────────────────────────────── #}
+<form
+  id="category_edit_form"
+  method="post"
+  action="/admin/category/category?categoryId={{ categoryId }}"
+  novalidate
+>
+  <input type="hidden" name="_method" value="put">
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+  <div class="idea-admin-panel" style="max-width: 640px;">
+    <div class="idea-admin-panel__head">
+      <h3>カテゴリ情報</h3>
+    </div>
+    <div class="idea-admin-panel__body">
+
+      {# name → categoryName #}
+      <div class="idea-admin-field">
+        <div class="idea-admin-field__label">
+          <label for="admin_category_name">カテゴリ名</label>
+          <span class="idea-admin-required">必須</span>
         </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6"><a class="c-baseLink" href="/admin/category/category-list"><i class="fa fa-backward"></i><span>カテゴリ管理</span></a></div>
-                    <div class="col-6 text-end"><button class="btn btn-ec-conversion px-5" type="submit">保存</button></div>
-                </div>
-            </div>
+        <div class="idea-admin-field__input">
+          {{ form.input('name')|raw }}
+          <span class="idea-admin-error" role="alert">{{ form.error('name') }}</span>
         </div>
-    </form>
+      </div>
+
+      {# sort_no → sortNo #}
+      <div class="idea-admin-field">
+        <div class="idea-admin-field__label">
+          <label for="admin_category_sort_no">並び順</label>
+        </div>
+        <div class="idea-admin-field__input" style="max-width: 9rem;">
+          {{ form.input('sort_no')|raw }}
+          <span class="idea-admin-error" role="alert">{{ form.error('sort_no') }}</span>
+        </div>
+      </div>
+
+      {# parent_id — rendered as hidden; parentId comes from body and is
+         typically managed via the list view tree, not edited here.
+         Kept editable for edge-case direct correction. #}
+      <div class="idea-admin-field">
+        <div class="idea-admin-field__label">
+          <label for="admin_category_parent_id">親カテゴリ ID</label>
+        </div>
+        <div class="idea-admin-field__input" style="max-width: 20rem;">
+          {{ form.input('parent_id')|raw }}
+          <span class="idea-admin-error" role="alert">{{ form.error('parent_id') }}</span>
+          <span style="font-size: .75rem; color: var(--idea-muted);">空欄でルートカテゴリとして扱います</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {# ── Fixed bottom toolbar ───────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="toolbar" aria-label="ページ操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/category/category-list" rel="goCategoryList">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        カテゴリ一覧
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button type="submit" class="idea-admin-action idea-admin-action--primary" id="save_btn">
+        <i class="fa fa-save" aria-hidden="true"></i>
+        保存
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{# ── Danger zone: delete (separate form, prevents accidental PUT+DELETE) ─── #}
+<div class="idea-admin-panel idea-admin-category-danger" style="max-width: 640px; margin-top: 2.5rem;">
+  <div class="idea-admin-panel__head">
+    <h3 style="color: #a9472e;">削除</h3>
+  </div>
+  <div class="idea-admin-panel__body" style="gap: 1rem;">
+    <p style="font-size: .86rem; color: var(--idea-muted); margin: 0;">
+      このカテゴリを削除すると元に戻せません。子カテゴリや商品との関連も解除されます。
+    </p>
+    <div>
+      <button
+        type="button"
+        class="idea-admin-action idea-admin-action--destructive"
+        id="delete_trigger_btn"
+        aria-haspopup="dialog"
+        aria-controls="delete_dialog"
+      >
+        <i class="fa fa-trash" aria-hidden="true"></i>
+        このカテゴリを削除
+      </button>
+    </div>
+  </div>
+</div>
+
+{# ── Delete confirmation dialog ──────────────────────────────────────────── #}
+<div
+  class="idea-admin-dialog-backdrop"
+  id="delete_dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="delete_dialog_title"
+  hidden
+>
+  <div class="idea-admin-dialog">
+    <div class="idea-admin-dialog__head">
+      <h2 class="idea-admin-dialog__title" id="delete_dialog_title">カテゴリを削除しますか？</h2>
+      <button
+        type="button"
+        class="idea-admin-icon-btn"
+        id="delete_dialog_close"
+        aria-label="キャンセル"
+      ><i class="fa fa-times" aria-hidden="true"></i></button>
+    </div>
+    <div class="idea-admin-dialog__body">
+      <strong>{{ categoryName }}</strong> を削除します。この操作は取り消せません。
+    </div>
+    <div class="idea-admin-dialog__foot" style="display:flex; justify-content:flex-end; gap:.65rem; padding:.85rem 1.1rem; border-top: 1px solid rgba(205,191,170,.4);">
+      <button type="button" class="idea-admin-action" id="delete_dialog_cancel">キャンセル</button>
+
+      {# DELETE is submitted via a dedicated mini-form — keeps CSRF token out
+         of the PUT form above and makes the HTTP semantics explicit. #}
+      <form
+        id="delete_form"
+        method="post"
+        action="/admin/category/category?categoryId={{ categoryId }}"
+        style="display:inline;"
+      >
+        <input type="hidden" name="_method" value="delete">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <button type="submit" class="idea-admin-action idea-admin-action--destructive" id="delete_confirm_btn">
+          <i class="fa fa-trash" aria-hidden="true"></i>
+          削除する
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block stylesheet %}
+<style>
+/* ── Category editor — per-page extensions (idea-admin-* namespace) ───── */
+
+/* KPI strip: smaller row for the 3 read-only chips */
+.idea-admin-category-kpi-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 640px;
+  margin-bottom: 1.25rem;
+}
+
+/* ID value uses monospace for opaque ID strings */
+.idea-admin-category-id-value {
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+
+/* Danger zone panel: softer clay-tinted border */
+.idea-admin-category-danger {
+  border-color: rgba(192, 111, 79, .30);
+  background: rgba(255, 250, 240, .85);
+}
+.idea-admin-category-danger .idea-admin-panel__head {
+  background: rgba(192, 111, 79, .06);
+}
+</style>
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  const backdrop = document.getElementById('delete_dialog');
+  const openBtn  = document.getElementById('delete_trigger_btn');
+  const closeBtn = document.getElementById('delete_dialog_close');
+  const cancelBtn = document.getElementById('delete_dialog_cancel');
+
+  function openDialog() {
+    backdrop.hidden = false;
+    closeBtn.focus();
+  }
+
+  function closeDialog() {
+    backdrop.hidden = true;
+    openBtn.focus();
+  }
+
+  openBtn.addEventListener('click', openDialog);
+  closeBtn.addEventListener('click', closeDialog);
+  cancelBtn.addEventListener('click', closeDialog);
+
+  // Close on backdrop click (outside the dialog box)
+  backdrop.addEventListener('click', function (e) {
+    if (e.target === backdrop) closeDialog();
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !backdrop.hidden) closeDialog();
+  });
+}());
+</script>
 {% endblock %}

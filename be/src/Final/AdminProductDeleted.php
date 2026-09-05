@@ -8,6 +8,7 @@ use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
 use MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface;
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
@@ -56,6 +57,7 @@ final readonly class AdminProductDeleted
         #[Inject] AdminSession $adminSession,
         #[Inject] ProductQueryInterface $productQuery,
         #[Inject] ProductCommandInterface $productCommand,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
@@ -78,6 +80,7 @@ final readonly class AdminProductDeleted
         }
 
         $productCommand->delete($productCode);
+        $cacheInvalidator->invalidateCorpus();
 
         $this->productCode = $current->productCode;
         $this->productName = $current->productName;

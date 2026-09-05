@@ -6,87 +6,30 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminNewsForm;
-use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
-use MyVendor\BeMart\Tests\Resource\Admin\ContentJaMessages;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
-use Ray\WebFormModule\FormFactory;
-use Twig\Environment;
-use Twig\Markup;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
 
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
-use function dirname;
-use function explode;
-use function http_build_query;
-use function implode;
-use function in_array;
-use function is_dir;
-use function is_string;
 use function preg_replace;
 use function str_contains;
 use function trim;
 
 /**
- * Phase 3 — fidelity check for the admin News-edit HTML port (the admin
- * pilot's FORM/CRUD page).
+ * Markup-parity verification for the admin News-edit page (idea-admin rebuild).
  *
- * Same standard as the storefront form-page pilot {@see LoginHtmlRenderTest}:
- * EC-CUBE renders the news inputs through the Symfony FormView
- * (`form_widget(form.title)`); BeMart renders them through a real
- * Ray.WebFormModule {@see AdminNewsForm} exposed as `body.form`. This
- * test renders EC-CUBE's `form_widget(form.<field>)` calls through the
- * SAME `AdminNewsForm` instance, so the inputs are byte-identical on both
- * sides and diff to ZERO — the form-widget residual family is eliminated.
+ * L1 — required field presence and list data output.
+ * L2 — form action/method routing and link href/rel.
  *
- * Honest, not circular: `AdminNewsForm::init()` is itself a PORT of
- * EC-CUBE's `NewsType` + `news_edit.twig`'s `form_widget` calls, so the
- * form object IS the agreed reference for the widgets.
- *
- * The difference from the storefront form pilot is the LAYOUT — the page
- * extends `admin-base.html.twig` (a port of EC-CUBE's admin-theme
- * `default_frame.twig`), served via {@see EcCubeAdminStubLoader}. The
- * News resource requires an authenticated admin, so the html context's
- * `AdminSession` is rebound to a seeded admin id.
+ * EC-CUBE reference-rendering tests are archived under
+ * {@see Group('ec-cube-parity-archived')} and skipped unconditionally.
  */
 final class AdminNewsHtmlRenderTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
-
-    /**
-     * EC-CUBE lines with no BeMart counterpart and vice versa. Each entry
-     * is a whitespace-collapsed line; the comment states WHY it is
-     * acceptable. The form inputs are rendered by a real AdminNewsForm on
-     * BOTH sides, so they diff to zero; the residual is the admin-frame
-     * baseline (same families as {@see AdminNewsListHtmlRenderTest}) plus
-     * the form `csrfToken` hidden input.
-     *
-     * @var list<string>
-     */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        "'ECCUBE-CSRF-TOKEN': $('meta[name=\"eccube-csrf-token\"]').attr('content')",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>新着情報管理 コンテンツ管理 - BeMart</title>',
-        '<title>新着情報管理 コンテンツ管理 - EC-CUBE</title>',
-    ];
 
     private ResourceInterface $resource;
 
@@ -107,6 +50,8 @@ final class AdminNewsHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
+    // ── L0: HTML document structure ─────────────────────────────────────────
+
     public function testNewsEditRendersAsHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/admin/news/news', [
@@ -119,36 +64,32 @@ final class AdminNewsHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
+        $this->assertStringContainsString('<div class="idea-admin-shell">', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testNewsEditPreservesEcCubeAdminMarkupStructure(): void
+    public function testNewsEditUsesIdeaAdminShellLandmarks(): void
     {
         $html = $this->resource->get('page://self/admin/news/news', [
             'newsId' => 'nw-welcome',
         ])->toString();
 
         foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-mainNavArea">',
-            '<div class="c-contentsArea">',
-            'class="form-horizontal"',
-            'class="card rounded border-0 mb-4"',
-            'class="ec-cardCollapse collapse show"',
-            'class="c-conversionArea"',
-            'class="btn btn-ec-conversion px-5"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
+            '<div class="idea-admin-shell">',
+            'class="idea-admin-topbar"',
+            'class="idea-admin-sidebar"',
+            'class="idea-admin-content"',
+        ] as $landmark) {
+            $this->assertStringContainsString($landmark, $html, "idea-admin landmark missing: {$landmark}");
         }
     }
 
+    // ── L1: Required field presence ─────────────────────────────────────────
+
     /**
-     * The form inputs are rendered by a real AdminNewsForm: the page
-     * carries the EC-CUBE field ids / attributes, pre-filled with the
-     * persisted row.
+     * The form must render all five AdminNewsForm fields.
      */
     public function testNewsEditRendersRealFormInputs(): void
     {
@@ -156,232 +97,126 @@ final class AdminNewsHtmlRenderTest extends TestCase
             'newsId' => 'nw-welcome',
         ])->toString();
 
-        $this->assertStringContainsString('id="admin_news_title"', $html);
-        $this->assertStringContainsString('name="title"', $html);
-        // The seed post's title is repopulated from the resource body.
-        $this->assertStringContainsString('value="ようこそ"', $html);
+        // Form routing — & is HTML-escaped to &amp; by Twig
+        $this->assertStringContainsString('action="/admin/news/news?newsId=nw-welcome&amp;_method=put"', $html);
+
+        // publishDate field
         $this->assertStringContainsString('id="admin_news_publish_date"', $html);
+        $this->assertStringContainsString('name="publishDate"', $html);
+
+        // newsTitle field pre-filled with seed value
+        $this->assertStringContainsString('id="admin_news_title"', $html);
+        $this->assertStringContainsString('name="newsTitle"', $html);
+        $this->assertStringContainsString('value="ようこそ"', $html);
+
+        // newsUrl field
+        $this->assertStringContainsString('id="admin_news_url"', $html);
+        $this->assertStringContainsString('name="newsUrl"', $html);
+
+        // linkMethod checkbox — hidden false-value sentinel + checkbox
+        $this->assertStringContainsString('name="linkMethod" value="0"', $html);
+        $this->assertStringContainsString('id="admin_news_link_method"', $html);
+        $this->assertStringContainsString('name="linkMethod" value="1"', $html);
+        $this->assertStringNotContainsString('name="linkMethod[]"', $html);
+
+        // newsDescription textarea
         $this->assertStringContainsString('<textarea id="admin_news_description"', $html);
+        $this->assertStringContainsString('name="newsDescription"', $html);
     }
 
     /**
-     * The honesty test: diff BeMart's rendered admin News-edit page
-     * against EC-CUBE's own rendering. Every difference must be in the
-     * residual allowlist.
+     * Required field labels carry the idea-admin-required badge.
      */
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
-    public function testNewsEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    public function testRequiredFieldsBadged(): void
     {
-        $beMart = $this->resource->get('page://self/admin/news/news', [
+        $html = $this->resource->get('page://self/admin/news/news', [
             'newsId' => 'nw-welcome',
         ])->toString();
-        $ecCube = $this->renderEcCube();
 
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's admin News-edit HTML diverged from EC-CUBE's beyond "
-            . "the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
-        );
-
-        // With the inputs rendered by a real AdminNewsForm on both sides,
-        // the residual is the admin-frame baseline + the form csrfToken
-        // hidden input + the omitted `visible` select. If this balloons,
-        // the port has drifted.
-        $this->assertLessThanOrEqual(
-            40,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
+        $this->assertStringContainsString('class="idea-admin-required"', $html);
     }
 
-    private static function isResidual(string $line): bool
+    // ── L2: Form action/method routing and back link ─────────────────────────
+
+    /**
+     * New-news form (no newsId) posts to the collection create endpoint.
+     */
+    public function testNewNewsFormPostsToCollectionCreateAction(): void
     {
-        if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
-            return true;
-        }
+        $html = $this->resource->get('page://self/admin/news/news')->toString();
 
-        foreach ([
-            // EC-CUBE-runtime <head> furniture.
-            'eccube-csrf-token',
-            '<title>',
-            'c-headerBar__shopTitle',
-            // Admin frame: the logged-in-operator header user-menu.
-            'c-headerBar__userMenu',
-            'data-bs-content',
-            'last_login',
-            // Admin frame: the DYNAMIC sidebar nav (eccubeNav tree).
-            'nav-',
-            'data-bs-toggle="collapse"',
-            'fa-fw',
-            // Form: EC-CUBE's hidden `csrfToken` CSRF input. BeMart keeps the
-            // hidden input (structure) with an empty value — the html
-            // context has no per-request CSRF widget.
-            'name="csrfToken"',
-            'csrfcsrfToken',
-            // Form: EC-CUBE's `visible` display-status select in the
-            // conversion area. The AdminNewsFetched projection does not
-            // carry dtb_news.visible (out of the Wave 9 CMS slice), so the
-            // select is omitted. EC-CUBE renders nothing here either when
-            // `form.visible` is a bare stub, so this family is defensive.
-            'col-auto',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function renderEcCube(): string
-    {
-        $adminTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/admin';
-        if (! is_dir($adminTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
-
-        $twig = new Environment(new EcCubeAdminStubLoader($adminTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-
-        // FORM-PAGE pilot: EC-CUBE's `form_widget(form.<field>)` calls are
-        // rendered through BeMart's real AdminNewsForm — pre-filled with
-        // the SAME seed post as BeMart's html-context body — so the inputs
-        // are byte-identical to BeMart's port. The form object is the
-        // agreed reference (a port of NewsType + news_edit.twig). See the
-        // class doc.
-        $form = (new FormFactory())->newInstance(AdminNewsForm::class);
-        if ($form instanceof AdminNewsForm) {
-            $form->fillValues([
-                'newsId' => 'nw-welcome',
-                'newsTitle' => 'ようこそ',
-                'newsDescription' => 'EC-CUBE へようこそ。',
-                'newsUrl' => null,
-                'publishDate' => '2026-01-01T00:00:00+09:00',
-                'linkMethod' => false,
-            ]);
-        }
-
-        $this->registerEcCubeStubs($twig, $form);
-
-        return $twig->render('Content/news_edit.twig', [
-            // The `form` variable's children are the field NAMES; the
-            // stubbed form_widget (below) renders each through the form.
-            'form' => new EcCubeStub([
-                'csrfToken' => 'csrfToken',
-                'publish_date' => 'publish_date',
-                'title' => 'title',
-                'url' => 'url',
-                'link_method' => 'link_method',
-                'description' => 'description',
-                'visible' => 'visible',
-            ]),
-            'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
-            'eccube_config' => [
-                'locale' => 'ja',
-                'eccube_official_site_url' => 'https://www.ec-cube.net/',
-                'eccube_community_site_url' => 'https://xoo.ps/eccube/',
-                'eccube_document_url' => 'https://doc4.ec-cube.net/',
-                'eccube_manual_url' => 'https://www.ec-cube.net/product/',
-            ],
-            'eccubeNav' => [],
-            'menus' => ['content', 'news'],
-            'plugin_assets' => [],
-            'plugin_snippets' => [],
-            'app' => new EcCubeStub([
-                'user' => new EcCubeStub([
-                    'name' => '管理者',
-                    'login_date' => '2026-05-20 10:00:00',
-                    'two_factor_auth_enabled' => false,
-                ]),
-                'request' => new EcCubeStub(['_route' => 'admin_content_news_edit']),
-            ]),
-            'subtitle' => 'コンテンツ管理',
-            'sub_title' => 'コンテンツ管理',
-            'title' => '新着情報管理',
-        ]);
-    }
-
-    private function registerEcCubeStubs(Environment $twig, AdminNewsForm|null $form): void
-    {
-        $messages = AdminJaMessages::forSection(ContentJaMessages::keys());
-        $trans = static function (string $key, array $params = []) use ($messages): string {
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('date_sec', static fn ($d): string => (string) $d));
-        $twig->addFilter(new TwigFilter('date_min', static fn ($d): string => (string) $d));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
-
-        // EC-CUBE's `form_widget(form.<field>)` renders through BeMart's
-        // real AdminNewsForm so the inputs are byte-identical to BeMart's
-        // port (which renders the same form). The first arg is the field
-        // name. Fields the AdminNewsForm does NOT declare — `csrfToken` (CSRF
-        // is EC-CUBE-runtime) and `visible` (dtb_news.visible is out of
-        // the Wave 9 CMS slice — see the port header) — render empty here,
-        // mirroring BeMart's port which omits them; both are kept as
-        // residual families. Returns Twig\Markup so the markup is not
-        // double-escaped, matching EC-CUBE's real form_widget + BeMart's
-        // `|raw`.
-        $formFields = ['publish_date', 'title', 'url', 'link_method', 'description'];
-        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFields): Markup {
-            if ($form instanceof AdminNewsForm && is_string($field) && in_array($field, $formFields, true)) {
-                return new Markup($form->input($field), 'UTF-8');
-            }
-
-            return new Markup('', 'UTF-8');
-        }));
-        $twig->addFunction(new TwigFunction('form_errors', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('form_label', static fn ($f = '', $l = '', $o = []): string => ''));
-        $twig->addFunction(new TwigFunction('form_row', static fn ($f = '', $o = []): string => ''));
-        $twig->addFunction(new TwigFunction('form_rest', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('has_errors', static fn (...$f): bool => false));
+        $this->assertStringContainsString('action="/admin/news/news-list"', $html);
+        $this->assertStringContainsString('name="newsTitle"', $html);
+        $this->assertStringContainsString('name="publishDate"', $html);
+        $this->assertStringContainsString('name="newsUrl"', $html);
+        $this->assertStringContainsString('name="newsDescription"', $html);
     }
 
     /**
-     * @return list<string>
+     * Edit page includes a separate delete form routed via _method=delete.
      */
-    private function normalize(string $html): array
+    public function testDeleteFormPresentInEditMode(): void
     {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
-        }
+        $html = $this->resource->get('page://self/admin/news/news', [
+            'newsId' => 'nw-welcome',
+        ])->toString();
 
-        return $lines;
+        $this->assertStringContainsString('id="news-delete-form"', $html);
+        $this->assertStringContainsString('_method=delete', $html);
+    }
+
+    /**
+     * Back link navigates to the news list (goNewsList rel).
+     */
+    public function testBackLinkPointsToNewsList(): void
+    {
+        $html = $this->resource->get('page://self/admin/news/news', [
+            'newsId' => 'nw-welcome',
+        ])->toString();
+
+        $this->assertStringContainsString('href="/admin/news/news-list"', $html);
+    }
+
+    /**
+     * CSRF token hidden input is emitted.
+     */
+    public function testCsrfTokenHiddenInputPresent(): void
+    {
+        $html = $this->resource->get('page://self/admin/news/news', [
+            'newsId' => 'nw-welcome',
+        ])->toString();
+
+        $this->assertStringContainsString('name="csrfToken"', $html);
+    }
+
+    // ── Archived: EC-CUBE reference-rendering tests ──────────────────────────
+
+    /**
+     * @deprecated EC-CUBE 4.3 reference rendering comparison.
+     * Archived: the clean-room rebuild no longer targets EC-CUBE DOM parity.
+     * Retained as a skipped placeholder for historical audit trail.
+     */
+    #[Group('ec-cube-parity-archived')]
+    public function testNewsEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE DOM-parity test archived: the News edit page has been ' .
+            'rebuilt as a clean-room idea-admin template and no longer ' .
+            'targets EC-CUBE landmark or class-name parity.'
+        );
+    }
+
+    /**
+     * @deprecated EC-CUBE admin markup structure check.
+     * Archived: c-* / Bootstrap landmarks replaced by idea-admin-* equivalents.
+     */
+    #[Group('ec-cube-parity-archived')]
+    public function testNewsEditPreservesEcCubeAdminMarkupStructure(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE admin markup structure test archived: c-container / ' .
+            'c-mainNavArea / c-headerBar landmarks have been superseded by ' .
+            'idea-admin-shell / idea-admin-content / idea-admin-topbar.'
+        );
     }
 }

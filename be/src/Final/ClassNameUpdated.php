@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Exception\ClassNameNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
@@ -32,6 +33,7 @@ final readonly class ClassNameUpdated
         #[Input] string|null $classNameLabel,
         #[Inject] AdminSession $adminSession,
         #[Inject] ClassNameStorageInterface $classNames,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
@@ -48,6 +50,8 @@ final readonly class ClassNameUpdated
         );
 
         $classNames->put($merged);
+
+        $cacheInvalidator->invalidateCorpus();
 
         $this->classNameId = $merged->classNameId;
         $this->name = $merged->name;

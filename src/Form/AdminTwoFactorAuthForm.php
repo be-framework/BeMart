@@ -70,4 +70,14 @@ final class AdminTwoFactorAuthForm extends AbstractForm
         // exists for this wave.
         $this->filter->validate('deviceToken')->isNotBlank();
     }
+
+    /**
+     * Repopulates hidden server-side challenge fields for HTML rendering.
+     *
+     * @param array<string, string> $values field name => value
+     */
+    public function fillValues(array $values): void
+    {
+        $this->fill($values);
+    }
 }

@@ -1,172 +1,416 @@
-{#
-  BeMart admin order editor — EC-CUBE admin-theme `Order/edit.twig`.
-
-  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Order/edit.twig`
-  — the ~1057-line multi-panel 受注登録 / 受注編集 screen. It extends the
-  admin frame (`admin-base.html.twig`), not the storefront frame.
-
-  Tier-2 port note: EC-CUBE's editor wires a Customer-search panel, a
-  Shipping collection, an OrderItem collection (with a product-search
-  modal), the price-recompute totals and a per-status workflow panel.
-  The Be projection ({@see \MyVendor\BeMart\Be\Final\AdminOrderFetched})
-  keeps a flat order header + a line-item snapshot, so the port renders
-  the editable header panels — orderer contact, money knobs, the
-  read-only line-item table and the totals summary. The Shipping
-  collection edits live on the sibling `shipping` page; the
-  product-search modal + the customer-search modal are EC-CUBE-runtime
-  fragments dropped as enumerated residuals.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
-     AdminOrderEditForm leaf fields (Ray.WebFormModule).
-   - `price` filter -> JPY NumberFormatter.
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
-#}
 {% extends 'admin-base.html.twig' %}
 
+{% set isNew = orderNo is not defined or orderNo is empty %}
 {% set route = 'admin-order-edit' %}
-{% set title = orderNo ? '受注編集' : '受注登録' %}
+{% set title = isNew ? '受注登録' : '受注編集' %}
 {% set sub_title = '受注管理' %}
 
+{% block stylesheet %}
+<style>
+.idea-admin-order-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: .6rem 1rem;
+  font-size: .84rem;
+}
+.idea-admin-order-meta-grid > div dt {
+  color: var(--idea-muted);
+  font-weight: 700;
+  font-size: .73rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-bottom: .12rem;
+}
+.idea-admin-order-meta-grid > div dd {
+  margin: 0;
+  color: var(--idea-ink);
+  font-weight: 500;
+  word-break: break-all;
+}
+.idea-admin-order-status {
+  display: inline-flex;
+  align-items: center;
+  padding: .16rem .58rem;
+  border-radius: var(--idea-admin-radius-badge);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  background: rgba(73, 111, 124, .12);
+  color: var(--idea-blue);
+  border: 1px solid rgba(73, 111, 124, .25);
+}
+.idea-admin-order-status[data-status="3"],
+.idea-admin-order-status[data-status="9"] {
+  background: rgba(169, 71, 46, .10);
+  color: #a9472e;
+  border-color: rgba(169, 71, 46, .22);
+}
+.idea-admin-order-status[data-status="4"],
+.idea-admin-order-status[data-status="5"],
+.idea-admin-order-status[data-status="6"] {
+  background: rgba(82, 107, 85, .12);
+  color: var(--idea-olive);
+  border-color: rgba(82, 107, 85, .22);
+}
+.idea-admin-billing-row {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  align-items: center;
+  gap: .5rem;
+  padding: .45rem 0;
+  border-bottom: 1px solid rgba(205, 191, 170, .25);
+  font-size: .86rem;
+}
+.idea-admin-billing-row:last-child { border-bottom: none; }
+.idea-admin-billing-row dt {
+  color: var(--idea-muted);
+  font-weight: 700;
+  margin: 0;
+}
+.idea-admin-billing-row dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.idea-admin-billing-row--total dt,
+.idea-admin-billing-row--total dd {
+  font-size: .95rem;
+  font-weight: 800;
+  color: var(--idea-ink);
+}
+.idea-admin-input-right input {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.idea-admin-customer-link {
+  color: var(--idea-blue);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(73, 111, 124, .35);
+  transition: border-color .14s;
+}
+.idea-admin-customer-link:hover { border-color: var(--idea-blue); }
+</style>
+{% endblock %}
+
 {% block main %}
-    <form role="form" method="post" action="/admin/order" id="order_form" name="form1" novalidate>
-        <input type="hidden" name="_method" value="put">
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">注文者情報</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3"><span>お名前</span><span class="badge bg-primary ms-1">必須</span></div>
-                                <div class="col">
-                                    <div class="row">
-                                        <div class="col-6">{{ form.input('name01')|raw }}</div>
-                                        <div class="col-6">{{ form.input('name02')|raw }}</div>
-                                    </div>
-                                    {% if form.error('name01') %}<span class="invalid-feedback d-block">{{ form.error('name01') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"><span>メールアドレス</span></div>
-                                <div class="col">{{ form.input('email')|raw }}</div>
-                            </div>
-                        </div>
-                    </div>
+{# ─── Single form wraps primary + side ──────────────────────────────────── #}
+<form
+  id="order_form"
+  method="post"
+  action="{{ isNew ? '/admin/order/create' : '/admin/order' }}"
+  novalidate
+>
+  {% if not isNew %}
+  <input type="hidden" name="_method" value="put">
+  {% endif %}
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  {% if not isNew %}
+  <input type="hidden" name="orderNo" value="{{ orderNo }}">
+  {% endif %}
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">商品明細</span>
-                        </div>
-                        <div class="card-body p-0">
-                            <table class="table table-sm" id="order_item_table">
-                                <thead>
-                                <tr>
-                                    <th class="border-top-0 pt-2 pb-2 ps-3">商品コード</th>
-                                    <th class="border-top-0 pt-2 pb-2">商品名</th>
-                                    <th class="border-top-0 pt-2 pb-2 text-end">単価</th>
-                                    <th class="border-top-0 pt-2 pb-2 text-center">数量</th>
-                                    <th class="border-top-0 pt-2 pb-2 text-end pe-3">小計</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for item in items %}
-                                    <tr>
-                                        <td class="align-middle ps-3">{{ item.productCode }}</td>
-                                        <td class="align-middle">{{ item.productName }}</td>
-                                        <td class="align-middle text-end">{{ item.unitPrice|price }}</td>
-                                        <td class="align-middle text-center">{{ item.quantity }}</td>
-                                        <td class="align-middle text-end pe-3">{{ (item.unitPrice * item.quantity)|price }}</td>
-                                    </tr>
-                                {% else %}
-                                    <tr>
-                                        <td class="align-middle text-center text-muted" colspan="5">商品明細はありません</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+  <div class="idea-admin-layout">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">管理用メモ</span>
-                        </div>
-                        <div class="card-body">
-                            {{ form.input('message')|raw }}
-                        </div>
-                    </div>
+    {# ── Primary column ──────────────────────────────────────────────── #}
+    <div class="idea-admin-primary">
 
-                </div>
-            </div>
-
-            <div class="c-contentsArea__secondaryCol">
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header">
-                        <span class="card-title">ご請求額</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="row mb-2">
-                            <div class="col-6"><span>小計</span></div>
-                            <div class="col-6 text-end">{{ (order.subtotal|default(0))|price }}</div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-6"><span>送料</span></div>
-                            <div class="col-6 text-end">{{ (order.deliveryFeeTotal|default(0))|price }}</div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-6"><span>手数料</span></div>
-                            <div class="col-6">{{ form.input('charge')|raw }}</div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-6"><span>値引き</span></div>
-                            <div class="col-6">{{ form.input('discount')|raw }}</div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-6"><span>消費税</span></div>
-                            <div class="col-6 text-end">{{ (order.tax|default(0))|price }}</div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-6"><span>利用ポイント</span></div>
-                            <div class="col-6">{{ form.input('usePoint')|raw }}</div>
-                        </div>
-                        <hr>
-                        <div class="row mb-2">
-                            <div class="col-6"><span class="fw-bold">合計</span></div>
-                            <div class="col-6 text-end fw-bold">{{ (order.paymentTotal|default(0))|price }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      {# --- Order metadata (read-only header, existing orders only) --- #}
+      {% if not isNew and order is not null %}
+      <section class="idea-admin-panel" aria-labelledby="panel-order-info">
+        <div class="idea-admin-panel__head">
+          <h3 id="panel-order-info">受注情報</h3>
+          {# Status badge #}
+          {% set statusLabel = {
+            1: '新規受付', 3: '注文取消', 4: '対応中',
+            5: '発送済み', 6: '入金済み', 7: '決済処理中',
+            8: '購入処理中', 9: '返品'
+          } %}
+          <span class="idea-admin-order-status" data-status="{{ order.orderStatus }}">
+            {{ statusLabel[order.orderStatus]|default('不明') }}
+          </span>
         </div>
-
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/order-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>受注一覧へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="idea-admin-panel__body">
+          <dl class="idea-admin-order-meta-grid">
+            <div>
+              <dt>受注番号</dt>
+              <dd>{{ order.orderNo }}</dd>
             </div>
+            <div>
+              <dt>受注日時</dt>
+              <dd>{{ order.orderDate }}</dd>
+            </div>
+            <div>
+              <dt>入金日時</dt>
+              <dd>{{ order.paymentDate ?: '—' }}</dd>
+            </div>
+            <div>
+              <dt>会員</dt>
+              <dd>
+                {% if customer and customer.customerId %}
+                  <a class="idea-admin-customer-link"
+                     href="/admin/customer?customerId={{ customer.customerId|e('html_attr') }}">
+                    {{ customer.name01 }} {{ customer.name02 }}
+                  </a>
+                {% elseif customer %}
+                  {{ customer.name01 }} {{ customer.name02 }}
+                  <small style="color:var(--idea-muted);">(退会済み)</small>
+                {% else %}
+                  <span style="color:var(--idea-muted);">—</span>
+                {% endif %}
+              </dd>
+            </div>
+            {% if customer %}
+            <div>
+              <dt>メールアドレス</dt>
+              <dd>{{ customer.email }}</dd>
+            </div>
+            {% endif %}
+          </dl>
         </div>
-    </form>
+      </section>
+      {% endif %}
+
+      {# --- Line items table --- #}
+      <section class="idea-admin-panel" aria-labelledby="panel-items">
+        <div class="idea-admin-panel__head">
+          <h3 id="panel-items">商品明細</h3>
+          {% if not isNew and items is defined and items|length > 0 %}
+          <span class="idea-admin-page-subtitle">{{ items|length }} 件</span>
+          {% endif %}
+        </div>
+        <div style="padding:0;">
+          <div class="idea-admin-table-wrap" style="border:none;border-radius:0;box-shadow:none;">
+            <table class="idea-admin-table" id="order_item_table">
+              <thead>
+                <tr>
+                  <th>商品コード</th>
+                  <th>商品名</th>
+                  <th style="text-align:right;">単価</th>
+                  <th style="text-align:center;">数量</th>
+                  {% if not isNew %}<th style="text-align:right;">小計</th>{% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% if isNew %}
+                {# --- New order: editable row for first order item --- #}
+                <tr id="order_item_row_0">
+                  <td>
+                    <input type="text"
+                           name="orderItems[0][productCode]"
+                           id="order_item_0_product_code"
+                           class="form-control"
+                           placeholder="商品コード">
+                  </td>
+                  <td>
+                    <input type="text"
+                           name="orderItems[0][productName]"
+                           id="order_item_0_product_name"
+                           class="form-control"
+                           placeholder="商品名">
+                  </td>
+                  <td style="text-align:right;">
+                    <input type="text"
+                           name="orderItems[0][unitPrice]"
+                           id="order_item_0_unit_price"
+                           class="form-control"
+                           placeholder="0"
+                           style="text-align:right;">
+                  </td>
+                  <td style="text-align:center;">
+                    <input type="text"
+                           name="orderItems[0][quantity]"
+                           id="order_item_0_quantity"
+                           class="form-control"
+                           placeholder="1"
+                           style="text-align:center;">
+                  </td>
+                </tr>
+                {% else %}
+                {% for item in items %}
+                <tr>
+                  <td style="color:var(--idea-muted);font-size:.82rem;">{{ item.productCode }}</td>
+                  <td>{{ item.productName }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums;">
+                    &yen;{{ item.unitPrice|number_format }}
+                  </td>
+                  <td style="text-align:center;">{{ item.quantity }}</td>
+                  <td style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums;">
+                    &yen;{{ (item.unitPrice * item.quantity)|number_format }}
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="5">
+                    <div class="idea-admin-empty">
+                      <span class="idea-admin-empty__title">明細なし</span>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {# --- Editable contact fields --- #}
+      <section class="idea-admin-panel" aria-labelledby="panel-contact">
+        <div class="idea-admin-panel__head">
+          <h3 id="panel-contact">注文者情報</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          {% if isNew %}
+          {# New order: customer ID selector and payment method #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_customer_id">会員ID</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              <input type="text"
+                     name="customerId"
+                     id="order_customer_id"
+                     class="form-control"
+                     placeholder="会員ID">
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_payment_method_id">支払方法</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              <input type="text"
+                     name="paymentMethodId"
+                     id="order_payment_method_id"
+                     class="form-control"
+                     placeholder="1"
+                     value="1">
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_name_name01">氏名</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              <div style="display:flex;gap:.5rem;">
+                {{ form.input('name01')|raw }}
+                {{ form.input('name02')|raw }}
+              </div>
+              <span class="idea-admin-error">{{ form.error('name01') }}</span>
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_email">メールアドレス</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('email')|raw }}
+              <span class="idea-admin-error">{{ form.error('email') }}</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# --- Admin memo --- #}
+      <section class="idea-admin-panel" aria-labelledby="panel-memo">
+        <div class="idea-admin-panel__head">
+          <h3 id="panel-memo">管理メモ</h3>
+          <span class="idea-admin-panel__hint">顧客には表示されません</span>
+        </div>
+        <div class="idea-admin-panel__body">
+          {{ form.input('message')|raw }}
+          <span class="idea-admin-error">{{ form.error('message') }}</span>
+        </div>
+      </section>
+
+    </div>{# /primary #}
+
+    {# ── Sticky side column ──────────────────────────────────────────── #}
+    <aside class="idea-admin-side" aria-label="請求額・調整">
+
+      {# --- Billing summary + editable knobs in one panel --- #}
+      <section class="idea-admin-panel" aria-labelledby="panel-billing">
+        <div class="idea-admin-panel__head">
+          <h3 id="panel-billing">請求額</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <dl>
+            <div class="idea-admin-billing-row">
+              <dt>商品小計</dt>
+              <dd>&yen;{{ (order.subtotal|default(0))|number_format }}</dd>
+            </div>
+            <div class="idea-admin-billing-row">
+              <dt>送料</dt>
+              <dd>&yen;{{ (order.deliveryFeeTotal|default(0))|number_format }}</dd>
+            </div>
+            <div class="idea-admin-billing-row">
+              <dt>手数料</dt>
+              <dd class="idea-admin-input-right">
+                {{ form.input('charge')|raw }}
+                <span class="idea-admin-error">{{ form.error('charge') }}</span>
+              </dd>
+            </div>
+            <div class="idea-admin-billing-row">
+              <dt>値引き</dt>
+              <dd class="idea-admin-input-right">
+                {{ form.input('discount')|raw }}
+                <span class="idea-admin-error">{{ form.error('discount') }}</span>
+              </dd>
+            </div>
+            <div class="idea-admin-billing-row">
+              <dt>消費税</dt>
+              <dd>&yen;{{ (order.tax|default(0))|number_format }}</dd>
+            </div>
+            <div class="idea-admin-billing-row">
+              <dt>利用pt</dt>
+              <dd class="idea-admin-input-right">
+                {{ form.input('usePoint')|raw }}
+                <span class="idea-admin-error">{{ form.error('usePoint') }}</span>
+              </dd>
+            </div>
+            <div class="idea-admin-billing-row idea-admin-billing-row--total">
+              <dt>合計</dt>
+              <dd>&yen;{{ (order.paymentTotal|default(0))|number_format }}</dd>
+            </div>
+            {% if order is not null and order.addPoint is defined and order.addPoint %}
+            <div class="idea-admin-billing-row">
+              <dt>付与pt</dt>
+              <dd>{{ order.addPoint|number_format }} pt</dd>
+            </div>
+            {% endif %}
+          </dl>
+        </div>
+      </section>
+
+    </aside>{# /side #}
+
+  </div>{# /layout #}
+
+  {# ── Fixed bottom toolbar ────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/order-list" rel="goOrderList">
+        <i class="fa fa-angle-left" aria-hidden="true"></i>
+        受注一覧に戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button type="submit" class="idea-admin-action idea-admin-action--primary" form="order_form">
+        <i class="fa fa-save fa-fw" aria-hidden="true"></i>
+        {{ isNew ? '受注を登録' : '変更を保存' }}
+      </button>
+    </div>
+  </div>
+
+</form>
 {% endblock %}

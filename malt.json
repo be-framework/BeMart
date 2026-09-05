@@ -4,6 +4,7 @@
     "php@8.4",
     "mysql@8.0",
     "nginx",
+    "redis",
     "composer",
     "alps-asd/asd/asd"
   ],
@@ -16,6 +17,9 @@
     ],
     "nginx": [
       8080
+    ],
+    "redis": [
+      6379
     ]
   },
   "php_extensions": [

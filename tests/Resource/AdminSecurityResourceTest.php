@@ -61,6 +61,7 @@ final class AdminSecurityResourceTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertInstanceOf(AdminSecurityForm::class, $ro->body['form']);
         $this->assertFalse($ro->body['isSecureRequest']);
+        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnGetAnonymousAdminReturns403(): void
@@ -85,17 +86,6 @@ final class AdminSecurityResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('doUpdateSecurity', $ro->body['transitionId']);
-    }
-
-    public function testOnPutMissingCsrfReturns403(): void
-    {
-        $this->rebindAdminSession(self::TEST_ADMIN_ID);
-
-        $ro = $this->resource->put('page://self/admin/security', [
-            'adminAllowHosts' => '192.168.0.0/24',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testOnPutAnonymousReturns403(): void

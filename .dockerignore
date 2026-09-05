@@ -1,0 +1,21 @@
+# Keep the build context lean and free of the GPL EC-CUBE reference clone.
+.git
+.github
+.claude
+vendor
+node_modules
+tools
+var/tmp
+var/log
+build
+.phpunit.cache
+.phpcs-cache
+.psalm
+coverage.xml
+*.output
+.DS_Store
+docs/api
+docs/web-e2e
+findings.md
+progress.md
+task_plan.md

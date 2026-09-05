@@ -1,0 +1,976 @@
+/*
+  idea-admin.css — BeMart admin design system
+  Brand family: idea-store (warm neutral palette, same CSS custom properties)
+  Scope: idea-admin-* vocabulary only. No EC-CUBE / Bootstrap / c-* classes.
+  Admin UI is denser and more functional than the storefront; larger touch
+  targets and softer radii are traded for tighter spacing and data density.
+*/
+
+/* ─── Design tokens (re-use storefront palette) ──────────────────────────── */
+:root {
+  /* Colours — same as idea-store.css */
+  --idea-ink:          #29251f;
+  --idea-muted:        #6f675c;
+  --idea-paper:        #ece1cf;
+  --idea-surface:      #fffaf0;
+  --idea-surface-soft: #f5ede0;
+  --idea-stone:        #cdbfaa;
+  --idea-stone-2:      #b5a58d;
+  --idea-wood:         #a98258;
+  --idea-olive:        #526b55;
+  --idea-clay:         #c06f4f;
+  --idea-blue:         #496f7c;
+  --idea-focus:        #2f5f4b;
+
+  /* Typography */
+  --idea-font-sans:  Inter, "Helvetica Neue", Arial, "Hiragino Sans", "Yu Gothic", sans-serif;
+  --idea-font-serif: "Iowan Old Style", "Yu Mincho", "Hiragino Mincho ProN", serif;
+
+  /* Shadows */
+  --idea-shadow-card:  0 4px 14px rgba(41, 37, 31, 0.08);
+  --idea-shadow-float: 0 10px 32px rgba(41, 37, 31, 0.12);
+
+  /* Radii (admin uses smaller values than storefront) */
+  --idea-admin-radius-panel:   12px;
+  --idea-admin-radius-input:   8px;
+  --idea-admin-radius-button:  8px;
+  --idea-admin-radius-badge:   999px;
+
+  /* Layout */
+  --idea-admin-sidebar-w:   220px;
+  --idea-admin-topbar-h:    52px;
+  --idea-admin-toolbar-h:   60px;
+  --idea-admin-content-max: 1180px;
+  --idea-admin-primary-w:   minmax(0, 1fr);
+  --idea-admin-side-w:      300px;
+}
+
+* { box-sizing: border-box; }
+
+/* ─── App shell (topbar + sidebar + content) ─────────────────────────────── */
+
+.idea-admin-shell {
+  display: grid;
+  grid-template-rows: var(--idea-admin-topbar-h) 1fr;
+  grid-template-columns: var(--idea-admin-sidebar-w) 1fr;
+  grid-template-areas:
+    "topbar topbar"
+    "sidebar content";
+  min-height: 100vh;
+  background: var(--idea-surface-soft);
+  font-family: var(--idea-font-sans);
+  color: var(--idea-ink);
+  line-height: 1.55;
+}
+
+/* Topbar */
+.idea-admin-topbar {
+  grid-area: topbar;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.25rem;
+  background: var(--idea-ink);
+  color: var(--idea-surface);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 2px 8px rgba(41, 37, 31, 0.18);
+}
+.idea-admin-topbar__logo {
+  font-family: var(--idea-font-serif);
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: -.02em;
+  color: var(--idea-surface);
+  text-decoration: none;
+  flex: 0 0 auto;
+}
+.idea-admin-topbar__logo img {
+  height: 26px;
+  width: auto;
+  display: block;
+}
+.idea-admin-topbar__store-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  color: rgba(255, 250, 240, .65);
+  font-size: .8rem;
+  text-decoration: none;
+  transition: color .15s;
+}
+.idea-admin-topbar__store-link:hover { color: var(--idea-surface); }
+.idea-admin-topbar__spacer { flex: 1; }
+.idea-admin-topbar__user {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: rgba(255, 250, 240, .78);
+  font-size: .82rem;
+}
+
+/* Sidebar */
+.idea-admin-sidebar {
+  grid-area: sidebar;
+  background: #1f1c17;
+  color: rgba(255, 250, 240, .75);
+  overflow-y: auto;
+  position: sticky;
+  top: var(--idea-admin-topbar-h);
+  height: calc(100vh - var(--idea-admin-topbar-h));
+}
+.idea-admin-sidebar nav { padding: .75rem 0; }
+.idea-admin-sidenav { list-style: none; margin: 0; padding: 0; }
+.idea-admin-sidenav__item { border-bottom: 1px solid rgba(255, 250, 240, .06); }
+.idea-admin-sidenav__link {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  width: 100%;
+  padding: .62rem 1rem;
+  color: rgba(255, 250, 240, .72);
+  font-family: inherit;
+  font-size: .84rem;
+  text-align: left;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  transition: background .14s, color .14s;
+  cursor: pointer;
+}
+.idea-admin-sidenav__link:hover,
+.idea-admin-sidenav__link.is-active {
+  background: rgba(255, 250, 240, .08);
+  color: var(--idea-surface);
+}
+.idea-admin-sidenav__link.is-active {
+  border-left: 3px solid var(--idea-wood);
+  padding-left: calc(1rem - 3px);
+}
+.idea-admin-sidenav__sub {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, .18);
+}
+.idea-admin-sidenav__sub a {
+  display: block;
+  padding: .42rem 1rem .42rem 2.1rem;
+  color: rgba(255, 250, 240, .58);
+  font-size: .8rem;
+  text-decoration: none;
+  transition: color .14s;
+}
+.idea-admin-sidenav__sub a:hover { color: var(--idea-surface); }
+
+/* Content area */
+.idea-admin-content {
+  grid-area: content;
+  padding: 1.5rem clamp(1rem, 3vw, 2rem) calc(var(--idea-admin-toolbar-h) + 2rem);
+  min-width: 0;
+}
+.idea-admin-page-header {
+  display: flex;
+  align-items: baseline;
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+}
+.idea-admin-page-title {
+  font-family: var(--idea-font-sans);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -.02em;
+}
+.idea-admin-page-subtitle {
+  color: var(--idea-muted);
+  font-size: .82rem;
+}
+
+/* ─── Editor layout (two-column: primary + side) ─────────────────────────── */
+
+.idea-admin-layout {
+  display: grid;
+  grid-template-columns: var(--idea-admin-primary-w) var(--idea-admin-side-w);
+  gap: 1.25rem;
+  align-items: start;
+  max-width: var(--idea-admin-content-max);
+}
+.idea-admin-primary {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.idea-admin-side {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  position: sticky;
+  top: calc(var(--idea-admin-topbar-h) + 1.25rem);
+}
+
+/* ─── Panel / card ───────────────────────────────────────────────────────── */
+
+.idea-admin-panel {
+  background: var(--idea-surface);
+  border: 1px solid rgba(205, 191, 170, .55);
+  border-radius: var(--idea-admin-radius-panel);
+  box-shadow: var(--idea-shadow-card);
+  overflow: hidden;
+}
+.idea-admin-panel__head {
+  display: flex;
+  align-items: baseline;
+  gap: .6rem;
+  flex-wrap: wrap;
+  padding: .72rem 1rem;
+  border-bottom: 1px solid rgba(205, 191, 170, .4);
+  background: var(--idea-surface-soft);
+}
+.idea-admin-panel__head h3 {
+  margin: 0;
+  font-size: .9rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+.idea-admin-panel__hint {
+  margin: 0;
+  color: var(--idea-muted);
+  font-size: .76rem;
+}
+.idea-admin-panel__body {
+  padding: .9rem 1rem;
+  display: grid;
+  gap: .72rem;
+}
+
+/* ─── Form field row (label + input) ─────────────────────────────────────── */
+
+.idea-admin-field {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: .5rem;
+  align-items: start;
+}
+.idea-admin-field__label {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  padding-top: .55rem;
+}
+.idea-admin-field__label label {
+  font-size: .84rem;
+  font-weight: 700;
+  color: var(--idea-ink);
+  cursor: pointer;
+}
+.idea-admin-field__input {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  min-width: 0;
+}
+
+/* Shared input / select / textarea styles (scoped to admin field inputs) */
+.idea-admin-field__input input:not([type="checkbox"]):not([type="radio"]),
+.idea-admin-field__input select,
+.idea-admin-field__input textarea {
+  width: 100%;
+  min-height: 2.4rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: rgba(255, 253, 248, .95);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: .88rem;
+  padding: .45rem .7rem;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.idea-admin-field__input textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+.idea-admin-field__input input:focus,
+.idea-admin-field__input select:focus,
+.idea-admin-field__input textarea:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .15);
+}
+/* Full-width panels that contain bare inputs (e.g. description, searchWord) */
+.idea-admin-panel__body > input,
+.idea-admin-panel__body > textarea {
+  width: 100%;
+  min-height: 2.4rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: rgba(255, 253, 248, .95);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: .88rem;
+  padding: .45rem .7rem;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.idea-admin-panel__body > textarea { min-height: 8rem; resize: vertical; }
+.idea-admin-panel__body > input:focus,
+.idea-admin-panel__body > textarea:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .15);
+}
+
+/* ─── Required badge ─────────────────────────────────────────────────────── */
+
+.idea-admin-required {
+  display: inline-flex;
+  align-items: center;
+  padding: .08rem .38rem;
+  border-radius: var(--idea-admin-radius-badge);
+  background: rgba(192, 111, 79, .14);
+  color: var(--idea-clay);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+/* ─── Error message ──────────────────────────────────────────────────────── */
+
+.idea-admin-error {
+  color: #a9472e;
+  font-size: .78rem;
+  font-weight: 700;
+}
+.idea-admin-error:empty { display: none; }
+
+/* ─── Status / category badge chip ──────────────────────────────────────── */
+
+.idea-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: .18rem .58rem;
+  border-radius: var(--idea-admin-radius-badge);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.idea-admin-badge--public {
+  background: rgba(82, 107, 85, .12);
+  color: var(--idea-olive);
+  border-color: rgba(82, 107, 85, .22);
+}
+.idea-admin-badge--private {
+  background: rgba(205, 191, 170, .28);
+  color: var(--idea-muted);
+  border-color: rgba(205, 191, 170, .4);
+}
+.idea-admin-badge--discontinued {
+  background: rgba(169, 71, 46, .10);
+  color: #a9472e;
+  border-color: rgba(169, 71, 46, .20);
+}
+
+/* ─── Action buttons ─────────────────────────────────────────────────────── */
+
+.idea-admin-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  padding: .55rem 1.15rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-button);
+  background: var(--idea-surface);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: .86rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+  white-space: nowrap;
+}
+.idea-admin-action:hover {
+  background: var(--idea-surface-soft);
+  border-color: var(--idea-stone-2);
+}
+.idea-admin-action--primary {
+  background: var(--idea-olive);
+  border-color: var(--idea-olive);
+  color: var(--idea-surface);
+  box-shadow: 0 4px 12px rgba(82, 107, 85, .22);
+}
+.idea-admin-action--primary:hover {
+  background: var(--idea-focus);
+  border-color: var(--idea-focus);
+  color: var(--idea-surface);
+}
+.idea-admin-action--destructive {
+  background: rgba(169, 71, 46, .08);
+  border-color: rgba(169, 71, 46, .30);
+  color: #a9472e;
+}
+.idea-admin-action--destructive:hover {
+  background: rgba(169, 71, 46, .14);
+  border-color: rgba(169, 71, 46, .45);
+}
+.idea-admin-action[disabled],
+.idea-admin-action:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Bottom action toolbar ──────────────────────────────────────────────── */
+
+.idea-admin-toolbar {
+  position: fixed;
+  bottom: 0;
+  left: var(--idea-admin-sidebar-w);
+  right: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: var(--idea-admin-toolbar-h);
+  padding: 0 clamp(1rem, 3vw, 2rem);
+  background: rgba(255, 250, 240, .96);
+  border-top: 1px solid rgba(205, 191, 170, .55);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -4px 16px rgba(41, 37, 31, .08);
+}
+.idea-admin-toolbar__back a {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  color: var(--idea-muted);
+  font-size: .84rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color .14s;
+}
+.idea-admin-toolbar__back a:hover { color: var(--idea-ink); }
+.idea-admin-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+
+/* ─── Read-only meta strip ───────────────────────────────────────────────── */
+
+.idea-admin-meta {
+  gap: .85rem;
+}
+.idea-admin-meta__image {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--idea-surface-soft);
+}
+.idea-admin-meta__image img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+.idea-admin-meta__list {
+  display: grid;
+  gap: .45rem;
+  margin: 0;
+}
+.idea-admin-meta__list > div {
+  display: grid;
+  grid-template-columns: 4rem 1fr;
+  gap: .4rem;
+  font-size: .82rem;
+  padding-bottom: .4rem;
+  border-bottom: 1px solid rgba(205, 191, 170, .3);
+}
+.idea-admin-meta__list > div:last-child { border-bottom: none; padding-bottom: 0; }
+.idea-admin-meta__list dt { color: var(--idea-muted); font-weight: 700; }
+.idea-admin-meta__list dd { margin: 0; word-break: break-word; }
+.idea-admin-meta__link {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  color: var(--idea-olive);
+  font-size: .8rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(82, 107, 85, .35);
+  transition: border-color .14s;
+}
+.idea-admin-meta__link:hover { border-color: var(--idea-olive); }
+
+/* ─── Notice / alert strip ───────────────────────────────────────────────── */
+
+.idea-admin-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  padding: .75rem 1rem;
+  border-radius: var(--idea-admin-radius-panel);
+  border: 1px solid rgba(82, 107, 85, .28);
+  background: rgba(82, 107, 85, .07);
+  color: var(--idea-olive);
+  font-size: .86rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.idea-admin-notice--error {
+  border-color: rgba(169, 71, 46, .28);
+  background: rgba(169, 71, 46, .07);
+  color: #a9472e;
+}
+.idea-admin-notice--warning {
+  border-color: rgba(169, 130, 46, .30);
+  background: rgba(169, 130, 46, .07);
+  color: #8a6020;
+}
+.idea-admin-notice--info {
+  border-color: rgba(73, 111, 124, .28);
+  background: rgba(73, 111, 124, .07);
+  color: var(--idea-blue);
+}
+
+/* ─── Data table ─────────────────────────────────────────────────────────── */
+
+.idea-admin-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--idea-admin-radius-panel);
+  border: 1px solid rgba(205, 191, 170, .45);
+  box-shadow: var(--idea-shadow-card);
+  background: var(--idea-surface);
+}
+.idea-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .84rem;
+  color: var(--idea-ink);
+}
+.idea-admin-table thead th {
+  background: var(--idea-surface-soft);
+  color: var(--idea-muted);
+  font-weight: 700;
+  font-size: .76rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  padding: .55rem .85rem;
+  border-bottom: 1px solid rgba(205, 191, 170, .5);
+  white-space: nowrap;
+  text-align: left;
+}
+.idea-admin-table tbody tr {
+  border-bottom: 1px solid rgba(205, 191, 170, .28);
+  transition: background .12s;
+}
+.idea-admin-table tbody tr:last-child { border-bottom: none; }
+.idea-admin-table tbody tr:hover { background: rgba(245, 237, 224, .55); }
+.idea-admin-table tbody td {
+  padding: .6rem .85rem;
+  vertical-align: middle;
+}
+.idea-admin-table tfoot td {
+  padding: .55rem .85rem;
+  border-top: 1px solid rgba(205, 191, 170, .4);
+  color: var(--idea-muted);
+  font-size: .8rem;
+}
+.idea-admin-table__check { width: 2.4rem; text-align: center; }
+.idea-admin-table__actions { width: 7rem; text-align: right; white-space: nowrap; }
+.idea-admin-table__thumb img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--idea-surface-soft);
+  display: block;
+}
+.idea-admin-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.idea-admin-table__sort:hover { color: var(--idea-ink); }
+.idea-admin-table input[type="checkbox"] {
+  accent-color: var(--idea-olive);
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+/* ─── Search / filter bar ────────────────────────────────────────────────── */
+
+.idea-admin-search-bar {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.idea-admin-search-bar input[type="text"],
+.idea-admin-search-bar input[type="search"] {
+  min-width: min(20rem, 100%);
+  flex: 1;
+  min-height: 2.4rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: var(--idea-surface);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: .88rem;
+  padding: .42rem .75rem;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.idea-admin-search-bar input:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .15);
+}
+
+/* ─── Toolbar (list page: bulk actions + CSV) ─────────────────────────────── */
+
+.idea-admin-list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: .85rem;
+}
+.idea-admin-list-toolbar__left,
+.idea-admin-list-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.idea-admin-count {
+  font-size: .82rem;
+  color: var(--idea-muted);
+  font-weight: 700;
+}
+
+/* Button group (inline cluster, e.g. 公開/非公開/廃止) */
+.idea-admin-btn-group {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-button);
+  overflow: hidden;
+}
+.idea-admin-btn-group .idea-admin-action {
+  border: none;
+  border-radius: 0;
+  border-right: 1px solid var(--idea-stone);
+}
+.idea-admin-btn-group .idea-admin-action:last-child { border-right: none; }
+
+/* ─── Pagination ─────────────────────────────────────────────────────────── */
+
+.idea-admin-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+.idea-admin-pager__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.1rem;
+  height: 2.1rem;
+  padding: 0 .5rem;
+  border: 1px solid rgba(205, 191, 170, .45);
+  border-radius: 6px;
+  background: var(--idea-surface);
+  color: var(--idea-muted);
+  font-size: .82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background .14s, border-color .14s, color .14s;
+  cursor: pointer;
+}
+.idea-admin-pager__item:hover {
+  background: var(--idea-surface-soft);
+  border-color: var(--idea-stone-2);
+  color: var(--idea-ink);
+}
+.idea-admin-pager__item.is-active {
+  background: var(--idea-olive);
+  border-color: var(--idea-olive);
+  color: var(--idea-surface);
+}
+.idea-admin-pager__item[disabled],
+.idea-admin-pager__item.is-disabled {
+  opacity: .35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Dashboard summary cards ────────────────────────────────────────────── */
+
+.idea-admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.idea-admin-kpi {
+  padding: 1rem 1.1rem;
+  background: var(--idea-surface);
+  border: 1px solid rgba(205, 191, 170, .45);
+  border-radius: var(--idea-admin-radius-panel);
+  box-shadow: var(--idea-shadow-card);
+}
+.idea-admin-kpi__label {
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--idea-muted);
+  margin-bottom: .3rem;
+}
+.idea-admin-kpi__value {
+  font-family: var(--idea-font-serif);
+  font-size: 1.85rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--idea-ink);
+  font-variant-numeric: tabular-nums;
+}
+.idea-admin-kpi__sub {
+  font-size: .76rem;
+  color: var(--idea-muted);
+  margin-top: .25rem;
+}
+.idea-admin-kpi--positive .idea-admin-kpi__value { color: var(--idea-olive); }
+.idea-admin-kpi--negative .idea-admin-kpi__value { color: #a9472e; }
+
+/* ─── Detail view (dl spec list) ─────────────────────────────────────────── */
+
+.idea-admin-spec-list {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid rgba(205, 191, 170, .35);
+  font-size: .86rem;
+}
+.idea-admin-spec-row {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: .5rem;
+  padding: .6rem 0;
+  border-bottom: 1px solid rgba(205, 191, 170, .28);
+}
+.idea-admin-spec-row:last-child { border-bottom: none; }
+.idea-admin-spec-row dt { color: var(--idea-muted); font-weight: 700; }
+.idea-admin-spec-row dd { margin: 0; word-break: break-word; }
+
+/* ─── Empty state ─────────────────────────────────────────────────────────── */
+
+.idea-admin-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--idea-muted);
+  background: var(--idea-surface);
+  border: 1px solid rgba(205, 191, 170, .35);
+  border-radius: var(--idea-admin-radius-panel);
+}
+.idea-admin-empty__title {
+  font-weight: 700;
+  color: var(--idea-ink);
+  font-size: 1rem;
+}
+
+/* ─── Inline text button ─────────────────────────────────────────────────── */
+
+.idea-admin-text-btn {
+  border: none;
+  background: transparent;
+  color: var(--idea-muted);
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  transition: color .14s;
+}
+.idea-admin-text-btn:hover { color: var(--idea-ink); }
+.idea-admin-text-btn--danger { color: #a9472e; }
+.idea-admin-text-btn--danger:hover { color: #862e18; }
+
+/* ─── Icon action buttons (table row: eye / copy) ────────────────────────── */
+
+.idea-admin-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(205, 191, 170, .4);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--idea-muted);
+  font-size: .85rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .14s, border-color .14s, color .14s;
+}
+.idea-admin-icon-btn:hover {
+  background: var(--idea-surface-soft);
+  border-color: var(--idea-stone-2);
+  color: var(--idea-ink);
+}
+
+/* ─── Progress bar ───────────────────────────────────────────────────────── */
+
+.idea-admin-progress {
+  height: .5rem;
+  border-radius: 999px;
+  background: rgba(205, 191, 170, .35);
+  overflow: hidden;
+}
+.idea-admin-progress__bar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--idea-olive);
+  transition: width .3s ease;
+}
+
+/* ─── Dialog / modal ────────────────────────────────────────────────────── */
+
+.idea-admin-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(41, 37, 31, .45);
+}
+.idea-admin-dialog-backdrop[hidden] { display: none; }
+.idea-admin-dialog {
+  background: var(--idea-surface);
+  border: 1px solid rgba(205, 191, 170, .55);
+  border-radius: var(--idea-admin-radius-panel);
+  box-shadow: var(--idea-shadow-float);
+  width: min(480px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.idea-admin-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .85rem 1.1rem;
+  border-bottom: 1px solid rgba(205, 191, 170, .4);
+  background: var(--idea-surface-soft);
+}
+.idea-admin-dialog__title {
+  margin: 0;
+  font-size: .95rem;
+  font-weight: 700;
+}
+.idea-admin-dialog__body {
+  padding: 1rem 1.1rem;
+  flex: 1;
+  font-size: .88rem;
+}
+.idea-admin-dialog__body ul {
+  margin: .5rem 0 0;
+  padding-left: 1.2rem;
+  color: #a9472e;
+  font-size: .82rem;
+}
+.idea-admin-dialog__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .6rem;
+  padding: .75rem 1.1rem;
+  border-top: 1px solid rgba(205, 191, 170, .4);
+  background: var(--idea-surface-soft);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .idea-admin-layout {
+    grid-template-columns: 1fr;
+  }
+  .idea-admin-side {
+    position: static;
+  }
+}
+
+@media (max-width: 860px) {
+  .idea-admin-shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "topbar"
+      "content";
+  }
+  .idea-admin-sidebar {
+    display: none;
+  }
+  .idea-admin-toolbar {
+    left: 0;
+  }
+  .idea-admin-field {
+    grid-template-columns: 1fr;
+  }
+  .idea-admin-field__label {
+    padding-top: 0;
+  }
+  .idea-admin-spec-row {
+    grid-template-columns: 7rem 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .idea-admin-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .idea-admin-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .idea-admin-list-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ─── Login-context frame ─────────────────────────────────────────────────── */
+
+.idea-admin-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--idea-surface-soft);
+  font-family: var(--idea-font-sans);
+  color: var(--idea-ink);
+}
+
+.idea-admin-login-wrap {
+  width: 100%;
+  max-width: 400px;
+  padding: 1.5rem 1rem;
+}

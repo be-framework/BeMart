@@ -1,96 +1,68 @@
-{#
-  BeMart favorites list — EC-CUBE goFavoriteList.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}お気に入り | IDEA STORE{% endblock %}
+{% block content %}
 
-  PORT of EC-CUBE 4.3 default-theme `Mypage/favorite.twig`
-  (src/Eccube/Resource/template/default/Mypage/favorite.twig).
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><a href="/mypage">マイページ</a><span>/</span><span>お気に入り</span>
+</nav>
 
-  Markup skeleton, `ec-mypageRole` / `ec-favoriteRole` /
-  `ec-favoriteRole__itemList` / `ec-favoriteRole__item` classes and the
-  block structure are kept verbatim from EC-CUBE. Only the dynamic
-  bindings are rebound to the FavoriteList resource body
-  (src/Resource/Page/Mypage/FavoriteList.php):
-    customerId, favorites[] { productCode, productName, unitPrice,
-                              fileName },
-    favoriteCount
-
-  Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
-
-  Per the Phase 3 ALPS audit, `Favorite` was re-tagged `src-template`:
-  the favorite row composes productName / unitPrice, and FavoriteEntity
-  / SqlFavoriteStorage carry these, so the resource body is sufficient
-  for the row content.
-
-  Phase 3 ENRICHMENT — the `Favorite` ALPS descriptor + FavoriteEntity
-  were widened with `fileName` (the product main-image file name — the
-  lowest-`sort_no` `dtb_product_image` row). SqlFavoriteStorage JOINs
-  the image table; FakeFavoriteStorage carries the parallel field. The
-  favorite-row THUMBNAIL is now wired (previously a missing-body-field
-  residual), falling back to the shared `no_image_product` placeholder
-  when the product has no image — the same CartItem `mainImage` pattern.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `pagination` -> the resource body's flat `favorites` list; BeMart's
-     FavoriteList is not a paged view, so the `ec-pagerRole` +
-     `pager.twig` include is OMITTED.
-   - `csrf_token_for_anchor()` — BeMart renders the token into the
-     `token-for-anchor` attribute expected by EC-CUBE's `function.js`;
-     the router normalizes the generated `_token` field to `csrfToken`.
-   - MISSING BODY FIELD — EC-CUBE's favorite.twig renders a price RANGE
-     (`price02_inc_tax_min`～`price02_inc_tax_max`). BeMart's
-     FavoriteEntity carries a single `unitPrice`, so the min/max range
-     is OMITTED; the row shows the single price. Enumerated as residual.
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'mypage' %}
-{% set route = 'mypage-favorite-list' %}
-{% set title = 'マイページ' %}
-
-{% block main %}
-    <div class="ec-layoutRole__main">
-        <div class="ec-mypageRole">
-            <div class="ec-pageHeader">
-                <h1>マイページ/お気に入り一覧</h1>
-            </div>
-            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'favorite', name01: name01|default(''), name02: name02|default('') } %}
-        </div>
-
-        <div class="ec-mypageRole">
-            <div class="ec-favoriteRole">
-                {% if favoriteCount > 0 %}
-                    <div class="ec-favoriteRole__header">
-                        <p>{{ favoriteCount }}件のお気に入りがあります</p>
-                    </div>
-                    <div class="ec-favoriteRole__detail">
-                        <ul class="ec-favoriteRole__itemList">
-                            {% for FavoriteProduct in favorites %}
-                                <li class="ec-favoriteRole__item">
-                                    <a class="ec-closeBtn--circle"
-                                       href="/mypage/favorite?productCode={{ FavoriteProduct.productCode }}&_method=delete"
-                                       token-for-anchor="{{ csrf_token_for_anchor() }}"
-                                       data-method="delete">
-                                        <div class="ec-icon">
-                                            <img src="{{ asset('assets/icon/cross-white.svg') }}" alt="close">
-                                        </div>
-                                    </a>
-                                    <a class="ec-favoriteRole__itemThumb" href="/product?productCode={{ FavoriteProduct.productCode }}">
-                                        <p class="ec-favoriteRole__item-image">
-                                            <img src="{{ asset(FavoriteProduct.fileName|default('assets/img/common/no_image_product.png'), 'save_image') }}">
-                                        </p>
-                                    </a>
-                                    <p class="ec-favoriteRole__itemTitle">{{ FavoriteProduct.productName }}</p>
-                                    <p class="ec-favoriteRole__itemPrice">
-                                        {{ FavoriteProduct.unitPrice|price }}
-                                    </p>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% else %}
-                    <div class="ec-favoriteRole__header">お気に入りは登録されていません。</div>
-                {% endif %}
-            </div>
-        </div>
+<section class="idea-container idea-section idea-section--tight" aria-labelledby="idea-favorite-title">
+  <div class="idea-section-head">
+    <div>
+      <p class="idea-eyebrow">My Favorites</p>
+      <h1 id="idea-favorite-title" class="idea-section-title">お気に入り一覧</h1>
     </div>
+    {% if favoriteCount|default(0) > 0 %}
+      <span class="idea-muted">{{ favoriteCount }} 件</span>
+    {% endif %}
+  </div>
+
+  {% if favoriteCount|default(0) > 0 %}
+    <ul class="idea-grid idea-product-grid" aria-label="お気に入り商品">
+      {% for item in favorites %}
+        {% set imageSrc = item.fileName
+          ? '/save_image/' ~ item.fileName
+          : '/assets/idea-store/images/product/product-01.svg' %}
+        <li>
+          <article class="idea-card idea-product-card idea-favorite-item">
+            <a class="idea-product-card-media" href="/product?productCode={{ item.productCode }}" aria-label="{{ item.productName }} の詳細">
+              <img src="{{ imageSrc }}" alt="{{ item.productName }}" loading="lazy">
+            </a>
+            <span class="idea-card-body">
+              <span class="idea-card-kicker">{{ item.productCode }}</span>
+              <strong class="idea-card-title">{{ item.productName }}</strong>
+              <span class="idea-price">¥{{ item.unitPrice|number_format }}</span>
+              <span class="idea-card-bottom">
+                <a class="idea-link" href="/product?productCode={{ item.productCode }}">詳細を見る</a>
+                <form method="post" action="/mypage/favorite">
+                  <input type="hidden" name="_method" value="delete">
+                  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                  <input type="hidden" name="productCode" value="{{ item.productCode }}">
+                  <button class="idea-text-button" type="submit" aria-label="{{ item.productName }} をお気に入りから削除">削除</button>
+                </form>
+              </span>
+            </span>
+          </article>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <div class="idea-actions" style="margin-top:2rem;">
+      <a class="idea-button idea-button--light" href="/products">商品を探す</a>
+      <a class="idea-link" href="/mypage">マイページへ戻る</a>
+    </div>
+
+  {% else %}
+    <div class="idea-empty" aria-live="polite">
+      <p class="idea-eyebrow">No favorites yet</p>
+      <h2>お気に入りに商品はありません。</h2>
+      <p class="idea-muted">気になった商品は商品詳細ページからお気に入りに追加できます。</p>
+      <div class="idea-actions">
+        <a class="idea-button" href="/products">商品を見る</a>
+        <a class="idea-link" href="/mypage">マイページへ戻る</a>
+      </div>
+    </div>
+  {% endif %}
+
+</section>
 {% endblock %}

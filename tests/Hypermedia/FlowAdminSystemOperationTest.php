@@ -21,7 +21,10 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
 {
     public const FLOW_ID = 'flow-admin-system-operation';
 
-    private const ADMIN_ID = 'ad000000000000000000000000000001';
+    // dtb_member.id of test-admin. The DB-backed flow creates another
+    // admin, so the session identity has to resolve to a real row: the
+    // authority guard in MemberCreating compares the caller's authority.
+    private const ADMIN_ID = '1';
     private const CSRF_TOKEN = 'workflow-system-csrf-token';
     private const ADMIN_PASSWORD = 'local-dev-admin-password';
     private const MEMBER_PASSWORD = 'workflow-member-password-2026';
@@ -57,7 +60,10 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Alps('goAdminLogin')]
     public function testAdminLoginForm(): ResourceObject
     {
-        $created = $this->resource->post('page://self/admin/member', [
+        $adminTop = $this->resource->get('page://self/admin/index');
+        $this->assertSame(Code::OK, $adminTop->code);
+        $memberList = $this->follow($adminTop, 'goMemberList');
+        $created = $this->resource->post($this->linkHref($memberList, 'doCreateMember'), [
             'loginId' => self::$adminLoginId,
             'password' => self::ADMIN_PASSWORD,
             'name' => 'Workflow System Admin',
@@ -67,7 +73,11 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
         $this->assertSame(Code::CREATED, $created->code);
         $this->assertSame(self::$adminLoginId, $this->bodyValue($created, 'loginId'));
 
-        $response = $this->resource->get('page://self/admin/login');
+        $loggedOut = $this->resource->post($this->linkHref($adminTop, 'doAdminLogout'), [
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::SEE_OTHER, $loggedOut->code);
+        $response = $this->follow($loggedOut, 'goAdminLogin');
 
         $this->assertSame(Code::OK, $response->code);
 
@@ -78,7 +88,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Depends('testAdminLoginForm')]
     public function testAdminLogsIn(ResourceObject $response): ResourceObject
     {
-        $loggedIn = $this->resource->post('page://self/admin/login', [
+        $loggedIn = $this->resource->post($this->linkHref($response, 'doAdminLogin'), [
             'loginId' => self::$adminLoginId,
             'password' => self::ADMIN_PASSWORD,
             'csrfToken' => self::CSRF_TOKEN,
@@ -110,7 +120,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Depends('testMemberList')]
     public function testCreatesMember(ResourceObject $response): ResourceObject
     {
-        $created = $this->resource->post('page://self/admin/member', [
+        $created = $this->resource->post($this->linkHref($response, 'doCreateMember'), [
             'loginId' => self::$memberLoginId,
             'password' => self::MEMBER_PASSWORD,
             'name' => 'Workflow Member',
@@ -135,7 +145,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Depends('testMember')]
     public function testUpdatesMember(ResourceObject $response): ResourceObject
     {
-        $updated = $this->resource->put('page://self/admin/member', [
+        $updated = $this->resource->put($this->linkHref($response, 'doUpdateMember'), [
             'loginId' => self::$memberLoginId,
             'name' => 'Workflow Member Updated',
             'csrfToken' => self::CSRF_TOKEN,
@@ -151,7 +161,9 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Depends('testUpdatesMember')]
     public function testUpdatesAuthorityRole(ResourceObject $response): ResourceObject
     {
-        $updated = $this->resource->post('page://self/admin/authority-role', [
+        $member = $this->follow($response, 'goMember', ['loginId' => self::$memberLoginId]);
+        $memberList = $this->follow($member, 'goMemberList');
+        $updated = $this->resource->post($this->linkHref($memberList, 'doUpdateAuthorityRole'), [
             'loginId' => self::$memberLoginId,
             'authority' => 0,
             'csrfToken' => self::CSRF_TOKEN,
@@ -161,6 +173,35 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
         $this->assertSame(self::$memberLoginId, $this->bodyValue($updated, 'loginId'));
 
         return $updated;
+    }
+
+    #[Alps('doDeleteMember')]
+    #[Depends('testUpdatesAuthorityRole')]
+    public function testDeletesMember(ResourceObject $response): ResourceObject
+    {
+        $member = $this->follow($response, 'goMember', ['loginId' => self::$memberLoginId]);
+        $deleted = $this->resource->delete($this->linkHref($member, 'doDeleteMember'), [
+            'loginId' => self::$memberLoginId,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(self::$memberLoginId, $this->bodyValue($deleted, 'loginId'));
+        $this->assertFalse((bool) $this->bodyValue($deleted, 'alreadyDeleted'));
+
+        return $deleted;
+    }
+
+    #[Alps('goMember')]
+    #[Depends('testDeletesMember')]
+    public function testConfirmsDeletedMemberIsInactive(ResourceObject $response): ResourceObject
+    {
+        $memberList = $this->follow($response, 'goMemberList');
+        $member = $this->follow($memberList, 'goMember', ['loginId' => self::$memberLoginId]);
+
+        $this->assertSame(0, $this->bodyValue($member, 'work'));
+
+        return $member;
     }
 
     #[Alps('goLoginHistoryList')]
@@ -181,7 +222,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Depends('testSecurity')]
     public function testUpdatesSecurity(ResourceObject $response): ResourceObject
     {
-        $updated = $this->resource->put('page://self/admin/security', [
+        $updated = $this->resource->put($this->linkHref($response, 'doUpdateSecurity'), [
             'adminAllowHosts' => '',
             'adminDenyHosts' => '',
             'frontAllowHosts' => '',
@@ -212,7 +253,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
         assert($twoFactorAuth instanceof TwoFactorAuthInterface);
         self::$twoFactorAuthSecret = (string) $this->bodyValue($response, 'authKey');
         $this->assertNotSame('', self::$twoFactorAuthSecret);
-        $configured = $this->resource->put('page://self/admin/two-factor-auth-set', [
+        $configured = $this->resource->put($this->linkHref($response, 'doSetTwoFactorAuth'), [
             'loginId' => self::$adminLoginId,
             'authKey' => self::$twoFactorAuthSecret,
             'deviceToken' => $twoFactorAuth->generateDeviceToken(self::$twoFactorAuthSecret),
@@ -240,7 +281,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
         assert(self::$dbSession instanceof WorkflowDbSession);
         $twoFactorAuth = self::$dbSession->injector()->getInstance(TwoFactorAuthInterface::class);
         assert($twoFactorAuth instanceof TwoFactorAuthInterface);
-        $verified = $this->resource->post('page://self/admin/two-factor-auth', [
+        $verified = $this->resource->post($this->linkHref($response, 'doVerifyTwoFactorAuth'), [
             'loginId' => self::$adminLoginId,
             'deviceToken' => $twoFactorAuth->generateDeviceToken(self::$twoFactorAuthSecret),
             'csrfToken' => self::CSRF_TOKEN,
@@ -264,7 +305,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Depends('testContentCache')]
     public function testClearsCache(ResourceObject $response): ResourceObject
     {
-        $cleared = $this->resource->put('page://self/admin/content/cache', [
+        $cleared = $this->resource->put($this->linkHref($response, 'doClearCache'), [
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
@@ -285,7 +326,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Depends('testMaintenance')]
     public function testTogglesMaintenance(ResourceObject $response): ResourceObject
     {
-        $toggled = $this->resource->put('page://self/admin/content/maintenance', [
+        $toggled = $this->resource->put($this->linkHref($response, 'doToggleMaintenance'), [
             'enabled' => false,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -307,10 +348,10 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Depends('testSystemInfo')]
     public function testAdminLogsOut(ResourceObject $response): void
     {
-        $loggedOut = $this->resource->post('page://self/admin/logout', [
+        $loggedOut = $this->resource->post($this->linkHref($response, 'doAdminLogout'), [
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $loggedOut->code);
+        $this->assertSame(Code::SEE_OTHER, $loggedOut->code);
     }
 }

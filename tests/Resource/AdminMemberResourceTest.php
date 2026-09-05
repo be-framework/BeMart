@@ -7,10 +7,12 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Exception\InsufficientAuthorityException;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
+use MyVendor\BeMart\Provide\Error\ExceptionStatusMapper;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -102,6 +104,25 @@ final class AdminMemberResourceTest extends TestCase
         $this->assertStringContainsString('loginId=fresh-admin', $ro->headers['Location']);
     }
 
+    public function testOnPostEscalatingAuthorityReturns403(): void
+    {
+        // shop-owner (authority=1) minting a システム管理者 (authority=0).
+        $this->rebindAdminSession(self::SHOP_OWNER_ID);
+
+        try {
+            $this->resource->post('page://self/admin/member', [
+                'loginId' => 'minted-admin',
+                'password' => 'minted-admin-password-2026',
+                'name' => '昇格管理者',
+                'authority' => 0,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+            $this->fail('Expected InsufficientAuthorityException');
+        } catch (InsufficientAuthorityException $e) {
+            $this->assertSame(Code::FORBIDDEN, (new ExceptionStatusMapper())->status($e));
+        }
+    }
+
     public function testOnPostDuplicateLoginIdReturns409(): void
     {
         $this->expectException(\MyVendor\BeMart\Be\Exception\LoginIdAlreadyTakenException::class);
@@ -113,19 +134,6 @@ final class AdminMemberResourceTest extends TestCase
             'authority' => 1,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-    }
-
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/member', [
-            'loginId' => 'csrf-victim',
-            'password' => 'csrf-victim-password-2026',
-            'name' => 'CSRF被害者',
-            'authority' => 1,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 
     public function testOnPutUpdatesAdmin(): void

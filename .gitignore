@@ -1,7 +1,9 @@
 /vendor/
+/node_modules/
 /.phpunit.cache/
+/.phpcs-cache
 /build/
-/var/log/*.json
+/var/log/
 /var/tmp/
 /tests/Http/log/*.log
 .DS_Store
@@ -17,3 +19,4 @@
 
 # EC-CUBE source clone for schema extraction and HTML parity tests
 /tools/ec-cube-source/
+

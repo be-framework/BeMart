@@ -1,91 +1,476 @@
 {#
-  BeMart admin payment-method editor — EC-CUBE Setting/Shop/payment_edit.twig.
+  BeMart admin Payment editor — clean-room build (idea-admin design language).
+
+  DATA CONTRACT (src/Resource/Page/Admin/Payment/Payment.php onGet):
+    paymentId   string   — opaque id; empty string = create mode
+    payment     array|null — {paymentId, paymentMethodName, charge, ruleMin, ruleMax, visible}
+                            null when paymentId is empty (create mode)
+    form        AdminPaymentForm — pre-filled renderer (HTML context only)
+
+  FORM CONTRACT (src/Form/AdminPaymentForm.php):
+    paymentMethodName  text      required  (id: payment_method)
+    charge             text      optional  (id: payment_charge) — surcharge amount, default 0
+    ruleMin            text      optional  (id: payment_rule_min)
+    ruleMax            text      optional  (id: payment_rule_max)
+    visible            checkbox  optional  (id: payment_visible)
+
+  ACTIONS (#[Link] on Payment resource):
+    POST   /admin/payment/payment-list                       — doCreatePayment (create)
+    PUT    /admin/payment/payment?paymentId=…&_method=put    — doUpdatePayment (edit)
+    DELETE /admin/payment/payment?paymentId=…&_method=delete — doDeletePayment (edit)
+  Back: goPaymentList → /admin/payment/payment-list
+
+  CSRF: csrfToken from resource body; field name "csrfToken".
+  _method tunnel: hidden input + action query string.
+
+  MODES:
+    Create (paymentId empty) — narrow single-column form:
+      sections: 支払方法情報, 手数料 + 利用金額範囲, 表示設定
+    Edit   (paymentId set)   — two-column layout:
+      primary: 同 3 sections as create, pre-filled
+      side: 現在の設定 (read-only spec strip) + 削除 danger zone
+
+  idea-admin vocabulary:
+    idea-admin-layout / idea-admin-primary / idea-admin-side
+    idea-admin-panel / idea-admin-panel__head / idea-admin-panel__body / idea-admin-panel__hint
+    idea-admin-field / idea-admin-field__label / idea-admin-field__input
+    idea-admin-required / idea-admin-error / idea-admin-notice
+    idea-admin-badge (--public / --private)
+    idea-admin-spec-list / idea-admin-spec-row
+    idea-admin-action (--primary / --destructive)
+    idea-admin-toolbar / idea-admin-toolbar__back / idea-admin-toolbar__actions
+
+  Per-page additions (idea-admin-* scoped, block stylesheet):
+    idea-admin-payment-create-wrap  narrow centered shell for create mode
+    idea-admin-payment-range-row    side-by-side min/max inputs
+    idea-admin-danger-zone          destructive section with red border accent
 #}
 {% extends 'admin-base.html.twig' %}
 
+{% set isEdit = paymentId is defined and paymentId is not empty %}
 {% set route = 'admin-payment-payment' %}
-{% set title = '支払方法設定' %}
-{% set sub_title = '店舗設定' %}
+{% set title = isEdit ? '支払方法編集' : '支払方法登録' %}
+{% set sub_title = '設定' %}
+
+{% block stylesheet %}
+<style>
+/* ── per-page additions (idea-admin-* scoped) ── */
+.idea-admin-payment-create-wrap {
+  max-width: 600px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+}
+.idea-admin-payment-range-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: .5rem;
+}
+.idea-admin-payment-range-row__sep {
+  color: var(--idea-muted);
+  font-size: .82rem;
+  font-weight: 700;
+  text-align: center;
+  padding-top: .2rem;
+}
+.idea-admin-danger-zone {
+  border: 1px solid rgba(169, 71, 46, .30);
+  border-radius: var(--idea-admin-radius-panel, 12px);
+  background: rgba(169, 71, 46, .04);
+  padding: .9rem 1rem;
+  display: grid;
+  gap: .65rem;
+}
+.idea-admin-danger-zone__label {
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #a9472e;
+  margin: 0;
+}
+.idea-admin-danger-zone__body {
+  font-size: .82rem;
+  color: var(--idea-muted, #6f675c);
+  margin: 0;
+}
+/* visible checkbox row layout */
+.idea-admin-payment-toggle {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .55rem 0;
+}
+.idea-admin-payment-toggle label {
+  font-size: .88rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--idea-ink);
+  margin: 0;
+}
+</style>
+{% endblock stylesheet %}
 
 {% block main %}
-    <form role="form" method="post" action="/admin/payment/payment" id="payment_edit_form" name="form1" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="paymentId" value="{{ paymentId|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">支払方法</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>支払方法名</span>
-                                    <span class="badge bg-primary ms-1">必須</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('method')|raw }}
-                                    {% if form.error('method') %}<span class="invalid-feedback d-block">{{ form.error('method') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>手数料</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('charge')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>下限金額</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('rule_min')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>上限金額</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('rule_max')|raw }}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3">
-                                    <span>有効・無効</span>
-                                </div>
-                                <div class="col">
-                                    {{ form.input('visible')|raw }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+{# ════════════════════════════════════════════════════════════════════
+   CREATE MODE — narrow single-column focused form
+   ════════════════════════════════════════════════════════════════════ #}
+{% if not isEdit %}
+
+<form
+  id="payment_create_form"
+  role="form"
+  method="post"
+  action="/admin/payment/payment-list"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+  <div class="idea-admin-payment-create-wrap">
+
+    {# Section: 支払方法情報 #}
+    <section class="idea-admin-panel" aria-labelledby="section-method">
+      <div class="idea-admin-panel__head">
+        <h3 id="section-method">支払方法情報</h3>
+        <p class="idea-admin-panel__hint">顧客に表示される支払方法の名称を入力してください。</p>
+      </div>
+      <div class="idea-admin-panel__body">
+
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label for="payment_method">支払方法名</label>
+            <span class="idea-admin-required">必須</span>
+          </div>
+          <div class="idea-admin-field__input">
+            {{ form.input('paymentMethodName')|raw }}
+            {% if form.error('paymentMethodName') %}
+            <span class="idea-admin-error" role="alert">{{ form.error('paymentMethodName') }}</span>
+            {% endif %}
+          </div>
         </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/payment/payment-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>支払方法設定一覧へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+      </div>
+    </section>
+
+    {# Section: 手数料と利用金額範囲 #}
+    <section class="idea-admin-panel" aria-labelledby="section-fee">
+      <div class="idea-admin-panel__head">
+        <h3 id="section-fee">手数料と利用金額範囲</h3>
+        <p class="idea-admin-panel__hint">手数料は注文金額に加算されます。利用金額範囲を空欄にすると制限なしになります。</p>
+      </div>
+      <div class="idea-admin-panel__body">
+
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label for="payment_charge">手数料（円）</label>
+          </div>
+          <div class="idea-admin-field__input">
+            {{ form.input('charge')|raw }}
+            {% if form.error('charge') %}
+            <span class="idea-admin-error" role="alert">{{ form.error('charge') }}</span>
+            {% endif %}
+          </div>
         </div>
-    </form>
+
+        <div class="idea-admin-field">
+          <div class="idea-admin-field__label">
+            <label>利用金額範囲（円）</label>
+          </div>
+          <div class="idea-admin-field__input">
+            <div class="idea-admin-payment-range-row">
+              <div>
+                <label for="payment_rule_min" style="font-size:.76rem;color:var(--idea-muted);font-weight:700;display:block;margin-bottom:.2rem;">下限</label>
+                {{ form.input('ruleMin')|raw }}
+              </div>
+              <span class="idea-admin-payment-range-row__sep">〜</span>
+              <div>
+                <label for="payment_rule_max" style="font-size:.76rem;color:var(--idea-muted);font-weight:700;display:block;margin-bottom:.2rem;">上限</label>
+                {{ form.input('ruleMax')|raw }}
+              </div>
+            </div>
+            {% if form.error('ruleMin') %}
+            <span class="idea-admin-error" role="alert">{{ form.error('ruleMin') }}</span>
+            {% endif %}
+            {% if form.error('ruleMax') %}
+            <span class="idea-admin-error" role="alert">{{ form.error('ruleMax') }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    {# Section: 表示設定 #}
+    <section class="idea-admin-panel" aria-labelledby="section-visibility">
+      <div class="idea-admin-panel__head">
+        <h3 id="section-visibility">表示設定</h3>
+        <p class="idea-admin-panel__hint">非表示にすると購入フロー上で選択できなくなります。</p>
+      </div>
+      <div class="idea-admin-panel__body">
+        <div class="idea-admin-payment-toggle">
+          {{ form.input('visible')|raw }}
+          <label for="payment_visible">この支払方法を有効にする</label>
+        </div>
+      </div>
+    </section>
+
+  </div>{# .idea-admin-payment-create-wrap #}
+
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/payment/payment-list">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        支払方法一覧
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        登録
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{# ════════════════════════════════════════════════════════════════════
+   EDIT MODE — two-column layout with current-values side panel
+   ════════════════════════════════════════════════════════════════════ #}
+{% else %}
+
+<form
+  id="payment_edit_form"
+  role="form"
+  method="post"
+  action="/admin/payment/payment?paymentId={{ paymentId|url_encode }}&amp;_method=put"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="paymentId" value="{{ paymentId }}">
+  <input type="hidden" name="_method" value="put">
+
+  <div class="idea-admin-layout">
+
+    {# ── Primary column ──────────────────────────────────────────── #}
+    <div class="idea-admin-primary">
+
+      {# Section: 支払方法情報 #}
+      <section class="idea-admin-panel" aria-labelledby="section-method-edit">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-method-edit">支払方法情報</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="payment_method">支払方法名</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('paymentMethodName')|raw }}
+              {% if form.error('paymentMethodName') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('paymentMethodName') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# Section: 手数料と利用金額範囲 #}
+      <section class="idea-admin-panel" aria-labelledby="section-fee-edit">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-fee-edit">手数料と利用金額範囲</h3>
+          <p class="idea-admin-panel__hint">空欄の上限は無制限として扱われます。</p>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="payment_charge">手数料（円）</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('charge')|raw }}
+              {% if form.error('charge') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('charge') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label>利用金額範囲（円）</label>
+            </div>
+            <div class="idea-admin-field__input">
+              <div class="idea-admin-payment-range-row">
+                <div>
+                  <label for="payment_rule_min" style="font-size:.76rem;color:var(--idea-muted);font-weight:700;display:block;margin-bottom:.2rem;">下限</label>
+                  {{ form.input('ruleMin')|raw }}
+                </div>
+                <span class="idea-admin-payment-range-row__sep">〜</span>
+                <div>
+                  <label for="payment_rule_max" style="font-size:.76rem;color:var(--idea-muted);font-weight:700;display:block;margin-bottom:.2rem;">上限</label>
+                  {{ form.input('ruleMax')|raw }}
+                </div>
+              </div>
+              {% if form.error('ruleMin') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('ruleMin') }}</span>
+              {% endif %}
+              {% if form.error('ruleMax') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('ruleMax') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# Section: 表示設定 #}
+      <section class="idea-admin-panel" aria-labelledby="section-visibility-edit">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-visibility-edit">表示設定</h3>
+          <p class="idea-admin-panel__hint">非表示にすると購入フロー上で選択できなくなります。</p>
+        </div>
+        <div class="idea-admin-panel__body">
+          <div class="idea-admin-payment-toggle">
+            {{ form.input('visible')|raw }}
+            <label for="payment_visible">この支払方法を有効にする</label>
+          </div>
+        </div>
+      </section>
+
+    </div>{# .idea-admin-primary #}
+
+    {# ── Side panel ──────────────────────────────────────────────── #}
+    <aside class="idea-admin-side" aria-label="現在の設定・削除">
+
+      {# Current values — read-only overview #}
+      <section class="idea-admin-panel" aria-labelledby="section-current">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-current">現在の設定</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          {% if payment is not null %}
+          <dl class="idea-admin-spec-list">
+            <div class="idea-admin-spec-row">
+              <dt>方法名</dt>
+              <dd>{{ payment.paymentMethodName }}</dd>
+            </div>
+            <div class="idea-admin-spec-row">
+              <dt>手数料</dt>
+              <dd>{{ payment.charge|number_format }}円</dd>
+            </div>
+            <div class="idea-admin-spec-row">
+              <dt>下限金額</dt>
+              <dd>
+                {% if payment.ruleMin is not null and payment.ruleMin > 0 %}
+                  {{ payment.ruleMin|number_format }}円
+                {% else %}
+                  <span style="color:var(--idea-muted);">制限なし</span>
+                {% endif %}
+              </dd>
+            </div>
+            <div class="idea-admin-spec-row">
+              <dt>上限金額</dt>
+              <dd>
+                {% if payment.ruleMax is not null and payment.ruleMax > 0 %}
+                  {{ payment.ruleMax|number_format }}円
+                {% else %}
+                  <span style="color:var(--idea-muted);">制限なし</span>
+                {% endif %}
+              </dd>
+            </div>
+            <div class="idea-admin-spec-row">
+              <dt>表示</dt>
+              <dd>
+                {% if payment.visible %}
+                  <span class="idea-admin-badge idea-admin-badge--public">有効</span>
+                {% else %}
+                  <span class="idea-admin-badge idea-admin-badge--private">非表示</span>
+                {% endif %}
+              </dd>
+            </div>
+          </dl>
+          {% endif %}
+        </div>
+      </section>
+
+      {# Delete — danger zone #}
+      <section class="idea-admin-panel" aria-labelledby="section-danger">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-danger" style="color:#a9472e;">削除</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <div class="idea-admin-danger-zone">
+            <p class="idea-admin-danger-zone__label">危険な操作</p>
+            <p class="idea-admin-danger-zone__body">
+              この支払方法を削除すると元に戻せません。既存の受注には影響しません。
+            </p>
+            <button
+              class="idea-admin-action idea-admin-action--destructive"
+              type="button"
+              id="payment-delete-btn"
+            >
+              <i class="fa fa-trash" aria-hidden="true"></i>
+              削除
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </aside>
+
+  </div>{# .idea-admin-layout #}
+
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/payment/payment-list">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        支払方法一覧
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-save" aria-hidden="true"></i>
+        保存
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{# Delete affordance — separate hidden form; submitted via JS confirm #}
+<form
+  id="payment-delete-form"
+  method="post"
+  action="/admin/payment/payment?paymentId={{ paymentId|url_encode }}&amp;_method=delete"
+  aria-hidden="true"
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="paymentId" value="{{ paymentId }}">
+  <input type="hidden" name="_method" value="delete">
+</form>
+
+{% endif %}{# isEdit #}
+
 {% endblock %}
+
+{% block javascript %}
+{% if isEdit %}
+<script>
+(function () {
+  'use strict';
+  var btn = document.getElementById('payment-delete-btn');
+  if (!btn) { return; }
+  btn.addEventListener('click', function () {
+    var name = {{ (payment is not null ? payment.paymentMethodName : '')|json_encode }};
+    if (window.confirm('「' + name + '」を削除してもよいですか？この操作は取り消せません。')) {
+      document.getElementById('payment-delete-form').submit();
+    }
+  });
+}());
+</script>
+{% endif %}
+{% endblock javascript %}

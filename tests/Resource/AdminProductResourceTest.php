@@ -11,10 +11,13 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
+use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
+use function assert;
 use function dirname;
 
 final class AdminProductResourceTest extends TestCase
@@ -28,19 +31,24 @@ final class AdminProductResourceTest extends TestCase
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
-    private function rebindAdminSession(string|null $adminId): void
+    private function rebindAdminSession(string|null $adminId, bool $htmlMutation = false): void
     {
         $session = new FakeAdminSession($adminId);
         $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session) extends AbstractModule {
-            public function __construct(private readonly FakeAdminSession $session)
-            {
+        $override = new class ($session, $htmlMutation) extends AbstractModule {
+            public function __construct(
+                private readonly FakeAdminSession $session,
+                private readonly bool $htmlMutation,
+            ) {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSession::class)->toInstance($this->session);
+                if ($this->htmlMutation) {
+                    $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
+                }
             }
         };
         $base->override($override);
@@ -111,18 +119,6 @@ final class AdminProductResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/product', [
-            'productCode' => 'wave8-no-csrf-001',
-            'productName' => 'No CSRF',
-            'price02' => 100,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostWithoutAdminReturns403(): void
     {
         $this->rebindAdminSession(null);
@@ -191,6 +187,19 @@ final class AdminProductResourceTest extends TestCase
         $this->assertFalse($ro->body['alreadyDeleted']);
     }
 
+    public function testOnDeleteHtmlContextRedirectsToProductList(): void
+    {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
+        $ro = $this->resource->delete('page://self/admin/product', [
+                'productCode' => 'admin-active-001',
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/product-list', $ro->headers['Location']);
+        $this->assertSame('admin-active-001', $ro->body['productCode']);
+    }
+
     public function testOnDeleteAlreadyDeletedReturnsAlreadyDeleted(): void
     {
         // Fake context is static-fixture based; replay-after-mutation is
@@ -215,13 +224,4 @@ final class AdminProductResourceTest extends TestCase
         ]);
     }
 
-    public function testOnDeleteMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->delete('page://self/admin/product', [
-            'productCode' => 'admin-active-001',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

@@ -13,6 +13,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderListFetched;
 use MyVendor\BeMart\Be\Input\GetAdminOrderListInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminOrderSearchForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -47,6 +48,7 @@ class OrderList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -60,7 +62,7 @@ class OrderList extends ResourceObject
     #[Alps('goOrderList')]
     #[JsonSchema(schema: 'get-admin-order-list.json', params: 'get-admin-order-list.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
-    #[Link(rel: 'doCreateOrder', href: 'page://self/admin/order', method: 'post')]
+    #[Link(rel: 'doCreateOrder', href: 'page://self/admin/order/create', method: 'post')]
     public function onGet(int $limit = 50, int $offset = 0): static
     {
         $final = ($this->becoming)(new GetAdminOrderListInput(
@@ -76,6 +78,7 @@ class OrderList extends ResourceObject
             'count' => $final->count,
             'limit' => $final->limit,
             'offset' => $final->offset,
+            'csrfToken' => $this->csrf->token,
         ];
         // Phase 3: an AdminOrderSearchForm for the HTML list page to
         // render the `multi` keyword box via `{{ searchForm.input(...) }}`.

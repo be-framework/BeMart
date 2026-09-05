@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\TaxRuleNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
@@ -31,6 +32,7 @@ class TaxRule extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -49,7 +51,7 @@ class TaxRule extends ResourceObject
 
         assert($final instanceof TaxRuleDeleted);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, '/admin/tax-rule/tax-rule-list');
         $this->body = ['taxRuleId' => $final->taxRuleId];
 
         return $this;

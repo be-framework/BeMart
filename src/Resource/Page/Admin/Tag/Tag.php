@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\TagNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
@@ -26,6 +27,7 @@ class Tag extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -43,8 +45,7 @@ class Tag extends ResourceObject
 
         assert($final instanceof TagDeleted);
 
-        $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/tag/tag-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/tag/tag-list');
         $this->body = ['tagId' => $final->tagId];
 
         return $this;

@@ -1,66 +1,350 @@
-{# EC-CUBE admin category list — product category management screen. #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-category-category-list' %}
-{% set title = 'カテゴリ管理' %}
+{% set route     = 'admin-category-category-list' %}
+{% set title     = 'カテゴリ管理' %}
 {% set sub_title = '商品管理' %}
 
-{% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header"><span class="card-title">カテゴリ登録</span></div>
-                    <div class="card-body">
-                        <form method="post" action="/admin/category/category-list" class="row g-3 align-items-end">
-                            <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_category') }}">
-                            <div class="col-6">
-                                <label class="form-label" for="categoryName">カテゴリ名</label>
-                                <input class="form-control" id="categoryName" name="categoryName" required>
-                            </div>
-                            <div class="col-2">
-                                <label class="form-label" for="sortNo">並び順</label>
-                                <input class="form-control" id="sortNo" name="sortNo" type="number" value="1" min="1">
-                            </div>
-                            <div class="col-auto">
-                                <button class="btn btn-ec-conversion" type="submit">登録</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/Category/CategoryList.php onGet)
+    count       int     — total category rows
+    categories  list<{categoryId, categoryName, parentId, sortNo}>
 
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header"><span class="card-title">カテゴリ一覧</span></div>
-                    <div class="card-body p-0">
-                        <table class="table mb-0">
-                            <thead>
-                            <tr>
-                                <th class="ps-3">ID</th>
-                                <th>カテゴリ名</th>
-                                <th>親カテゴリ</th>
-                                <th>並び順</th>
-                                <th class="pe-3"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for Category in categories %}
-                                <tr>
-                                    <td class="ps-3">{{ Category.categoryId }}</td>
-                                    <td>{{ Category.categoryName }}</td>
-                                    <td>{{ Category.parentId|default('') }}</td>
-                                    <td>{{ Category.sortNo }}</td>
-                                    <td class="text-end pe-3">
-                                        <a class="btn btn-ec-regular" href="/admin/category/category?categoryId={{ Category.categoryId }}">編集</a>
-                                    </td>
-                                </tr>
-                            {% else %}
-                                <tr><td colspan="5" class="text-center text-muted p-4">カテゴリがありません</td></tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+  ACTIONS (derived from #[Link] annotations on CategoryList.php + Category.php)
+    POST   /admin/category/category-list              doCreateCategory   (categoryName, sortNo, parentId?, csrfToken)
+    GET    /admin/category/category?categoryId=…      goCategory         (edit page)
+    PUT    /admin/category/category                   doUpdateCategory   (categoryId, categoryName?, sortNo?, parentId?, csrfToken)
+    DELETE /admin/category/category?categoryId=…      doDeleteCategory   (csrfToken — anchor method-override)
+    GET    /admin/category/csv                        goExportCategory
+    POST   /admin/category/csv                        doImportCategoryCsv
+
+  Design vocabulary: idea-admin-* (public/assets/idea-store/css/idea-admin.css)
+#}
+
+{% block stylesheet %}
+<style>
+/* ── Category-specific extensions (idea-admin-* namespace) ── */
+
+/* Inline quick-create form grid */
+.idea-admin-cat-create {
+  display: grid;
+  grid-template-columns: 1fr 7rem 7rem auto;
+  gap: .55rem;
+  align-items: end;
+}
+@media (max-width: 680px) {
+  .idea-admin-cat-create { grid-template-columns: 1fr; }
+}
+
+/* KPI count strip */
+.idea-admin-cat-kpi {
+  display: flex;
+  align-items: baseline;
+  gap: .4rem;
+  margin-bottom: 1.1rem;
+}
+.idea-admin-cat-kpi__num {
+  font-family: var(--idea-font-serif);
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: var(--idea-ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.idea-admin-cat-kpi__label {
+  font-size: .8rem;
+  color: var(--idea-muted);
+  font-weight: 700;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+
+{# ── Page header ── #}
+<div class="idea-admin-page-header">
+  <h1 class="idea-admin-page-title">カテゴリ管理</h1>
+  <span class="idea-admin-page-subtitle">商品管理</span>
+</div>
+
+{# ── KPI: total count ── #}
+<div class="idea-admin-cat-kpi" role="status" aria-label="登録件数">
+  <span class="idea-admin-cat-kpi__num">{{ count ?? 0 }}</span>
+  <span class="idea-admin-cat-kpi__label">件登録</span>
+</div>
+
+{# ── Quick-create panel (doCreateCategory) ── #}
+<div class="idea-admin-panel" style="margin-bottom:1.25rem;">
+  <div class="idea-admin-panel__head">
+    <h3>新規カテゴリを追加</h3>
+  </div>
+  <div class="idea-admin-panel__body">
+    <form
+      id="category-create-form"
+      method="post"
+      action="/admin/category/category-list"
+      aria-label="カテゴリ新規登録"
+    >
+      <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_category') }}">
+
+      <div class="idea-admin-cat-create">
+
+        {# categoryName — required #}
+        <div>
+          <label class="idea-admin-field__label" for="cat-create-name" style="margin-bottom:.3rem;">
+            <span style="font-size:.82rem;font-weight:700;">カテゴリ名</span>
+            <span class="idea-admin-required">必須</span>
+          </label>
+          <input
+            id="cat-create-name"
+            type="text"
+            name="categoryName"
+            placeholder="例: アウター"
+            maxlength="255"
+            required
+            style="width:100%;min-height:2.4rem;border:1px solid var(--idea-stone);border-radius:8px;
+                   background:rgba(255,253,248,.95);color:var(--idea-ink);font:inherit;font-size:.88rem;
+                   padding:.45rem .7rem;outline:none;"
+          >
         </div>
+
+        {# parentId — optional, select from existing categories #}
+        <div>
+          <label class="idea-admin-field__label" for="cat-create-parent" style="margin-bottom:.3rem;">
+            <span style="font-size:.82rem;font-weight:700;">親カテゴリ</span>
+          </label>
+          <select
+            id="cat-create-parent"
+            name="parentId"
+            style="width:100%;min-height:2.4rem;border:1px solid var(--idea-stone);border-radius:8px;
+                   background:rgba(255,253,248,.95);color:var(--idea-ink);font:inherit;font-size:.88rem;
+                   padding:.45rem .7rem;outline:none;"
+          >
+            <option value="">— なし（ルート）</option>
+            {% for cat in categories %}
+              <option value="{{ cat.categoryId }}">{{ cat.categoryName }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        {# sortNo — required #}
+        <div>
+          <label class="idea-admin-field__label" for="cat-create-sort" style="margin-bottom:.3rem;">
+            <span style="font-size:.82rem;font-weight:700;">並び順</span>
+            <span class="idea-admin-required">必須</span>
+          </label>
+          <input
+            id="cat-create-sort"
+            type="number"
+            name="sortNo"
+            value="{{ (count ?? 0) + 1 }}"
+            min="1"
+            max="2147483647"
+            required
+            style="width:100%;min-height:2.4rem;border:1px solid var(--idea-stone);border-radius:8px;
+                   background:rgba(255,253,248,.95);color:var(--idea-ink);font:inherit;font-size:.88rem;
+                   padding:.45rem .7rem;outline:none;"
+          >
+        </div>
+
+        <button
+          class="idea-admin-action idea-admin-action--primary"
+          type="submit"
+          style="align-self:flex-end;"
+        >
+          <i class="fa fa-plus" aria-hidden="true"></i>
+          追加
+        </button>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── List toolbar: count + CSV actions ── #}
+<div class="idea-admin-list-toolbar">
+  <div class="idea-admin-list-toolbar__left">
+    <span class="idea-admin-count">{{ count ?? 0 }}件</span>
+  </div>
+  <div class="idea-admin-list-toolbar__right">
+    {# goExportCategory — GET /admin/category/csv #}
+    <a class="idea-admin-action" href="/admin/category/csv" rel="goExportCategory">
+      <i class="fa fa-cloud-download" aria-hidden="true"></i>
+      CSV出力
+    </a>
+    {# doImportCategoryCsv — POST /admin/category/csv (separate CSV upload page) #}
+    <a class="idea-admin-action" href="/admin/category/csv#import" rel="doImportCategoryCsv">
+      <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+      CSV取込
+    </a>
+  </div>
+</div>
+
+{# ── Category list / empty state ── #}
+{% if categories is not empty %}
+
+  {#
+    UX decision: render flat list sorted by sortNo.
+    Parent relationship surfaced via badge, not nested indentation,
+    so the table remains scannable regardless of tree depth.
+    Inline delete uses <dialog> (same pattern as CustomerList).
+    Edit navigates to goCategory (/admin/category/category?categoryId=…).
+  #}
+  <div class="idea-admin-table-wrap">
+    <table class="idea-admin-table" aria-label="カテゴリ一覧">
+      <thead>
+        <tr>
+          <th scope="col" style="width:3rem;text-align:right;">#</th>
+          <th scope="col">カテゴリ名</th>
+          <th scope="col" style="width:11rem;">親カテゴリ</th>
+          <th scope="col" style="width:5rem;text-align:right;">並び順</th>
+          <th scope="col" class="idea-admin-table__actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for category in categories %}
+        <tr id="category-row-{{ category.categoryId }}">
+
+          {# Row index — 1-based display counter #}
+          <td style="text-align:right;font-size:.78rem;color:var(--idea-muted);font-variant-numeric:tabular-nums;font-weight:700;">
+            {{ loop.index }}
+          </td>
+
+          {# Category name — link to edit page (goCategory) #}
+          <td>
+            <a
+              class="idea-admin-meta__link"
+              href="/admin/category/category?categoryId={{ category.categoryId }}"
+              rel="goCategory"
+            >{{ category.categoryName }}</a>
+          </td>
+
+          {# Parent category — show ID as badge when set, dash when root #}
+          <td>
+            {% if category.parentId %}
+              {#
+                Resolve parent name from the flat list for display.
+                Falls back to raw ID if the parent is not in the current result set.
+              #}
+              {% set parentName = '' %}
+              {% for c in categories %}
+                {% if c.categoryId == category.parentId %}
+                  {% set parentName = c.categoryName %}
+                {% endif %}
+              {% endfor %}
+              <span class="idea-admin-badge idea-admin-badge--private" title="parentId: {{ category.parentId }}">
+                {{ parentName is not empty ? parentName : category.parentId }}
+              </span>
+            {% else %}
+              <span style="color:var(--idea-muted);font-size:.78rem;">—</span>
+            {% endif %}
+          </td>
+
+          {# Sort number (sortNo) — display order value from the domain #}
+          <td style="text-align:right;font-size:.82rem;font-variant-numeric:tabular-nums;">
+            {{ category.sortNo }}
+          </td>
+
+          {# Row actions: Edit + Delete #}
+          <td class="idea-admin-table__actions">
+
+            {# goCategory — GET edit page #}
+            <a
+              class="idea-admin-icon-btn"
+              href="/admin/category/category?categoryId={{ category.categoryId }}"
+              rel="goCategory"
+              aria-label="{{ category.categoryName }}を編集"
+              title="編集"
+            >
+              <i class="fa fa-pencil" aria-hidden="true"></i>
+            </a>
+
+            {# doDeleteCategory — opens delete confirmation dialog #}
+            <button
+              class="idea-admin-icon-btn idea-admin-action--destructive"
+              type="button"
+              aria-label="{{ category.categoryName }}を削除"
+              aria-haspopup="dialog"
+              onclick="document.getElementById('delete-dialog-{{ category.categoryId }}').showModal()"
+              title="削除"
+            >
+              <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5">{{ count }}件</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  {# ── Delete confirmation dialogs (one per row) ── #}
+  {# doDeleteCategory: DELETE /admin/category/category — CSRF protected #}
+  {% for category in categories %}
+  <dialog
+    id="delete-dialog-{{ category.categoryId }}"
+    aria-labelledby="delete-title-{{ category.categoryId }}"
+    style="border:1px solid rgba(205,191,170,.45);border-radius:12px;padding:0;max-width:30rem;width:90%;"
+  >
+    <div class="idea-admin-panel__head">
+      <h3 id="delete-title-{{ category.categoryId }}" style="margin:0;font-size:.9rem;font-weight:700;">
+        カテゴリを削除しますか？
+      </h3>
+      <button
+        class="idea-admin-icon-btn"
+        type="button"
+        aria-label="閉じる"
+        onclick="this.closest('dialog').close()"
+      ><i class="fa fa-times" aria-hidden="true"></i></button>
     </div>
+    <div class="idea-admin-panel__body">
+      <p style="margin:0;font-size:.88rem;">
+        この操作は元に戻せません。<br>
+        <strong>{{ category.categoryName }}</strong> を削除します。よろしいですか？
+      </p>
+      {% if category.parentId is null %}
+        <p class="idea-admin-notice idea-admin-notice--warning" style="margin-top:.75rem;font-size:.8rem;">
+          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+          ルートカテゴリを削除すると、配下のカテゴリも影響を受ける場合があります。
+        </p>
+      {% endif %}
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:.6rem;padding:.75rem 1rem;border-top:1px solid rgba(205,191,170,.35);">
+      <button
+        class="idea-admin-action"
+        type="button"
+        onclick="this.closest('dialog').close()"
+      >キャンセル</button>
+      {# Method override: DELETE via POST with _method=delete #}
+      <form
+        method="post"
+        action="/admin/category/category?categoryId={{ category.categoryId }}&_method=delete"
+        style="display:contents;"
+      >
+        <input type="hidden" name="_method" value="delete">
+        <input type="hidden" name="categoryId" value="{{ category.categoryId }}">
+        <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_category_delete') }}">
+        <button class="idea-admin-action idea-admin-action--destructive" type="submit">
+          削除
+        </button>
+      </form>
+    </div>
+  </dialog>
+  {% endfor %}
+
+{% else %}
+
+  {# ── Empty state ── #}
+  <div class="idea-admin-empty" role="status">
+    <i class="fa fa-tags fa-2x" aria-hidden="true"></i>
+    <p class="idea-admin-empty__title">カテゴリがまだ登録されていません</p>
+    <p style="font-size:.84rem;">上のフォームから最初のカテゴリを追加してください。</p>
+  </div>
+
+{% endif %}
+
 {% endblock %}

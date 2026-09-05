@@ -1,208 +1,134 @@
-{#
-  BeMart Shopping non-member page — EC-CUBE goShoppingNonMember.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}お客様情報の入力 | IDEA STORE{% endblock %}
+{% block content %}
 
-  PORT of EC-CUBE 4.3 default-theme `Shopping/nonmember.twig`
-  (src/Eccube/Resource/template/default/Shopping/nonmember.twig).
+<nav class="idea-container idea-breadcrumb" aria-label="パンくずリスト">
+  <a href="/">ホーム</a><span>/</span><a href="/cart">カート</a><span>/</span><a href="/shopping/login">購入入口</a><span>/</span><span aria-current="page">お客様情報</span>
+</nav>
 
-  FORM page (Ray.WebFormModule) — see var/templates/README.md. Markup
-  skeleton, the `ec-customerRole` / `ec-cartRole` / `ec-progress` /
-  `ec-off1Grid` / `ec-borderedDefs` / `ec-halfInput` / `ec-zipInput` /
-  `ec-select` / `ec-input` / `ec-telInput` / `ec-RegisterRole__actions`
-  classes + the `<dl>`/`<dt>`/`<dd>` definition-list structure are kept
-  verbatim from EC-CUBE.
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-nonmember-heading">
+  <div>
+    <p class="idea-eyebrow">Guest checkout</p>
+    <h1 id="idea-nonmember-heading" class="idea-title idea-title--compact">お客様情報の入力</h1>
+    <p class="idea-muted">会員登録不要でご購入いただけます。連絡先とお届け先を入力してください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Guest</span>
+    <strong>Step 2</strong>
+    <small>Shipping info</small>
+  </div>
+</section>
 
-  The NonMember resource exposes a real `NonMemberForm` (an
-  AbstractForm) as `body.form`; the inputs are rendered through it:
+<section class="idea-container idea-checkout-progress" aria-label="購入ステップ">
+  <span><b>1</b>カート</span>
+  <span class="is-active"><b>2</b>お客様情報</span>
+  <span><b>3</b>ご注文手続き</span>
+  <span><b>4</b>完了</span>
+</section>
 
-    {{ form.input('name01')|raw }}   <- real <input> w/ name/attrs
-    {{ form.error('name01') }}       <- inline Be-domain error, if any
-
-  EC-CUBE renders the same inputs through the Symfony FormView
-  (`form_widget(form.name.name01)`); the field names / placeholders in
-  NonMemberForm::init() are ported from EC-CUBE's `NonMemberType` leaf
-  fields. EC-CUBE's `NonMemberType` nests fields under compound types,
-  but BeMart's NonMember resource body carries them FLAT (the params
-  SubmitNonMemberInput accepts), so the form declares them flat. The
-  render-diff test stubs EC-CUBE's `form_widget` / `form_label` to
-  delegate to the SAME NonMemberForm so the inputs + labels diff to
-  ZERO. Validation authority stays with the Be Becoming chain.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `form._token` — Symfony CSRF widget; kept as the hidden `_token`
-     input bound to the body's `csrfToken` (null in the html context).
-   - `has_errors(...)` — request-validation runtime; resolves false on a
-     fresh form, so the conditional ` error` class never appears.
-   - `is_granted('ROLE_USER')` — EC-CUBE auth-state runtime. The
-     customer-info progress step is shown `is-complete` for anonymous
-     purchases; this page IS the anonymous branch, so the step renders
-     `is-complete` unconditionally — identical to EC-CUBE's output here.
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'cart_page' %}
-{% set route = 'shopping-non-member' %}
-{% set title = 'お客様情報の入力' %}
-
-{% block javascript %}
-<script src="//yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
-{% endblock javascript %}
-
-{% block main %}
-
-<div class="ec-customerRole">
-    <div class="ec-pageHeader">
-        <h1>お客様情報の入力</h1>
-    </div>
-    <div class="ec-cartRole">
-        <div class="ec-cartRole__progress">
-            <ul class="ec-progress">
-                {% set step = 1 %}
-                <li class="ec-progress__item">
-                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                    </div>
-                    <div class="ec-progress__label">カートの商品
-                    </div>
-                </li>
-                <li class="ec-progress__item is-complete">
-                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                    </div>
-                    <div class="ec-progress__label">お客様情報
-                    </div>
-                </li>
-                <li class="ec-progress__item">
-                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                    </div>
-                    <div class="ec-progress__label">ご注文手続き
-                    </div>
-                </li>
-                <li class="ec-progress__item">
-                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                    </div>
-                    <div class="ec-progress__label">ご注文内容確認
-                    </div>
-                </li>
-                <li class="ec-progress__item">
-                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                    </div>
-                    <div class="ec-progress__label">完了
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="ec-off1Grid">
-        <div class="ec-off1Grid__cell">
-            <form method="post" action="/shopping/non-member" class="h-adr">
-            <span class="p-country-name" style="display:none;">Japan</span>
-            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-            <div class="ec-borderedDefs">
-                <dl>
-                    <dt>
-                        <label class="ec-label">お名前</label>
-                    </dt>
-                    <dd>
-                        <div class="ec-halfInput">
-                            {{ form.input('name01')|raw }}
-                            {{ form.input('name02')|raw }}
-                            {{ form.error('name01') }}
-                            {{ form.error('name02') }}
-                        </div>
-                    </dd>
-                </dl>
-                <dl>
-                    <dt>
-                        <label class="ec-label">お名前(カナ)</label>
-                    </dt>
-                    <dd>
-                        <div class="ec-halfInput">
-                            {{ form.input('kana01')|raw }}
-                            {{ form.input('kana02')|raw }}
-                            {{ form.error('kana01') }}
-                            {{ form.error('kana02') }}
-                        </div>
-                    </dd>
-                </dl>
-                <dl>
-                    <dt>
-                        <label class="ec-label">会社名</label>
-                    </dt>
-                    <dd>
-                        <div class="ec-halfInput">
-                            {{ form.input('companyName')|raw }}
-                            {{ form.error('companyName') }}
-                        </div>
-                    </dd>
-                </dl>
-                <dl>
-                    <dt>
-                        <label class="ec-label">住所</label>
-                    </dt>
-                    <dd>
-                        <div class="ec-zipInput"><span>〒</span>
-                            {{ form.input('postalCode')|raw }}
-                            <div class="ec-zipInputHelp">
-                                <div class="ec-zipInputHelp__icon">
-                                    <div class="ec-icon"><img
-                                                src="{{ asset('assets/icon/question-white.svg') }}" alt="">
-                                    </div>
-                                </div><a href="https://www.post.japanpost.jp/zipcode/" target="_blank"><span>郵便番号検索</span></a>
-                            </div>
-                            {{ form.error('postalCode') }}
-                        </div>
-
-                        <div class="ec-select">
-                            {{ form.input('pref')|raw }}
-                            {{ form.error('pref') }}
-                        </div>
-                        <div class="ec-input">
-                            {{ form.input('addr01')|raw }}
-                            {{ form.error('addr01') }}
-                        </div>
-                        <div class="ec-input">
-                            {{ form.input('addr02')|raw }}
-                            {{ form.error('addr02') }}
-                        </div>
-                    </dd>
-                </dl>
-                <dl>
-                    <dt>
-                        <label class="ec-label">電話番号</label>
-                    </dt>
-                    <dd>
-                        <div class="ec-telInput">
-                            {{ form.input('phoneNumber')|raw }}
-                            {{ form.error('phoneNumber') }}
-                        </div>
-                    </dd>
-                </dl>
-                <dl>
-                    <dt>
-                        <label class="ec-label">メールアドレス</label>
-                    </dt>
-                    <dd>
-                        <div class="ec-input">
-                            {{ form.input('email')|raw }}
-                            {{ form.error('email') }}
-                        </div>
-                        <div class="ec-input">
-                            {{ form.input('email_confirm')|raw }}
-                            {{ form.error('email_confirm') }}
-                        </div>
-                    </dd>
-                </dl>
-            </div>
-            <div class="ec-RegisterRole__actions">
-                <div class="ec-off4Grid">
-                    <div class="ec-off4Grid__cell">
-                        <button type="submit" class="ec-blockBtn--action">次へ</button>
-                        <a class="ec-blockBtn--cancel" href="/cart">戻る</a>
-                    </div>
-                </div>
-            </div>
-        </form>
-        </div>
-    </div>
+{% if message is defined and message %}
+<div class="idea-container idea-section--tight" role="alert">
+  <p class="idea-form-error">{{ message }}</p>
 </div>
+{% endif %}
+
+<section class="idea-container idea-section">
+  <form class="idea-checkout-panel idea-guest-form h-adr"
+        method="post"
+        action="/shopping/non-member"
+        novalidate>
+    <span class="p-country-name" aria-hidden="true">Japan</span>
+    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+    <div class="idea-panel-head">
+      <div>
+        <p class="idea-eyebrow">Contact &amp; address</p>
+        <h2 class="idea-section-title">連絡先とお届け先</h2>
+      </div>
+      <a class="idea-link" href="/shopping/login">購入入口に戻る</a>
+    </div>
+
+    <div class="idea-form-grid idea-form-grid--two">
+
+      <label class="idea-field">
+        <span>姓</span>
+        {{ form.input('name01')|raw }}
+        <span class="idea-form-error">{{ form.error('name01') }}</span>
+      </label>
+
+      <label class="idea-field">
+        <span>名</span>
+        {{ form.input('name02')|raw }}
+        <span class="idea-form-error">{{ form.error('name02') }}</span>
+      </label>
+
+      <label class="idea-field">
+        <span>セイ</span>
+        {{ form.input('kana01')|raw }}
+        <span class="idea-form-error">{{ form.error('kana01') }}</span>
+      </label>
+
+      <label class="idea-field">
+        <span>メイ</span>
+        {{ form.input('kana02')|raw }}
+        <span class="idea-form-error">{{ form.error('kana02') }}</span>
+      </label>
+
+      <label class="idea-field idea-field--full">
+        <span>会社名（任意）</span>
+        {{ form.input('companyName')|raw }}
+        <span class="idea-form-error">{{ form.error('companyName') }}</span>
+      </label>
+
+      <label class="idea-field">
+        <span>メールアドレス</span>
+        {{ form.input('email')|raw }}
+        <span class="idea-form-error">{{ form.error('email') }}</span>
+      </label>
+
+      <label class="idea-field">
+        <span>メールアドレス（確認）</span>
+        {{ form.input('email_confirm')|raw }}
+        <span class="idea-form-error">{{ form.error('email_confirm') }}</span>
+      </label>
+
+      <label class="idea-field">
+        <span>電話番号</span>
+        {{ form.input('phoneNumber')|raw }}
+        <span class="idea-form-error">{{ form.error('phoneNumber') }}</span>
+      </label>
+
+      <label class="idea-field">
+        <span>郵便番号</span>
+        {{ form.input('postalCode')|raw }}
+        <span class="idea-form-error">{{ form.error('postalCode') }}</span>
+      </label>
+
+      <label class="idea-field">
+        <span>都道府県</span>
+        {{ form.input('pref')|raw }}
+        <span class="idea-form-error">{{ form.error('pref') }}</span>
+      </label>
+
+      <label class="idea-field">
+        <span>市区町村</span>
+        {{ form.input('addr01')|raw }}
+        <span class="idea-form-error">{{ form.error('addr01') }}</span>
+      </label>
+
+      <label class="idea-field">
+        <span>番地・建物名</span>
+        {{ form.input('addr02')|raw }}
+        <span class="idea-form-error">{{ form.error('addr02') }}</span>
+      </label>
+
+    </div>
+
+    <div class="idea-form-actions">
+      <button class="idea-button" type="submit">次へ</button>
+      <a class="idea-link" href="/cart">カートに戻る</a>
+    </div>
+  </form>
+</section>
+
 {% endblock %}

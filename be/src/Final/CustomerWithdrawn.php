@@ -30,8 +30,8 @@ use function sprintf;
  *      that goes to the human who still owns the address — must run
  *      before step 2 overwrites the record).
  *   2. Replace the customer record:
- *        - email → `withdrawn-{customerId}@example.invalid` (the
- *          `.invalid` TLD is reserved by RFC 2606 and can never
+ *        - email → `withdrawn-{customerId}@example.test` (the
+ *          `.test` TLD is reserved by RFC 2606 and can never
  *          collide with a real address, freeing the original email
  *          slot so the human can re-register later)
  *        - customerStatus → STATUS_WITHDRAWN (3)
@@ -51,14 +51,14 @@ use function sprintf;
  * the same customer is a no-op. We detect "already withdrawn" by
  * customerStatus===STATUS_WITHDRAWN(3) and short-circuit — no second
  * mail, no second cart-clear. The Final still constructs successfully
- * so the resource layer returns 200 on replay. (In production the
- * session is cleared by the EventListener after step 4, so a normal
- * UI flow never replays; this branch exists for retries and
+ * so the resource layer returns 200 on replay. (The resource clears
+ * the session right after this Final constructs, so a normal UI flow
+ * never replays; this branch exists for retries and
  * test-determinism.)
  *
- * Session clear is the EC-CUBE EventListener's job (Slice 7.2
- * contract — same as Pilot 6 doLogin / doLogout). The Be layer does
- * NOT touch session storage.
+ * Session clear belongs to the resource layer, which owns the
+ * session-writer port (same as Pilot 6 doLogin / doLogout). The Be
+ * layer does NOT touch session storage.
  */
 final readonly class CustomerWithdrawn
 {
@@ -108,7 +108,7 @@ final readonly class CustomerWithdrawn
             return;
         }
 
-        $dummyEmail = sprintf('withdrawn-%s@example.invalid', $current->customerId);
+        $dummyEmail = sprintf('withdrawn-%s@example.test', $current->customerId);
 
         // Step 2: persist the withdrawn shape (record of truth FIRST,
         // mirroring CheckoutCompleted's order convention).

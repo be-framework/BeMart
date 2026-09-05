@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Query;
 
+use MyVendor\BeMart\Be\Reason\Service\ChangesProductCorpus;
 use MyVendor\BeMart\Be\Reason\Entity\CategoryEntity;
 use Ray\MediaQuery\Annotation\DbQuery;
 
@@ -28,8 +29,10 @@ interface CategoryStorageInterface
     public function item(string $categoryId): CategoryEntity|null;
 
     #[DbQuery('tcategory_put')]
+    #[ChangesProductCorpus]
     public function put(CategoryEntity $category): void;
 
     #[DbQuery('tcategory_remove')]
+    #[ChangesProductCorpus]
     public function delete(string $categoryId): void;
 }

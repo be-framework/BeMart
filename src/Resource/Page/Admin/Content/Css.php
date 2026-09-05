@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
 use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Annotation\JsonSchema;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,10 +15,10 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ContentCssUpdated;
 use MyVendor\BeMart\Be\Input\UpdateContentCssInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Form\AdminCssForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -26,16 +27,13 @@ use function assert;
  *
  * PORT-side note: EC-CUBE's `CssController` reads / writes a single
  * `customize.css` file on disk; there is no Be domain entity for it (the
- * customize-CSS file was not modelled in any ALPS wave). This resource is
- * therefore a THIN HTML RENDERER only — it carries no `be/src/` Becoming
- * chain. It authenticates at the resource layer via
- * {@see AdminSession} (the same guard the Be CMS Finals apply)
- * and exposes an empty {@see AdminCssForm} for the
- * `Content/css.twig` port to render via `{{ form.input('css') }}`.
+ * customize-CSS file was not modelled in any ALPS wave). The Be transition
+ * updates the EC-CUBE-compatible asset boundary; GET renders that readback
+ * through {@see AdminCssForm}.
  *
  * FLAGGED: a future `be/src/` wave should model the customize-CSS file as
  * a Be domain (Get/Update Inputs + Final) so this resource can carry the
- * real persisted CSS instead of an empty editor.
+ * public customize.css asset instead of the runtime compatibility boundary.
  */
 class Css extends ResourceObject
 {
@@ -44,6 +42,7 @@ class Css extends ResourceObject
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
         private readonly CustomizeAssetWriterInterface $assetWriter,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -65,7 +64,10 @@ class Css extends ResourceObject
         $form->fillValues(['css' => $this->assetWriter->readCss()]);
 
         $this->code = Code::OK;
-        $this->body = ['form' => $form];
+        $this->body = [
+            'form' => $form,
+            'csrfToken' => $this->csrf->token,
+        ];
 
         return $this;
     }
@@ -79,13 +81,13 @@ class Css extends ResourceObject
     #[JsonSchema(schema: 'put-admin-content-css.json', params: 'put-admin-content-css.param.json')]
     #[Link(rel: 'goContentJs', href: 'page://self/admin/content/js')]
     #[CsrfProtected]
-    public function onPut(string $css = ''): static
+    public function onPut(string $css = '', string|null $mode = null): static
     {
         $final = ($this->becoming)(new UpdateContentCssInput(css: $css));
 
         assert($final instanceof ContentCssUpdated);
 
-        $this->code = Code::OK;
+        $this->code = $mode === 'content_operation_form' ? Code::SEE_OTHER : Code::OK;
         $this->headers['Location'] = '/admin/content/css';
         $this->body = [
             'transitionId' => 'doUpdateContentCss',

@@ -1,0 +1,42 @@
+[
+  { "area": "EF", "item_id": "top", "title": "フロントTOP表示", "auth": "none",
+    "steps": [ { "action": "goto", "url": "/" } ] },
+
+  { "area": "EF", "item_id": "cart-add", "title": "カート投入（TOP→一覧→詳細→投入→カート確認）多段操作", "auth": "none",
+    "steps": [
+      { "action": "goto", "url": "/" },
+      { "action": "goto", "url": "/products" },
+      { "action": "goto", "url": "/product?productCode=CODE000002" },
+      { "action": "fill", "sel": "input[name=\"quantity\"]", "value": "2" },
+      { "action": "submitFollow", "sel": "button.add-cart" },
+      { "action": "goto", "url": "/cart" }
+    ] },
+
+  { "area": "EF", "item_id": "contact", "title": "お問い合わせフォーム表示", "auth": "none",
+    "steps": [ { "action": "goto", "url": "/contact" } ] },
+
+  { "area": "EF", "item_id": "entry", "title": "会員登録フォーム表示", "auth": "none",
+    "steps": [ { "action": "goto", "url": "/entry" } ] },
+
+  { "area": "EA", "item_id": "login", "title": "管理ログイン（ID/PW→2FA→ダッシュボード）多段操作", "auth": "none",
+    "steps": [
+      { "action": "goto", "url": "/admin/login" },
+      { "action": "fill", "sel": "input[name=\"loginId\"]", "value": "test-admin" },
+      { "action": "fill", "sel": "input[name=\"password\"]", "value": "$ADMIN_PW" },
+      { "action": "submitFollow" },
+      { "action": "fill", "sel": "input[name=\"deviceToken\"]", "value": "123456" },
+      { "action": "submitFollow" }
+    ] },
+
+  { "area": "EA", "item_id": "dashboard", "title": "管理ホーム（ダッシュボード）", "auth": "admin",
+    "steps": [ { "action": "goto", "url": "/admin/index" } ] },
+
+  { "area": "EA", "item_id": "product-list", "title": "商品マスター 一覧", "auth": "admin",
+    "steps": [ { "action": "goto", "url": "/admin/product-list" } ] },
+
+  { "area": "EA", "item_id": "order-list", "title": "受注管理 一覧", "auth": "admin",
+    "steps": [ { "action": "goto", "url": "/admin/order-list" } ] },
+
+  { "area": "EA", "item_id": "customer-list", "title": "会員管理 一覧", "auth": "admin",
+    "steps": [ { "action": "goto", "url": "/admin/customer-list" } ] }
+]

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Help;
 
 use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\RepositoryModule\Annotation\CacheableResponse;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -21,6 +22,7 @@ use BEAR\Resource\Annotation\JsonSchema;
  * the content lookup against the admin-editable TradeLaw store is left as
  * TODO until a dedicated aggregation lands.
  */
+#[CacheableResponse]
 class TradeLaw extends ResourceObject
 {
     /**
@@ -42,9 +44,6 @@ class TradeLaw extends ResourceObject
                 'page' => 'trade-law',
                 'title' => '特定商取引法に基づく表記',
                 'sections' => [],
-            ],
-            'links' => [
-                'goTop' => 'page://self/',
             ],
         ];
 

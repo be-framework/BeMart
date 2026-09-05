@@ -1,597 +1,163 @@
-{#
-  BeMart admin Order list — EC-CUBE goOrderList (受注一覧).
-
-  PORT of EC-CUBE 4.3 admin-theme `Order/index.twig`
-  (src/Eccube/Resource/template/admin/Order/index.twig).
-
-  Order section, DATA/LIST + search-form page. It extends the admin
-  frame (`admin-base.html.twig`, the port of EC-CUBE's admin
-  `default_frame.twig`), not the storefront `base.html.twig`. The markup
-  skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim from
-  EC-CUBE; only the dynamic bindings are rebound to the OrderList
-  resource body (src/Resource/Page/Admin/OrderList.php — body carries
-  `orders` (a list of {orderNo, customerId, total, paymentTotal,
-  orderDate, orderStatus}), `count`, `limit`, `offset` and an
-  AdminOrderSearchForm exposed as `searchForm`).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` / `canonical-path ...)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `form_widget(searchForm.multi)` -> `searchForm.input('multi')` — the
-     real AdminOrderSearchForm keyword box (Ray.WebFormModule).
-   - The detail-search panel's `form_widget(searchForm.<field>)` calls
-     (orderer name / kana / company, payment-method, order-status
-     checkboxes, the four date ranges, email / phone / order-no /
-     tracking-number / purchase-product / purchase-price / shipping-mail)
-     -> the OrderList resource supports ONLY pagination knobs (Wave 7
-     first iteration — see OrderList's docblock; the search axes are
-     Phase 2). AdminOrderSearchForm declares only `multi`, so those
-     widgets render EMPTY. The panel STRUCTURE (rows / labels / collapse)
-     is kept verbatim; the empty widgets are an enumerated residual.
-   - `{% for Order in pagination %}` -> the resource body's `orders`
-     list. EC-CUBE's `pagination` is a KnpPaginator; the list endpoint
-     returns the full collection (no server-side paging in scope), so the
-     `pageMaxis` page-count <select> + the `@admin/pager.twig` block are
-     OMITTED. Enumerated as residual.
-   - EC-CUBE's table iterates `{% for Shipping in Order.Shippings %}` —
-     ONE row per shipment, keyed by `Shipping.id`. The AdminOrderListFetched
-     projection (Wave 7 shallow admin grid) does NOT carry per-shipment
-     rows; it is a flat order projection. BeMart's port renders ONE row
-     per ORDER keyed by `orderNo`, dropping the Shipping sub-loop. The
-     shipment-scoped columns (出荷状況 / お問い合わせ番号 / お届け先 +
-     the per-shipment action icons) therefore render empty / minimal.
-     FLAGGED for enrichment follow-up.
-   - `Order.name01`/`name02`/`payment_method`/`OrderStatusColor`/
-     `OrderStatus`/`payment_date`/`message`/`note`/`is_multiple` -> the
-     projection carries a flat `orderNo` / `customerId` / `total` /
-     `paymentTotal` / `orderDate` / `orderStatus` (an int). The orderer
-     name, payment method, status color/label, payment date and the
-     message/note tooltips are NOT carried (Wave 7 shallow-grid slice).
-     The cells render the projection value or empty. FLAGGED for
-     enrichment follow-up.
-   - `csrf_token()` hidden input on the bulk form + `csrf_token_for_anchor()`
-     -> EC-CUBE per-request CSRF widget. OMITTED exactly as the storefront
-     ports omit it. EC-CUBE-runtime only — enumerated as residual.
-   - `OrderStatuses` (the bulk-status <select> options) -> EC-CUBE
-     master-data; the OrderList body carries no status master, so the
-     <select> renders with only the placeholder option. Enumerated as
-     residual.
-   - `search_items.twig` include (saved-search chips) -> EC-CUBE admin
-     fragment with no BeMart equivalent; dropped (the render-diff loader
-     serves it empty).
-#}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-order' %}
+{% set route = 'admin-order-list' %}
 {% set title = '受注一覧' %}
 {% set sub_title = '受注管理' %}
 
-{% block javascript %}
-    <script>
-        $(function() {
-            toggleBtnBulk('input[id^="check_"]', '.btn-bulk-wrapper');
-            $('input[id^="check_"]').on('change', function() {
-                $('#toggle_check_all').prop('checked', false);
-                toggleBtnBulk('input[id^="check_"]', '.btn-bulk-wrapper');
-            });
-
-            // 登録チェックボックス
-            $('#toggle_check_all').on('change', function() {
-                var checked = $(this).prop('checked');
-                if (checked) {
-                    $('input[id^="check_"]').prop('checked', true);
-                } else {
-                    $('input[id^="check_"]').prop('checked', false);
-                }
-                toggleBtnBulk('input[id^="check_"]', '.btn-bulk-wrapper');
-            });
-
-            $('#btn_bulk_delete').on('click', function(event) {
-                event.preventDefault();
-                $('#form_bulk').attr('action', "/admin/order/bulk-delete").submit();
-                return false;
-            });
-
-            // PDF出力(複数)
-            $('#bulkExportPdf').on('click', function(event) {
-                window.open('', 'newwin', 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=700, height=700');
-                $('#form_bulk').attr('action', "/admin/order/export-order-pdf");
-                $('#form_bulk').attr('target', 'newwin');
-                $('#form_bulk').submit();
-                return false;
-            });
-
-            // PDF出力(単一)
-            $('.pdf-print').click(function() {
-                window.open(this.href, 'newwin', 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=700, height=700');
-                return false;
-            });
-
-            // 送り状番号
-            var updateTrackingNumber = function(id, url, tracking_number, callback) {
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: {'trackingNumber': tracking_number, 'csrfToken': '{{ csrf_token('admin_order') }}'}
-                }).done(function(data, textStatus, jqXHR) {
-                    if (data['status'] == 'OK') {
-                        $('#tracking_number_' + id).val(data['trackingNumber']);
-                        if (typeof callback == 'function') {
-                            callback();
-                        }
-                    } else {
-                        alert('Update failed.');
-                    }
-                    return true;
-                }).fail(function(jqXHR, textStatus, errorThrown) {
-                    var response = JSON.parse(jqXHR.responseText);
-                    var messages = '';
-                    for (var i = 0; i < response.messages.length; i++) {
-                        messages += response.messages[i] + "\n";
-                    }
-                    alert(messages);
-                    return false;
-                });
-            };
-
-            $('button.update_tracking_number').prop('disabled', true);
-            // フォームに変更があったら更新ボタンを有効にする
-            $('input.update_tracking_number').on('keyup', function(event) {
-                var $tracking_number = $(this);
-                var $button = $("button[data-target='#" + $tracking_number.attr('id') + "']");
-                $button.prop('disabled', false);
-                $button.children('i')
-                    .removeClass('text-secondary')
-                    .addClass('text-success');
-            });
-            // enter キーで更新し、次のフォームへフォーカスを移動する
-            $('input.update_tracking_number').on('keypress', function(event) {
-                var $tracking_number = $(this);
-                var $button = $("button[data-target='#" + $tracking_number.attr('id') + "']");
-
-                var code = event.which ? event.which : event.keyCode;
-
-                if (code == 13) { // on press to enter
-                    var index = $('input.update_tracking_number').index(this);
-                    var callback = function() {
-                        $button.prop('disabled', true);
-                        $button.children('i')
-                            .removeClass('text-success')
-                            .addClass('text-secondary');
-                        $('input.update_tracking_number:gt(' + index + '):first').focus();
-                    };
-                    updateTrackingNumber($tracking_number.data('shipping_id'), $tracking_number.data('url'), $tracking_number.val(), callback);
-                    event.preventDefault();
-                }
-            });
-            // 更新ボタンの制御
-            $('button.update_tracking_number').on('click', function(event) {
-                event.preventDefault();
-                var $button = $(this);
-                var $target = $($(this).data('target'));
-                var tracking_number = $target.val();
-                var callback = function() {
-                    $button.prop('disabled', true);
-                    $button.children('i')
-                        .removeClass('text-success')
-                        .addClass('text-secondary');
-                };
-
-                updateTrackingNumber($target.data('shipping_id'), $target.data('url'), tracking_number, callback);
-            });
-
-            // 完了ボタン
-            $('#bulkChangeComplete').on('click', function() {
-                location.href = '/admin/order-list?resume=1';
-            });
-
-        });
-    </script>
-
-    {{ include('Page/Admin/Order/confirmationModal_js.html.twig') }}
-{% endblock javascript %}
-
 {% block main %}
-    <!--検索条件設定テーブルここから-->
-    <div class="c-outsideBlock">
-        <form name="search_form" id="search_form" method="get" action="/admin/order-list">
-            <div class="c-outsideBlock__contents">
-                <div class="row">
-                    <div class="col-12">
-                        <div>
-                            <label class="col-form-label" data-bs-toggle="tooltip" data-bs-placement="top" title="情報を入力して一覧の絞り込み検索ができます。より詳細な条件を指定するには［詳細検索］を開いてください。">注文番号・お名前・会社名・メールアドレス・電話番号<i class="fa fa-question-circle fa-lg ms-1"></i></label>
-                            {{ searchForm.input('multi')|raw }}
-                        </div>
-                        <div class="row">
-                            <div class="mb-3 col-12">
-                                <label class="col-form-label"  data-bs-toggle="tooltip" data-bs-placement="top" title="受注の対応状況による絞り込み検索ができます。カッコ内は対応すべき受注の件数が表示されています。">対応状況<i class="fa fa-question-circle fa-lg ms-1"></i></label>
-                                <div id="admin_search_order_status">
-                                    <!-- 各対応状況の件数を表示する -->
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-inline-block mb-3 collapsed" data-bs-toggle="collapse" href="#searchDetail" aria-expanded="false" aria-controls="searchDetail">
-                            <a>
-                                <i class="fa fw-bold me-1 fa-plus-square-o">
-                                    <span class="fw-bold">詳細検索</span>
-                                </i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="c-subContents ec-collapse collapse" id="searchDetail">
-                <div class="row">
-                    <div class="col">
-                        <label class="col-form-label">注文者名</label>
-                    </div>
-                    <div class="col">
-                        <div class="row">
-                            <div class="col-12">
-                                <p class="col-form-label">支払方法</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label class="col-form-label">注文者名(カナ)</label>
-                    </div>
-                    <div class="col">
-                        <label class="col-form-label">注文日</label>
-                        <div class="row align-items-center">
-                            <div class="col">
-                            </div>
-                            <div class="col-auto text-center">〜</div>
-                            <div class="col">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label class="col-form-label">注文者会社名</label>
-                    </div>
-                    <div class="col">
-                        <label class="col-form-label">入金日</label>
-                        <div class="row align-items-center">
-                            <div class="col">
-                            </div>
-                            <div class="col-auto text-center">〜</div>
-                            <div class="col">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label class="col-form-label">メールアドレス</label>
-                    </div>
-                    <div class="col">
-                        <label class="col-form-label">更新日</label>
-                        <div class="row align-items-center">
-                            <div class="col">
-                            </div>
-                            <div class="col-auto text-center">〜</div>
-                            <div class="col">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label class="col-form-label">電話番号</label>
-                    </div>
-                    <div class="col">
-                        <label class="col-form-label">お届け日</label>
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <div class="input-group">
-                                </div>
-                            </div>
-                            <div class="col-auto text-center">〜</div>
-                            <div class="col">
-                                <div class="input-group">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label class="col-form-label">注文番号</label>
-                    </div>
-                    <div class="col">
-                        <label class="col-form-label">購入金額</label>
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <div class="input-group">
-                                </div>
-                            </div>
-                            <div class="col-auto text-center">〜</div>
-                            <div class="col">
-                                <div class="input-group">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <div class="row">
-                            <div class="col-12">
-                                <p class="col-form-label">お問い合わせ番号</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <label class="col-form-label">購入商品名</label>
-                    </div>
-                </div>
 
-                <div class="row mb-2">
-                    <div class="col">
-                        <div class="row">
-                            <div class="col-12">
-                                <p class="col-form-label">出荷メール</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col"></div>
-                </div>
-            </div>
-            <div class="c-outsideBlock__contents">
-                <div class="row">
-                    <div class="mb-4">
-                        <div class="col-12">
-                            <button class="btn btn-ec-conversion px-5" type="submit" id="search_submit">検索</button>
-                            <span class="fw-bold ms-2" id="search_total_count">検索結果：{{ count }}件が該当しました</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="c-outsideBlock__contents mb-5">
-            </div>
-        </form>
-    </div>
-    <!--検索条件設定テーブルここまで-->
-
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                {% if count %}
-
-                    <form id="form_bulk" method="POST" action="">
-                        <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_order') }}">
-                        <div class="row justify-content-between mb-2">
-                            <div class="col-7">
-                                <div class="row justify-content-between">
-                                    <div class="col-auto d-none btn-bulk-wrapper">
-                                        <label class="me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="チェックを入れた受注に対して、一括処理を行います。充分に確認をしてから実行してください。">一括操作<i class="fa fa-question-circle fa-lg ms-1"></i></label>
-                                        <button id="bulkSendMail" type="button" class="btn btn-ec-regular me-2" data-type="mail" data-bulk-update="true">
-                                            メールする
-                                        </button>
-                                        <button type="button" id="bulkExportPdf" class="btn btn-ec-regular me-2">納品書出力</button>
-                                    </div>
-                                    <div class="col d-none btn-bulk-wrapper">
-                                        <div class="d-inline-block me-2">
-                                            <select class="form-select" id="option_bulk_status">
-                                                <option value="" selected>対応状況の変更</option>
-                                            </select>
-                                        </div>
-                                        <button type="button" id="btn_bulk_status" class="btn btn-ec-regular me-2 progressModal" data-type="status" data-bulk-update="true" data-submit="bulk">
-                                            決定
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-5 text-end">
-                                <div class="d-inline-block">
-                                    <div class="btn-group" role="group">
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-ec-regular" data-bs-toggle="dropdown" id="csvDownloadDropDown">
-                                                <i class="fa fa-cloud-download me-1 text-secondary"></i>
-                                                <span>CSVダウンロード</span>
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="/admin/order/export-order" id="orderCsvDownload">
-                                                    受注CSV
-                                                </a>
-                                                <a class="dropdown-item" href="/admin/order/export-shipping" id="shippingCsvDownload">
-                                                    出荷CSV
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-ec-regular" data-bs-toggle="dropdown" id="csvSettingDropDown">
-                                                <i class="fa fa-cog me-1 text-secondary"></i>
-                                                <span>CSV出力項目設定</span>
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="/admin/csv-config" id="orderCsvSetting">
-                                                    受注CSV
-                                                </a>
-                                                <a class="dropdown-item" href="/admin/csv-config" id="shippingCsvSetting">
-                                                    出荷CSV
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card rounded border-0 mb-4 d-block">
-                            <div class="card-body p-0">
-                                <table class="table table-sm" id="search_result">
-                                    <thead>
-                                    <tr>
-                                        <th class="border-top-0 pt-2 pb-2 text-center ps-3">
-                                            <input type="checkbox" id="toggle_check_all" name="filter" value="open">
-                                        </th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center">ID<a href="#" class="js-listSort" data-sortkey="orderer"><i class="fa fa-arrow-up" aria-hidden="true"></i></a>注文者<a href="#" class="js-listSort" data-sortkey="order"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center text-nowrap">支払方法<a href="#" class="js-listSort" data-sortkey="payment_method"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center">対応状況<a href="#" class="js-listSort" data-sortkey="order_status"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center">購入金額<a href="#" class="js-listSort" data-sortkey="purchase_price"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center">お問合せ</th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center text-nowrap">出荷状況<a href="#" class="js-listSort" data-sortkey="shipping_status"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center">お問い合わせ番号<a href="#" class="js-listSort" data-sortkey="tracking_number"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center">お届け先<a href="#" class="js-listSort" data-sortkey="delivery"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center pe-3"></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for Order in orders %}
-                                        <tr>
-                                            <td class="align-middle text-center ps-3">
-                                                <input type="checkbox" id="check_{{ Order.orderNo }}" data-id="{{ Order.orderNo }}" name="ids[]" value="{{ Order.orderNo }}"
-                                                       data-preview-notify-mail-url="/admin/order/mail-confirm?orderNo={{ Order.orderNo }}"
-                                                       data-notify-mail-url="/admin/order/shipping-notify-mail?orderNo={{ Order.orderNo }}"
-                                                       data-update-status-url="/admin/order?orderNo={{ Order.orderNo }}&_method=put"
-                                                />
-                                            </td>
-                                            <td class="align-middle text-start">
-                                                <a class="action-edit" href="/admin/order/edit?orderNo={{ Order.orderNo }}">{{ Order.orderNo }}<br>{{ Order.customerId }}<br>{{ Order.orderDate }}</a>
-                                            </td>
-                                            <td class="align-middle text-center">
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                <span class="badge badge-ec-blue" style="background-color: #fff; color: ; border-color: ">{{ Order.orderStatus }}</span>
-                                            </td>
-                                            <td class="align-middle text-end">
-                                                {{ Order.paymentTotal|price }}<br>
-                                                未入金
-                                            </td>
-                                            <td class="align-middle text-center">
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                未出荷
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                <div class="input-group input-group-sm">
-                                                    <input type="text" id="tracking_number_{{ Order.orderNo }}" class="form-control update_tracking_number" placeholder="お問い合わせ番号" value="" data-shipping_id="{{ Order.orderNo }}" data-url="/admin/order/tracking-number?orderNo={{ Order.orderNo }}&_method=put"/>
-                                                    <span class="input-group-btn">
-                                                <button type="button" class="btn btn-default update_tracking_number" data-target="#tracking_number_{{ Order.orderNo }}">
-                                                    <i class="fa fa-check fa-lg text-secondary" aria-hidden="true"></i>
-                                                </button>
-                                            </span>
-                                                </div>
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                <br>
-                                            </td>
-                                            <td class="align-middle pe-3">
-                                                <div class="text-end">
-                                                    <div class="px-1 d-inline-block">
-                                                        <a class="btn btn-ec-actionIcon confirmationModal"
-                                                           data-type="mail" data-bulk-update="false"
-                                                           data-preview-notify-mail-url="/admin/order/mail-confirm?orderNo={{ Order.orderNo }}"
-                                                           data-notify-mail-url="/admin/order/shipping-notify-mail?orderNo={{ Order.orderNo }}"
-                                                           data-bs-toggle="tooltip" data-bs-placement="top" title="出荷メール送信">
-                                                            <i class="fa fa-send fa-lg text-secondary" aria-hidden="true"></i>
-                                                        </a>
-                                                    </div>
-                                                    <div class="px-1 d-inline-block">
-                                                        <a class="btn btn-ec-actionIcon pdf-print" href="/admin/order/export-order-pdf?ids[]={{ Order.orderNo }}" data-bs-toggle="tooltip" data-bs-placement="top" title="納品書出力">
-                                                            <i class="fa fa-table fa-lg text-secondary" aria-hidden="true"></i>
-                                                        </a>
-                                                    </div>
-                                                    <div class="px-1 d-inline-block">
-                                                        <a class="btn btn-ec-actionIcon confirmationModal" href="javascript:;"
-                                                           data-id="{{ Order.orderNo }}" data-type="status" data-bulk-update="false"
-                                                           data-update-status-url="/admin/order?orderNo={{ Order.orderNo }}&_method=put"
-                                                           data-preview-notify-mail-url="/admin/order/mail-confirm?orderNo={{ Order.orderNo }}"
-                                                           data-bs-toggle="tooltip" data-bs-placement="top" title="出荷済にする">
-                                                            <i class="fa fa-check fa-lg text-secondary" aria-hidden="true"></i>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                                <div class="row justify-content-md-center"></div>
-                            </div>
-                            <div class="row justify-content-md-center pb-4 mb-4">
-                            </div>
-                        </div>
-                    </form>
-                    {# 検索結果なし #}
-                {% else %}
-                    <div class="card rounded border-0">
-                        <div class="card-body p-4">
-                            <div class="text-center text-muted mb-4 h5">検索条件に合致するデータが見つかりませんでした</div>
-                            <div class="text-center text-muted">検索条件を変えて、再度検索をお試しください</div>
-                            <div class="text-center text-muted">[詳細検索]も試してみましょう</div>
-                        </div>
-                    </div>
-                {% endif %}
-
-                <!-- 出荷済にする確認モーダル -->
-                <div class="modal fade" id="sentUpdateModal" tabindex="-1" role="dialog" aria-labelledby="sentUpdateModal" aria-hidden="true" data-bs-keyboard="false" data-bs-backdrop="static">
-                    <div class="modal-dialog modal-lg" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title fw-bold"><!--confirmationModal_js.twig--></h5>
-                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p class="modal-message"></p>
-                                <ul id="bulkErrors"></ul>
-                                <div id="bulk-options">
-                                    <div class="fw-bold mb-2 notificationMail">メールの送信</div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" id="notificationMail">
-                                        <label class="form-check-label notificationMail" for="notificationMail">
-                                            出荷お知らせメールを同時に送る
-                                        </label>
-                                    </div>
-                                    <div>
-                                        <div class="d-inline-block" data-bs-toggle="collapse" href="#viewEmail" aria-expanded="false" aria-controls="viewEmail"><a><i class="fa fa-plus-square-o fw-bold me-1"></i><span class="fw-bold">メールの文面を確認</span></a></div>
-                                        <div class="collapse bg-light p-4 ec-collapse bg-ec-formGray" id="viewEmail" style="word-wrap: break-word; word-break:break-all">
-                                            <pre></pre>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="progress" style="display: none">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                <button id="bulkChange" class="btn btn-ec-conversion" type="button"><!--confirmationModal_js.twig--></button>
-                                <button id="bulkChangeComplete" class="btn btn-ec-regular" style="display: none" type="button">閉じる</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 一括削除の確認モーダル -->
-                <div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-labelledby="discontinuance" aria-hidden="true" data-bs-keyboard="false" data-bs-backdrop="static">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title fw-bold">注文情報を削除します</h5>
-                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body text-start">
-                                <p class="text-start">注文情報を削除してよろしいですか？</p>
-                                <ul id="bulkErrors"></ul>
-                                <div class="progress" style="display: none">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                <button class="btn btn-ec-delete" type="button" id="btn_bulk_delete">削除</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+    {# --- keyword search bar ------------------------------------------ #}
+    <form id="search_form" method="get" action="/admin/order-list"
+          class="idea-admin-search-bar">
+        <div class="idea-admin-field">
+            <label class="idea-admin-field__label" for="admin_search_order_multi">
+                <i class="fa fa-search fa-fw" aria-hidden="true"></i>
+                注文番号・会員ID・メールアドレス
+            </label>
+            <div class="idea-admin-field__input">
+                {{ searchForm.input('multi')|raw }}
             </div>
         </div>
-    </div>
+        <div class="idea-admin-list-toolbar">
+            <div class="idea-admin-list-toolbar__left">
+                <button type="submit" class="idea-admin-action idea-admin-action--primary">
+                    <i class="fa fa-search fa-fw" aria-hidden="true"></i>
+                    絞り込む
+                </button>
+                <span class="idea-admin-count">
+                    {{ count }} 件
+                </span>
+            </div>
+            <div class="idea-admin-list-toolbar__right">
+                <a class="idea-admin-action" href="/admin/order/export-order">
+                    <i class="fa fa-download fa-fw" aria-hidden="true"></i>
+                    受注CSV
+                </a>
+                <a class="idea-admin-action" href="/admin/order/export-shipping">
+                    <i class="fa fa-download fa-fw" aria-hidden="true"></i>
+                    出荷CSV
+                </a>
+                <a class="idea-admin-action idea-admin-action--primary"
+                   href="/admin/order/create" rel="doCreateOrder">
+                    <i class="fa fa-plus fa-fw" aria-hidden="true"></i>
+                    新規受注
+                </a>
+            </div>
+        </div>
+    </form>
+
+    {# --- bulk-delete form (wraps order grid + checkboxes) ----------- #}
+    <form id="form_bulk" method="post" action="/admin/order/bulk-delete">
+        <input type="hidden" name="mode" value="order_bulk_delete_form">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+    {# --- order grid -------------------------------------------------- #}
+    {% if count %}
+
+        <div class="idea-admin-table-wrap">
+            <table class="idea-admin-table" id="search_result">
+                <thead>
+                    <tr>
+                        <th class="idea-admin-table__check">
+                            <input type="checkbox" id="toggle_check_all"
+                                   aria-label="全件選択">
+                        </th>
+                        <th>注文番号</th>
+                        <th>会員ID</th>
+                        <th>注文日</th>
+                        <th>対応状況</th>
+                        <th>支払合計</th>
+                        <th class="idea-admin-table__actions">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for Order in orders %}
+                    <tr id="order-{{ Order.orderNo }}">
+                        <td class="idea-admin-table__check">
+                            <input type="checkbox"
+                                   id="check_{{ Order.orderNo }}"
+                                   name="ids[]"
+                                   value="{{ Order.orderNo }}"
+                                   data-update-status-url="/admin/order-status?orderNo={{ Order.orderNo }}"
+                                   aria-label="{{ Order.orderNo }}">
+                        </td>
+                        <td>
+                            <a href="/admin/order?orderNo={{ Order.orderNo }}"
+                               rel="goOrder">
+                                {{ Order.orderNo }}
+                            </a>
+                        </td>
+                        <td>{{ Order.customerId }}</td>
+                        <td>{{ Order.orderDate }}</td>
+                        <td>
+                            {% set statusLabels = {
+                                1: '新規受付',
+                                3: '注文取消',
+                                4: '対応中',
+                                5: '発送済み',
+                                6: '入金済み',
+                                7: '決済処理中',
+                                8: '購入処理中',
+                                9: '返品'
+                            } %}
+                            <span class="idea-admin-badge">
+                                {{ statusLabels[Order.orderStatus] ?? Order.orderStatus }}
+                            </span>
+                        </td>
+                        <td>{{ Order.paymentTotal|price }}</td>
+                        <td class="idea-admin-table__actions">
+                            <a class="idea-admin-icon-btn"
+                               href="/admin/order?orderNo={{ Order.orderNo }}"
+                               rel="goOrder"
+                               title="詳細">
+                                <i class="fa fa-pencil fa-fw" aria-hidden="true"></i>
+                            </a>
+                            <a class="idea-admin-icon-btn"
+                               href="/admin/order/export-order-pdf?ids[]={{ Order.orderNo }}"
+                               title="納品書出力">
+                                <i class="fa fa-file-text fa-fw" aria-hidden="true"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="idea-admin-list-toolbar">
+            <div class="idea-admin-list-toolbar__left">
+                <button type="button" id="bulk_delete_btn"
+                        class="idea-admin-action idea-admin-action--danger">
+                    <i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+                    選択した受注を削除
+                </button>
+            </div>
+        </div>
+
+    {% else %}
+
+        <div class="idea-admin-empty">
+            <i class="fa fa-inbox fa-3x" aria-hidden="true"></i>
+            <p class="idea-admin-empty__title">該当する受注がありません</p>
+        </div>
+
+    {% endif %}
+
+    </form>{# /form_bulk #}
+
+    <script>
+    (function () {
+      'use strict';
+      var btn = document.getElementById('bulk_delete_btn');
+      var form = document.getElementById('form_bulk');
+      if (!btn || !form) { return; }
+      btn.addEventListener('click', function () {
+        var checked = form.querySelectorAll('input[name="ids[]"]:checked');
+        if (checked.length === 0) { return; }
+        $(form).attr('action', "/admin/order/bulk-delete");
+        form.submit();
+      });
+    }());
+    </script>
+
 {% endblock %}

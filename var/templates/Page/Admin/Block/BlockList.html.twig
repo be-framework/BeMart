@@ -1,143 +1,458 @@
-{#
-  BeMart admin Block list — EC-CUBE goBlockList.
-
-  PORT of EC-CUBE 4.3 admin-theme `Content/block.twig`
-  (src/Eccube/Resource/template/admin/Content/block.twig).
-
-  DATA/LIST page. Extends the admin frame (`admin-base.html.twig`). The
-  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
-  from EC-CUBE; only the dynamic bindings are rebound to the BlockList
-  resource body (src/Resource/Page/Admin/Block/BlockList.php — body
-  carries `count` + `blocks`, a list of {blockId, blockName,
-  blockFileName, blockDeletable}).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `{% for Block in Blocks %}` -> the resource body's `blocks` list.
-   - `Block.deletable` -> `Block.blockDeletable`; an undeletable system
-     block (the seed ヘッダー) shows no delete affordance.
-   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
-     CSRF widget. OMITTED. EC-CUBE-runtime only — enumerated as residual.
-#}
 {% extends 'admin-base.html.twig' %}
+{#
+  BeMart admin Block list — clean-room design.
+
+  DATA CONTRACT (src/Resource/Page/Admin/Block/BlockList.php onGet):
+    count   int                      — total block count
+    blocks  list<{                   — one entry per block
+      blockId:       string,
+      blockName:     string,
+      blockFileName: string,
+      blockDeletable: bool
+    }>
+
+  ACTIONS (from #[Link] on BlockList.php / Block.php):
+    POST   /admin/block/block-list                              doCreateBlock
+    GET    /admin/block/block?blockId={id}                      goBlock (edit)
+    DELETE /admin/block/block?blockId={id}&_method=delete       doDeleteBlock
+
+  UX decisions (not EC-CUBE mirrored):
+    — KPI chip shows block count.
+    — Client-side live filter in the toolbar; no server round-trip.
+    — Inline quick-create dialog avoids a full-page navigation for simple creates.
+    — System blocks (blockDeletable=false) get a muted "system" badge; no delete
+      affordance is rendered for them.
+    — Delete is confirmed via a lightweight per-row dialog.
+    — Sticky bottom toolbar is NOT used on a list page (no pending save state).
+
+  idea-admin vocabulary used:
+    idea-admin-kpi / idea-admin-kpi-grid
+    idea-admin-list-toolbar / idea-admin-list-toolbar__left / __right
+    idea-admin-search-bar
+    idea-admin-table-wrap / idea-admin-table / idea-admin-table__actions
+    idea-admin-badge / idea-admin-badge--private
+    idea-admin-action / idea-admin-action--primary / idea-admin-action--destructive
+    idea-admin-icon-btn
+    idea-admin-dialog-backdrop / idea-admin-dialog
+    idea-admin-empty
+    idea-admin-count
+    idea-admin-notice / idea-admin-notice--error
+    idea-admin-panel / idea-admin-panel__head / idea-admin-panel__body
+    idea-admin-field / idea-admin-field__label / idea-admin-field__input
+    idea-admin-required / idea-admin-error
+#}
 
 {% set route = 'admin-block-block-list' %}
 {% set title = 'ブロック管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
 {% block stylesheet %}
-    <style type="text/css">
-        li.list-group-item {
-            z-index: inherit !important;
-        }
-    </style>
-{% endblock %}
+<style>
+/* ── Quick-create slide panel ───────────────────────────────────────────── */
+.idea-admin-create-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  background: rgba(41, 37, 31, .38);
+  backdrop-filter: blur(2px);
+}
+.idea-admin-create-sheet[hidden] { display: none; }
+.idea-admin-create-sheet__panel {
+  width: min(440px, 100vw);
+  height: 100vh;
+  background: var(--idea-surface);
+  border-left: 1px solid rgba(205, 191, 170, .55);
+  box-shadow: -8px 0 32px rgba(41, 37, 31, .12);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.idea-admin-create-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: 1rem 1.1rem .85rem;
+  border-bottom: 1px solid rgba(205, 191, 170, .4);
+  background: var(--idea-surface-soft);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.idea-admin-create-sheet__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.idea-admin-create-sheet__body {
+  flex: 1;
+  padding: 1.25rem 1.1rem;
+  display: grid;
+  gap: .9rem;
+  align-content: start;
+}
+.idea-admin-create-sheet__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .65rem;
+  padding: .85rem 1.1rem;
+  border-top: 1px solid rgba(205, 191, 170, .4);
+  background: var(--idea-surface-soft);
+  position: sticky;
+  bottom: 0;
+}
+/* system badge */
+.idea-admin-badge--system {
+  background: rgba(73, 111, 124, .10);
+  color: var(--idea-blue);
+  border-color: rgba(73, 111, 124, .20);
+}
+/* row highlight on search hit */
+.idea-admin-table tbody tr.js-block-row[hidden] { display: none; }
+</style>
+{% endblock stylesheet %}
 
 {% block javascript %}
-    <script>
-        // searchWordの実行
-        $('#search-block').on('input', function() {
-            searchWord($(this).val(), $(".list-group li"));
-        });
-    </script>
+<script>
+(function () {
+  'use strict';
+
+  /* ── Live filter ─────────────────────────────────────────────────────── */
+  var filterInput = document.getElementById('js-block-filter');
+  var rows        = document.querySelectorAll('.js-block-row');
+  var emptyState  = document.getElementById('js-empty-filter');
+  var countLabel  = document.getElementById('js-block-count');
+
+  function applyFilter() {
+    var q = filterInput ? filterInput.value.trim().toLowerCase() : '';
+    var visible = 0;
+    rows.forEach(function (row) {
+      var name = (row.dataset.blockName || '').toLowerCase();
+      var file = (row.dataset.blockFile || '').toLowerCase();
+      var match = !q || name.indexOf(q) !== -1 || file.indexOf(q) !== -1;
+      row.hidden = !match;
+      if (match) { visible++; }
+    });
+    if (emptyState) { emptyState.hidden = visible > 0; }
+    if (countLabel) { countLabel.textContent = visible + ' 件'; }
+  }
+
+  if (filterInput) { filterInput.addEventListener('input', applyFilter); }
+
+  /* ── Quick-create sheet (slide panel) ────────────────────────────────── */
+  var sheet       = document.getElementById('js-create-sheet');
+  var sheetClose  = document.getElementById('js-create-sheet-close');
+  var openBtn     = document.getElementById('js-open-create');
+
+  function openSheet() {
+    if (!sheet) return;
+    sheet.removeAttribute('hidden');
+    var first = sheet.querySelector('input:not([type=hidden])');
+    if (first) { first.focus(); }
+  }
+
+  function closeSheet() {
+    if (!sheet) return;
+    sheet.setAttribute('hidden', '');
+    if (openBtn) { openBtn.focus(); }
+  }
+
+  if (openBtn)    { openBtn.addEventListener('click', openSheet); }
+  if (sheetClose) { sheetClose.addEventListener('click', closeSheet); }
+  if (sheet) {
+    sheet.addEventListener('click', function (e) {
+      if (e.target === sheet) { closeSheet(); }
+    });
+    sheet.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { closeSheet(); }
+    });
+  }
+
+  /* ── Delete dialogs ──────────────────────────────────────────────────── */
+  document.addEventListener('click', function (e) {
+    var trigger = e.target.closest('[data-delete-trigger]');
+    if (trigger) {
+      e.preventDefault();
+      var dialog = document.getElementById(trigger.dataset.deleteTrigger);
+      if (dialog) {
+        dialog.removeAttribute('hidden');
+        var focus = dialog.querySelector('.js-dialog-confirm');
+        if (focus) { focus.focus(); }
+      }
+    }
+
+    var cancel = e.target.closest('.js-dialog-cancel');
+    if (cancel) {
+      var dlg = cancel.closest('.idea-admin-dialog-backdrop');
+      if (dlg) { dlg.setAttribute('hidden', ''); }
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('.idea-admin-dialog-backdrop:not([hidden])').forEach(function (d) {
+      d.setAttribute('hidden', '');
+    });
+  });
+}());
+</script>
 {% endblock javascript %}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="row justify-content-between mb-2">
-                    <div class="col-9">
-                        <a class="btn btn-ec-regular" href="/admin/block/block">新規作成</a>
-                    </div>
-                    <div class="col-3">
-                        <div class="row">
-                            <div class="col">
-                                <div class="input-group mb-3">
-                                    <div class="input-group-text">
-                                        <span id="basic-addon1"><i class="fa fa-search"></i></span>
-                                    </div>
-                                    <input id="search-block" class="form-control" type="search" aria-label="Search">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-body p-0">
-                        <div class="card rounded border-0">
-                            <ul class="list-group list-group-flush">
-                                <li>
-                                    <div class="row p-3 fw-bold">
-                                        <div class="col-4 col-md-6">ブロック名</div>
-                                        <div class="col-3 col-md-4">ファイル名</div>
-                                        <div class="col-5 col-md-2"></div>
-                                    </div>
-                                </li>
-                                {% for Block in blocks %}
-                                    <li id="ex-block-{{ Block.blockId }}" class="list-group-item">
-                                        <div class="row">
-                                            <div class="col-4 col-md-6 d-flex align-items-center">
-                                                <a href="/admin/block/block?blockId={{ Block.blockId }}">
-                                                    {{ Block.blockName }}
-                                                </a>
-                                            </div>
-                                            <div class="col-3 col-md-4 d-flex align-items-center">
-                                                {{ Block.blockFileName }}.twig
-                                            </div>
-                                            <div class="col-5 col-md-2">
-                                                <div class="row">
-                                                    <div class="col-6 text-end">
-                                                        <a href="/admin/block/block?blockId={{ Block.blockId }}"
-                                                           class="btn btn-ec-actionIcon me-3" data-bs-toggle="tooltip"
-                                                           data-bs-placement="top" title="編集">
-                                                            <i class="fa fa-pencil fa-lg text-secondary"></i>
-                                                        </a>
-                                                    </div>
-                                                    {% if Block.blockDeletable %}
-                                                        <div class="col-6">
-                                                            <div class="d-inline-block me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="削除">
-                                                                <a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal-{{ Block.blockId }}" class="btn btn-ec-actionIcon">
-                                                                    <i class="fa fa-close fa-lg text-secondary"></i>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal fade" id="confirmModal-{{ Block.blockId }}" tabindex="-1" role="dialog"
-                                                             aria-labelledby="confirmModal-{{ Block.blockId }}" aria-hidden="true">
-                                                            <div class="modal-dialog" role="document">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title fw-bold">削除します</h5>
-                                                                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close">
 
-                                                                        </button>
-                                                                    </div>
-                                                                    <div class="modal-body text-start">
-                                                                        <p class="text-start">この操作はあとから取り消すことができません。「{{ Block.blockName }}」を削除してよろしいですか？</p>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                                                        <a href="/admin/block/block?blockId={{ Block.blockId }}&_method=delete"
-                                                                           class="btn btn-ec-delete" data-confirm="false" >
-                                                                            削除
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+{# ── KPI strip ──────────────────────────────────────────────────────────── #}
+<div class="idea-admin-kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); margin-bottom: 1.25rem;">
+  <div class="idea-admin-kpi">
+    <div class="idea-admin-kpi__label">登録ブロック数</div>
+    <div class="idea-admin-kpi__value" id="js-block-count">{{ count }} 件</div>
+    <div class="idea-admin-kpi__sub">CMS コンテンツブロック</div>
+  </div>
+</div>
+
+{# ── List toolbar ────────────────────────────────────────────────────────── #}
+<div class="idea-admin-list-toolbar">
+  <div class="idea-admin-list-toolbar__left">
+    <button id="js-open-create"
+            type="button"
+            class="idea-admin-action idea-admin-action--primary"
+            aria-haspopup="dialog"
+            aria-controls="js-create-sheet">
+      <i class="fa fa-plus" aria-hidden="true"></i>
+      新規ブロック
+    </button>
+  </div>
+  <div class="idea-admin-list-toolbar__right">
+    <div class="idea-admin-search-bar" style="margin-bottom:0;">
+      <label for="js-block-filter" class="sr-only">ブロックを絞り込む</label>
+      <input id="js-block-filter"
+             type="search"
+             placeholder="ブロック名 / ファイル名で絞り込み"
+             autocomplete="off"
+             aria-label="ブロックを絞り込む">
     </div>
-{% endblock %}
+  </div>
+</div>
+
+{# ── Block table ─────────────────────────────────────────────────────────── #}
+{% if blocks is not empty %}
+
+<div class="idea-admin-table-wrap" role="region" aria-label="ブロック一覧">
+  <table class="idea-admin-table">
+    <thead>
+      <tr>
+        <th>ブロック名</th>
+        <th>ファイル名</th>
+        <th>種別</th>
+        <th class="idea-admin-table__actions"></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for Block in blocks %}
+      <tr id="ex-block-{{ Block.blockId }}"
+          class="js-block-row"
+          data-block-name="{{ Block.blockName }}"
+          data-block-file="{{ Block.blockFileName }}">
+
+        {# Block name — links to edit #}
+        <td>
+          <a href="/admin/block/block?blockId={{ Block.blockId }}"
+             rel="goBlock"
+             style="font-weight:700; color:var(--idea-ink); text-decoration:none;">
+            {{ Block.blockName }}
+          </a>
+        </td>
+
+        {# File name with .twig hint #}
+        <td>
+          <code style="font-size:.82rem; color:var(--idea-muted);">{{ Block.blockFileName }}.twig</code>
+        </td>
+
+        {# Deletable badge #}
+        <td>
+          {% if Block.blockDeletable %}
+            <span class="idea-admin-badge idea-admin-badge--public">カスタム</span>
+          {% else %}
+            <span class="idea-admin-badge idea-admin-badge--system">システム</span>
+          {% endif %}
+        </td>
+
+        {# Row actions #}
+        <td class="idea-admin-table__actions">
+          <a href="/admin/block/block?blockId={{ Block.blockId }}"
+             class="idea-admin-icon-btn"
+             rel="goBlock"
+             title="{{ Block.blockName }} を編集">
+            <i class="fa fa-pencil" aria-hidden="true"></i>
+          </a>
+          {% if Block.blockDeletable %}
+            <button type="button"
+                    class="idea-admin-icon-btn"
+                    style="color:#a9472e; border-color:rgba(169,71,46,.25);"
+                    data-delete-trigger="del-dialog-{{ Block.blockId }}"
+                    title="{{ Block.blockName }} を削除"
+                    aria-label="{{ Block.blockName }} を削除">
+              <i class="fa fa-trash" aria-hidden="true"></i>
+            </button>
+          {% endif %}
+        </td>
+      </tr>
+
+      {# Per-row delete confirmation dialog #}
+      {% if Block.blockDeletable %}
+      <div id="del-dialog-{{ Block.blockId }}"
+           class="idea-admin-dialog-backdrop"
+           role="dialog"
+           aria-labelledby="del-dialog-title-{{ Block.blockId }}"
+           aria-modal="true"
+           hidden>
+        <div class="idea-admin-dialog">
+          <div class="idea-admin-dialog__head">
+            <h5 id="del-dialog-title-{{ Block.blockId }}" class="idea-admin-dialog__title">
+              ブロックを削除しますか？
+            </h5>
+            <button type="button"
+                    class="idea-admin-text-btn js-dialog-cancel"
+                    aria-label="閉じる">
+              <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="idea-admin-dialog__body">
+            <p style="margin:0;">「<strong>{{ Block.blockName }}</strong>」を削除します。この操作は取り消せません。</p>
+          </div>
+          <div class="idea-admin-dialog__foot">
+            <button type="button"
+                    class="idea-admin-action js-dialog-cancel">
+              キャンセル
+            </button>
+            <a href="/admin/block/block?blockId={{ Block.blockId }}&_method=delete"
+               class="idea-admin-action idea-admin-action--destructive js-dialog-confirm"
+               rel="doDeleteBlock">
+              <i class="fa fa-trash" aria-hidden="true"></i>
+              削除する
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4">合計 {{ count }} 件</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+{# Empty state shown by JS when filter yields no results #}
+<div id="js-empty-filter" class="idea-admin-empty" hidden>
+  <i class="fa fa-search fa-2x" aria-hidden="true"></i>
+  <p class="idea-admin-empty__title">絞り込み結果なし</p>
+  <p>別のキーワードで試してください</p>
+</div>
+
+{% else %}
+
+<div class="idea-admin-empty">
+  <i class="fa fa-cube fa-2x" aria-hidden="true"></i>
+  <p class="idea-admin-empty__title">ブロックがまだ登録されていません</p>
+  <p>「新規ブロック」から最初のブロックを作成してください</p>
+  <button type="button"
+          class="idea-admin-action idea-admin-action--primary"
+          onclick="document.getElementById('js-open-create').click()">
+    <i class="fa fa-plus" aria-hidden="true"></i>
+    新規ブロック
+  </button>
+</div>
+
+{% endif %}
+
+{# ── Quick-create side sheet ─────────────────────────────────────────────── #}
+<div id="js-create-sheet"
+     class="idea-admin-create-sheet"
+     role="dialog"
+     aria-labelledby="js-create-sheet-title"
+     aria-modal="true"
+     hidden>
+  <div class="idea-admin-create-sheet__panel">
+    <div class="idea-admin-create-sheet__head">
+      <h5 id="js-create-sheet-title" class="idea-admin-create-sheet__title">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        新規ブロックを作成
+      </h5>
+      <button id="js-create-sheet-close"
+              type="button"
+              class="idea-admin-text-btn"
+              aria-label="閉じる">
+        <i class="fa fa-times" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <form class="idea-admin-create-sheet__body"
+          method="post"
+          action="/admin/block/block-list"
+          rel="doCreateBlock"
+          aria-label="新規ブロック作成フォーム">
+      <input type="hidden" name="csrfToken" value="">
+
+      {# Block name #}
+      <div class="idea-admin-field">
+        <div class="idea-admin-field__label">
+          <label for="new-block-name">ブロック名</label>
+          <span class="idea-admin-required">必須</span>
+        </div>
+        <div class="idea-admin-field__input">
+          <input id="new-block-name"
+                 type="text"
+                 name="blockName"
+                 placeholder="例: ユーザーブロック"
+                 maxlength="32"
+                 required
+                 autocomplete="off">
+        </div>
+      </div>
+
+      {# File name #}
+      <div class="idea-admin-field">
+        <div class="idea-admin-field__label">
+          <label for="new-block-file">ファイル名</label>
+          <span class="idea-admin-required">必須</span>
+        </div>
+        <div class="idea-admin-field__input">
+          <div style="display:flex; align-items:center; gap:.4rem;">
+            <input id="new-block-file"
+                   type="text"
+                   name="blockFileName"
+                   placeholder="例: user_block"
+                   maxlength="32"
+                   required
+                   autocomplete="off"
+                   pattern="[A-Za-z0-9_]+"
+                   title="英数字とアンダースコアのみ">
+            <span style="white-space:nowrap; color:var(--idea-muted); font-size:.88rem;">.twig</span>
+          </div>
+          <span class="idea-admin-error" id="new-block-file-error" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div class="idea-admin-create-sheet__foot">
+        <button type="button"
+                class="idea-admin-action js-dialog-cancel">
+          キャンセル
+        </button>
+        <button type="submit"
+                class="idea-admin-action idea-admin-action--primary">
+          <i class="fa fa-save" aria-hidden="true"></i>
+          作成する
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock main %}

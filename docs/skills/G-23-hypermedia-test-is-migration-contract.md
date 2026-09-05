@@ -82,6 +82,20 @@ What this catches that Final-direct tests miss:
 - HTTP envelope (status, body, error transformation)
 - Cross-binding interaction (e.g. `AdminSessionInterface` wired correctly alongside the SQL pipeline)
 
+## Web+DB completion adjunct
+
+The same rule applies when judging whether the web application is complete. Browser evidence alone is not enough if it cannot be projected back into a Resource/HTTP workflow.
+
+For Web+DB completion work:
+
+1. Start with one user story per `tests/Hypermedia/Flow*.php` file.
+2. Keep the hardcoded URI to the entrypoint only; after that, follow `_links`, `Location`, HTML form action, or the ALPS rel.
+3. Create business state through Web/HTTP transitions, not direct SQL seed or fixture boundary.
+4. Add an HTTP projection for the same story before treating browser evidence as complete.
+5. If a browser run exposes a missing affordance or unclear payload, record it as fail/follow-up. Do not add runner-only body construction, route inference, fake stores, or direct state injection to turn the row green.
+
+The 20260610 Web+DB run deliberately leaves Admin unsafe CRUD/update operations as fail where only screen reachability was proven. Those failures are completion work, not test flakiness. They should be closed by adding Hypermedia/HTTP workflow evidence first, then implementation fixes, then browser re-run.
+
 ## Anti-pattern
 
 Do NOT write `XxxSqlIntegrationTest` that constructs the Final directly:
@@ -123,7 +137,7 @@ For each storage migration batch (e.g. one Reason interface family):
    - Missing top-level descriptor → add as `src-entity`
    - Inline child needed at top-level → promote
    - New atomic fields needed → add field descriptors
-2. **Schema check** — confirm in `sql/schema/ec-cube-4.3-mysql-mysqldump.sql`:
+2. **Schema check** — confirm in `sql/schema/bemart-schema.sql`:
    - Column names + types
    - FK constraints (especially to empty `mtb_*` tables — nullable defaults are usually safe; document where you defaulted to NULL because the master table is empty in the structure-only dump)
    - UNIQUE indexes (or their absence — record `customer_id + product_code` cases as "app-level guard required")
