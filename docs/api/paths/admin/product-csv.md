@@ -27,7 +27,7 @@ proven end-to-end before adding stream plumbing.
 ## GET
 ALPS `goExportProduct` に対応する GET 操作。
 
-**ALPS**: `goExportProduct` - 商品CSVをエクスポートする
+**ALPS**: `goExportProduct`
 
 
 
@@ -54,7 +54,7 @@ _No parameters required_
 ## POST
 ALPS `doCreateProduct` に対応する POST 操作。
 
-**ALPS**: `doCreateProduct` - 商品を作成する
+**ALPS**: `doCreateProduct`
 
 
 

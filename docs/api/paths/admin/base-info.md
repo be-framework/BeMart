@@ -32,7 +32,7 @@ Setting/Shop Tier-2 also renders `shop_master.twig` from this body;
 the `form` key carries an {@see \AdminShopMasterForm} pre-filled
 with the dtb_base_info row for the HTML editor.
 
-**ALPS**: `goBaseInfo` - 基本情報を見る
+**ALPS**: `goBaseInfo`
 
 
 
@@ -71,7 +71,7 @@ _No parameters required_
 ## POST
 Wave 8: every shop-info field is admin-form input.
 
-**ALPS**: `doUpdateBaseInfo` - 基本情報を更新する
+**ALPS**: `doUpdateBaseInfo`
 
 
 

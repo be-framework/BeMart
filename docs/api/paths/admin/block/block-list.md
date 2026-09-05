@@ -11,7 +11,7 @@ EC-CUBE goBlockList + doCreateBlock — collection endpoint (Wave 9 CMS).
 ## GET
 ALPS `goBlockList` に対応する GET 操作。
 
-**ALPS**: `goBlockList` - ブロック一覧を見る
+**ALPS**: `goBlockList`
 
 
 
@@ -38,7 +38,7 @@ _No parameters required_
 ## POST
 ALPS `doCreateBlock` に対応する POST 操作。
 
-**ALPS**: `doCreateBlock` - ブロックを作成する
+**ALPS**: `doCreateBlock`
 
 
 

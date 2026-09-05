@@ -38,7 +38,7 @@ the JSON-context tests assert key-wise on `body` and are unaffected.
 ## GET
 ALPS `goCheckoutEntry` / `goShopping` に対応する GET 操作。
 
-**ALPS**: `goCheckoutEntry, goShopping` - 購入手続き入口へ進む, 注文手続きを見る
+**ALPS**: `goCheckoutEntry, goShopping`
 
 
 

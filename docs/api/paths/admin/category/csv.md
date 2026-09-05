@@ -20,7 +20,7 @@ cannot mistake the stub for a real import.
 ## GET
 ALPS `goExportCategory` に対応する GET 操作。
 
-**ALPS**: `goExportCategory` - カテゴリCSVをエクスポートする
+**ALPS**: `goExportCategory`
 
 
 
@@ -46,7 +46,7 @@ _No parameters required_
 ## POST
 ALPS `doImportCategoryCsv` に対応する POST 操作。
 
-**ALPS**: `doImportCategoryCsv` - カテゴリCSVをインポートする
+**ALPS**: `doImportCategoryCsv`
 
 
 

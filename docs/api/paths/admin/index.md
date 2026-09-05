@@ -33,7 +33,7 @@ request — the same firewall contract as the News / Customer admin
 pages, enforced here at the resource layer because there is no Be
 Final to raise `UnauthorizedAdminAccessException`.
 
-**ALPS**: `goAdminTop` - 管理画面トップを見る
+**ALPS**: `goAdminTop`
 
 
 

@@ -19,7 +19,7 @@ Failure mapping:
 ## GET
 ALPS `goExportOrder` に対応する GET 操作。
 
-**ALPS**: `goExportOrder` - 受注CSVをエクスポートする
+**ALPS**: `goExportOrder`
 
 
 

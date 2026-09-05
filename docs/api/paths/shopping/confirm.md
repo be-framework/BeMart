@@ -35,7 +35,7 @@ doCheckout (`page://self/shopping/checkout`).
 ## GET
 ALPS `goShopping` に対応する GET 操作。
 
-**ALPS**: `goShopping` - 注文手続きを見る
+**ALPS**: `goShopping`
 
 
 
@@ -82,7 +82,7 @@ HTML checkout form posts the selected payment field as `payment`.
 
 Keep GET query compatibility while accepting the real browser form.
 
-**ALPS**: `goShopping` - 注文手続きを見る
+**ALPS**: `goShopping`
 
 
 

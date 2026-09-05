@@ -30,7 +30,7 @@ convention as CustomerList).
 Wave 7: pagination knobs are admin-form input. Same taint
 discipline as Wave 5 / Wave 6 admin resources.
 
-**ALPS**: `goOrderList` - 受注一覧を見る
+**ALPS**: `goOrderList`
 
 
 

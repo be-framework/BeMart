@@ -37,7 +37,7 @@ optional. In the dev/html fake-CSRF environment we expose the fake
 token into the hidden `_token` input so a real browser form submit
 can exercise the POST path instead of failing at the boundary.
 
-**ALPS**: `goCustomerRegistration` - 会員登録フォームを見る
+**ALPS**: `goCustomerRegistration`
 
 
 
@@ -69,7 +69,7 @@ as taint sources so Psalm can trace them. Semantic value objects
 format-validate but do not universally escape — sinks downstream
 still need their own defense (bound params, HTML escape on render).
 
-**ALPS**: `doRegisterCustomer` - 会員登録する
+**ALPS**: `doRegisterCustomer`
 
 
 

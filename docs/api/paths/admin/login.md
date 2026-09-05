@@ -49,7 +49,7 @@ body field carries the trusted reference {@see \CsrfToken::$token}
 issues, which the HTML port renders into the form's hidden
 `_csrf_token` input so the subsequent POST passes CSRF validation.
 
-**ALPS**: `doAdminLogin` - 管理者ログインする
+**ALPS**: `doAdminLogin`
 
 
 
@@ -78,7 +78,7 @@ _No parameters required_
 Wave 4 / Phase B Slice 9: every form field is user-controlled
 input — same taint discipline as the customer login.
 
-**ALPS**: `doAdminLogin` - 管理者ログインする
+**ALPS**: `doAdminLogin`
 
 
 

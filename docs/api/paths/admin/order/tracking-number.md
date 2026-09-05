@@ -22,7 +22,7 @@ Failure mapping:
 ## PUT
 ALPS `doUpdateTrackingNumber` に対応する PUT 操作。
 
-**ALPS**: `doUpdateTrackingNumber` - 伝票番号を更新する
+**ALPS**: `doUpdateTrackingNumber`
 
 
 

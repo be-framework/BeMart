@@ -12,7 +12,7 @@ update.
 ## GET
 ALPS `goLayoutList` に対応する GET 操作。
 
-**ALPS**: `goLayoutList` - レイアウト一覧を見る
+**ALPS**: `goLayoutList`
 
 
 

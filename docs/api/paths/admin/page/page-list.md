@@ -12,7 +12,7 @@ EC-CUBE goPageList + doCreatePage — collection endpoint (Wave 9 CMS).
 ## GET
 ALPS `goPageList` に対応する GET 操作。
 
-**ALPS**: `goPageList` - ページ一覧を見る
+**ALPS**: `goPageList`
 
 
 
@@ -40,7 +40,7 @@ _No parameters required_
 ## POST
 ALPS `doCreatePage` に対応する POST 操作。
 
-**ALPS**: `doCreatePage` - ページを作成する
+**ALPS**: `doCreatePage`
 
 
 

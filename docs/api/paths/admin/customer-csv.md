@@ -21,7 +21,7 @@ Resource layer sets the `Content-Type: text/csv` and
 ## GET
 ALPS `goExportCustomer` に対応する GET 操作。
 
-**ALPS**: `goExportCustomer` - 会員CSVをエクスポートする
+**ALPS**: `goExportCustomer`
 
 
 

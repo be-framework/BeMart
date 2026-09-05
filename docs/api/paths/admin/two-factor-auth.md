@@ -30,7 +30,7 @@ Anonymous-accessible (login-context): returns 200 regardless of
 session state — the admin firewall guard is downstream of a
 successful challenge.
 
-**ALPS**: `doVerifyTwoFactorAuth` - 二要素認証を確認する
+**ALPS**: `doVerifyTwoFactorAuth`
 
 
 
@@ -73,7 +73,7 @@ Failure mapping:
       come back through the password stage — which is throttled on
       the same counter, i.e. only after the window has passed)
 
-**ALPS**: `doVerifyTwoFactorAuth` - 二要素認証を確認する
+**ALPS**: `doVerifyTwoFactorAuth`
 
 
 

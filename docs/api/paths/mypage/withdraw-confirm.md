@@ -44,7 +44,7 @@ Maps to `page://self/mypage/withdraw-confirm`.
 ## GET
 ALPS `goMypageWithdrawConfirm` に対応する GET 操作。
 
-**ALPS**: `goMypageWithdrawConfirm` - 退会実行確認を見る
+**ALPS**: `goMypageWithdrawConfirm`
 
 
 

@@ -31,7 +31,7 @@ drops the row.
 ## DELETE
 Wave 8: pluginCode is admin-form input (selected from the grid).
 
-**ALPS**: `doUninstallPlugin` - プラグインをアンインストールする
+**ALPS**: `doUninstallPlugin`
 
 
 
