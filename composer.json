@@ -23,7 +23,7 @@
   "require": {
     "php": "^8.3",
     "be-framework/be": "dev-semantic-logger-0.9 as 0.1.0",
-    "bear/devtools": "dev-abstract-workflow-test-contract",
+    "bear/devtools": "dev-html-link-audit-affordances",
     "bear/package": "^1.14",
     "bear/query-repository": "1.x-dev",
     "bear/sunday": "^1.6",

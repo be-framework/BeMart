@@ -1,0 +1,962 @@
+{
+  "GET page://self/admin/authority-role doUpdateAuthorityRole": {
+    "classification": "fail",
+    "note": "affordance で post /admin/authority-role に届くが rel=\"doUpdateAuthorityRole\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/base-info doUpdateBaseInfo": {
+    "classification": "fail",
+    "note": "affordance で post /admin/base-info に届くが rel=\"doUpdateBaseInfo\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/base-info goOrderList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/order-list に届くが rel=\"goOrderList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/base-info goPaymentList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/payment/payment-list に届くが rel=\"goPaymentList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/base-info goProductList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/product-list に届くが rel=\"goProductList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/block/block goBlockList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/block/block-list に届くが rel=\"goBlockList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/block/block-list doDeleteBlock": {
+    "classification": "fail",
+    "note": "削除が GET anchor の ?_method=delete。router は POST でしか override しないので削除されない",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/block/block-list doUpdateBlock": {
+    "classification": "fail",
+    "note": "更新が GET anchor の ?_method=put。router は POST でしか override しない",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/calendar doCreateCalendarHoliday": {
+    "classification": "fail",
+    "note": "affordance で post /admin/calendar に届くが rel=\"doCreateCalendarHoliday\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/calendar doDeleteCalendarHoliday": {
+    "classification": "fail",
+    "note": "affordance で delete /admin/calendar に届くが rel=\"doDeleteCalendarHoliday\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/calendar doUpdateCalendar": {
+    "classification": "fail",
+    "note": "affordance で post /admin/calendar に届くが rel=\"doUpdateCalendar\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/category/category doDeleteCategory": {
+    "classification": "fail",
+    "note": "affordance で delete /admin/category/category に届くが rel=\"doDeleteCategory\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/category/category doUpdateCategory": {
+    "classification": "fail",
+    "note": "affordance で put /admin/category/category に届くが rel=\"doUpdateCategory\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/category/category-list doCreateCategory": {
+    "classification": "fail",
+    "note": "affordance で post /admin/category/category-list に届くが rel=\"doCreateCategory\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/category/category-list doDeleteCategory": {
+    "classification": "fail",
+    "note": "affordance で delete /admin/category/category に届くが rel=\"doDeleteCategory\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/category/category-list doImportCategoryCsv": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で CSV ページへ遷移する。直接の POST form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/category/category-list doUpdateCategory": {
+    "classification": "resourceOnly",
+    "note": "一覧には削除 form だけがあり PUT form は無い（編集は edit ページ）",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/category/csv doImportCategoryCsv": {
+    "classification": "fail",
+    "note": "affordance で post /admin/category/csv に届くが rel=\"doImportCategoryCsv\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/category/csv goCategoryList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/category/category-list に届くが rel=\"goCategoryList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/category/edit doCreateCategory": {
+    "classification": "fail",
+    "note": "affordance で post /admin/category/category-list に届くが rel=\"doCreateCategory\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/category/edit doUpdateCategory": {
+    "classification": "resourceOnly",
+    "note": "categoryId 無しの新規モードでは PUT form を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/category/edit goCategoryList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/category/category-list に届くが rel=\"goCategoryList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/class-category/class-category-export doImportClassCategoryCsv": {
+    "classification": "fail",
+    "note": "affordance で post /admin/product/csv-class-category に届くが rel=\"doImportClassCategoryCsv\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/class-category/class-category-list doCreateClassCategory": {
+    "classification": "fail",
+    "note": "affordance で post /admin/class-category/class-category-list に届くが rel=\"doCreateClassCategory\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/class-category/class-category-list doDeleteClassCategory": {
+    "classification": "resourceOnly",
+    "note": "一覧には PUT form だけがあり削除 form が無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/class-category/class-category-list doUpdateClassCategory": {
+    "classification": "fail",
+    "note": "affordance で put /admin/class-category/class-category に届くが rel=\"doUpdateClassCategory\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/class-name/class-name-export doImportClassNameCsv": {
+    "classification": "fail",
+    "note": "affordance で post /admin/product/csv-class-name に届くが rel=\"doImportClassNameCsv\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/class-name/class-name-list doCreateClassName": {
+    "classification": "fail",
+    "note": "affordance で post /admin/class-name/class-name-list に届くが rel=\"doCreateClassName\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/class-name/class-name-list doDeleteClassName": {
+    "classification": "resourceOnly",
+    "note": "一覧には PUT form だけがあり削除 form が無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/class-name/class-name-list doUpdateClassName": {
+    "classification": "fail",
+    "note": "affordance で put /admin/class-name/class-name に届くが rel=\"doUpdateClassName\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/content/cache doClearCache": {
+    "classification": "fail",
+    "note": "affordance で put /admin/content/cache に届くが rel=\"doClearCache\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/content/css doUpdateContentCss": {
+    "classification": "fail",
+    "note": "affordance で put /admin/content/css に届くが rel=\"doUpdateContentCss\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/content/js doUpdateContentJs": {
+    "classification": "fail",
+    "note": "affordance で put /admin/content/js に届くが rel=\"doUpdateContentJs\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/content/maintenance doToggleMaintenance": {
+    "classification": "fail",
+    "note": "affordance で put /admin/content/maintenance に届くが rel=\"doToggleMaintenance\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/csv-config doUpdateCsv": {
+    "classification": "fail",
+    "note": "affordance で post /admin/csv-config に届くが rel=\"doUpdateCsv\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/customer goCustomerList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/customer-list に届くが rel=\"goCustomerList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/customer-delivery-edit goCustomerList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/customer-list に届くが rel=\"goCustomerList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/customer-list doCreateCustomer": {
+    "classification": "resourceOnly",
+    "note": "会員一覧に会員作成 form が無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/customer-list doDeleteCustomer": {
+    "classification": "fail",
+    "note": "affordance で post /admin/delete-customer に届くが rel=\"doDeleteCustomer\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/customer-list doResendActivationMail": {
+    "classification": "resourceOnly",
+    "note": "fixture の一覧に行が無く再送 form が描画されない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/customer-list goCustomer": {
+    "classification": "fail",
+    "note": "affordance で get /admin/customer に届くが rel=\"goCustomer\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/delivery/delivery doUpdateDelivery": {
+    "classification": "resourceOnly",
+    "note": "deliveryId 無しの新規モードでは PUT form を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/delivery/delivery-list doCreateDelivery": {
+    "classification": "fail",
+    "note": "affordance で post /admin/delivery/delivery-list に届くが rel=\"doCreateDelivery\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/delivery/delivery-list doDeleteDelivery": {
+    "classification": "fail",
+    "note": "JS が anchor を POST form に変換して動くが、静的 HTML は GET anchor。<form> にする",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/delivery/delivery-list doUpdateDelivery": {
+    "classification": "fail",
+    "note": "JS が anchor を POST form に変換して動くが、静的 HTML は GET anchor。<form> にする",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/index doAdminLogout": {
+    "classification": "fail",
+    "note": "管理トップにログアウト form が無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/index goAdminLogout": {
+    "classification": "fail",
+    "note": "管理トップにログアウトへのリンクが無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/index goContentCache": {
+    "classification": "fail",
+    "note": "affordance で get /admin/content/cache に届くが rel=\"goContentCache\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/index goMemberList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/member-list に届くが rel=\"goMemberList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/layout/layout doUpdateLayout": {
+    "classification": "fail",
+    "note": "編集 form が override 無しの POST で送る。#[Link] は PUT",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/layout/layout-list doUpdateLayout": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で編集ページへ遷移する。直接の PUT form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/login doAdminLogin": {
+    "classification": "fail",
+    "note": "affordance で post /admin/login に届くが rel=\"doAdminLogin\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/mail-template doCreateMailTemplate": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で作成ページへ遷移する。直接の POST form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/mail-template doUpdateMailTemplate": {
+    "classification": "fail",
+    "note": "affordance で post /admin/mail-template に届くが rel=\"doUpdateMailTemplate\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/mail-template goOrderList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/order-list に届くが rel=\"goOrderList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/mail-template goOrderMail": {
+    "classification": "fail",
+    "note": "メールテンプレート一覧から受注メール送信へのリンクが無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/master-data doSelectMasterData": {
+    "classification": "fail",
+    "note": "affordance で put /admin/master-data に届くが rel=\"doSelectMasterData\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/member doDeleteMember": {
+    "classification": "resourceOnly",
+    "note": "loginId 無しの新規モードでは削除 form を描画しない",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/member doUpdateMember": {
+    "classification": "resourceOnly",
+    "note": "loginId 無しの新規モードでは PUT form を描画しない",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/member goMemberList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/member-list に届くが rel=\"goMemberList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/member-list doCreateMember": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で登録ページへ遷移する。直接の POST form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/member-list doDeleteMember": {
+    "classification": "fail",
+    "note": "affordance で delete /admin/member に届くが rel=\"doDeleteMember\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/member-list doUpdateAuthorityRole": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で権限ページへ遷移する。直接の POST form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/member-list doUpdateMember": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で編集ページへ遷移する。直接の PUT form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/member-list goMember": {
+    "classification": "fail",
+    "note": "affordance で get /admin/member に届くが rel=\"goMember\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/news/news goNewsList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/news/news-list に届くが rel=\"goNewsList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/news/news-list doCreateNews": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で登録ページへ遷移する。直接の POST form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/news/news-list doDeleteNews": {
+    "classification": "fail",
+    "note": "JS が anchor を POST form に変換して動くが、静的 HTML は GET anchor。<form> にする",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/news/news-list doUpdateNews": {
+    "classification": "fail",
+    "note": "JS が anchor を POST form に変換して動くが、静的 HTML は GET anchor。<form> にする",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/order doUpdateOrder": {
+    "classification": "fail",
+    "note": "affordance で put /admin/order に届くが rel=\"doUpdateOrder\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/order doUpdateOrderStatus": {
+    "classification": "resourceOnly",
+    "note": "受注詳細に /admin/order-status への form が無い（リンクのみ）",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/order-list doCreateOrder": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で受注登録ページへ遷移する。直接の POST form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/order/edit doUpdateOrder": {
+    "classification": "fail",
+    "note": "受注編集 form が /admin/order に PUT しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/order/export-shipping doImportShippingCsv": {
+    "classification": "fail",
+    "note": "affordance で post /admin/order/import-shipping に届くが rel=\"doImportShippingCsv\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/order/export-shipping goOrderList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/order-list に届くが rel=\"goOrderList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/order/import-shipping doImportShippingCsv": {
+    "classification": "fail",
+    "note": "affordance で post /admin/order/import-shipping に届くが rel=\"doImportShippingCsv\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/order/mail-confirm doSendOrderMail": {
+    "classification": "fail",
+    "note": "affordance で post /admin/order/send-mail に届くが rel=\"doSendOrderMail\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/order/order-pdf goExportOrderPdf": {
+    "classification": "fail",
+    "note": "affordance で get /admin/order/export-order-pdf に届くが rel=\"goExportOrderPdf\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/order/send-mail goOrderMailConfirm": {
+    "classification": "targetOut",
+    "note": "確認画面は入力 form の POST 結果として遷移する。GET affordance は描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/order/shipping-address doSelectShippingAddress": {
+    "classification": "fail",
+    "note": "affordance で post /admin/order/shipping-address に届くが rel=\"doSelectShippingAddress\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/order/shipping-address doUpdateOrderShippingAddress": {
+    "classification": "fail",
+    "note": "affordance で put /admin/order/shipping-address に届くが rel=\"doUpdateOrderShippingAddress\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/order/shipping-address doUpdateShippingAddress": {
+    "classification": "fail",
+    "note": "affordance で put /admin/order/shipping-address に届くが rel=\"doUpdateShippingAddress\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/order/shipping-notify-mail doSendShippingNotifyMail": {
+    "classification": "fail",
+    "note": "affordance で post /admin/order/shipping-notify-mail に届くが rel=\"doSendShippingNotifyMail\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/page/page goPageList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/page/page-list に届くが rel=\"goPageList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/page/page-list doCreatePage": {
+    "classification": "fail",
+    "note": "affordance で post /admin/page/page-list に届くが rel=\"doCreatePage\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/page/page-list doDeletePage": {
+    "classification": "fail",
+    "note": "affordance で delete /admin/page/page に届くが rel=\"doDeletePage\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/page/page-list doUpdatePage": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で編集ページへ遷移する。直接の PUT form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/payment/payment doUpdatePayment": {
+    "classification": "resourceOnly",
+    "note": "paymentId 無しの新規モードでは PUT form を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/payment/payment-list doCreatePayment": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で登録ページへ遷移する。直接の POST form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/payment/payment-list doDeletePayment": {
+    "classification": "fail",
+    "note": "削除が GET anchor の ?_method=delete。router は POST でしか override しないので削除されない",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/payment/payment-list doUpdatePayment": {
+    "classification": "fail",
+    "note": "表示切替が GET anchor の ?_method=put。router は POST でしか override しない",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/payment/payment-list goProductList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/product-list に届くが rel=\"goProductList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/plugin-list doDisablePlugin": {
+    "classification": "fail",
+    "note": "affordance で post /admin/plugin-disable に届くが rel=\"doDisablePlugin\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/plugin-list doEnablePlugin": {
+    "classification": "fail",
+    "note": "affordance で post /admin/plugin-enable に届くが rel=\"doEnablePlugin\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/plugin-list doUninstallPlugin": {
+    "classification": "fail",
+    "note": "affordance で delete /admin/plugin に届くが rel=\"doUninstallPlugin\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/product doCopyProduct": {
+    "classification": "fail",
+    "note": "affordance で post /admin/product-copy に届くが rel=\"doCopyProduct\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/product doDeleteProduct": {
+    "classification": "fail",
+    "note": "affordance で delete /admin/product に届くが rel=\"doDeleteProduct\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/product doUpdateProduct": {
+    "classification": "fail",
+    "note": "affordance で put /admin/product に届くが rel=\"doUpdateProduct\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/product-csv doImportProductCsv": {
+    "classification": "fail",
+    "note": "affordance で post /admin/product-csv に届くが rel=\"doImportProductCsv\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/product-csv goExportCategory": {
+    "classification": "fail",
+    "note": "affordance で get /admin/category/csv に届くが rel=\"goExportCategory\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/product-csv goProductList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/product-list に届くが rel=\"goProductList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/product-list doBulkUpdateProductStatus": {
+    "classification": "resourceOnly",
+    "note": "一括ステータス変更 form は fixture 描画に現れない（行が無い）",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/product-list doCreateProduct": {
+    "classification": "resourceOnly",
+    "note": "一覧には直接の POST form が無く /admin/product-new を経由する",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/product-list goProduct": {
+    "classification": "resourceOnly",
+    "note": "fixture の一覧に行が無く商品詳細リンクが描画されない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/product-new doCreateProduct": {
+    "classification": "fail",
+    "note": "affordance で post /admin/product に届くが rel=\"doCreateProduct\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/product/edit doCreateProduct": {
+    "classification": "fail",
+    "note": "affordance で post /admin/product に届くが rel=\"doCreateProduct\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/product/edit doUpdateProduct": {
+    "classification": "resourceOnly",
+    "note": "productCode 無しの新規モードでは PUT form を描画しない",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/product/product-class goProduct": {
+    "classification": "resourceOnly",
+    "note": "productCode 無しでは商品詳細へのリンクを描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/security doUpdateSecurity": {
+    "classification": "fail",
+    "note": "affordance で put /admin/security に届くが rel=\"doUpdateSecurity\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/system doAdminLogout": {
+    "classification": "fail",
+    "note": "システム情報ページにログアウト form が無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/tag/tag-list doCreateTag": {
+    "classification": "fail",
+    "note": "affordance で post /admin/tag/tag-list に届くが rel=\"doCreateTag\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/tag/tag-list doDeleteTag": {
+    "classification": "fail",
+    "note": "タグ一覧の行に削除 form が無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/tax-rule/tax-rule-list doCreateTaxRule": {
+    "classification": "fail",
+    "note": "affordance で post /admin/tax-rule/tax-rule-list に届くが rel=\"doCreateTaxRule\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/tax-rule/tax-rule-list doDeleteTaxRule": {
+    "classification": "fail",
+    "note": "削除が GET anchor の ?_method=delete。router は POST でしか override しないので削除されない",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/template/template-add doInstallTemplate": {
+    "classification": "fail",
+    "note": "affordance で post /admin/template/template-add に届くが rel=\"doInstallTemplate\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/template/template-add goTemplateList": {
+    "classification": "fail",
+    "note": "affordance で get /admin/template/template-list に届くが rel=\"goTemplateList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/template/template-list doDeleteTemplate": {
+    "classification": "fail",
+    "note": "affordance で delete /admin/template/template-list に届くが rel=\"doDeleteTemplate\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/template/template-list doDownloadTemplate": {
+    "classification": "fail",
+    "note": "affordance で post /admin/template/template-list に届くが rel=\"doDownloadTemplate\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/template/template-list doSelectTemplate": {
+    "classification": "fail",
+    "note": "affordance で put /admin/template/template-list に届くが rel=\"doSelectTemplate\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/template/template-list goTemplateAdd": {
+    "classification": "fail",
+    "note": "affordance で get /admin/template/template-add に届くが rel=\"goTemplateAdd\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/template/template-list goTemplateInstall": {
+    "classification": "fail",
+    "note": "affordance で get /admin/template/template-add に届くが rel=\"goTemplateInstall\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/trade-law doUpdateTradeLaw": {
+    "classification": "fail",
+    "note": "affordance で post /admin/trade-law に届くが rel=\"doUpdateTradeLaw\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/cart doAddCartItem": {
+    "classification": "fail",
+    "note": "affordance で post /cart/item に届くが rel=\"doAddCartItem\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/contact doSubmitContact": {
+    "classification": "fail",
+    "note": "affordance で post /contact に届くが rel=\"doSubmitContact\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/contact/confirm doSubmitContact": {
+    "classification": "fail",
+    "note": "affordance で post /contact に届くが rel=\"doSubmitContact\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/contact/confirm goTop": {
+    "classification": "fail",
+    "note": "affordance で get / に届くが rel=\"goTop\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/entry doRegisterCustomer": {
+    "classification": "fail",
+    "note": "affordance で post /entry に届くが rel=\"doRegisterCustomer\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/entry goCustomerRegistrationConfirm": {
+    "classification": "targetOut",
+    "note": "確認画面は入力 form の POST 結果として遷移する。GET affordance は描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/entry/activate goTop": {
+    "classification": "fail",
+    "note": "affordance で get / に届くが rel=\"goTop\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/entry/confirm doRegisterCustomer": {
+    "classification": "fail",
+    "note": "affordance で post /entry に届くが rel=\"doRegisterCustomer\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/entry/confirm goTop": {
+    "classification": "fail",
+    "note": "affordance で get / に届くが rel=\"goTop\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/forgot-password doRequestPasswordReset": {
+    "classification": "fail",
+    "note": "affordance で post /forgot-password に届くが rel=\"doRequestPasswordReset\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/forgot-password goLogin": {
+    "classification": "fail",
+    "note": "affordance で get /login に届くが rel=\"goLogin\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/index goHelpAbout": {
+    "classification": "fail",
+    "note": "トップのフッターに /help/about へのリンクが無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/index goHelpAgreement": {
+    "classification": "fail",
+    "note": "トップのフッターに /help/agreement へのリンクが無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/index goHelpPrivacy": {
+    "classification": "fail",
+    "note": "トップのフッターに /help/privacy へのリンクが無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/login doLogin": {
+    "classification": "fail",
+    "note": "affordance で post /login に届くが rel=\"doLogin\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/login doRequestPasswordReset": {
+    "classification": "resourceOnly",
+    "note": "ログイン画面からは GET で再設定ページへ遷移する。直接の POST form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/login goCustomerRegistration": {
+    "classification": "fail",
+    "note": "affordance で get /entry に届くが rel=\"goCustomerRegistration\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage doAddFavorite": {
+    "classification": "resourceOnly",
+    "note": "マイページにお気に入り追加 form は無い（商品ページの affordance）",
+    "reason": "target-missing"
+  },
+  "GET page://self/mypage doRemoveFavorite": {
+    "classification": "resourceOnly",
+    "note": "fixture のお気に入りが空で削除 form が描画されない",
+    "reason": "target-missing"
+  },
+  "GET page://self/mypage goCart": {
+    "classification": "fail",
+    "note": "affordance で get /cart に届くが rel=\"goCart\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage goCustomerAddressList": {
+    "classification": "fail",
+    "note": "affordance で get /mypage/address-list に届くが rel=\"goCustomerAddressList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage goFavoriteList": {
+    "classification": "fail",
+    "note": "affordance で get /mypage/favorite-list に届くが rel=\"goFavoriteList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage goMypageChange": {
+    "classification": "fail",
+    "note": "affordance で get /mypage/change に届くが rel=\"goMypageChange\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage goMypageHistory": {
+    "classification": "fail",
+    "note": "マイページに注文履歴へのリンクが無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/mypage goMypageWithdraw": {
+    "classification": "fail",
+    "note": "affordance で get /mypage/withdraw に届くが rel=\"goMypageWithdraw\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage goOrderHistory": {
+    "classification": "fail",
+    "note": "マイページに注文履歴へのリンクが無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/mypage goProductList": {
+    "classification": "fail",
+    "note": "affordance で get /products に届くが rel=\"goProductList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/address doCreateCustomerAddress": {
+    "classification": "fail",
+    "note": "affordance で post /mypage/address-list に届くが rel=\"doCreateCustomerAddress\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/address doUpdateCustomerAddress": {
+    "classification": "resourceOnly",
+    "note": "addressId 無しの新規モードでは PUT form を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/mypage/address goCustomerAddressList": {
+    "classification": "fail",
+    "note": "affordance で get /mypage/address-list に届くが rel=\"goCustomerAddressList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/address-list doCreateCustomerAddress": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で住所入力ページへ遷移する。直接の POST form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/mypage/address-list doDeleteCustomerAddress": {
+    "classification": "resourceOnly",
+    "note": "fixture の既定顧客に住所が無く削除 form が描画されない",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/mypage/address-list doUpdateCustomerAddress": {
+    "classification": "resourceOnly",
+    "note": "一覧からは GET で住所編集ページへ遷移する。直接の PUT form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/mypage/address-list goMypage": {
+    "classification": "fail",
+    "note": "affordance で get /mypage に届くが rel=\"goMypage\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/change doUpdateCustomer": {
+    "classification": "fail",
+    "note": "affordance で post /mypage/change に届くが rel=\"doUpdateCustomer\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/change goMypage": {
+    "classification": "fail",
+    "note": "affordance で get /mypage に届くが rel=\"goMypage\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/change-complete goCustomerAddressList": {
+    "classification": "fail",
+    "note": "affordance で get /mypage/address-list に届くが rel=\"goCustomerAddressList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/change-complete goMypage": {
+    "classification": "fail",
+    "note": "affordance で get /mypage に届くが rel=\"goMypage\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/change-complete goTop": {
+    "classification": "fail",
+    "note": "affordance で get / に届くが rel=\"goTop\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/favorite-list doAddFavorite": {
+    "classification": "resourceOnly",
+    "note": "お気に入り一覧に追加 form は無い（商品ページの affordance）",
+    "reason": "target-missing"
+  },
+  "GET page://self/mypage/favorite-list doRemoveFavorite": {
+    "classification": "resourceOnly",
+    "note": "fixture のお気に入りが空で削除 form が描画されない",
+    "reason": "target-missing"
+  },
+  "GET page://self/mypage/favorite-list goMypage": {
+    "classification": "fail",
+    "note": "affordance で get /mypage に届くが rel=\"goMypage\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/history doReorder": {
+    "classification": "fail",
+    "note": "affordance で post /mypage/reorder に届くが rel=\"doReorder\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/history goMypage": {
+    "classification": "fail",
+    "note": "affordance で get /mypage に届くが rel=\"goMypage\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/order-history goMypage": {
+    "classification": "fail",
+    "note": "affordance で get /mypage に届くが rel=\"goMypage\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/withdraw doWithdrawCustomer": {
+    "classification": "fail",
+    "note": "affordance で post /mypage/withdraw に届くが rel=\"doWithdrawCustomer\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/withdraw-complete goTop": {
+    "classification": "fail",
+    "note": "affordance で get / に届くが rel=\"goTop\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/withdraw-confirm doWithdrawCustomer": {
+    "classification": "fail",
+    "note": "affordance で post /mypage/withdraw に届くが rel=\"doWithdrawCustomer\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/mypage/withdraw-confirm goMypage": {
+    "classification": "fail",
+    "note": "affordance で get /mypage に届くが rel=\"goMypage\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/product doAddFavorite": {
+    "classification": "resourceOnly",
+    "note": "未ログインの fixture ではお気に入り form を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/product doRemoveFavorite": {
+    "classification": "resourceOnly",
+    "note": "未ログインの fixture ではお気に入り form を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/products goCart": {
+    "classification": "fail",
+    "note": "affordance で get /cart に届くが rel=\"goCart\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/products goProduct": {
+    "classification": "fail",
+    "note": "affordance で get /product に届くが rel=\"goProduct\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/reset doResetPassword": {
+    "classification": "fail",
+    "note": "affordance で post /reset に届くが rel=\"doResetPassword\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping doConfirmOrder": {
+    "classification": "fail",
+    "note": "affordance で post /shopping/confirm に届くが rel=\"doConfirmOrder\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/complete goCart": {
+    "classification": "fail",
+    "note": "affordance で get /cart に届くが rel=\"goCart\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/confirm doCheckout": {
+    "classification": "fail",
+    "note": "affordance で post /shopping/checkout に届くが rel=\"doCheckout\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/confirm goShoppingError": {
+    "classification": "targetOut",
+    "note": "エラー画面はサーバ側 redirect で遷移する。GET affordance は描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/shopping/login doLogin": {
+    "classification": "fail",
+    "note": "affordance で post /login に届くが rel=\"doLogin\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/login goCustomerRegistration": {
+    "classification": "fail",
+    "note": "affordance で get /entry に届くが rel=\"goCustomerRegistration\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/login goShoppingNonMember": {
+    "classification": "fail",
+    "note": "affordance で get /shopping/non-member に届くが rel=\"goShoppingNonMember\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/non-member doSubmitNonMember": {
+    "classification": "fail",
+    "note": "affordance で post /shopping/non-member に届くが rel=\"doSubmitNonMember\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/non-member goCart": {
+    "classification": "fail",
+    "note": "affordance で get /cart に届くが rel=\"goCart\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/shipping doSelectShippingAddress": {
+    "classification": "fail",
+    "note": "affordance で post /shopping/shipping に届くが rel=\"doSelectShippingAddress\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/shipping-edit doUpdateShippingAddress": {
+    "classification": "fail",
+    "note": "affordance で post /shopping/shipping-edit に届くが rel=\"doUpdateShippingAddress\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/shipping-edit goShoppingShipping": {
+    "classification": "fail",
+    "note": "affordance で get /shopping/shipping に届くが rel=\"goShoppingShipping\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/shipping-multiple goShopping": {
+    "classification": "fail",
+    "note": "affordance で get /shopping に届くが rel=\"goShopping\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/shipping-multiple goShoppingShipping": {
+    "classification": "fail",
+    "note": "複数配送先ページに配送先選択へ戻るリンクが無い",
+    "reason": "target-missing"
+  },
+  "GET page://self/shopping/shipping-multiple-edit doAddMultipleShippingAddress": {
+    "classification": "fail",
+    "note": "affordance で post /shopping/shipping-multiple-edit に届くが rel=\"doAddMultipleShippingAddress\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/shopping/shipping-multiple-edit goShoppingShippingMultiple": {
+    "classification": "fail",
+    "note": "affordance で get /shopping/shipping-multiple に届くが rel=\"goShoppingShippingMultiple\" が無い",
+    "reason": "semantic-token-missing"
+  }
+}

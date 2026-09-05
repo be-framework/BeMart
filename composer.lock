@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "95cc24ee750094ae769647287e95bf9c",
+    "content-hash": "88c3c523002ea3b7680995fdf015b365",
     "packages": [
         {
             "name": "aura/cli",
@@ -611,16 +611,16 @@
         },
         {
             "name": "bear/devtools",
-            "version": "dev-abstract-workflow-test-contract",
+            "version": "dev-html-link-audit-affordances",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.DevTools.git",
-                "reference": "09eaf956e35d251d636c8317349ab610424d153c"
+                "reference": "5a91b475d6a8b595d5a0b3ea8ee68bd042940dc7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/09eaf956e35d251d636c8317349ab610424d153c",
-                "reference": "09eaf956e35d251d636c8317349ab610424d153c",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/5a91b475d6a8b595d5a0b3ea8ee68bd042940dc7",
+                "reference": "5a91b475d6a8b595d5a0b3ea8ee68bd042940dc7",
                 "shasum": ""
             },
             "require": {
@@ -727,10 +727,10 @@
                 }
             ],
             "support": {
-                "source": "https://github.com/bearsunday/BEAR.DevTools/tree/abstract-workflow-test-contract",
+                "source": "https://github.com/bearsunday/BEAR.DevTools/tree/html-link-audit-affordances",
                 "issues": "https://github.com/bearsunday/BEAR.DevTools/issues"
             },
-            "time": "2026-06-09T05:04:03+00:00"
+            "time": "2026-09-05T10:05:19+00:00"
         },
         {
             "name": "bear/package",
@@ -2060,7 +2060,7 @@
             "dist": {
                 "type": "path",
                 "url": "be",
-                "reference": "cc46e612ebe9925c013ce9d34014d6b022c80270"
+                "reference": "582b54fe20c555993e476620e427f520c37864e1"
             },
             "require": {
                 "be-framework/be": "dev-semantic-logger-0.9 as 0.1.0",
