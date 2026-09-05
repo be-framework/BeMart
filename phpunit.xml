@@ -8,6 +8,7 @@
         <testsuite name="fake">
             <directory>tests/Resource</directory>
             <exclude>tests/Resource/Sql</exclude>
+            <directory>tests/Alps</directory>
             <directory>tests/Auth</directory>
             <directory>tests/Module</directory>
             <directory>tests/Router</directory>

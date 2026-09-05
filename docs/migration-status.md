@@ -94,6 +94,34 @@ already implements the import (the router turns an `import_file` upload into the
 ways: a sixth dead form breaks the build, and so does an entry that is no
 longer dead. The other 118 POST forms resolve to a resource that writes.
 
+### 2.2 `#[Alps]` references the profile does not define
+
+`alps.json` is the SSOT and `#[Alps('id')]` is a resource claiming to implement
+one of its transitions. Nothing checked that the id exists — `asd --validate`
+validates the profile, not the references into it — and 19 had drifted.
+`tests/Alps/AlpsReferenceTest.php` now holds the list and fails on a twentieth
+as well as on an entry that has since been resolved.
+
+| Group | Count | What it needs |
+|---|---|---|
+| Route gates and fallbacks (`doActionRedirect`, `goUnsupportedRoute`, +6) | 8 | Either gate descriptors in the profile, or drop `#[Alps]` — a client cannot discover these |
+| Placeholder (`goAdminEmptyPage`) | 1 | Drop `#[Alps]` |
+| Screens and actions absent from the profile | 10 | A descriptor each |
+
+The ten: `doCreateMailTemplate`, `goAdminContentFileManager`,
+`goAdminCustomerDeliveryEdit`, `goAdminLog`, `goAdminOrderMailConfirm`,
+`goAdminOrderOrderPdf`, `goAdminProductProductClass`,
+`goAdminTemplateTemplateAdd`, `goAdminTwoFactorAuthEdit`,
+`goShoppingShippingMultipleEdit`.
+
+`goAdminOrderMailConfirm` is close to a rename: the profile already carries
+`goOrderMailConfirm`. `goAdminOrderOrderPdf` and `goShoppingShippingMultipleEdit`
+are not — they are editor screens distinct from the `goExportOrderPdf` and
+`goShoppingShippingMultiple` transitions they link to.
+
+Four of the ten are also the four remaining §2.1 dead forms, so for those the
+read descriptor, the write descriptor and the handler land together.
+
 ---
 
 ## 3. Phase log
