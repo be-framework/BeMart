@@ -8,6 +8,7 @@ use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
 use MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface;
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
@@ -66,6 +67,7 @@ final readonly class AdminProductUpdated
         #[Inject] AdminSession $adminSession,
         #[Inject] ProductQueryInterface $productQuery,
         #[Inject] ProductCommandInterface $productCommand,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
@@ -97,6 +99,9 @@ final readonly class AdminProductUpdated
         );
 
         $productCommand->update($merged);
+        // The corpus a shopper reads is cached; this is the write announcing itself, so the
+        // storefront does not keep serving the old row until a TTL runs out.
+        $cacheInvalidator->invalidateCorpus();
 
         $this->productCode = $merged->productCode;
         $this->productName = $merged->productName;

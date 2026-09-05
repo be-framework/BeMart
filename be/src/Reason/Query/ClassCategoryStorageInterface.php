@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Query;
 
+use MyVendor\BeMart\Be\Reason\Service\ChangesProductCorpus;
 use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
 use Ray\MediaQuery\Annotation\DbQuery;
 
@@ -37,14 +38,18 @@ interface ClassCategoryStorageInterface
     public function item(string $classCategoryId): ClassCategoryEntity|null;
 
     #[DbQuery('tclass_category_put')]
+    #[ChangesProductCorpus]
     public function put(ClassCategoryEntity $classCategory): void;
 
     #[DbQuery('tclass_category_delete')]
+    #[ChangesProductCorpus]
     public function delete(string $classCategoryId): void;
 
     #[DbQuery('tclass_category_reorder')]
+    #[ChangesProductCorpus]
     public function reorder(string $classCategoryId, int $sortNo): void;
 
     #[DbQuery('tclass_category_visible')]
+    #[ChangesProductCorpus]
     public function setVisible(string $classCategoryId, bool $visible): void;
 }

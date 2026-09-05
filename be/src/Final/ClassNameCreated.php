@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
 use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
@@ -27,6 +28,7 @@ final readonly class ClassNameCreated
         #[Input] string $classNameLabel,
         #[Inject] AdminSession $adminSession,
         #[Inject] ClassNameStorageInterface $classNames,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
         #[Inject] ClassNameIdProvider $ids,
     ) {
         if ($adminSession->adminId === null) {
@@ -39,6 +41,8 @@ final readonly class ClassNameCreated
         );
 
         $classNames->put($entity);
+
+        $cacheInvalidator->invalidateCorpus();
 
         $this->classNameId = $entity->classNameId;
         $this->name = $entity->name;

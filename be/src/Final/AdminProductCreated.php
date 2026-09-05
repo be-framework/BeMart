@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
 use MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface;
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -44,6 +45,7 @@ final readonly class AdminProductCreated
         #[Input] string|null $searchWord,
         #[Input] string|null $note,
         #[Inject] ProductCommandInterface $command,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
     ) {
         $command->create(new ProductEntity(
             productCode: $productCode,
@@ -55,6 +57,8 @@ final readonly class AdminProductCreated
             searchWord: $searchWord,
             note: $note,
         ));
+        // The corpus a shopper reads is cached; the write announces itself
+        $cacheInvalidator->invalidateCorpus();
 
         $this->productCode = $productCode;
         $this->productName = $productName;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Query;
 
+use MyVendor\BeMart\Be\Reason\Service\ChangesProductCorpus;
 use MyVendor\BeMart\Be\Reason\Entity\TagEntity;
 use Ray\MediaQuery\Annotation\DbQuery;
 
@@ -28,11 +29,14 @@ interface TagStorageInterface
     public function item(string $tagId): TagEntity|null;
 
     #[DbQuery('tag_put')]
+    #[ChangesProductCorpus]
     public function put(TagEntity $tag): void;
 
     #[DbQuery('tag_delete')]
+    #[ChangesProductCorpus]
     public function delete(string $tagId): void;
 
     #[DbQuery('tag_reorder')]
+    #[ChangesProductCorpus]
     public function reorder(string $tagId, int $sortNo): void;
 }

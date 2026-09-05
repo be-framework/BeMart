@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\RepositoryModule\Annotation\CacheableResponse;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -27,6 +28,7 @@ use BEAR\Resource\Annotation\JsonSchema;
  *
  * @see #Top in alps.json — full descriptor list
  */
+#[CacheableResponse]
 class Index extends ResourceObject
 {
     /**

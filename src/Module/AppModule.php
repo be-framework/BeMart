@@ -11,6 +11,8 @@ use BEAR\Resource\Module\JsonSchemaModule;
 use BEAR\Resource\ResourceObject;
 use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use Be\Framework\Module\BeModule;
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
+use MyVendor\BeMart\Cache\ProductCacheInvalidator;
 use MyVendor\BeMart\Auth\AdminSessionWriterInterface;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
@@ -183,6 +185,8 @@ final class AppModule extends AbstractAppModule
         $this->install(new BeModule('MyVendor\\BeMart\\Be\\Semantic'));
 
         $this->bind(PasswordHasherInterface::class)->to(NativePasswordHasher::class);
+        // A Final announces a product change; this is what turns the announcement into cache work
+        $this->bind(ProductCacheInvalidatorInterface::class)->to(ProductCacheInvalidator::class);
         $this->bind(HtmlAdminLoginChallengeAdapter::class);
         $this->bind(CustomerSessionWriterInterface::class)->to(NoopCustomerSessionWriter::class)->in(Scope::SINGLETON);
         $this->bind(AdminSessionWriterInterface::class)->to(NoopAdminSessionWriter::class)->in(Scope::SINGLETON);

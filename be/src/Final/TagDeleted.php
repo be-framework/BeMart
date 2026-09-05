@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Be\Exception\TagNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
@@ -23,6 +24,7 @@ final readonly class TagDeleted
         #[Input] string $tagId,
         #[Inject] AdminSession $adminSession,
         #[Inject] TagStorageInterface $tags,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
@@ -33,6 +35,8 @@ final readonly class TagDeleted
         }
 
         $tags->delete($tagId);
+
+        $cacheInvalidator->invalidateCorpus();
 
         $this->tagId = $tagId;
     }

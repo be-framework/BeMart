@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Query;
 
+use MyVendor\BeMart\Be\Reason\Service\ChangesProductCorpus;
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
 use MyVendor\BeMart\Be\Reason\Query\Result\CopiedProduct;
 use Ray\MediaQuery\Annotation\DbQuery;
@@ -30,6 +31,7 @@ interface ProductCommandInterface
      * Final is responsible for the 409 guard.
      */
     #[DbQuery('product_create')]
+    #[ChangesProductCorpus]
     public function create(ProductEntity $product): void;
 
     /**
@@ -39,6 +41,7 @@ interface ProductCommandInterface
      * not perform the merge itself.
      */
     #[DbQuery('product_update')]
+    #[ChangesProductCorpus]
     public function update(ProductEntity $product): void;
 
     /**
@@ -48,6 +51,7 @@ interface ProductCommandInterface
      * the store.
      */
     #[DbQuery('product_soft_delete')]
+    #[ChangesProductCorpus]
     public function delete(string $productCode): void;
 
     /**
@@ -59,5 +63,6 @@ interface ProductCommandInterface
      * newly-persisted entity.
      */
     #[DbQuery('product_copy', factory: \MyVendor\BeMart\Be\Reason\Query\Factory\ProductFactory::class)]
+    #[ChangesProductCorpus]
     public function copy(string $sourceCode, string $newCode): CopiedProduct;
 }
