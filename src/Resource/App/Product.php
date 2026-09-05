@@ -20,11 +20,11 @@ use MyVendor\BeMart\Support\ProductImageCatalog;
  * tag as well as its own, so purging the stock URI drops this entry too. Copying the number in
  * would have made a stale product page that no invalidation could reach.
  *
- * A longer lifetime than the stock it embeds: master data changes when someone edits a product,
- * and until an admin write path purges this URI, the cascade through stock plus the TTL are the
- * eviction paths.
+ * Master data changes when someone edits a product; until an admin write path purges this URI,
+ * the cascade through stock and the 30-second TTL are the eviction paths. A bare `#[Cacheable]`
+ * would be a year, and a parent hit never re-reads the embedded stock.
  */
-#[Cacheable]
+#[Cacheable(expirySecond: 30)]
 class Product extends ResourceObject
 {
     public function __construct(

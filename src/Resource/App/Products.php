@@ -26,10 +26,11 @@ use function array_values;
  *
  * Two invalidation paths, because one alone is not enough. Every entry declares the shared
  * `product-corpus` surrogate key, so an admin edit can drop every keyword and limit variant with
- * one tag - the URI tag would only reach the exact query string that produced an entry. The TTL is
- * the floor under that: `stock` moves as orders are placed, and no write path announces those.
+ * one tag - the URI tag would only reach the exact query string that produced an entry. The 60-second
+ * `short` TTL is the floor under that: `stock` moves as orders are placed, and no write path
+ * announces those.
  */
-#[Cacheable]
+#[Cacheable(expiry: 'short')]
 class Products extends ResourceObject
 {
     /** The tag every variant of this corpus carries, so one purge reaches all of them */
