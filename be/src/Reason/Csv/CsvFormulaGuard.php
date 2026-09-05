@@ -42,7 +42,7 @@ final class CsvFormulaGuard
             return $cell;
         }
 
-        if (! in_array(substr((string) $cell, 0, 1), self::TRIGGERS, true)) {
+        if (! in_array(substr($cell, 0, 1), self::TRIGGERS, true)) {
             return $cell;
         }
 
