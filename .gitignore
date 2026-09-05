@@ -20,11 +20,3 @@
 # EC-CUBE source clone for schema extraction and HTML parity tests
 /tools/ec-cube-source/
 
-# Cache-loop run output: rewritten by every iteration. The tools beside it are tracked.
-/var/loop/last-*.txt
-/var/loop/loop.log
-/var/loop/redis/
-
-# Compiled context artifacts (bin/compile.php writes these)
-/autoload.php
-/preload.php
