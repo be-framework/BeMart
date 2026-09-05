@@ -5,7 +5,7 @@
     "description": "BeMart Be — pure Be Framework domain (Input / Final / Semantic / Exception / Becoming / Reason) for the BeMart project.",
     "require": {
         "php": "^8.3",
-        "be-framework/be": "0.x-dev as 0.1.0",
+        "be-framework/be": "dev-semantic-logger-0.9 as 0.1.0",
         "ray/input-query": "^1.0",
         "ray/media-query": "^1.1"
     },
