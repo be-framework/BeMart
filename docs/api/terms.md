@@ -4,9 +4,9 @@ This index reports lexical identifier matches only; it does not prove semantic e
 
 ## Summary
 
-- Terms used in API: 375
+- Terms used in API: 374
 - Terms with same-name ALPS descriptor: 126
-- Lexical ALPS coverage: 33.6%
+- Lexical ALPS coverage: 33.7%
 - Reserved representation fields: 0
 - ☑︎ = ALPS descriptor binding
 
@@ -871,13 +871,16 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: get-admin-content-js.json#/properties/csrfToken
   - schema property: get-admin-content-maintenance.json#/properties/csrfToken
   - schema property: get-admin-csv-config.json#/properties/csrfToken
+  - schema property: get-admin-customer-list.json#/properties/csrfToken
   - schema property: get-admin-layout-layout.json#/properties/csrfToken
   - schema property: get-admin-login.json#/properties/csrfToken
   - schema property: get-admin-mail-template.json#/properties/csrfToken
+  - schema property: get-admin-master-data.json#/properties/csrfToken
   - schema property: get-admin-member-list.json#/properties/csrfToken
   - schema property: get-admin-member.json#/properties/csrfToken
   - schema property: get-admin-news-news.json#/properties/csrfToken
   - schema property: get-admin-order-edit.json#/properties/csrfToken
+  - schema property: get-admin-order-list.json#/properties/csrfToken
   - schema property: get-admin-order-shipping-notify-mail.json#/properties/csrfToken
   - schema property: get-admin-order-status.json#/properties/csrfToken
   - schema property: get-admin-order.json#/properties/csrfToken
@@ -907,6 +910,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: get-shopping-shipping-multiple-edit.json#/properties/csrfToken
   - schema property: get-shopping-shipping.json#/properties/csrfToken
   - schema property: get-shopping.json#/properties/csrfToken
+  - schema property: put-admin-master-data.json#/properties/csrfToken
 
 ### `css`
 
@@ -1248,11 +1252,6 @@ This index reports lexical identifier matches only; it does not prove semantic e
 
 - usages:
   - schema property: get-admin-trade-law.json#/properties/tradeLawRows/items/properties/displayOrderScreenKey
-
-### `dummyEmail`
-
-- usages:
-  - schema property: post-mypage-withdraw.json#/properties/dummyEmail
 
 ### `email` ☑︎
 
@@ -2820,6 +2819,8 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - parameter: DELETE /admin/member {mode}
   - parameter: POST /admin/order/bulk-delete {mode}
   - parameter: POST /admin/trade-law {mode}
+  - parameter: POST /admin/two-factor-auth {mode}
+  - parameter: PUT /admin/two-factor-auth-set {mode}
   - parameter: POST /contact {mode}
   - parameter: POST /entry {mode}
   - parameter: POST /login {mode}
@@ -2828,6 +2829,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: post-admin-member.param.json#/properties/mode
   - schema property: post-admin-order-bulk-delete.param.json#/properties/mode
   - schema property: post-admin-trade-law.param.json#/properties/mode
+  - schema property: post-admin-two-factor-auth.param.json#/properties/mode
   - schema property: post-contact.param.json#/properties/mode
   - schema property: post-entry.param.json#/properties/mode
   - schema property: post-login.param.json#/properties/mode
@@ -2836,6 +2838,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: put-admin-content-js.param.json#/properties/mode
   - schema property: put-admin-content-maintenance.param.json#/properties/mode
   - schema property: put-admin-member.param.json#/properties/mode
+  - schema property: put-admin-two-factor-auth-set.param.json#/properties/mode
 
 ### `name`
 
@@ -4606,14 +4609,12 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - parameter: POST /cart/item {sessionPrefix}
   - parameter: PUT /cart/item {sessionPrefix}
   - parameter: DELETE /cart/item {sessionPrefix}
-  - parameter: POST /mypage/withdraw {sessionPrefix}
   - parameter: GET /shopping {sessionPrefix}
   - parameter: POST /shopping/non-member {sessionPrefix}
   - schema property: delete-cart-item.param.json#/properties/sessionPrefix
   - schema property: get-cart.param.json#/properties/sessionPrefix
   - schema property: get-shopping.param.json#/properties/sessionPrefix
   - schema property: post-cart-item.param.json#/properties/sessionPrefix
-  - schema property: post-mypage-withdraw.param.json#/properties/sessionPrefix
   - schema property: post-shopping-non-member.param.json#/properties/sessionPrefix
   - schema property: put-cart-item.param.json#/properties/sessionPrefix
 

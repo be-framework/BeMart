@@ -17,24 +17,20 @@ use Ray\Di\AbstractModule;
  * Same URI (`page://self/admin/login-history`), same body-shape
  * assertions, same AUTHZ branch. The only differences are:
  *
- *  - the storage binding (LoginHistoryStorageInterface →
- *    SqlLoginHistoryStorage) is layered via the base class's
- *    sqlOverrideModule; persistence is against the real
- *    dtb_login_history table.
+ *  - LoginHistoryStorageInterface is the Ray.MediaQuery proxy layered
+ *    via the base class's sqlOverrideModule; persistence is against the
+ *    real dtb_login_history table.
  *
  *  - the Fake-backed sibling leans on the JSON login-history corpus seeding
- *    four sample attempts in its constructor. dtb_login_history is
- *    empty on each test, and the LoginHistory Resource exposes a single
- *    `goLoginHistoryList` affordance — there is NO append / POST
- *    affordance on the resource layer (append() lives on the storage
- *    interface but the Wave 8 Final does not call it). So the SQL
- *    sibling seeds the four equivalent rows directly via the
- *    insertLoginHistory fixture, exactly as AdminTemplateResourceSqlTest
- *    seeds templates the resource layer cannot POST.
- *
- *  - mtb_login_history_status (the NOT NULL FK target) is empty in the
- *    structure-only dump, so setUp seeds it via seedLoginHistoryStatus
- *    before any row is inserted.
+ *    four sample attempts. dtb_login_history is empty on each test, and
+ *    the LoginHistory Resource exposes a single `goLoginHistoryList`
+ *    affordance — rows are written by the login flow
+ *    ({@see \MyVendor\BeMart\Be\Final\AdminAuthenticated}), never by a
+ *    POST to this resource. So the SQL sibling seeds the four
+ *    equivalent rows directly via the insertLoginHistory fixture,
+ *    exactly as AdminTemplateResourceSqlTest seeds templates the
+ *    resource layer cannot POST. The write path itself is covered by
+ *    {@see \MyVendor\BeMart\Be\Tests\Sql\LoginAttemptGateSqlTest}.
  *
  * Why mirror exactly: per G-23 the Resource-layer contract MUST stay
  * green for both Fake and SQL backings. If the SQL side passes but the

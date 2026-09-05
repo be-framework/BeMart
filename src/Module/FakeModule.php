@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Module;
 
 use BEAR\Package\AbstractAppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Query\InMemoryLoginHistoryStorage;
+use MyVendor\BeMart\Be\Reason\Fake\Service\InMemoryPreOrderClaim;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeClientIp;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCustomerInitialPoint;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeInventoryAllocator;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
@@ -23,9 +26,13 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTemplateCompatibility;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
 use MyVendor\BeMart\Be\Reason\Fake\Service\NullCsrfToken;
+use MyVendor\BeMart\Be\Reason\Query\LoginAttemptGateInterface;
+use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
+use MyVendor\BeMart\Be\Reason\Service\PreOrderClaimInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClientIpInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
@@ -111,6 +118,21 @@ final class FakeModule extends AbstractAppModule
         $templateCompat = new FakeTemplateCompatibility();
         $this->bind(FakeTemplateCompatibility::class)->toInstance($templateCompat);
         $this->bind(TemplateCompatibilityInterface::class)->toInstance($templateCompat);
+
+        // Login audit + throttle need a store that actually remembers
+        // appends; the static FakeQuery corpus cannot count failures.
+        // One instance across the three bindings — Ray.Di scopes
+        // singletons per binding, and the reader, the writer and the
+        // counter must see the same rows.
+        $loginHistory = new InMemoryLoginHistoryStorage();
+        $this->bind(InMemoryLoginHistoryStorage::class)->toInstance($loginHistory);
+        $this->bind(LoginHistoryStorageInterface::class)->toInstance($loginHistory);
+        $this->bind(LoginAttemptGateInterface::class)->toInstance($loginHistory);
+        $this->bind(ClientIpInterface::class)->to(FakeClientIp::class)->in(Scope::SINGLETON);
+
+        // The claim is a compare-and-swap; a static fixture can only ever
+        // answer with one value, so the Fake context needs a store.
+        $this->bind(PreOrderClaimInterface::class)->to(InMemoryPreOrderClaim::class)->in(Scope::SINGLETON);
 
         $this->bind(CustomerInitialPointInterface::class)->to(FakeCustomerInitialPoint::class)->in(Scope::SINGLETON);
         $this->bind(PurchaseFlowInterface::class)->to(FakePurchaseFlow::class)->in(Scope::SINGLETON);

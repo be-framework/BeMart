@@ -7,10 +7,13 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
+use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
+use MyVendor\BeMart\Be\Reason\Query\LoginAttemptGateInterface;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -123,4 +126,40 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
         ]);
     }
 
+    /**
+     * A wrong code leaves the challenge in place so the admin can retype
+     * it — but only up to the throttle. On refusal the pending challenge
+     * is dropped, so the browser cannot keep POSTing codes at it.
+     */
+    public function testOnPostRefusesFurtherCodesWith429AndDropsTheChallenge(): void
+    {
+        $this->challenge->startVerification(self::ADMIN_ID, self::LOGIN_ID);
+
+        for ($i = 0; $i < LoginAttemptGateInterface::MAX_FAILURES; $i++) {
+            try {
+                $this->post('000000');
+                $this->fail('expected TwoFactorAuthFailedException');
+            } catch (TwoFactorAuthFailedException) {
+            }
+        }
+
+        // Right code this time, and still refused.
+        $ro = $this->post(FakeTwoFactorAuth::VALID_TOKEN);
+
+        $this->assertSame(429, $ro->code);
+        $this->assertNotSame('', $ro->body['message']);
+        $this->assertArrayNotHasKey(HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY, $_SESSION);
+        $this->assertArrayNotHasKey(HtmlAdminSessionAdapter::ADMIN_ID_KEY, $_SESSION);
+
+        // Challenge gone: the next submission has nothing to answer.
+        $this->assertSame(Code::FORBIDDEN, $this->post(FakeTwoFactorAuth::VALID_TOKEN)->code);
+    }
+
+    private function post(string $deviceToken): ResourceObject
+    {
+        return $this->resource->post('page://self/admin/two-factor-auth', [
+            'deviceToken' => $deviceToken,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+    }
 }

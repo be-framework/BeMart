@@ -10,9 +10,11 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use Be\Framework\SemanticVariable\ValidationMessageHandler;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
+use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
 use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
 use MyVendor\BeMart\Be\Final\TwoFactorAuthVerified;
 use MyVendor\BeMart\Be\Input\VerifyTwoFactorAuthInput;
@@ -48,6 +50,9 @@ use function assert;
  */
 class TwoFactorAuth extends ResourceObject
 {
+    /** BEAR\Resource\Code has no 429; {@see \MyVendor\BeMart\Provide\Error\ExceptionStatusMapper} maps the same status for JSON clients. */
+    private const HTTP_TOO_MANY_REQUESTS = 429;
+
     public function __construct(
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
@@ -117,10 +122,14 @@ class TwoFactorAuth extends ResourceObject
      * client-supplied `loginId` is ignored.
      *
      * Failure mapping:
-     *   - Invalid CSRF                  → 403 (interceptor)
-     *   - Missing pending challenge     → 403
-     *   - SemanticVariableException     → 400 (malformed code)
-     *   - TwoFactorAuthFailedException  → 400 (code mismatch)
+     *   - Invalid CSRF                   → 403 (interceptor)
+     *   - Missing pending challenge      → 403
+     *   - SemanticVariableException      → 400 (malformed code)
+     *   - TwoFactorAuthFailedException   → 400 (code mismatch)
+     *   - LoginAttemptsExceededException → 429 (too many codes burned;
+     *       the pending challenge is dropped here, so the admin has to
+     *       come back through the password stage — which is throttled on
+     *       the same counter, i.e. only after the window has passed)
      *
      * @psalm-taint-source input $deviceToken
      */
@@ -141,10 +150,18 @@ class TwoFactorAuth extends ResourceObject
             return $this;
         }
 
-        $final = ($this->becoming)(new VerifyTwoFactorAuthInput(
-            loginId: $challenge->loginId,
-            deviceToken: $deviceToken,
-        ));
+        try {
+            $final = ($this->becoming)(new VerifyTwoFactorAuthInput(
+                loginId: $challenge->loginId,
+                deviceToken: $deviceToken,
+            ));
+        } catch (LoginAttemptsExceededException $e) {
+            $this->loginChallenge->abandonVerification();
+            $this->code = self::HTTP_TOO_MANY_REQUESTS;
+            $this->body = ['message' => (new ValidationMessageHandler())->getMessage($e, 'ja')];
+
+            return $this;
+        }
 
         assert($final instanceof TwoFactorAuthVerified);
         $this->loginChallenge->completeVerification($challenge);

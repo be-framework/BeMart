@@ -95,7 +95,7 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('goMypageWithdraw', $ro->body['transitionId']);
-        $this->assertSame(['sessionPrefix', 'csrfToken'], $ro->body['fields']);
+        $this->assertSame(['csrfToken'], $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/mypage/withdraw', $ro->body['submitTo']['href']);
         $this->assertNull($ro->body['csrfToken']);
@@ -132,7 +132,7 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($this->aliceId, $ro->body['customerId']);
-        $this->assertSame($dummyEmail, $ro->body['dummyEmail']);
+        $this->assertArrayNotHasKey('dummyEmail', $ro->body);
         $this->assertTrue($ro->body['cleared']);
         $this->assertStringContainsString('退会', $ro->body['message']);
 

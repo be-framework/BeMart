@@ -139,7 +139,7 @@
               type="button"
               aria-label="{{ member.name }}を削除"
               aria-haspopup="dialog"
-              onclick="document.getElementById('delete-dialog-{{ member.loginId }}').showModal()"
+              onclick="document.getElementById('delete-dialog-{{ member.loginId|e('js') }}').showModal()"
             >
               <i class="fa fa-times" aria-hidden="true"></i>
             </button>

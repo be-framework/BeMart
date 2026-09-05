@@ -163,8 +163,11 @@ $loadSql = static function (PDO $pdo, string $path) use ($fail): void {
         // without embedded semicolons in string literals — a split on ";\n" is
         // sufficient and avoids pulling in a full SQL parser.
         foreach (explode(";\n", $sql) as $statement) {
-            $statement = trim($statement);
-            if ($statement === '' || str_starts_with($statement, '--')) {
+            // Every DDL block here is introduced by `-- …` comment lines.
+            // They have to be stripped rather than used to skip the chunk,
+            // or the statement they document is skipped with them.
+            $statement = trim((string) preg_replace('/^(?:--[^\n]*(?:\n|$)\s*)+/', '', trim($statement)));
+            if ($statement === '') {
                 continue;
             }
 

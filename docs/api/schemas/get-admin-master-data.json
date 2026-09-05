@@ -15,6 +15,13 @@
       "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
       "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
     },
+    "csrfToken": {
+      "type": "string",
+      "title": "CSRFトークン",
+      "description": "フォーム送信元を検証するトークン。管理者向けマスタデータ選択フォームに使用。",
+      "minLength": 1,
+      "maxLength": 160
+    },
     "submitTo": {
       "type": [
         "object",

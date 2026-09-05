@@ -13,11 +13,12 @@
 //
 // Usage:
 //   node run.cjs [scenarios.json]
-// Env (all optional, defaults target `composer serve:page:dev`):
+// Env (defaults target `composer serve:page:dev`; ADMIN_PW is REQUIRED):
 //   BEMART_BASE  http://127.0.0.1:8081
 //   CHROME_BIN   /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 //   ADMIN_ID     test-admin
-//   ADMIN_PW     local-dev-admin-password
+//   ADMIN_PW     (no default — the seeded test-admin password, i.e. whatever
+//                 BEMART_DEMO_ADMIN_PASSWORD was set to when seeding)
 //   DEV_2FA      123456   (BEMART_DEV_LOGIN magic code)
 //   OUT          ../evidence-browser
 //
@@ -31,11 +32,16 @@ const HERE = __dirname;
 const BASE = process.env.BEMART_BASE || 'http://127.0.0.1:8081';
 const CHROME = process.env.CHROME_BIN || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const ADMIN_ID = process.env.ADMIN_ID || 'test-admin';
-const ADMIN_PW = process.env.ADMIN_PW || 'local-dev-admin-password';
+const ADMIN_PW = process.env.ADMIN_PW;
 const DEV_2FA = process.env.DEV_2FA || '123456';
 const OUT = process.env.OUT || path.join(HERE, '..', 'evidence-browser');
 const SCN = process.argv[2] || path.join(HERE, 'scenarios.json');
 const SUBMIT = 'button[type="submit"], input[type="submit"], button';
+
+if (!ADMIN_PW) {
+  console.error('ADMIN_PW is not set. Export the seeded test-admin password (the value BEMART_DEMO_ADMIN_PASSWORD was seeded with) before running this harness.');
+  process.exit(1);
+}
 
 const abs = (u) => (u.startsWith('http') ? u : BASE + u);
 fs.mkdirSync(OUT, { recursive: true });

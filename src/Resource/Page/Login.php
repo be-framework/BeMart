@@ -60,11 +60,6 @@ use function trim;
  */
 class Login extends ResourceObject
 {
-    // PoC fixture prefill for the browser demo. Remove these constants
-    // and the prefilledLoginForm() call before production hardening.
-    private const POC_LOGIN_EMAIL = 'login-test@example.com';
-    private const POC_LOGIN_PASSWORD = '';
-
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfToken $csrf,
@@ -99,9 +94,7 @@ class Login extends ResourceObject
                 'href' => 'page://self/login',
             ],
             'csrfToken' => $this->csrf->token,
-            // PoC fixture prefill for quick HTML-context verification.
-            // See prefilledLoginForm(); deliberately easy to remove.
-            'form' => $this->prefilledLoginForm(),
+            'form' => $this->emptyLoginForm(),
         ];
 
         return $this;
@@ -265,15 +258,10 @@ class Login extends ResourceObject
             : 'メールアドレスまたはパスワードが正しくありません。';
     }
 
-    private function prefilledLoginForm(): LoginForm
+    private function emptyLoginForm(): LoginForm
     {
         $form = $this->formFactory->newInstance(LoginForm::class);
         assert($form instanceof LoginForm);
-
-        $form->fillValues([
-            'email' => self::POC_LOGIN_EMAIL,
-            'password' => self::POC_LOGIN_PASSWORD,
-        ]);
 
         return $form;
     }

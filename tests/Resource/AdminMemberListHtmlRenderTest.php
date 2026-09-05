@@ -11,13 +11,17 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
+use Twig\Environment;
 
+use function json_decode;
+use function preg_match;
 use function str_contains;
+use function substr_count;
 
 /**
  * HTML render fidelity for the admin Member-list page (goMemberList).
  *
- * Verification contract — two levels:
+ * Verification contract — three levels:
  *   L1  Required fields / list data output
  *       name, loginId present per member row; count chip; new-registration link.
  *   L2  Form action/method and link href/rel semantics
@@ -25,9 +29,11 @@ use function str_contains;
  *       Delete form:  POST /admin/member?loginId=…&_method=delete + csrfToken.
  *       Edit link:    GET  /admin/member?loginId=….
  *       Register link: GET /admin/member.
+ *   L3  Injection boundary: the per-row delete `onclick` JS string literal.
  *
- * EC-CUBE rendering comparison tests are retired:
- * @group ec-cube-parity-archived
+ * Only the retired EC-CUBE rendering comparison carries
+ * `@group ec-cube-parity-archived`; a class-level group would exclude the
+ * L1/L2/L3 contract from the default suite.
  */
 final class AdminMemberListHtmlRenderTest extends TestCase
 {
@@ -157,6 +163,76 @@ final class AdminMemberListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('_method=delete', $html);
         $this->assertStringContainsString('name="csrfToken"', $html);
         $this->assertStringContainsString('name="mode" value="member_form"', $html);
+    }
+
+    // ── L3: injection boundary ────────────────────────────────────────────────
+
+    /**
+     * The delete button interpolates the login ID into a JS string literal
+     * inside an `onclick` attribute. `html` escaping does not hold there: the
+     * attribute parser decodes `&#039;` back into a quote before the JS parser
+     * sees it. The grid renders stored rows, so the template defends even
+     * though {@see \MyVendor\BeMart\Be\Semantic\LoginId} now rejects the
+     * payload at the write boundary.
+     */
+    public function testDeleteDialogOnclickCannotBreakOutOfTheJsStringLiteral(): void
+    {
+        $html = $this->renderMemberList("evil'); alert(1); ('");
+
+        $onclick = $this->dialogOnclick($html);
+        $this->assertSame(2, substr_count($onclick, "'"), 'the JS string keeps exactly its two delimiters');
+        $this->assertStringNotContainsString('&#039;', $onclick);
+        $this->assertStringNotContainsString('&#x27;', $onclick);
+        $this->assertStringNotContainsString('alert(1)', $onclick);
+    }
+
+    /**
+     * Escaping must not break the id handshake: the JS-escaped literal has to
+     * evaluate back to the dialog's `id` attribute.
+     */
+    public function testDeleteDialogOnclickTargetsTheRenderedDialogId(): void
+    {
+        $html = $this->renderMemberList('test-admin');
+
+        $matched = preg_match("/getElementById\('([^']*)'\)/", $this->dialogOnclick($html), $matches);
+        $this->assertSame(1, $matched, 'delete-dialog id argument not rendered');
+
+        // `\uXXXX` is what keeps the literal intact; JSON shares the escape
+        // syntax, so decoding it gives the value the JS runtime would see.
+        $evaluated = json_decode('"' . $matches[1] . '"');
+
+        $this->assertSame('delete-dialog-test-admin', $evaluated);
+        $this->assertStringContainsString('id="delete-dialog-test-admin"', $html);
+    }
+
+    private function renderMemberList(string $loginId): string
+    {
+        $twig = HtmlTestInjector::getInstance()->getInstance(Environment::class);
+
+        return $twig->render('Page/Admin/MemberList.html.twig', [
+            'members' => [
+                [
+                    'adminId' => 'ad0000000000000000000000000000ff',
+                    'loginId' => $loginId,
+                    'name' => '侵入者',
+                    'authority' => 1,
+                    'work' => 1,
+                    'sortNo' => 1,
+                ],
+            ],
+            'count' => 1,
+            'filters' => ['nameKeyword' => null, 'limit' => 50, 'offset' => 0],
+            'csrfToken' => 'render-test-token',
+        ]);
+    }
+
+    /** The `onclick` that opens the per-row delete dialog. */
+    private function dialogOnclick(string $html): string
+    {
+        $matched = preg_match('/onclick="(document\.getElementById\([^"]*)"/', $html, $matches);
+        $this->assertSame(1, $matched, 'delete-dialog onclick attribute not rendered');
+
+        return $matches[1];
     }
 
     // ── EC-CUBE parity tests (archived) ───────────────────────────────────────
