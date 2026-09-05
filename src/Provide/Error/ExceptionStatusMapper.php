@@ -26,6 +26,7 @@ final class ExceptionStatusMapper
 {
     private const HTTP_CONFLICT = 409;
     private const HTTP_UNPROCESSABLE_ENTITY = 422;
+    private const HTTP_TOO_MANY_REQUESTS = 429;
 
     /** @var list<class-string<Throwable>> */
     private const BAD_REQUEST = [
@@ -89,6 +90,7 @@ final class ExceptionStatusMapper
         \MyVendor\BeMart\Be\Exception\LoginIdAlreadyTakenException::class,
         \MyVendor\BeMart\Be\Exception\OutOfStockException::class,
         \MyVendor\BeMart\Be\Exception\PluginNotInstalledException::class,
+        \MyVendor\BeMart\Be\Exception\PreOrderAlreadyClaimedException::class,
         \MyVendor\BeMart\Be\Exception\ProductCodeAlreadyInUseException::class,
     ];
 
@@ -96,6 +98,11 @@ final class ExceptionStatusMapper
     private const UNPROCESSABLE = [
         \MyVendor\BeMart\Be\Exception\InsufficientStockException::class,
         \MyVendor\BeMart\Be\Exception\PaymentDeclinedException::class,
+    ];
+
+    /** @var list<class-string<Throwable>> */
+    private const TOO_MANY_REQUESTS = [
+        \MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException::class,
     ];
 
     /** Mapped HTTP status for a throwable, or null when it is unexpected (→ 500). */
@@ -122,6 +129,7 @@ final class ExceptionStatusMapper
             Code::NOT_FOUND => self::NOT_FOUND,
             self::HTTP_CONFLICT => self::CONFLICT,
             self::HTTP_UNPROCESSABLE_ENTITY => self::UNPROCESSABLE,
+            self::HTTP_TOO_MANY_REQUESTS => self::TOO_MANY_REQUESTS,
         ] as $status => $classes) {
             foreach ($classes as $class) {
                 if ($e instanceof $class) {

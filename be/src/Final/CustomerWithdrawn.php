@@ -51,14 +51,14 @@ use function sprintf;
  * the same customer is a no-op. We detect "already withdrawn" by
  * customerStatus===STATUS_WITHDRAWN(3) and short-circuit — no second
  * mail, no second cart-clear. The Final still constructs successfully
- * so the resource layer returns 200 on replay. (In production the
- * session is cleared by the EventListener after step 4, so a normal
- * UI flow never replays; this branch exists for retries and
+ * so the resource layer returns 200 on replay. (The resource clears
+ * the session right after this Final constructs, so a normal UI flow
+ * never replays; this branch exists for retries and
  * test-determinism.)
  *
- * Session clear is the EC-CUBE EventListener's job (Slice 7.2
- * contract — same as Pilot 6 doLogin / doLogout). The Be layer does
- * NOT touch session storage.
+ * Session clear belongs to the resource layer, which owns the
+ * session-writer port (same as Pilot 6 doLogin / doLogout). The Be
+ * layer does NOT touch session storage.
  */
 final readonly class CustomerWithdrawn
 {

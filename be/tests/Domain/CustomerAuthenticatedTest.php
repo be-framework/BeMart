@@ -64,6 +64,30 @@ final class CustomerAuthenticatedTest extends TestCase
         ));
     }
 
+    public function testWithdrawnCustomerRaisesLoginFailed(): void
+    {
+        // Withdrawal keeps the row, the password hash, and a
+        // deterministic `withdrawn-{customerId}@…` address, so only the
+        // status stops the old credentials from minting a session.
+        // Same exception as wrong-password (no enumeration).
+        $this->expectException(LoginFailedException::class);
+        ($this->becoming)(new LoginInput(
+            email: 'withdrawn-30000000aaaa3333bbbb4444cccc5555@example.invalid',
+            password: 'local-dev-member-password',
+        ));
+    }
+
+    public function testProvisionalCustomerRaisesLoginFailed(): void
+    {
+        // 仮会員 (customerStatus=1) has not proven the address yet:
+        // doActivateCustomer must run first.
+        $this->expectException(LoginFailedException::class);
+        ($this->becoming)(new LoginInput(
+            email: 'provisional@example.com',
+            password: 'local-dev-member-password',
+        ));
+    }
+
     public function testInvalidEmailFormatRejected(): void
     {
         $this->expectException(SemanticVariableException::class);

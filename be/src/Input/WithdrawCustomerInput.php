@@ -22,8 +22,9 @@ use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
  * tampering with form fields; the body simply doesn't accept an id.
  *
  * `sessionPrefix` scopes the cart-clear side-effect (cartKey is
- * `{sessionPrefix}_{saleTypeId}`). Default matches AddCartItemInput
- * so resource callers and tests need not thread it through.
+ * `{sessionPrefix}_{saleTypeId}`). It has no default: the Resource
+ * resolves it from CartSessionPrefixInterface, and an omitted prefix
+ * would clear a partition belonging to somebody else.
  *
  * Session itself is wiped by the EC-CUBE-side EventListener after
  * this transition (Slice 7.2 contract — same as Pilot 6 doLogin /
@@ -35,11 +36,8 @@ use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
 #[Be(CustomerWithdrawn::class)]
 final readonly class WithdrawCustomerInput
 {
-    /**
-     * @psalm-taint-source input $sessionPrefix
-     */
     public function __construct(
-        public string $sessionPrefix = 'session-prefix-1',
+        public string $sessionPrefix,
     ) {
     }
 }

@@ -3,32 +3,24 @@
 # /admin/index
 EC-CUBE admin home — 管理画面ダッシュボード (top-level wave, Phase 3).
 
-Thin renderer for the admin dashboard (`admin/index.twig`). EC-CUBE's
+Renderer for the admin dashboard (`admin/index.twig`). EC-CUBE's
 dashboard is a controller-assembled aggregate of KPIs — order-status
 counts, weekly/monthly/yearly sales charts, shop-status counters
 (out-of-stock / product / customer totals) and a recommended-plugins
-panel. None of those projections exist as a Be Framework domain
-transition: there is no `goDashboard` in `alps.json` and no dashboard
-Entity. Authoring one would mean inventing data, which the 厳密移植
-discipline forbids.
+panel.
 
-So this resource is a THIN RENDERER only: it enforces the admin
-firewall (same 403-when-anonymous contract as every other admin page —
-the html context binds the anonymous `FakeAdminSession(null)` by
-default) and exposes a body whose dashboard-widget fields are present
-but EMPTY / zero. The HTML port (`Index.html.twig`) renders the
-EC-CUBE dashboard skeleton verbatim around those empty values; the
-widgets that would be data-driven are enumerated as render-diff
-residual.
+The 「ショップ状況」 counters (取扱商品数 / 会員数 / 在庫切れ商品数) ARE
+wired to a real projection: {@see \DashboardCountsQueryInterface} reads
+them in one query over the product / customer / product-class storages.
+Counting registered rows is not inventing data, so these are surfaced
+honestly.
 
-MISSING-BODY-FIELD follow-ups (flagged, NOT enriched here — the brief
-forbids inventing Entities): the dashboard needs `orderStatuses`,
-`orders` (per-status counts), `salesThisMonth` / `salesToday` /
-`salesYesterday`, `countNonStockProducts`, `countProducts`,
-`countCustomers` and `recommendedPlugins`. Each requires a real Be
-domain projection (an admin dashboard `goDashboard` transition over
-the order / product / customer / plugin storages). Until those land
-the body carries safe empties so the page still renders.
+The remaining widgets — `orderStatuses`, `orders` (per-status counts),
+`salesThisMonth` / `salesToday` / `salesYesterday` and
+`recommendedPlugins` — have no Be Framework projection yet (no
+`goDashboard` transition / sales-aggregate Entity in `alps.json`), so
+the body still carries safe empties for them and the HTML port renders
+the EC-CUBE skeleton verbatim around those.
 
 
 

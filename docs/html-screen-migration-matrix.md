@@ -52,7 +52,7 @@ HTML移植の残差を「エンティティがある/ない」だけで判断す
 | Storefront | 商品一覧 → `/product?productCode=...` | HTTP到達可 | 画像・カテゴリ・タグ・規格名をFake/SQL bodyに追加。SEO JSON-LDは残差 |
 | Storefront | 商品詳細 → カート投入 → `/cart` | 修正済み | CSRF hiddenを追加、成功時は303でカートへ遷移。カートの増減/削除リンクは残差 |
 | Storefront | 匿名MYページ系 → ログイン誘導 | 修正済み | `/mypage`、お気に入り、配送先、会員編集は匿名時 `/login` へ303。戻り先復元は残差 |
-| Admin | `/admin/login` | HTTP/Browser到達可 | ローカル比較用に `test-admin` / `local-dev-admin-password` をprefill |
+| Admin | `/admin/login` | HTTP/Browser到達可 | ローカル比較用に `test-admin` をprefill |
 | Admin | `/admin/index` | HTTP/Browser到達可 | ダッシュボードKPIは空プレースホルダ |
 | Admin | `/admin/product-list` | HTTP/Browser到達可 | 商品登録ボタン追加済み |
 | Admin | `/admin/product/new` | 追加済み | 初回は既存Input項目に限定（画像/カテゴリ/タグ/規格/税/商品クラスは別タスク） |

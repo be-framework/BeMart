@@ -12,6 +12,12 @@ Failure mapping:
   - AdminLoginFailedException     → 401 (no such loginId OR wrong
                                            password — combined, no
                                            user enumeration)
+  - LoginAttemptsExceededException → 429 (too many recent failures for
+                                           that loginId — refused
+                                           before the password is
+                                           checked, and the message
+                                           reads the same whether the
+                                           loginId exists or not)
 
 Mirrors Pilot 6 customer {@see \MyVendor\BeMart\Resource\Page\Login}
 but for the admin firewall — distinct namespace under `Page\Admin\`

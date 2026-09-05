@@ -10,9 +10,11 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use Be\Framework\SemanticVariable\ValidationMessageHandler;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
+use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
 use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
 use MyVendor\BeMart\Be\Final\TwoFactorAuthVerified;
 use MyVendor\BeMart\Be\Input\VerifyTwoFactorAuthInput;
@@ -20,6 +22,7 @@ use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -47,6 +50,9 @@ use function assert;
  */
 class TwoFactorAuth extends ResourceObject
 {
+    /** BEAR\Resource\Code has no 429; {@see \MyVendor\BeMart\Provide\Error\ExceptionStatusMapper} maps the same status for JSON clients. */
+    private const HTTP_TOO_MANY_REQUESTS = 429;
+
     public function __construct(
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
@@ -54,6 +60,7 @@ class TwoFactorAuth extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly AdminQueryInterface $adminQuery,
         private readonly CsrfToken $csrf,
+        private readonly AdminLoginFormSubmissionInterface $formSubmission,
     ) {
     }
 
@@ -115,10 +122,14 @@ class TwoFactorAuth extends ResourceObject
      * client-supplied `loginId` is ignored.
      *
      * Failure mapping:
-     *   - Invalid CSRF                  → 403 (interceptor)
-     *   - Missing pending challenge     → 403
-     *   - SemanticVariableException     → 400 (malformed code)
-     *   - TwoFactorAuthFailedException  → 400 (code mismatch)
+     *   - Invalid CSRF                   → 403 (interceptor)
+     *   - Missing pending challenge      → 403
+     *   - SemanticVariableException      → 400 (malformed code)
+     *   - TwoFactorAuthFailedException   → 400 (code mismatch)
+     *   - LoginAttemptsExceededException → 429 (too many codes burned;
+     *       the pending challenge is dropped here, so the admin has to
+     *       come back through the password stage — which is throttled on
+     *       the same counter, i.e. only after the window has passed)
      *
      * @psalm-taint-source input $deviceToken
      */
@@ -127,7 +138,7 @@ class TwoFactorAuth extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
-    public function onPost(string $deviceToken, string|null $loginId = null): static
+    public function onPost(string $deviceToken, string|null $loginId = null, string|null $mode = null): static
     {
         unset($loginId);
 
@@ -139,21 +150,39 @@ class TwoFactorAuth extends ResourceObject
             return $this;
         }
 
-        $final = ($this->becoming)(new VerifyTwoFactorAuthInput(
-            loginId: $challenge->loginId,
-            deviceToken: $deviceToken,
-        ));
+        try {
+            $final = ($this->becoming)(new VerifyTwoFactorAuthInput(
+                loginId: $challenge->loginId,
+                deviceToken: $deviceToken,
+            ));
+        } catch (LoginAttemptsExceededException $e) {
+            $this->loginChallenge->abandonVerification();
+            $this->code = self::HTTP_TOO_MANY_REQUESTS;
+            $this->body = ['message' => (new ValidationMessageHandler())->getMessage($e, 'ja')];
+
+            return $this;
+        }
 
         assert($final instanceof TwoFactorAuthVerified);
         $this->loginChallenge->completeVerification($challenge);
 
-        $this->code = Code::OK;
         $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doVerifyTwoFactorAuth',
             'loginId' => $final->loginId,
             'message' => '二要素認証を確認しました。',
         ];
+        if (($this->formSubmission)($mode)) {
+            // Browser form submit (decided by the formSubmission port, not
+            // raw client input): 303 See Other so the browser actually
+            // navigates (a 200 + Location response leaves browsers on the
+            // challenge page). JSON/Resource clients keep 200 OK.
+            $this->code = Code::SEE_OTHER;
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
 
         return $this;
     }

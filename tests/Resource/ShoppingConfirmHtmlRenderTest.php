@@ -6,7 +6,10 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
 use Twig\Environment;
 use Twig\Markup;
 use Twig\TwigFilter;
@@ -123,11 +126,25 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         '指定なし',
     ];
 
+    /** The confirm-screen pre-order fixture `aceface…a11ce` belongs to alice. */
+    private const ALICE_CUSTOMER_ID = '0123456789abcdef0123456789abcdef';
+
     private ResourceInterface $resource;
 
     protected function setUp(): void
     {
-        $injector = HtmlTestInjector::getInstance();
+        $session = new FakeSession(self::ALICE_CUSTOMER_ID);
+        $injector = HtmlTestInjector::getOverrideInstance(new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeSession $session)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(CustomerSession::class)->toInstance($this->session);
+            }
+        });
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 

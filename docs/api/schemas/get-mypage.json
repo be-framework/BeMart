@@ -118,7 +118,12 @@
               "title": "注文商品",
               "properties": {
                 "productCode": {
-                  "$ref": "#/$defs/productCode"
+                  "type": "string",
+                  "minLength": 0,
+                  "maxLength": 64,
+                  "title": "商品コード",
+                  "description": "SKU/品番。EC-CUBE の dtb_order_item.product_code は NULL 許容（商品削除後は空になる）ため、明細スナップショットでは空文字を許可する。",
+                  "example": "sample-001"
                 },
                 "productName": {
                   "type": "string",
