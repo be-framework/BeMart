@@ -47,13 +47,13 @@ Counts are ALPS transitions per flow. `✓` done · `~` partial · `✗` pending
 | flow-favorite | ✓ 3 | ✓ | ✓ | ✓ | ✓ storefront |
 | flow-inquiry (contact form) | ✓ 2 | ✓ | ✓ | ✓ (`Contact` has no table) | ✓ storefront |
 | flow-admin-auth | ✓ 1 | ✓ | ✓ | ✓ | ✓ admin |
-| flow-manage-product | ✓ 24 | ~ (product CSV import intentionally not migrated; category/class CSV paths connected) | ✓ | ✓ | ✓ admin (list/tag/class + product/product_class/category/csv editors done) |
+| flow-manage-product | ✓ 24 | ~ (no Be transition for product CSV import — `ProductCsv::onPost` parses inline; category/class CSV paths go through Be) | ✓ | ✓ | ~ admin (list/tag/class + product/category/csv editors done; `product-class` renders a POST form with no write handler — see §2.1) |
 | flow-manage-order | ✓ 13 | ~ (PDF fidelity residual; shipping CSV persistence connected) | ✓ | ✓ | ✓ admin (list + edit/shipping/mail/mail_confirm/pdf/csv-shipping done) |
-| flow-manage-customer | ✓ 6 | ✓ | ✓ | ✓ | ✓ admin (list/edit/delivery-edit done) |
+| flow-manage-customer | ✓ 6 | ✓ | ✓ | ✓ | ~ admin (list done; `customer` edit and `customer-delivery-edit` render POST forms with no write handler — see §2.1) |
 | flow-manage-shop | ✓ 15 | ✓ | ✓ | ✓ | ✓ admin (payment/delivery/tax list + calendar/csv/order-status/tradelaw + payment/delivery edits + shop-master editors done) |
-| flow-manage-content | ✓ 9 | ✓ | ✓ | ✓ | ✓ admin (news/page/file/css/js/cache/maintenance done) |
+| flow-manage-content | ✓ 9 | ✓ | ✓ | ✓ | ~ admin (news/page/css/js/cache/maintenance done; `content/file-manager` renders POST forms with no write handler — see §2.1) |
 | flow-manage-cms (layout/block) | ✓ 8 | ✓ | ~ (Template list/add only) | ✓ | ✓ admin (layout/block/template list + template_add done) |
-| flow-manage-system | ✓ 8 | ✓ | ✓ | ✓ | ✓ admin (member/login-history + system/log/security/masterdata/authority/2FA-edit done) |
+| flow-manage-system | ✓ 8 | ✓ | ✓ | ✓ | ~ admin (member/login-history + system/log/security/masterdata/authority done; `two-factor-auth-edit` renders a POST form with no write handler — see §2.1) |
 | flow-manage-mail | ✓ 2 | ✓ | ✓ | ✓ | ✓ admin (mail-template editor done) |
 | flow-manage-plugin *(out of scope)* | ✓ 6 | ~ (`doInstallPlugin` stub) | ✓ | ✓ | ~ admin (plugin list done; install/search out of scope) |
 | route-gate transitions | ✓ 60 | ~ (connected surfaces; some fidelity residuals) | ✓ | n/a | n/a |
@@ -65,6 +65,34 @@ Layer-specific notes:
 - **SQL: 150/150** — every `#[DbQuery]` id has a matching SQL file under `var/sql/`, and the smoke coverage test enforces this pairing.
 - **HTML: storefront ✓ / admin ✓ (in scope)** — `var/templates` holds **133 `.html.twig` files**: 43 storefront/non-admin pages, 72 admin pages/partials, 15 Block widgets, and 3 frames (`base.html.twig`, `admin-base.html.twig`, `admin-login-base.html.twig`). The remaining admin Store/Plugin install/search subtree is out of scope because the plugin runtime is excluded. The render-diff fidelity tests (`tests/Resource/*HtmlRenderTest.php`) activate only when the gitignored `tools/ec-cube-source/` 4.3 clone is present.
 - **flow-manage-cms Resource** — `Admin/Template/TemplateList.php` + `TemplateAdd` exist for the CMS template feature; layout/block resources are present but the CMS template-management surface is partial — *unverified* in full.
+
+### 2.1 Rendered forms without a write handler
+
+Five admin resources render a `<form method="post">` that no method answers. The
+markup was ported ahead of the handler, so the button reaches BEAR\Resource and
+comes back 405. Reproduce any row with `composer page -- post <path>`.
+
+| Template | POST target | Resource | Methods |
+|---|---|---|---|
+| `Page/Admin/CustomerDeliveryEdit.html.twig:104` | `/admin/customer-delivery-edit` | `Admin/CustomerDeliveryEdit.php` | `onGet` |
+| `Page/Admin/Customer.html.twig:75` | `/admin/customer` | `Admin/Customer.php` | `onGet` |
+| `Page/Admin/TwoFactorAuthEdit.html.twig:125` | `/admin/two-factor-auth-edit` | `Admin/TwoFactorAuthEdit.php` | `onGet` |
+| `Page/Admin/Content/FileManager.html.twig:308,348,382` | `/admin/content/file-manager` | `Admin/Content/FileManager.php` | `onGet` |
+| `Page/Admin/Product/ProductClass.html.twig:284` | `/admin/product/product-class` | `Admin/Product/ProductClass.php` | `onGet` |
+
+Each of the five needs a transition the ALPS profile does not carry yet. The
+storefront equivalents cannot be reused: `UpdateCustomerAddressInput` omits
+`customerId` on purpose and derives the owner from the customer session, which
+is the opposite of an administrator editing someone else's row.
+
+`Page/Admin/Product/CsvProduct.html.twig` was a sixth entry. Its upload posted
+to its own screen URL instead of `/admin/product-csv`, where `ProductCsv::onPost`
+already implements the import (the router turns an `import_file` upload into the
+`csv` parameter). Repointing the action was the whole fix — no new transition.
+
+`tests/Router/TemplateFormActionTest.php` holds the same list and fails both
+ways: a sixth dead form breaks the build, and so does an entry that is no
+longer dead. The other 118 POST forms resolve to a resource that writes.
 
 ---
 
@@ -86,7 +114,7 @@ it re-tagged Favorite and added transitions that Phase A's domain never saw. Lat
 
 Punch-list, roughly highest-effort first:
 
-1. **Admin HTML Tier-2 — done (in scope).** ✓ Done. Admin Tier-1 plus every in-scope Tier-2 editor wave is ported: flow-manage-system, Customer delivery-edit, Setting/System, Setting/Shop, Order, Product, and Store template_add. Current admin inventory is 72 admin page/partial templates. The remaining Store/Plugin install/search subtree is out of scope because plug-ins are excluded from this migration. Per-section history: `docs/phases/admin-fanout-plan.md` and `var/templates/README.md` "Fan-out status".
+1. **Admin HTML Tier-2 — rendered, six write handlers missing.** Admin Tier-1 plus every in-scope Tier-2 editor wave is ported as markup: flow-manage-system, Customer delivery-edit, Setting/System, Setting/Shop, Order, Product, and Store template_add. Current admin inventory is 72 admin page/partial templates. Six of those screens post to a resource that cannot answer — §2.1 lists them, and until each gains a write handler the editor is display-only. The remaining Store/Plugin install/search subtree is out of scope because plug-ins are excluded from this migration. Per-section history: `docs/phases/admin-fanout-plan.md` and `var/templates/README.md` "Fan-out status".
 2. **HTML enrichment backlog.** Phase 3 flagged data pages whose resource bodies are too thin for a faithful EC-CUBE port; each needs the Cart-style re-derive (ALPS → Entity/SQL/Fake enrich → template wiring). Done: **Mypage History** (`a31f8d8`/`3c1b03d`), **Shopping confirm/complete** (`1177e0d`/`2f8d17a`). Still open: **Mypage dashboard**, **Favorite**, **Address**, **Contact**.
 3. **`Block/*` widget templates — done.** ✓ Done. The `logo` and `footer` Block widgets are ported (`var/templates/Block/`, `f3df0d4`). The remaining Block regions (cart/login/search) stay EC-CUBE-runtime residuals; Block is intentionally not modelled in ALPS.
 4. **Phase-3 remediation transitions — all implemented.** ✓ Done. The named transitions the Phase-3 ALPS remediation added are implemented in `be/src` (`doSortNoMove`, `doToggleVisible`, `doUpdateTrackingNumber`, `doSendShippingNotifyMail`, `doResendActivationMail` — domain + storage/mailer + JSON resource + tests). Later route-gate descriptors are tracked separately from this remediation set.
