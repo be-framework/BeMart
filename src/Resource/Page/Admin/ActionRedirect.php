@@ -11,7 +11,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use BEAR\Resource\Annotation\JsonSchema;
 
-use function str_starts_with;
+use function preg_match;
 
 /**
  * Safe admin endpoint for EC-CUBE routes that are represented by list-page
@@ -76,9 +76,18 @@ class ActionRedirect extends ResourceObject
         $this->body = ['message' => '操作を受け付けました。'];
     }
 
+    /**
+     * A `returnTo` is honoured only when it is an absolute path on this
+     * origin. The second character must not be a separator: `//host` and
+     * `/\host` are both protocol-relative references, because browsers
+     * normalise `\` to `/` in an http(s) authority. A backslash,
+     * whitespace or control character anywhere else is refused too — it
+     * would either re-open the authority question or be smuggled into
+     * the `Location` header.
+     */
     private function safeReturnTo(string|null $returnTo): string
     {
-        if ($returnTo !== null && str_starts_with($returnTo, '/') && ! str_starts_with($returnTo, '//')) {
+        if ($returnTo !== null && preg_match('#\A/(?![/\\\\])[^\\\\\s]*\z#', $returnTo) === 1) {
             return $returnTo;
         }
 

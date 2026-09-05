@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
@@ -105,4 +106,64 @@ final class ReorderResourceTest extends TestCase
         ]);
     }
 
+    /**
+     * The reorder must land in the caller's own cart partition. cartKey is
+     * `{sessionPrefix}_{saleTypeId}`, so two shopping sessions replaying the
+     * same past order must touch two different rows.
+     */
+    public function testCartPartitionFollowsCallersSessionPrefix(): void
+    {
+        $first = $this->resourceWithCartPrefix('reorder-sess-a')
+            ->post('page://self/mypage/reorder', [
+                'orderNo' => 'past0000000000000000000000000001',
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+        $second = $this->resourceWithCartPrefix('reorder-sess-b')
+            ->post('page://self/mypage/reorder', [
+                'orderNo' => 'past0000000000000000000000000001',
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+
+        $this->assertSame(['reorder-sess-a_1'], $first->body['cartKeys']);
+        $this->assertSame(['reorder-sess-b_1'], $second->body['cartKeys']);
+        $this->assertNotSame($first->body['cartKeys'], $second->body['cartKeys']);
+    }
+
+    /**
+     * Resource wired to a cart partition of our choosing — production
+     * derives it from the PHP session id via HtmlCartSessionPrefix.
+     */
+    private function resourceWithCartPrefix(string $cartPrefix): ResourceInterface
+    {
+        $cartSessionPrefix = new class ($cartPrefix) implements CartSessionPrefixInterface {
+            public function __construct(private readonly string $cartPrefix)
+            {
+            }
+
+            public function prefix(): string
+            {
+                return $this->cartPrefix;
+            }
+        };
+        $session = new FakeSession('customer-001');
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base->override(new class ($session, $cartSessionPrefix) extends AbstractModule {
+            public function __construct(
+                private readonly FakeSession $session,
+                private readonly CartSessionPrefixInterface $cartSessionPrefix,
+            ) {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(CustomerSession::class)->toInstance($this->session);
+                $this->bind(CartSessionPrefixInterface::class)->toInstance($this->cartSessionPrefix);
+            }
+        });
+
+        $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
+
+        return $injector->getInstance(ResourceInterface::class);
+    }
 }

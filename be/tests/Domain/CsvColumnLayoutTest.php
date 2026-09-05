@@ -90,4 +90,34 @@ final class CsvColumnLayoutTest extends TestCase
 
         $this->assertSame(['C', 'A'], $projected);
     }
+
+    public function testProjectNeutralizesFormulaCellsButKeepsNumbers(): void
+    {
+        $layout = CsvColumnLayout::resolve(self::DEFAULTS, []);
+
+        $projected = $layout->project([
+            'a' => "+cmd|' /C calc'!A0",
+            'b' => '=1+1',
+            'c' => '@SUM(A1:A9)',
+            'd' => "\tHYPERLINK(\"http://evil.example\")",
+        ]);
+
+        $this->assertSame([
+            "'+cmd|' /C calc'!A0",
+            "'=1+1",
+            "'@SUM(A1:A9)",
+            "'\tHYPERLINK(\"http://evil.example\")",
+        ], $projected);
+    }
+
+    public function testProjectLeavesNegativeNumbersImportableAsNumbers(): void
+    {
+        $layout = CsvColumnLayout::resolve(self::DEFAULTS, []);
+
+        // A leading '-' is a formula trigger, but a real number is not a
+        // formula — prefixing it would import as text and break totals.
+        $projected = $layout->project(['a' => '-1200', 'b' => -3, 'c' => '-0.5', 'd' => '-cmd']);
+
+        $this->assertSame(['-1200', -3, '-0.5', "'-cmd"], $projected);
+    }
 }

@@ -63,7 +63,7 @@
   "scripts": {
     "test": "php -d memory_limit=512M ./vendor/bin/phpunit",
     "test:fake": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite fake",
-    "test:sql": "echo 'SQL PHPUnit suite is disabled; Sql folders are ignored by phpunit.xml.'",
+    "test:sql": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite sql",
     "test:http": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite http",
     "test:smoke": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite smoke",
     "setup:eccube-reference": "php bin/setup-eccube-reference.php",
@@ -144,7 +144,7 @@
     "tests": "Run static analysis and the default PHPUnit suite.",
     "test:full": "Prepare the EC-CUBE reference source, then run the default PHPUnit suite.",
     "test:fake": "Run the fake-context PHPUnit suite.",
-    "test:sql": "Disabled: Sql folders are ignored by phpunit.xml.",
+    "test:sql": "Run the MySQL-backed boundary suite (be/tests/Sql). Skips when DATABASE_URL is unset.",
     "test:http": "Run the HTTP PHPUnit suite.",
     "test:smoke": "Run smoke tests.",
     "setup:eccube-reference": "Clone or update the ignored EC-CUBE 4.3 reference source used by HTML parity tests.",

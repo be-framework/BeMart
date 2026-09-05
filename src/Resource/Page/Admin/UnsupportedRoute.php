@@ -11,7 +11,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use BEAR\Resource\Annotation\JsonSchema;
 
-use function str_starts_with;
+use function preg_match;
 
 /**
  * Safe placeholder for EC-CUBE admin routes that are referenced by ported
@@ -68,9 +68,10 @@ class UnsupportedRoute extends ResourceObject
         return $this;
     }
 
+    /** Same same-origin-path rule as {@see ActionRedirect}, and for the same reason. */
     private function safeReturnTo(string|null $returnTo): string
     {
-        if ($returnTo !== null && str_starts_with($returnTo, '/') && ! str_starts_with($returnTo, '//')) {
+        if ($returnTo !== null && preg_match('#\A/(?![/\\\\])[^\\\\\s]*\z#', $returnTo) === 1) {
             return $returnTo;
         }
 

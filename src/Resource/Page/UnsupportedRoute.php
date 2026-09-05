@@ -10,7 +10,7 @@ use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\JsonSchema;
 
-use function str_starts_with;
+use function preg_match;
 
 /** Safe placeholder for template routes that are not backed by a resource yet. */
 class UnsupportedRoute extends ResourceObject
@@ -45,9 +45,10 @@ class UnsupportedRoute extends ResourceObject
         return $this;
     }
 
+    /** Same same-origin-path rule as {@see ActionRedirect}, and for the same reason. */
     private function safeReturnTo(string|null $returnTo): string
     {
-        if ($returnTo !== null && str_starts_with($returnTo, '/') && ! str_starts_with($returnTo, '//')) {
+        if ($returnTo !== null && preg_match('#\A/(?![/\\\\])[^\\\\\s]*\z#', $returnTo) === 1) {
             return $returnTo;
         }
 

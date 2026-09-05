@@ -532,16 +532,16 @@ EC-CUBE handles the customer-inquiry form by emailing the shop directly (Symfony
 
 | BeMart field | EC-CUBE column | notes |
 |---|---|---|
-| timestamp | create_date | datetime NOT NULL — BeMart ISO-8601 string |
+| timestamp | create_date | datetime NOT NULL — written as NOW(), read back as the raw datetime |
 | loginId | user_name | longtext NULL — direct (column is `user_name`, not `login_id` here) |
-| success | login_history_status_id | smallint unsigned NOT NULL FK → mtb_login_history_status. Phase 2b: map status_id=1 → success=true, status_id=2 → success=false (seeded fixtures in EC-CUBE 4.3) |
+| success | login_history_status_id | smallint unsigned NOT NULL FK → mtb_login_history_status: 0 = 失敗, 1 = 成功 (the two rows sql/seed/mtb-master.sql loads) |
 | clientIp | client_ip | longtext NULL — direct |
 
 **Mismatches / gaps**:
 - EC-CUBE has `member_id` (FK back to the admin) — BeMart doesn't model it. Phase 2b should resolve `member_id` from `user_name` (login_id) at write time, or leave NULL (`ON DELETE SET NULL` so it's safe).
-- `success` is an enum FK, not a bool — Phase 2b stores 1/2 (or define new status ids 1=success, 2=failure based on mtb_login_history_status seed).
+- `success` is an enum FK, not a bool: writes map true → 1 and false → 0, reads compare against 1.
 
-**Used by**: `LoginHistoryStorageInterface::listRecent`, `append`.
+**Used by**: `LoginHistoryStorageInterface::list`, `append`, and `LoginAttemptGateInterface::failuresSinceLastSuccess` / `accountFailuresSinceLastSuccess` (login throttle).
 
 **Phase 2b SQL surface**:
 - SELECT … JOIN mtb_login_history_status ORDER BY create_date DESC LIMIT ?

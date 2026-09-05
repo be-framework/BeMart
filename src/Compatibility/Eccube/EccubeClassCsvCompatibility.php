@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Compatibility\Eccube;
 
+use MyVendor\BeMart\Be\Reason\Csv\CsvFormulaGuard;
 use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
 use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
 use MyVendor\BeMart\Be\Reason\Provider\ClassCategoryIdProvider;
@@ -146,19 +147,23 @@ final class EccubeClassCsvCompatibility implements ClassCsvCompatibilityInterfac
     }
 
     /**
-     * RFC-4180 quote a single field: only when it contains the delimiter,
-     * the enclosure, CR or LF, wrap it in double-quotes and double any
-     * embedded double-quote. Byte-identical to fputcsv(escape: '') for these
-     * inputs, but pure — no per-row php://memory stream and so no
-     * malformed-output fallback path.
+     * Neutralise CSV formula injection ({@see CsvFormulaGuard} — the same
+     * rule {@see \MyVendor\BeMart\Be\Reason\Csv\CsvColumnLayout::project()}
+     * applies to the layout-driven exports), then RFC-4180 quote: only
+     * when the field contains the delimiter, the enclosure, CR or LF, wrap
+     * it in double-quotes and double any embedded double-quote.
+     * Byte-identical to fputcsv(escape: '') for these inputs, but pure — no
+     * per-row php://memory stream and so no malformed-output fallback path.
      */
     private function quoteField(string $field): string
     {
-        if (preg_match('/[",\r\n]/', $field) === 1) {
-            return '"' . str_replace('"', '""', $field) . '"';
+        $guarded = (string) CsvFormulaGuard::neutralize($field);
+
+        if (preg_match('/[",\r\n]/', $guarded) === 1) {
+            return '"' . str_replace('"', '""', $guarded) . '"';
         }
 
-        return $field;
+        return $guarded;
     }
 
     /**

@@ -28,10 +28,14 @@ services:
       db:
         condition: service_healthy
     environment:
-      APP_CONTEXT: "html-eccube-sql-hal-app"
+      # `prod` selects BEAR's ProdModule: production error page (no stack
+      # traces in responses), OPTIONS introspection disabled, compiled DI.
+      APP_CONTEXT: "prod-html-eccube-sql-hal-app"
       DATABASE_URL: "mysql://root@db:3306/eccubedb?charset=utf8mb4"
-      # Dev-only: lets the admin 2FA accept 123456 for the demo. Never use in prod.
-      BEMART_DEV_LOGIN: "1"
+      # The built-in server is single-process by default, so one slow request
+      # blocks every visitor. Workers do not make it a production server —
+      # they keep a slow page from taking the whole site down.
+      PHP_CLI_SERVER_WORKERS: "4"
     ports:
       - "8080:8080"
 

@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
@@ -36,8 +37,11 @@ use function assert;
  */
 class Reorder extends ResourceObject
 {
+    private const DEFAULT_SESSION_PREFIX = 'session-prefix-1';
+
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CartSessionPrefixInterface $cartSessionPrefix,
     ) {
     }
 
@@ -51,7 +55,10 @@ class Reorder extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $orderNo): static
     {
-        $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo));
+        $final = ($this->becoming)(new ReorderInput(
+            orderNo: $orderNo,
+            sessionPrefix: $this->cartSessionPrefix->prefix() ?? self::DEFAULT_SESSION_PREFIX,
+        ));
 
         assert($final instanceof Reordered);
 

@@ -15,6 +15,7 @@ use Be\Framework\SemanticVariable\ValidationMessageHandler;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Exception\AdminLoginFailedException;
+use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
 use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\AdminAuthenticated;
 use MyVendor\BeMart\Be\Input\AdminLoginInput;
@@ -41,6 +42,12 @@ use function trim;
  *   - AdminLoginFailedException     → 401 (no such loginId OR wrong
  *                                            password — combined, no
  *                                            user enumeration)
+ *   - LoginAttemptsExceededException → 429 (too many recent failures for
+ *                                            that loginId — refused
+ *                                            before the password is
+ *                                            checked, and the message
+ *                                            reads the same whether the
+ *                                            loginId exists or not)
  *
  * Mirrors Pilot 6 customer {@see \MyVendor\BeMart\Resource\Page\Login}
  * but for the admin firewall — distinct namespace under `Page\Admin\`
@@ -61,10 +68,8 @@ use function trim;
  */
 class Login extends ResourceObject
 {
-    // PoC fixture prefill for the browser demo. Remove these constants
-    // and the prefilledLoginForm() call before production hardening.
-    private const POC_LOGIN_ID = 'test-admin';
-    private const POC_LOGIN_PASSWORD = '';
+    /** BEAR\Resource\Code has no 429; {@see \MyVendor\BeMart\Provide\Error\ExceptionStatusMapper} maps the same status for JSON clients. */
+    private const HTTP_TOO_MANY_REQUESTS = 429;
 
     public function __construct(
         private readonly BecomingInterface $becoming,
@@ -100,9 +105,7 @@ class Login extends ResourceObject
                 'href' => 'page://self/admin/login',
             ],
             'csrfToken' => $this->csrf->token,
-            // PoC fixture prefill for quick HTML-context verification.
-            // See prefilledLoginForm(); deliberately easy to remove.
-            'form' => $this->prefilledLoginForm(),
+            'form' => $this->emptyLoginForm(),
         ];
 
         return $this;
@@ -155,6 +158,16 @@ class Login extends ResourceObject
                 $values,
                 ['loginId' => self::domainMessage($e)],
                 Code::UNAUTHORIZED,
+            );
+        } catch (LoginAttemptsExceededException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            return $this->rejectForm(
+                $values,
+                ['loginId' => self::domainMessage($e)],
+                self::HTTP_TOO_MANY_REQUESTS,
             );
         }
 
@@ -260,7 +273,8 @@ class Login extends ResourceObject
         return [$field, $message];
     }
 
-    private static function domainMessage(AdminLoginFailedException $e): string
+    /** ja text carried by the rejection's #[Message]; the fallback keeps either case non-enumerating. */
+    private static function domainMessage(AdminLoginFailedException|LoginAttemptsExceededException $e): string
     {
         $message = (new ValidationMessageHandler())->getMessage($e, 'ja');
 
@@ -269,15 +283,10 @@ class Login extends ResourceObject
             : 'ログインIDまたはパスワードが正しくありません。';
     }
 
-    private function prefilledLoginForm(): AdminLoginForm
+    private function emptyLoginForm(): AdminLoginForm
     {
         $form = $this->formFactory->newInstance(AdminLoginForm::class);
         assert($form instanceof AdminLoginForm);
-
-        $form->fillValues([
-            'loginId' => self::POC_LOGIN_ID,
-            'password' => self::POC_LOGIN_PASSWORD,
-        ]);
 
         return $form;
     }

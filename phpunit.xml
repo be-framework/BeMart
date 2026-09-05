@@ -24,6 +24,15 @@
         <testsuite name="smoke">
             <directory>tests/Smoke</directory>
         </testsuite>
+        <testsuite name="sql">
+            <!--
+                MySQL-backed boundary contracts that no Fake can answer for:
+                the login-throttle windowing and the checkout claim's
+                compare-and-swap. The bootstrap skips the suite when
+                DATABASE_URL is unset, so a database-less run stays green.
+            -->
+            <directory>be/tests/Sql</directory>
+        </testsuite>
     </testsuites>
     <groups>
         <exclude>
