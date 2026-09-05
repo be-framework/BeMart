@@ -21,15 +21,16 @@
     }
   ],
   "require": {
-    "be-framework/be": "0.x-dev as 0.1.0",
+    "php": "^8.3",
+    "be-framework/be": "dev-semantic-logger-0.9 as 0.1.0",
     "bear/devtools": "dev-abstract-workflow-test-contract",
     "bear/package": "^1.14",
+    "bear/query-repository": "1.x-dev",
     "bear/sunday": "^1.6",
     "bear/tool-use": "dev-codex/review-hardening as 1.x-dev",
     "madapaja/twig-module": "^2.7",
     "my-vendor/be-mart-be": "@dev",
     "nyholm/psr7": "^1.8",
-    "php": "^8.3",
     "ray/di": "^2.18",
     "ray/input-query": "^1.0",
     "ray/media-query": "^1.1",

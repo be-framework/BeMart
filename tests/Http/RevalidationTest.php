@@ -34,8 +34,9 @@ use function trim;
 final class RevalidationTest extends TestCase
 {
     /**
-     * A port of its own, overridable: 8092/8093 belong to the flow tests, and a fixed guess in the
-     * same range is how this suite ended up talking to another project's server on this machine.
+     * A port of its own, overridable. The flow tests keep their servers alive for the whole run
+     * through HttpResource's registry, so this one must not appear in any Flow test; a fixed guess
+     * in another project's range is how this suite once ended up talking to a foreign server.
      */
     private const HOST = '127.0.0.1:18095';
     private const PATH = '/help/about';
