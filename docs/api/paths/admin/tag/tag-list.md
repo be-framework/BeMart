@@ -11,7 +11,7 @@ EC-CUBE goTagList + doCreateTag — collection endpoint (Wave 9).
 ## GET
 ALPS `goTagList` に対応する GET 操作。
 
-**ALPS**: `goTagList` - タグ一覧を見る
+**ALPS**: `goTagList`
 
 
 
@@ -38,7 +38,7 @@ _No parameters required_
 ## POST
 ALPS `doCreateTag` に対応する POST 操作。
 
-**ALPS**: `doCreateTag` - タグを作成する
+**ALPS**: `doCreateTag`
 
 
 

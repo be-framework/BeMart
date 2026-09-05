@@ -25,7 +25,7 @@ Failure mapping:
 ## GET
 Wave 9ι: goMailTemplateList — admin lists every mail template.
 
-**ALPS**: `goMailTemplateList` - メールテンプレート一覧を見る
+**ALPS**: `goMailTemplateList`
 
 
 
@@ -61,7 +61,7 @@ Wave 9ι: goMailTemplateList — admin lists every mail template.
 ## POST
 ALPS `doUpdateMailTemplate` に対応する POST 操作。
 
-**ALPS**: `doUpdateMailTemplate` - メールテンプレートを更新する
+**ALPS**: `doUpdateMailTemplate`
 
 
 
@@ -101,7 +101,7 @@ a later adapter pass; this surface is intentionally narrow and
 concrete so the legacy route reaches a Resource with CSRF/AUTHZ
 semantics instead of generic ActionRedirect.
 
-**ALPS**: `doDeleteMailTemplate` - メールテンプレートを削除する
+**ALPS**: `doDeleteMailTemplate`
 
 
 

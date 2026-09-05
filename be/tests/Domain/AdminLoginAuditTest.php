@@ -12,13 +12,18 @@ use MyVendor\BeMart\Be\Final\AdminAuthenticated;
 use MyVendor\BeMart\Be\Input\AdminLoginInput;
 use MyVendor\BeMart\Be\Reason\Fake\Query\InMemoryLoginHistoryStorage;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeClientIp;
+use MyVendor\BeMart\Be\Reason\Fake\Service\MutableClientIp;
 use MyVendor\BeMart\Be\Reason\Query\LoginAttemptGateInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClientIpInterface;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function count;
 use function dirname;
+use function is_dir;
+use function mkdir;
 
 /**
  * Audit + throttle contract of the admin password stage.
@@ -105,7 +110,7 @@ final class AdminLoginAuditTest extends TestCase
         $this->assertCount(count($rowsBefore), $this->history->list());
         $this->assertSame(
             LoginAttemptGateInterface::MAX_FAILURES,
-            $this->failureCount('test-admin'),
+            $this->failureCount('test-admin', FakeClientIp::ADDRESS),
         );
     }
 
@@ -122,11 +127,11 @@ final class AdminLoginAuditTest extends TestCase
         $this->burnFailures('test-admin', LoginAttemptGateInterface::MAX_FAILURES - 1);
 
         ($this->becoming)(new AdminLoginInput(loginId: 'test-admin', password: self::PASSWORD));
-        $this->assertSame(0, $this->failureCount('test-admin'));
+        $this->assertSame(0, $this->failureCount('test-admin', FakeClientIp::ADDRESS));
 
         // The next run of failures gets the full allowance again.
         $this->burnFailures('test-admin', LoginAttemptGateInterface::MAX_FAILURES - 1);
-        $this->assertSame(LoginAttemptGateInterface::MAX_FAILURES - 1, $this->failureCount('test-admin'));
+        $this->assertSame(LoginAttemptGateInterface::MAX_FAILURES - 1, $this->failureCount('test-admin', FakeClientIp::ADDRESS));
     }
 
     public function testOneLoginIdsFailuresDoNotThrottleAnother(): void
@@ -138,21 +143,133 @@ final class AdminLoginAuditTest extends TestCase
         $this->assertInstanceOf(AdminAuthenticated::class, $final);
     }
 
+    /**
+     * One client's failures leave the same loginId open for another
+     * client — and the second client's success does not lift the first
+     * client's lock.
+     */
+    public function testFailuresFromOneClientDoNotThrottleAnotherClientAgainstTheSameLoginId(): void
+    {
+        $clientIp = new MutableClientIp('192.0.2.10');
+        [$becoming, $history] = $this->injectorWithClientIp($clientIp);
+        $this->burnFailuresWith($becoming, 'test-admin', LoginAttemptGateInterface::MAX_FAILURES);
+
+        $clientIp->address = '192.0.2.99';
+        $final = ($becoming)(new AdminLoginInput(loginId: 'test-admin', password: self::PASSWORD));
+        $this->assertInstanceOf(AdminAuthenticated::class, $final);
+        $this->assertSame(
+            LoginAttemptGateInterface::MAX_FAILURES,
+            $history->failuresSinceLastSuccess('test-admin', '192.0.2.10', LoginAttemptGateInterface::WINDOW_MINUTES)->count,
+        );
+    }
+
+    /** A success from client A clears client A's own counter. */
+    public function testASuccessFromClientAClearsClientAsCounter(): void
+    {
+        $clientIp = new MutableClientIp('192.0.2.10');
+        [$becoming, $history] = $this->injectorWithClientIp($clientIp);
+        $this->burnFailuresWith($becoming, 'test-admin', LoginAttemptGateInterface::MAX_FAILURES - 1);
+        $this->assertSame(
+            LoginAttemptGateInterface::MAX_FAILURES - 1,
+            $history->failuresSinceLastSuccess('test-admin', '192.0.2.10', LoginAttemptGateInterface::WINDOW_MINUTES)->count,
+        );
+
+        ($becoming)(new AdminLoginInput(loginId: 'test-admin', password: self::PASSWORD));
+        $this->assertSame(
+            0,
+            $history->failuresSinceLastSuccess('test-admin', '192.0.2.10', LoginAttemptGateInterface::WINDOW_MINUTES)->count,
+        );
+    }
+
+    /**
+     * The loose account counter ignores the client: one failure per client
+     * (so no per-client counter moves) still refuses the loginId for a
+     * fresh client once MAX_ACCOUNT_FAILURES is crossed.
+     */
+    public function testFailuresAcrossClientsRefuseTheLoginIdAtTheAccountThreshold(): void
+    {
+        $clientIp = new MutableClientIp('192.0.2.100');
+        [$becoming, $history] = $this->injectorWithClientIp($clientIp);
+
+        for ($i = 0; $i < LoginAttemptGateInterface::MAX_ACCOUNT_FAILURES; $i++) {
+            $clientIp->address = '192.0.2.' . (100 + $i);
+            $this->burnFailuresWith($becoming, 'test-admin', 1);
+        }
+        $this->assertSame(
+            LoginAttemptGateInterface::MAX_ACCOUNT_FAILURES,
+            $history->accountFailuresSinceLastSuccess('test-admin', LoginAttemptGateInterface::WINDOW_MINUTES)->count,
+        );
+
+        $this->expectException(LoginAttemptsExceededException::class);
+        $clientIp->address = '192.0.2.250';
+        ($becoming)(new AdminLoginInput(loginId: 'test-admin', password: self::PASSWORD));
+    }
+
+    /**
+     * Build a becoming + audit store whose ClientIpInterface is `$clientIp`,
+     * so a test can change the throttle key while the attempts share one
+     * in-memory store.
+     *
+     * @return array{BecomingInterface, InMemoryLoginHistoryStorage}
+     */
+    private function injectorWithClientIp(ClientIpInterface $clientIp): array
+    {
+        $module = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $module->override(new class ($clientIp) extends AbstractModule {
+            public function __construct(private readonly ClientIpInterface $clientIp)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(ClientIpInterface::class)->toInstance($this->clientIp);
+            }
+        });
+
+        // Own tmp dir: this injector carries a per-test override, so its
+        // generated proxies must not land among the ones the shared `test`
+        // dir already holds for the default module.
+        $tmpDir = dirname(__DIR__, 2) . '/var/tmp/test-login-audit';
+        if (! is_dir($tmpDir)) {
+            mkdir($tmpDir, 0777, true);
+        }
+
+        $injector = new Injector($module, $tmpDir);
+
+        return [
+            $injector->getInstance(BecomingInterface::class),
+            $injector->getInstance(InMemoryLoginHistoryStorage::class),
+        ];
+    }
+
     private function burnFailures(string $loginId, int $times): void
+    {
+        $this->burnFailuresWith($this->becoming, $loginId, $times);
+    }
+
+    private function burnFailuresWith(BecomingInterface $becoming, string $loginId, int $times): void
     {
         for ($i = 0; $i < $times; $i++) {
             try {
-                ($this->becoming)(new AdminLoginInput(loginId: $loginId, password: 'not-the-right-password'));
+                ($becoming)(new AdminLoginInput(loginId: $loginId, password: 'not-the-right-password'));
                 $this->fail('expected AdminLoginFailedException');
             } catch (AdminLoginFailedException) {
             }
         }
     }
 
-    private function failureCount(string $loginId): int
+    private function failureCount(string $loginId, string $clientIp): int
     {
         return $this->history
-            ->failuresSinceLastSuccess($loginId, LoginAttemptGateInterface::WINDOW_MINUTES)
+            ->failuresSinceLastSuccess($loginId, $clientIp, LoginAttemptGateInterface::WINDOW_MINUTES)
+            ->count;
+    }
+
+    private function accountFailureCount(string $loginId): int
+    {
+        return $this->history
+            ->accountFailuresSinceLastSuccess($loginId, LoginAttemptGateInterface::WINDOW_MINUTES)
             ->count;
     }
 }

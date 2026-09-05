@@ -40,7 +40,7 @@ Wave 5: the email comes from the admin UI (typed input or query
 string), so it is user-controlled — same taint discipline as the
 customer-side LoginResource.
 
-**ALPS**: `goCustomer` - 会員詳細を見る
+**ALPS**: `goCustomer`
 
 
 

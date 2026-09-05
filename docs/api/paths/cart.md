@@ -13,7 +13,7 @@ sessionPrefix cookie, ownership is implicit. Returns 200 with a
 ## GET
 ALPS `goCart` に対応する GET 操作。
 
-**ALPS**: `goCart` - カートを見る
+**ALPS**: `goCart`
 
 
 

@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use Aura\Sql\DecoratedPdo;
 use BEAR\AppMeta\Meta;
+use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
 use MyVendor\BeMart\Be\Reason\Query\LoginAttemptGateInterface;
 use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
 use MyVendor\BeMart\Module\MediaQueryRuntimeModule;
@@ -18,6 +19,8 @@ use RuntimeException;
 
 use function assert;
 use function dirname;
+use function is_dir;
+use function mkdir;
 
 /**
  * MySQL contract of the login audit write and the throttle count.
@@ -73,7 +76,14 @@ final class LoginAttemptGateSqlTest extends TestCase
                 $this->install(new MediaQueryRuntimeModule(new DecoratedPdo($this->pdo)));
             }
         });
-        $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/test');
+        // Own tmp dir: this injector overrides the PDO binding, so its
+        // generated proxies must not mix with the shared `test` dir's.
+        $tmpDir = dirname(__DIR__, 2) . '/var/tmp/test-loginattemptgatesqltest';
+        if (! is_dir($tmpDir)) {
+            mkdir($tmpDir, 0777, true);
+        }
+
+        $injector = new Injector($module, $tmpDir);
 
         $history = $injector->getInstance(LoginHistoryStorageInterface::class);
         assert($history instanceof LoginHistoryStorageInterface);
@@ -123,28 +133,28 @@ final class LoginAttemptGateSqlTest extends TestCase
 
     public function testFailuresAreCountedUntilASuccessClearsThem(): void
     {
-        $this->assertSame(0, $this->failureCount(self::LOGIN_ID));
+        $this->assertSame(0, $this->failureCount(self::LOGIN_ID, self::CLIENT_IP));
 
         $this->history->append(self::LOGIN_ID, false, self::CLIENT_IP);
         $this->history->append(self::LOGIN_ID, false, self::CLIENT_IP);
-        $this->assertSame(2, $this->failureCount(self::LOGIN_ID));
+        $this->assertSame(2, $this->failureCount(self::LOGIN_ID, self::CLIENT_IP));
 
         $this->history->append(self::LOGIN_ID, true, self::CLIENT_IP);
-        $this->assertSame(0, $this->failureCount(self::LOGIN_ID));
+        $this->assertSame(0, $this->failureCount(self::LOGIN_ID, self::CLIENT_IP));
 
         // Same second as the success: ordering is by id, not by the
         // second-granularity create_date.
         $this->history->append(self::LOGIN_ID, false, self::CLIENT_IP);
-        $this->assertSame(1, $this->failureCount(self::LOGIN_ID));
+        $this->assertSame(1, $this->failureCount(self::LOGIN_ID, self::CLIENT_IP));
     }
 
     public function testFailuresOlderThanTheWindowAreNotCounted(): void
     {
         $this->seedAttempt(self::LOGIN_ID, false, self::WINDOW + 1);
-        $this->assertSame(0, $this->failureCount(self::LOGIN_ID));
+        $this->assertSame(0, $this->failureCount(self::LOGIN_ID, self::CLIENT_IP));
 
         $this->seedAttempt(self::LOGIN_ID, false, self::WINDOW - 1);
-        $this->assertSame(1, $this->failureCount(self::LOGIN_ID));
+        $this->assertSame(1, $this->failureCount(self::LOGIN_ID, self::CLIENT_IP));
     }
 
     /** A success that has already aged out must not clear in-window failures. */
@@ -153,7 +163,7 @@ final class LoginAttemptGateSqlTest extends TestCase
         $this->seedAttempt(self::LOGIN_ID, true, self::WINDOW + 1);
         $this->seedAttempt(self::LOGIN_ID, false, self::WINDOW - 1);
 
-        $this->assertSame(1, $this->failureCount(self::LOGIN_ID));
+        $this->assertSame(1, $this->failureCount(self::LOGIN_ID, self::CLIENT_IP));
     }
 
     public function testFailuresAreCountedPerLoginId(): void
@@ -161,13 +171,117 @@ final class LoginAttemptGateSqlTest extends TestCase
         $this->history->append('other-admin', false, self::CLIENT_IP);
         $this->history->append('other-admin', false, self::CLIENT_IP);
 
-        $this->assertSame(0, $this->failureCount(self::LOGIN_ID));
-        $this->assertSame(2, $this->failureCount('other-admin'));
+        $this->assertSame(0, $this->failureCount(self::LOGIN_ID, self::CLIENT_IP));
+        $this->assertSame(2, $this->failureCount('other-admin', self::CLIENT_IP));
     }
 
-    private function failureCount(string $loginId): int
+    public function testFailuresAreCountedPerClientIp(): void
     {
-        return $this->gate->failuresSinceLastSuccess($loginId, self::WINDOW)->count;
+        $otherClient = '192.0.2.99';
+        $this->history->append(self::LOGIN_ID, false, self::CLIENT_IP);
+        $this->history->append(self::LOGIN_ID, false, self::CLIENT_IP);
+        $this->history->append(self::LOGIN_ID, false, $otherClient);
+
+        $this->assertSame(2, $this->failureCount(self::LOGIN_ID, self::CLIENT_IP));
+        $this->assertSame(1, $this->failureCount(self::LOGIN_ID, $otherClient));
+    }
+
+    /** Five failures from client A put client A over MAX_FAILURES. */
+    public function testFiveFailuresFromClientAExceedThePerClientThreshold(): void
+    {
+        for ($i = 0; $i < LoginAttemptGateInterface::MAX_FAILURES; $i++) {
+            $this->history->append(self::LOGIN_ID, false, self::CLIENT_IP);
+        }
+
+        $count = $this->gate->failuresSinceLastSuccess(self::LOGIN_ID, self::CLIENT_IP, self::WINDOW);
+        $this->assertSame(LoginAttemptGateInterface::MAX_FAILURES, $count->count);
+        $this->expectException(LoginAttemptsExceededException::class);
+        $count->assertBelow(LoginAttemptGateInterface::MAX_FAILURES);
+    }
+
+    /** Client A's five failures leave client B a clean counter on the same loginId. */
+    public function testFailuresFromClientADoNotThrottleClientBAgainstTheSameLoginId(): void
+    {
+        $clientB = '192.0.2.99';
+        for ($i = 0; $i < LoginAttemptGateInterface::MAX_FAILURES; $i++) {
+            $this->history->append(self::LOGIN_ID, false, self::CLIENT_IP);
+        }
+
+        $countB = $this->gate->failuresSinceLastSuccess(self::LOGIN_ID, $clientB, self::WINDOW);
+        $this->assertSame(0, $countB->count);
+        $countB->assertBelow(LoginAttemptGateInterface::MAX_FAILURES);
+    }
+
+    public function testASuccessFromClientAClearsClientAsFailures(): void
+    {
+        for ($i = 0; $i < LoginAttemptGateInterface::MAX_FAILURES - 1; $i++) {
+            $this->history->append(self::LOGIN_ID, false, self::CLIENT_IP);
+        }
+        $this->assertSame(
+            LoginAttemptGateInterface::MAX_FAILURES - 1,
+            $this->failureCount(self::LOGIN_ID, self::CLIENT_IP),
+        );
+
+        $this->history->append(self::LOGIN_ID, true, self::CLIENT_IP);
+        $this->assertSame(0, $this->failureCount(self::LOGIN_ID, self::CLIENT_IP));
+    }
+
+    /** The per-client counter resets on the client's OWN success only. */
+    public function testASuccessFromAnotherClientDoesNotClearClientAsCounter(): void
+    {
+        for ($i = 0; $i < LoginAttemptGateInterface::MAX_FAILURES; $i++) {
+            $this->history->append(self::LOGIN_ID, false, self::CLIENT_IP);
+        }
+
+        $this->history->append(self::LOGIN_ID, true, '192.0.2.99');
+
+        $this->assertSame(
+            LoginAttemptGateInterface::MAX_FAILURES,
+            $this->failureCount(self::LOGIN_ID, self::CLIENT_IP),
+        );
+    }
+
+    /**
+     * The loose account counter ignores the client: failures spread across
+     * many clients (each well under MAX_FAILURES) still refuse once
+     * MAX_ACCOUNT_FAILURES is crossed, from a fresh client too.
+     */
+    public function testFailuresAcrossClientsRefuseAtTheAccountThreshold(): void
+    {
+        for ($i = 0; $i < LoginAttemptGateInterface::MAX_ACCOUNT_FAILURES - 1; $i++) {
+            $this->history->append(self::LOGIN_ID, false, '192.0.2.' . (100 + $i % 40));
+        }
+        $this->assertSame(
+            LoginAttemptGateInterface::MAX_ACCOUNT_FAILURES - 1,
+            $this->accountFailureCount(self::LOGIN_ID),
+        );
+
+        $this->history->append(self::LOGIN_ID, false, '192.0.2.200');
+        $count = $this->gate->accountFailuresSinceLastSuccess(self::LOGIN_ID, self::WINDOW);
+        $this->assertSame(LoginAttemptGateInterface::MAX_ACCOUNT_FAILURES, $count->count);
+        $this->expectException(LoginAttemptsExceededException::class);
+        $count->assertBelow(LoginAttemptGateInterface::MAX_ACCOUNT_FAILURES);
+    }
+
+    /** The account counter resets on any success for the loginId, whatever its client. */
+    public function testAccountFailuresAreClearedByASuccessFromAnyClient(): void
+    {
+        $this->history->append(self::LOGIN_ID, false, self::CLIENT_IP);
+        $this->history->append(self::LOGIN_ID, false, '192.0.2.99');
+        $this->assertSame(2, $this->accountFailureCount(self::LOGIN_ID));
+
+        $this->history->append(self::LOGIN_ID, true, '192.0.2.111');
+        $this->assertSame(0, $this->accountFailureCount(self::LOGIN_ID));
+    }
+
+    private function failureCount(string $loginId, string $clientIp): int
+    {
+        return $this->gate->failuresSinceLastSuccess($loginId, $clientIp, self::WINDOW)->count;
+    }
+
+    private function accountFailureCount(string $loginId): int
+    {
+        return $this->gate->accountFailuresSinceLastSuccess($loginId, self::WINDOW)->count;
     }
 
     /** Seed one attempt `$minutesAgo` in the past — append() always stamps NOW(). */

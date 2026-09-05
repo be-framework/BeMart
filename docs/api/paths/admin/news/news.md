@@ -20,7 +20,7 @@ needed).
 ## GET
 ALPS `goNews` に対応する GET 操作。
 
-**ALPS**: `goNews` - ニュース詳細を見る
+**ALPS**: `goNews`
 
 
 
@@ -54,7 +54,7 @@ ALPS `goNews` に対応する GET 操作。
 ## PUT
 ALPS `doUpdateNews` に対応する PUT 操作。
 
-**ALPS**: `doUpdateNews` - ニュースを更新する
+**ALPS**: `doUpdateNews`
 
 
 
@@ -91,7 +91,7 @@ ALPS `doUpdateNews` に対応する PUT 操作。
 ## DELETE
 ALPS `doDeleteNews` に対応する DELETE 操作。
 
-**ALPS**: `doDeleteNews` - ニュースを削除する
+**ALPS**: `doDeleteNews`
 
 
 

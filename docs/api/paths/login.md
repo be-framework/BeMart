@@ -44,7 +44,7 @@ state). The `csrfToken` body field carries the trusted reference
 renders into the form's hidden `_csrf_token` input so the
 subsequent POST passes CSRF validation.
 
-**ALPS**: `goLogin` - ログイン画面を見る
+**ALPS**: `goLogin`
 
 
 
@@ -74,7 +74,7 @@ _No parameters required_
 ## POST
 Phase B Slice 9: every form field is user-controlled input.
 
-**ALPS**: `doLogin` - ログインする
+**ALPS**: `doLogin`
 
 
 

@@ -48,7 +48,7 @@ Wave 6: customerId is user-controlled input from the admin UI
 (admin clicks a customer-list row, the row's customerId feeds
 this form). Same taint discipline as goCustomer's email.
 
-**ALPS**: `doDeleteCustomer` - 会員を削除する
+**ALPS**: `doDeleteCustomer`
 
 
 

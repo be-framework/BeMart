@@ -33,7 +33,7 @@ Becoming into any downstream sink. The Be Semantic\ProductCode
 constructor format-validates but does not escape — sinks downstream
 still need to defend (e.g. bound parameters for SQL).
 
-**ALPS**: `goProduct` - 商品詳細を見る
+**ALPS**: `goProduct`
 
 
 

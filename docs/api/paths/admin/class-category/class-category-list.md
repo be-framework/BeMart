@@ -17,7 +17,7 @@ axis; omit it for the unscoped grid view.
 ## GET
 ALPS `goClassCategoryList` に対応する GET 操作。
 
-**ALPS**: `goClassCategoryList` - 規格分類一覧を見る
+**ALPS**: `goClassCategoryList`
 
 
 
@@ -50,7 +50,7 @@ ALPS `goClassCategoryList` に対応する GET 操作。
 ## POST
 ALPS `doCreateClassCategory` に対応する POST 操作。
 
-**ALPS**: `doCreateClassCategory` - 規格分類を作成する
+**ALPS**: `doCreateClassCategory`
 
 
 

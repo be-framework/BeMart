@@ -40,7 +40,7 @@ POST / DELETE:
 Wave 8: the loginId comes from the admin UI (typed input or
 query string) — user-controlled.
 
-**ALPS**: `goMember` - 管理者詳細を見る
+**ALPS**: `goMember`
 
 
 
@@ -78,7 +78,7 @@ Wave 8: all form fields are user-controlled. The admin AUTHZ
 check lives inside the first Being (MemberCreating), so this
 method just maps the exceptions.
 
-**ALPS**: `doCreateMember` - 管理者を作成する
+**ALPS**: `doCreateMember`
 
 
 
@@ -119,7 +119,7 @@ transitions / are out of scope for Phase 1. EC-CUBE 4.3
 dtb_member has no email column, so no mailAddress field is
 accepted.
 
-**ALPS**: `doUpdateMember` - 管理者を更新する
+**ALPS**: `doUpdateMember`
 
 
 
@@ -156,7 +156,7 @@ replay returns 200 with `alreadyDeleted=true`. The caller's own
 account, and any target that outranks the caller, raise
 {@see InsufficientAuthorityException} → 403.
 
-**ALPS**: `doDeleteMember` - 管理者を削除する
+**ALPS**: `doDeleteMember`
 
 
 

@@ -41,7 +41,7 @@ doRegisterCustomer (`page://self/entry`).
 ## GET
 ALPS `goCustomerRegistrationConfirm` に対応する GET 操作。
 
-**ALPS**: `goCustomerRegistrationConfirm` - 会員登録確認を見る
+**ALPS**: `goCustomerRegistrationConfirm`
 
 
 

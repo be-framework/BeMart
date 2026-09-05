@@ -20,7 +20,7 @@ Failure mapping:
 ## GET
 Wave 9ι: goTradeLawList — admin views the current TradeLaw body.
 
-**ALPS**: `goTradeLawList` - 特定商取引法一覧を見る
+**ALPS**: `goTradeLawList`
 
 
 
@@ -47,7 +47,7 @@ _No parameters required_
 ## POST
 ALPS `doUpdateTradeLaw` に対応する POST 操作。
 
-**ALPS**: `doUpdateTradeLaw` - 特定商取引法を更新する
+**ALPS**: `doUpdateTradeLaw`
 
 
 

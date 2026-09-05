@@ -14,7 +14,7 @@ values in Twig.
 ## GET
 ALPS `goMasterData` に対応する GET 操作。
 
-**ALPS**: `goMasterData` - マスタデータ管理を見る
+**ALPS**: `goMasterData`
 
 
 
@@ -47,7 +47,7 @@ ALPS `goMasterData` に対応する GET 操作。
 Selects which master to view (doSelectMasterData). ALPS marks it
 `idempotent` → PUT; returns the chosen master's rows.
 
-**ALPS**: `doSelectMasterData` - マスタデータを選択する
+**ALPS**: `doSelectMasterData`
 
 
 

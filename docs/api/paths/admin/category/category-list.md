@@ -24,7 +24,7 @@ Failure mapping (collapsed admin AUTHZ + CSRF + format):
 ## GET
 ALPS `goCategoryList` に対応する GET 操作。
 
-**ALPS**: `goCategoryList` - カテゴリ一覧を見る
+**ALPS**: `goCategoryList`
 
 
 
@@ -54,7 +54,7 @@ _No parameters required_
 ## POST
 ALPS `doCreateCategory` に対応する POST 操作。
 
-**ALPS**: `doCreateCategory` - カテゴリを作成する
+**ALPS**: `doCreateCategory`
 
 
 

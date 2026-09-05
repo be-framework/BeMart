@@ -25,7 +25,7 @@ state). `csrfToken` carries the trusted reference
 renders it into the form's hidden `_token` input so the
 subsequent POST passes CSRF validation.
 
-**ALPS**: `goContactForm` - お問い合わせフォームを見る
+**ALPS**: `goContactForm`
 
 
 
@@ -53,7 +53,7 @@ _No parameters required_
 ## POST
 ALPS `doSubmitContact` に対応する POST 操作。
 
-**ALPS**: `doSubmitContact` - お問い合わせを送信する
+**ALPS**: `doSubmitContact`
 
 
 

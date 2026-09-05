@@ -43,7 +43,7 @@ blank shipping form — the render-smoke test exercises this with
 empty JSON-backed fake storage. AUTHZ is a direct admin-session check
 (Pattern B — no Be transition is invoked on the GET path).
 
-**ALPS**: `doSelectShippingAddress` - お届け先を選択する
+**ALPS**: `doSelectShippingAddress`
 
 
 
@@ -73,7 +73,7 @@ empty JSON-backed fake storage. AUTHZ is a direct admin-session check
 ## POST
 doSelectShippingAddress — pick an address-book row for the order.
 
-**ALPS**: `doSelectShippingAddress` - お届け先を選択する
+**ALPS**: `doSelectShippingAddress`
 
 
 
@@ -103,7 +103,7 @@ doSelectShippingAddress — pick an address-book row for the order.
 ## PUT
 doUpdateShippingAddress — overwrite the order's shipping fields.
 
-**ALPS**: `doUpdateShippingAddress` - お届け先を更新する
+**ALPS**: `doUpdateShippingAddress`
 
 
 

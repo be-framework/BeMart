@@ -15,7 +15,7 @@ Single-row affordances live at `page://self/admin/delivery/delivery`.
 ## GET
 ALPS `goDeliveryList` に対応する GET 操作。
 
-**ALPS**: `goDeliveryList` - 配送方法一覧を見る
+**ALPS**: `goDeliveryList`
 
 
 
@@ -43,7 +43,7 @@ _No parameters required_
 ## POST
 ALPS `doCreateDelivery` に対応する POST 操作。
 
-**ALPS**: `doCreateDelivery` - 配送方法を作成する
+**ALPS**: `doCreateDelivery`
 
 
 

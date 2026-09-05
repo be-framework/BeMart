@@ -15,7 +15,7 @@ delete-then-create.
 ## DELETE
 ALPS `doDeleteTaxRule` に対応する DELETE 操作。
 
-**ALPS**: `doDeleteTaxRule` - 税率ルールを削除する
+**ALPS**: `doDeleteTaxRule`
 
 
 

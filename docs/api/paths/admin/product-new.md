@@ -14,7 +14,7 @@ contract (code/name/price/stock/status/description/searchWord/note).
 ## GET
 ALPS `doCreateProduct` に対応する GET 操作。
 
-**ALPS**: `doCreateProduct` - 商品を作成する
+**ALPS**: `doCreateProduct`
 
 
 

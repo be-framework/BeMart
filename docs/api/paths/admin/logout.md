@@ -36,7 +36,7 @@ parallel `doLogout` for the customer side.
 Wave 4 / Phase B Slice 9: the CSRF token is user-controlled
 input — same taint discipline as the customer logout.
 
-**ALPS**: `doAdminLogout` - 管理者ログアウトする
+**ALPS**: `doAdminLogout`
 
 
 

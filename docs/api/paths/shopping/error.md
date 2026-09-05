@@ -21,7 +21,7 @@ transition: goCart.
 ## GET
 ALPS `goShoppingError` に対応する GET 操作。
 
-**ALPS**: `goShoppingError` - 購入エラー画面を表示する
+**ALPS**: `goShoppingError`
 
 
 

@@ -37,7 +37,7 @@ EC-CUBE doActivateCustomer landing — the email-verification-complete
 screen. Pure renderer: the body surfaces only the screen shape + the
 outbound `goTop` transition (ALPS `#CustomerActivationComplete`).
 
-**ALPS**: `goTop` - トップページを見る
+**ALPS**: `goTop`
 
 
 
@@ -64,7 +64,7 @@ _No parameters required_
 ## POST
 ALPS `doActivateCustomer` に対応する POST 操作。
 
-**ALPS**: `doActivateCustomer` - 会員を有効化する
+**ALPS**: `doActivateCustomer`
 
 
 

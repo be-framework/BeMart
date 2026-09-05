@@ -43,7 +43,7 @@ Thin GET renderer for `Setting/Shop/order_status.twig`. BeMart
 has a per-order status-change transition on POST, but not yet a
 master-data transition for editing status labels/colors.
 
-**ALPS**: `doUpdateOrderStatus` - 受注ステータスを変更する
+**ALPS**: `doUpdateOrderStatus`
 
 
 
@@ -70,7 +70,7 @@ the master-list shape; this wave exposes a concrete CSRF/AUTHZ
 surface and returns the accepted payload count without claiming
 full EC-CUBE master-data persistence yet.
 
-**ALPS**: `doUpdateOrderStatusList` - 対応状況一覧を更新する
+**ALPS**: `doUpdateOrderStatusList`
 
 
 
@@ -98,7 +98,7 @@ Wave 7: both `orderNo` and `orderStatus` are admin-form input
 (orderNo selected from the order-list row, orderStatus picked
 from a dropdown of dtb_order_status values).
 
-**ALPS**: `doUpdateOrderStatus` - 受注ステータスを変更する
+**ALPS**: `doUpdateOrderStatus`
 
 
 

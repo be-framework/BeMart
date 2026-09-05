@@ -31,7 +31,7 @@ AUTHORITY STAYS WITH the Be Framework Becoming chain (onPost). The
 JSON contexts ignore `body['form']`; the flat profile keys stay on
 `body` for the JSON-context tests.
 
-**ALPS**: `goMypageChange` - 会員情報変更画面を見る
+**ALPS**: `goMypageChange`
 
 
 
@@ -69,7 +69,7 @@ _No parameters required_
 ## POST
 ALPS `doUpdateCustomer` に対応する POST 操作。
 
-**ALPS**: `doUpdateCustomer` - 会員情報を更新する
+**ALPS**: `doUpdateCustomer`
 
 
 

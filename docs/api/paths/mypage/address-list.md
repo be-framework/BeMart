@@ -25,7 +25,7 @@ pulls it from CustomerSession (Pilot 5 F-2 / Pilot 8 lesson).
 ## GET
 ALPS `goCustomerAddressList` に対応する GET 操作。
 
-**ALPS**: `goCustomerAddressList` - 配送先一覧を見る
+**ALPS**: `goCustomerAddressList`
 
 
 
@@ -54,7 +54,7 @@ _No parameters required_
 ## POST
 ALPS `doCreateCustomerAddress` に対応する POST 操作。
 
-**ALPS**: `doCreateCustomerAddress` - 配送先を追加する
+**ALPS**: `doCreateCustomerAddress`
 
 
 

@@ -17,7 +17,7 @@ AUTHZ ladder; this resource maps exceptions to HTTP codes.
 ## GET
 ALPS `goCategory` に対応する GET 操作。
 
-**ALPS**: `goCategory` - カテゴリ詳細を見る
+**ALPS**: `goCategory`
 
 
 
@@ -49,7 +49,7 @@ ALPS `goCategory` に対応する GET 操作。
 ## PUT
 ALPS `doUpdateCategory` に対応する PUT 操作。
 
-**ALPS**: `doUpdateCategory` - カテゴリを更新する
+**ALPS**: `doUpdateCategory`
 
 
 
@@ -82,7 +82,7 @@ ALPS `doUpdateCategory` に対応する PUT 操作。
 ## DELETE
 ALPS `doDeleteCategory` に対応する DELETE 操作。
 
-**ALPS**: `doDeleteCategory` - カテゴリを削除する
+**ALPS**: `doDeleteCategory`
 
 
 

@@ -20,6 +20,8 @@ use RuntimeException;
 
 use function assert;
 use function dirname;
+use function is_dir;
+use function mkdir;
 
 /**
  * MySQL contract of the checkout claim — the arbiter that decides which
@@ -68,7 +70,14 @@ final class PreOrderClaimSqlTest extends TestCase
                 $this->install(new MediaQueryRuntimeModule(new DecoratedPdo($this->pdo)));
             }
         });
-        $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/test');
+        // Own tmp dir: this injector overrides the PDO binding, so its
+        // generated proxies must not mix with the shared `test` dir's.
+        $tmpDir = dirname(__DIR__, 2) . '/var/tmp/test-preorderclaimsqltest';
+        if (! is_dir($tmpDir)) {
+            mkdir($tmpDir, 0777, true);
+        }
+
+        $injector = new Injector($module, $tmpDir);
 
         // The Fake claim is bound for the `test` context; this suite is about
         // the SQL adapter, so ask for it by class.

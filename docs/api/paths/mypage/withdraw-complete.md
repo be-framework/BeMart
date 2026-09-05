@@ -29,7 +29,7 @@ Maps to `page://self/mypage/withdraw-complete`.
 ## GET
 ALPS `goMypageWithdrawComplete` に対応する GET 操作。
 
-**ALPS**: `goMypageWithdrawComplete` - 退会完了を見る
+**ALPS**: `goMypageWithdrawComplete`
 
 
 

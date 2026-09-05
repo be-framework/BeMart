@@ -25,7 +25,7 @@ Maps to `page://self/contact/complete`.
 ## GET
 ALPS `goContactComplete` に対応する GET 操作。
 
-**ALPS**: `goContactComplete` - お問い合わせ完了を見る
+**ALPS**: `goContactComplete`
 
 
 
