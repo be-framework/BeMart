@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
+use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -28,11 +29,13 @@ final readonly class ClassNameCsvImported
         #[Input] string $csv,
         #[Inject] AdminSession $adminSession,
         #[Inject] ClassCsvCompatibilityInterface $csvService,
+        #[Inject] ProductCacheInvalidatorInterface $cacheInvalidator,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
         $this->accepted = $csvService->importClassName($csv);
+        $cacheInvalidator->invalidateCorpus();
     }
 }

@@ -27,8 +27,10 @@ use function str_contains;
  * slow page - it is a wrong page, for as long as the entry lives. The interfaces mark which
  * operations change it ({@see ChangesProductCorpus}); this walks the Finals that call them.
  *
- * The check is structural because there is no run to observe: a Final that never announces
- * looks exactly like one whose test corpus happened not to change.
+ * The sweep is structural: it sees a Final that injects a marked interface and calls it, not one
+ * that reaches the write through a service (the class CSV imports). Those, and the paths a sweep
+ * cannot tell apart, are pinned by execution in AdminProductCacheAnnouncementTest,
+ * AdminCategoryTest and ClassCsvTransitionsTest with a recording invalidator.
  */
 final class CorpusAnnouncementCoverageTest extends TestCase
 {
