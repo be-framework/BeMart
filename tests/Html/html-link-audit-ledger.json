@@ -121,7 +121,7 @@
   },
   "GET page://self/admin/class-category/class-category-list doDeleteClassCategory": {
     "classification": "resourceOnly",
-    "note": "一覧には PUT form だけがあり削除 form が無い",
+    "note": "削除 form の action は JS が組み立てる（静的 HTML には無い）。auditor の欠陥ではない",
     "reason": "method-mismatch"
   },
   "GET page://self/admin/class-category/class-category-list doUpdateClassCategory": {
@@ -141,7 +141,7 @@
   },
   "GET page://self/admin/class-name/class-name-list doDeleteClassName": {
     "classification": "resourceOnly",
-    "note": "一覧には PUT form だけがあり削除 form が無い",
+    "note": "削除 form の action は JS が組み立てる（静的 HTML には無い）。auditor の欠陥ではない",
     "reason": "method-mismatch"
   },
   "GET page://self/admin/class-name/class-name-list doUpdateClassName": {
