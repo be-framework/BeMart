@@ -1,7 +1,7 @@
 {
   "name": "be-framework/be-mart",
   "type": "project",
-  "license": "MIT",
+  "license": "GPL-2.0-only",
   "description": "BeMart — AI-driven EC-CUBE → BEAR.Sunday + Be Framework migration. BEAR.Sunday application layer.",
   "repositories": [
     {
