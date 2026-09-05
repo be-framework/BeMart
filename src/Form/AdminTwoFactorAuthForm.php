@@ -24,8 +24,8 @@ use Ray\WebFormModule\AbstractForm;
  * EC-CUBE's block prefix is `admin_two_factor_auth`, so the FormView
  * ids are `admin_two_factor_auth_device_token` /
  * `admin_two_factor_auth_auth_key` — folded into the field attrs here.
- * `two_factor_auth.twig` passes `{'attr': {'class':'w-100', ...}}` to
- * the `device_token` widget; that template-side override is folded in.
+ * `two_factor_auth.twig` passes its own attrs to the `device_token`
+ * widget; that template-side override is folded in.
  *
  * VALIDATION AUTHORITY: there is no Be Framework 2FA transition (the
  * be/ domain layer is frozen for this wave), so the 2FA resources are
@@ -41,10 +41,9 @@ final class AdminTwoFactorAuthForm extends AbstractForm
      *
      * Ported from EC-CUBE's `TwoFactorAuthType::buildForm()`:
      * `deviceToken` (text, maxlength 6) and `authKey` (hidden). The
-     * `two_factor_auth.twig` template adds `class="w-100"` and a
-     * placeholder to the `device_token` widget; `two_factor_auth_set`
-     * uses the bare widget — the `w-100` class is kept (it is harmless
-     * on the set page and keeps one form definition).
+     * token widget declares `inputmode`/`pattern` so phones open the
+     * numeric keypad; `two_factor_auth_set` uses the same definition
+     * (one form, two pages).
      */
     #[Override]
     public function init(): void

@@ -93,7 +93,7 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('doVerifyTwoFactorAuth', $ro->body['transitionId']);
         $this->assertSame(self::LOGIN_ID, $ro->body['loginId']);
         $this->assertArrayHasKey('Location', $ro->headers);
@@ -111,7 +111,7 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame(Code::OK, $ro->code);
         $this->assertSame(self::LOGIN_ID, $ro->body['loginId']);
     }
 
