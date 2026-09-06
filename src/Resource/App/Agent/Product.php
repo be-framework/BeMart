@@ -14,8 +14,13 @@ use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Resource\App\Products;
 use MyVendor\BeMart\Support\ProductImageCatalog;
 
-/** LLM-readable product detail lookup for BEAR.ToolUse agents. */
-#[Cacheable]
+/**
+ * LLM-readable product detail lookup for BEAR.ToolUse agents
+ *
+ * The `product-corpus` tag reaches an admin edit; the 30-second TTL is the floor under the copied
+ * stock number, which no write path announces.
+ */
+#[Cacheable(expirySecond: 30)]
 class Product extends ResourceObject
 {
     public function __construct(
