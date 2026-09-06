@@ -27,6 +27,16 @@ jobs:
           --health-timeout=5s
           --health-retries=20
 
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
     env:
       DATABASE_URL: 'mysql://dbuser:secret@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=8.0.0'
 
@@ -63,3 +73,6 @@ jobs:
 
       - name: PHPUnit
         run: composer test
+
+      - name: Cache gate
+        run: GATE_SUITE=0 ./var/loop/verify-all.sh
