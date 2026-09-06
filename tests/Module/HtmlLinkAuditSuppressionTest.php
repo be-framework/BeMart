@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Module;
 
-use BEAR\Dev\Html\HtmlLinkAuditLoggerInterface;
+use MyVendor\BeMart\Support\Html\HtmlLinkAuditLoggerInterface;
 use MyVendor\BeMart\Support\Html\SilentHtmlLinkAuditLogger;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;

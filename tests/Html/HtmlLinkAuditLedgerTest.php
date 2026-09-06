@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Html;
 
-use BEAR\Dev\Html\HtmlLinkAuditLoggerInterface;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Tests\Smoke\ResourceSmokeTest;
@@ -13,6 +12,7 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
+use MyVendor\BeMart\Support\Html\HtmlLinkAuditLoggerInterface;
 use MyVendor\BeMart\Tests\Support\RecordingHtmlLinkAuditLogger;
 use Madapaja\TwigModule\Exception\TemplateNotFound;
 use Override;

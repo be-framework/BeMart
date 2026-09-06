@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Support;
 
-use BEAR\Dev\Html\HtmlLinkAuditLoggerInterface;
-use BEAR\Dev\Html\LinkHeader;
+use MyVendor\BeMart\Support\Html\HtmlLinkAuditLoggerInterface;
+use MyVendor\BeMart\Support\Html\LinkHeader;
 use Override;
 
 /** @psalm-type Warning = array{rel: string, method: string, href: string, reason: string} */

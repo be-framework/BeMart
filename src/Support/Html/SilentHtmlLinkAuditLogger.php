@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Support\Html;
 
-use BEAR\Dev\Html\HtmlLinkAuditLoggerInterface;
-use BEAR\Dev\Html\LinkHeader;
 use Override;
 
 /**

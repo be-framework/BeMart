@@ -6,8 +6,8 @@ title: "HTML Link Audit — 理由と分類"
 # HTML Link Audit — 理由と分類
 
 Page リソースが `#[Link]` で宣言した遷移が、描画された HTML の中に affordance
-（`<a>` / `<area>` / `<link>` / `<form>`）として存在するかを BEAR.Dev の
-`HtmlLinkAuditor` が検査する。結果は `tests/Html/html-link-audit-ledger.json`
+（`<a>` / `<area>` / `<link>` / `<form>`）として存在するかを BeMart の
+`src/Support/Html/HtmlLinkAuditor` が検査する。結果は `tests/Html/html-link-audit-ledger.json`
 （台帳）と突き合わせ、`tests/Html/HtmlLinkAuditLedgerTest` が判定する。
 
 - 台帳にない warning が出たら fail（未分類）
