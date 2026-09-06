@@ -42,6 +42,7 @@ use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Injector;
 use Ray\Di\AbstractModule;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
@@ -188,7 +189,9 @@ $flow = FLOWS[$flowName];
 $context = getenv('APP_CONTEXT') ?: 'cli-fake-hal-app';
 $dsnForFlush = getenv('CACHE_DSN') ?: '';
 if ($dsnForFlush !== '') {
-    (new Predis\Client($dsnForFlush))->flushall();
+    // Through symfony, not a client class: the app declares no redis client, and the pools this
+    // oracle judges are built the same way - ext-redis when it is there, predis when it is not.
+    RedisAdapter::createConnection($dsnForFlush)->flushall();
 } else {
     exec('rm -rf ' . escapeshellarg(dirname(__DIR__) . '/tmp/' . $context . '/cache'));
 }
@@ -786,7 +789,7 @@ if ($missCost !== null && $hitCost !== null) {
 
 // 7. what the store actually did with the lifetime the log claims
 if ($dsn !== '') {
-    $client = new Predis\Client($dsn);
+    $client = RedisAdapter::createConnection($dsn);
     /** @var list<string> $keys */
     $keys = $client->keys('*');
     $claimsNoExpiry = [];
