@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\App\Agent;
 
+use BEAR\QueryRepository\Header;
 use BEAR\RepositoryModule\Annotation\Cacheable;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\ToolUse\Attribute\Tool;
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Resource\App\Products;
 use MyVendor\BeMart\Support\ProductImageCatalog;
 
 use function array_filter;
@@ -20,8 +22,8 @@ use function max;
 use function min;
 
 /** LLM-readable catalogue search for BEAR.ToolUse agents. */
-#[Cacheable(expirySecond: 30)]
-final class Catalog extends ResourceObject
+#[Cacheable]
+class Catalog extends ResourceObject
 {
     public function __construct(
         private readonly ProductQueryInterface $productQuery,
@@ -48,6 +50,7 @@ final class Catalog extends ResourceObject
         )), 0, $limit);
 
         $this->code = Code::OK;
+        $this->headers[Header::SURROGATE_KEY] = Products::SURROGATE_KEY;
         $this->body = [
             'query' => $nameKeyword,
             'count' => count($visibleProducts),
