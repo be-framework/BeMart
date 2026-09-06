@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Resource;
 
+use BEAR\QueryRepository\Expiry;
 use BEAR\QueryRepository\Log\SafeSemanticLogger;
+use BEAR\RepositoryModule\Annotation\Cacheable;
 use BEAR\RepositoryModule\Annotation\CacheLog;
 use BEAR\RepositoryModule\Annotation\ResourceObjectPool;
 use BEAR\Resource\ResourceInterface;
@@ -13,17 +15,23 @@ use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Injector;
+use MyVendor\BeMart\Resource\App\Agent\Catalog;
+use MyVendor\BeMart\Resource\App\Agent\Product as AgentProduct;
+use MyVendor\BeMart\Resource\App\Product;
+use MyVendor\BeMart\Resource\App\Products;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
+use ReflectionClass;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 /**
  * The agent reads the same corpus a shopper does, so an admin edit has to reach its copy
  *
- * A TTL would pass a store-and-hit assertion and leave the staleness in place, which is why the
- * read after the invalidation is the one that matters here.
+ * The tag answers an admin edit and the TTL is the floor under the stock number each body copies,
+ * which no write path announces. Both are asserted here: the read after the invalidation, and the
+ * lifetime the copy is allowed to have.
  *
  * The pool comes from here because no context binds one: every context leaves the framework
  * default in place, a `NullAdapter` that answers every lookup with a miss, so this is the only
@@ -38,6 +46,39 @@ final class AgentCorpusCacheTest extends TestCase
             'catalog' => ['app://self/agent/catalog?limit=3'],
             'product' => ['app://self/agent/product?productCode=sample-001'],
         ];
+    }
+
+    /** @return array<string, array{class-string, class-string}> */
+    public static function copies(): array
+    {
+        return [
+            'catalog of products' => [Catalog::class, Products::class],
+            'product detail' => [AgentProduct::class, Product::class],
+        ];
+    }
+
+    /**
+     * @param class-string $copy
+     * @param class-string $original
+     */
+    #[DataProvider('copies')]
+    public function testTheAgentCopyDoesNotOutliveTheOneItDuplicates(string $copy, string $original): void
+    {
+        $expiry = Injector::getInstance('cli-fake-hal-app')->getInstance(Expiry::class);
+
+        self::assertLessThanOrEqual(
+            self::lifetime($original, $expiry),
+            self::lifetime($copy, $expiry),
+            'the agent answers with a stock number the storefront has already stopped serving',
+        );
+    }
+
+    /** @param class-string $class */
+    private static function lifetime(string $class, Expiry $expiry): int
+    {
+        $cacheable = (new ReflectionClass($class))->getAttributes(Cacheable::class)[0]->newInstance();
+
+        return $cacheable->expirySecond > 0 ? $cacheable->expirySecond : $expiry->getTime($cacheable->expiry);
     }
 
     #[DataProvider('agentReads')]
