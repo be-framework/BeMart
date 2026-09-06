@@ -21,7 +21,9 @@ use function min;
 
 /** LLM-readable catalogue search for BEAR.ToolUse agents. */
 #[Cacheable(expirySecond: 30)]
-final class Catalog extends ResourceObject
+// Not final: Ray.Aop weaves an interceptor by extending the class, so a final resource silently
+// gets none - the #[Cacheable] above cached nothing at all until this was measured.
+class Catalog extends ResourceObject
 {
     public function __construct(
         private readonly ProductQueryInterface $productQuery,

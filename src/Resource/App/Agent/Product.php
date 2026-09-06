@@ -14,7 +14,8 @@ use MyVendor\BeMart\Support\ProductImageCatalog;
 
 /** LLM-readable product detail lookup for BEAR.ToolUse agents. */
 #[Cacheable(expirySecond: 30)]
-final class Product extends ResourceObject
+// Not final, for the same reason as Agent\Catalog: a woven interceptor is a subclass.
+class Product extends ResourceObject
 {
     public function __construct(
         private readonly ProductQueryInterface $productQuery,
