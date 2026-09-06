@@ -21,8 +21,13 @@ use function array_values;
 use function max;
 use function min;
 
-/** LLM-readable catalogue search for BEAR.ToolUse agents. */
-#[Cacheable]
+/**
+ * LLM-readable catalogue search for BEAR.ToolUse agents
+ *
+ * The `product-corpus` tag reaches an admin edit; the `short` TTL is the floor under the stock
+ * number copied into each row, which no write path announces.
+ */
+#[Cacheable(expiry: 'short')]
 class Catalog extends ResourceObject
 {
     public function __construct(
