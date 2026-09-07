@@ -5,6 +5,8 @@
 /build/
 /var/log/
 /var/tmp/
+/var/loop/last-*.txt
+/var/loop/loop.log
 /tests/Http/log/*.log
 .DS_Store
 *.swp
