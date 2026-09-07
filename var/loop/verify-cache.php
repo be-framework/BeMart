@@ -40,10 +40,10 @@ use BEAR\Resource\ResourceInterface;
 use BEAR\Sunday\Extension\Transfer\HttpCacheInterface;
 use BEAR\Resource\Uri;
 use Koriym\SemanticLogger\LogJson;
-use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Injector;
 use Ray\Di\AbstractModule;
+use Ray\Di\Scope;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
@@ -216,7 +216,7 @@ $override = new class ($dsn, ($flow['mode'] ?? '') === 'cdn') extends AbstractMo
             : new StorageRedisDsnModule($this->dsn));
         // Recording on, by replacing the one binding that decides it
         $this->bind(SemanticLoggerInterface::class)->annotatedWith(CacheLog::class)
-            ->toInstance(new SafeSemanticLogger(new SemanticLogger()));
+            ->to(SafeSemanticLogger::class)->in(Scope::SINGLETON);
 
         if ($this->cdn) {
             // The CDN flavour BeMart would deploy behind, with the purge recorded instead of sent.

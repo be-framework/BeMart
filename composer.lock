@@ -819,12 +819,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.QueryRepository.git",
-                "reference": "bec4c4dc5852098415d126c00c9716742f3b9ddb"
+                "reference": "5abe57368553e00aa752551f7f70f63d43abcb53"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.QueryRepository/zipball/bec4c4dc5852098415d126c00c9716742f3b9ddb",
-                "reference": "bec4c4dc5852098415d126c00c9716742f3b9ddb",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.QueryRepository/zipball/5abe57368553e00aa752551f7f70f63d43abcb53",
+                "reference": "5abe57368553e00aa752551f7f70f63d43abcb53",
                 "shasum": ""
             },
             "require": {
@@ -896,7 +896,7 @@
                 "issues": "https://github.com/bearsunday/BEAR.QueryRepository/issues",
                 "source": "https://github.com/bearsunday/BEAR.QueryRepository/tree/1.x"
             },
-            "time": "2026-08-31T10:09:23+00:00"
+            "time": "2026-09-07T12:50:29+00:00"
         },
         {
             "name": "bear/resource",
@@ -2060,7 +2060,7 @@
             "dist": {
                 "type": "path",
                 "url": "be",
-                "reference": "cc46e612ebe9925c013ce9d34014d6b022c80270"
+                "reference": "582b54fe20c555993e476620e427f520c37864e1"
             },
             "require": {
                 "be-framework/be": "dev-semantic-logger-0.9 as 0.1.0",
