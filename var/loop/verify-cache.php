@@ -16,7 +16,9 @@ declare(strict_types=1);
  *   2. the second read is a hit
  *   3. an embedded child appears as a `depends_on` edge, and the parent's save carries the
  *      child's tag: without that the child's write cannot reach the parent
- *   4. the write's `invalidate` tags meet the parent's save tags (set intersection)
+ *   4. the write announces the change - an `invalidate` that is not the writer's own marker-preceded
+ *      cleanup - and its tags meet the parent's save tags (set intersection). The CDN outcome of
+ *      that announcement is printed; `failed` is a violation, `skipped` means no purger is bound
  *   5. the read after the write is a miss again - a hit here is stale content
  *   6. no entry is saved with an empty tag list, which no invalidation can ever reach
  *
@@ -283,6 +285,35 @@ function tagsOf(array $entries, string $prefix): array
     }
 
     return array_values(array_unique($tags));
+}
+
+/**
+ * The invalidations that announce a change, without the writer clearing its own entry
+ *
+ * Same rule as the library's retention policy: an `invalidate` is cleanup iff the event
+ * immediately before it is `pre_write_cleanup`. A write whose only invalidation is cleanup
+ * has told nobody about the change - the parent stays warm until its TTL.
+ *
+ * @param list<array{type: string, context: array<string, mixed>}> $entries
+ *
+ * @return list<array{type: string, context: array<string, mixed>}>
+ */
+function realInvalidations(array $entries): array
+{
+    $real = [];
+    foreach ($entries as $i => $entry) {
+        if ($entry['type'] !== 'invalidate') {
+            continue;
+        }
+
+        if ($i > 0 && $entries[$i - 1]['type'] === 'pre_write_cleanup') {
+            continue;
+        }
+
+        $real[] = $entry;
+    }
+
+    return $real;
 }
 
 /**
@@ -737,15 +768,27 @@ if ($flow['write'] !== null) {
     $writeEntries = flatten($logger->flush());
     $sessions['write'] = $writeEntries;
 
-    $invalidateTags = tagsOf($writeEntries, 'invalidate');
+    $announced = realInvalidations($writeEntries);
+    $invalidateTags = tagsOf($announced, 'invalidate');
     $savedTags = tagsOf($cold, 'save_');
-    // 4. the write has to invalidate a tag the parent was stored under
-    if (array_intersect($invalidateTags, $savedTags) === []) {
+    // 4. the write has to announce the change, and announce a tag the parent was stored under
+    if ($announced === [] && in_array('invalidate', typesOf($writeEntries), true)) {
+        $violations[] = '28: the write only cleaned up its own entry (marker-preceded invalidate) - nothing announced the change, the parent stays warm until its TTL';
+    } elseif (array_intersect($invalidateTags, $savedTags) === []) {
         $violations[] = sprintf(
             '4: the write invalidated %s, which does not meet the read tags %s',
             json_encode($invalidateTags),
             json_encode($savedTags),
         );
+    }
+
+    // The local pools and the edge are two targets; a local pass with a failed purge is still stale at the edge
+    foreach ($announced as $entry) {
+        $cdn = (string) ($entry['context']['cdn'] ?? '');
+        printf("%-18s %s\n", 'cdn on write', $cdn);
+        if ($cdn === 'failed') {
+            $violations[] = '29: the CDN purge failed - the local pools are clean and the edge is still serving the old page';
+        }
     }
 
     // 5. the read after the write must rebuild
