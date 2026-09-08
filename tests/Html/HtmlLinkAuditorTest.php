@@ -86,6 +86,16 @@ final class HtmlLinkAuditorTest extends TestCase
         $this->assertSame(['goNext:target-missing'], $this->reasons());
     }
 
+    public function testDataHrefAttributeIsNotMistakenForHref(): void
+    {
+        $this->auditor->audit(
+            [new LinkHeader('goNext', '/next')],
+            '<a data-href="/next" class="goNext">Next</a>',
+        );
+
+        $this->assertSame(['goNext:target-missing'], $this->reasons());
+    }
+
     public function testFormMethodOverrideMatchesDeleteWithValueUppercase(): void
     {
         $this->auditor->audit(

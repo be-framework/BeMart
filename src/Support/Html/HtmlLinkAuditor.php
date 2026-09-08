@@ -184,7 +184,7 @@ final readonly class HtmlLinkAuditor
 
     private function attribute(string $attrs, string $name): string|null
     {
-        if (preg_match('/\b' . $name . '\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))/i', $attrs, $match) !== 1) {
+        if (preg_match('/(?<![\w:-])' . $name . '\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))/i', $attrs, $match) !== 1) {
             return null;
         }
 
