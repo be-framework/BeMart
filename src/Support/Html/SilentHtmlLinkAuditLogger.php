@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Support\Html;
 
-use BEAR\Dev\Html\HtmlLinkAuditLoggerInterface;
-use BEAR\Dev\Html\LinkHeader;
 use Override;
 
 /**
- * Suppresses BEAR.Dev HTML link audit diagnostics.
+ * HTML contexts render Link headers without audit output.
  *
- * Link headers are still rendered by BEAR.Dev's LinkHeaderRenderer; only the
- * noisy template affordance warnings are intentionally ignored in BeMart's
- * default HTML contexts.
+ * The audit itself is judged once, by tests/Html/HtmlLinkAuditLedgerTest,
+ * against the ledger; see docs/html-link-audit.md.
  */
 final class SilentHtmlLinkAuditLogger implements HtmlLinkAuditLoggerInterface
 {

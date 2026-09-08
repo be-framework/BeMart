@@ -254,4 +254,4 @@ CSV/PDF/export/delete/plugin install等は非画面アクションとして残�
 1. 未ログインの `/mypage*` は401エラー画面ではなく、EC-CUBE相当のログイン誘導へ303/表示誘導する。今回検出: `/mypage/favorite-list`。
 2. 管理画面の未実装501リンクを、画面実装または安全な「準備中」画面に分類する。優先: `admin_order_edit`, `admin_customer_edit`, CSV/PDFエクスポート、テンプレートダウンロード。
 3. 状態変更系リンク（コピー/削除/プラグイン有効化など）は、GETクリックではなく専用のPOST/DELETE監査で確認する。
-4. この監査を PHPUnit の `LinkAuditTest` として固定し、404/500/Fatalが再発したら落ちるようにする。
+4. この監査を PHPUnit の `LinkAuditTest` として固定し、404/500/Fatalが再発したら落ちるようにする。→ 宣言済み遷移と描画された affordance の突き合わせは `tests/Html/HtmlLinkAuditLedgerTest` が固定した（[`html-link-audit.md`](html-link-audit.md)）。
