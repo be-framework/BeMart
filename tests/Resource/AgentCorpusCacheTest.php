@@ -11,7 +11,6 @@ use BEAR\RepositoryModule\Annotation\CacheLog;
 use BEAR\RepositoryModule\Annotation\ResourceObjectPool;
 use BEAR\Resource\ResourceInterface;
 use Koriym\SemanticLogger\LogJson;
-use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Injector;
@@ -22,6 +21,7 @@ use MyVendor\BeMart\Resource\App\Products;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
+use Ray\Di\Scope;
 use ReflectionClass;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -92,7 +92,7 @@ final class AgentCorpusCacheTest extends TestCase
             {
                 $this->bind(AdapterInterface::class)->annotatedWith(ResourceObjectPool::class)->toInstance(new ArrayAdapter());
                 $this->bind(SemanticLoggerInterface::class)->annotatedWith(CacheLog::class)
-                    ->toInstance(new SafeSemanticLogger(new SemanticLogger()));
+                    ->to(SafeSemanticLogger::class)->in(Scope::SINGLETON);
             }
         };
         $injector = Injector::getOverrideInstance('cli-fake-hal-app', $override);
