@@ -7,11 +7,13 @@ namespace MyVendor\BeMart\Tests\Module;
 use BEAR\AppMeta\Meta;
 use Be\Framework\Becoming;
 use Be\Framework\BecomingInterface;
+use BEAR\EventSourcing\Filtered;
 use BEAR\EventSourcing\Module\EventSourcingModule;
 use BEAR\EventSourcing\Recorded;
 use BEAR\EventSourcing\RecordedMethods;
 use BEAR\EventSourcing\Resource\BodyStoreInterface;
 use BEAR\EventSourcing\Resource\NullBodyStore;
+use BEAR\EventSourcing\Resource\ParamsFilterInterface;
 use BEAR\EventSourcing\Resource\SemanticLogInvoker;
 use BEAR\EventSourcing\SemanticLogExtractorInterface;
 use BEAR\Resource\InvokerInterface;
@@ -19,9 +21,11 @@ use BEAR\Resource\ResourceInterface;
 use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
+use MyVendor\BeMart\Be\Exception\ResetKeyInvalidException;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
+use MyVendor\BeMart\Module\AppParamsFilter;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -44,11 +48,12 @@ use function json_encode;
  * (state-changing only) — this is what actually proves the extractor enforces its own
  * write-only policy independent of what the invoker chose to record.
  *
- * No app-side redaction here: bear/event-sourcing's SemanticLogInvoker filters params by
- * default (SensitiveParamsFilter, unbound #[Filtered] falls back to it), so csrfToken never
- * reaches an extracted event's params — proven below against the real Checkout resource, not
- * asserted in the abstract. Checkout's own params (preOrderId + csrfToken) never include a
- * credential-shaped key, so the request stays `replayable: true` and is extracted normally.
+ * No app-side redaction here beyond {@see AppParamsFilter}: bear/event-sourcing's
+ * SemanticLogInvoker filters params by default (SensitiveParamsFilter), and this graph binds
+ * the same #[Filtered] AppParamsFilter ObserveModule binds in production — proven below against
+ * the real Checkout and Reset resources, not asserted in the abstract. Checkout's own params
+ * (preOrderId + csrfToken) never include a credential-shaped key, so the request stays
+ * `replayable: true` and is extracted normally.
  */
 final class EventSourcingExtractionTest extends TestCase
 {
@@ -84,10 +89,13 @@ final class EventSourcingExtractionTest extends TestCase
             protected function configure(): void
             {
                 $this->rename(InvokerInterface::class, self::ORIGINAL_INVOKER);
+                $this->bind(ParamsFilterInterface::class)->annotatedWith(Filtered::class)
+                    ->to(AppParamsFilter::class);
                 $this->bind(InvokerInterface::class)
                     ->toConstructor(SemanticLogInvoker::class, [
                         'invoker' => self::ORIGINAL_INVOKER,
                         'recordedMethods' => Recorded::class,
+                        'paramsFilter' => Filtered::class,
                     ])
                     ->in(Scope::SINGLETON);
                 $this->bind(RecordedMethods::class)->annotatedWith(Recorded::class)
@@ -222,5 +230,73 @@ final class EventSourcingExtractionTest extends TestCase
             'a successful request with a redacted credential must not become an event, even '
             . 'though it is still visible in the log for audit purposes',
         );
+    }
+
+    public function testResetKeyIsRedactedByTheAppSpecificFilterTheLibraryDefaultMisses(): void
+    {
+        // bear/event-sourcing's SensitiveParamsFilter deliberately does not match a generic
+        // `key` suffix (an idempotencyKey is domain input, not a secret), so resetKey — a
+        // real single-use password-reset credential — needs BeMart's own AppParamsFilter,
+        // bound above the same way ObserveModule binds it in production. This pins against
+        // the real Reset resource, not an abstract params array.
+        [$resource, $extractor, $logger] = $this->buildGraph(null);
+
+        try {
+            $resource->post('page://self/reset', [
+                'resetKey' => 'unknown-reset-key-not-in-storage-zzzz',
+                'password' => 'a-new-password-123',
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+            $this->fail('expected ResetKeyInvalidException for a resetKey absent from storage');
+        } catch (ResetKeyInvalidException) {
+            // expected: SemanticLogInvoker records the request before the Be Final rejects it.
+        }
+
+        $log = $logger->flush();
+        $tree = json_decode(json_encode($log->toTreeArray()), true);
+        $params = $tree['open'][0]['context']['params'];
+        $this->assertArrayNotHasKey(
+            'resetKey',
+            $params,
+            'AppParamsFilter must redact resetKey; the library default alone would not',
+        );
+        $this->assertFalse($tree['open'][0]['context']['replayable']);
+
+        $events = $extractor->extract($log);
+        $this->assertCount(0, $events, 'a redacted-credential request must not become an event');
+    }
+
+    public function testAuthKeyIsRedactedByTheAppSpecificFilterToo(): void
+    {
+        // Same gap, the other AppParamsFilter::CREDENTIAL_KEYS entry: authKey is the TOTP
+        // shared secret carried during two-factor device setup. Pins against the real
+        // Admin\TwoFactorAuthSet resource with no pending setup challenge in this graph, so
+        // onPut returns FORBIDDEN directly (no exception) — simpler than resetKey's failure
+        // path, but the redaction must hold regardless of how the request resolves.
+        [$resource, $extractor, $logger] = $this->buildGraph(null);
+
+        $ro = $resource->put('page://self/admin/two-factor-auth-set', [
+            'deviceToken' => '123456',
+            'authKey' => 'legacy-client-supplied-authkey-must-never-be-logged',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+        $this->assertSame(
+            403,
+            $ro->code,
+            'fixture must actually reach TwoFactorAuthSet::onPut for this test to mean anything',
+        );
+
+        $log = $logger->flush();
+        $tree = json_decode(json_encode($log->toTreeArray()), true);
+        $params = $tree['open'][0]['context']['params'];
+        $this->assertArrayNotHasKey(
+            'authKey',
+            $params,
+            'AppParamsFilter must redact authKey; the library default alone would not',
+        );
+        $this->assertFalse($tree['open'][0]['context']['replayable']);
+
+        $events = $extractor->extract($log);
+        $this->assertCount(0, $events, 'a redacted-credential request must not become an event');
     }
 }

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use BEAR\EventSourcing\Filtered;
 use BEAR\EventSourcing\Module\EventSourcingModule;
 use BEAR\EventSourcing\Recorded;
 use BEAR\EventSourcing\RecordedMethods;
 use BEAR\EventSourcing\Resource\BodyStoreInterface;
 use BEAR\EventSourcing\Resource\FileBodyStore;
+use BEAR\EventSourcing\Resource\ParamsFilterInterface;
 use BEAR\EventSourcing\Resource\SemanticLogInvoker;
 use BEAR\Package\AbstractAppModule;
 use BEAR\QueryRepository\DevQueryRepositoryLogModule;
@@ -32,11 +34,11 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
  * registers the package pointcuts a second time and every interceptor runs twice — the log
  * shows it as a scope nested in itself.
  *
- * No app-side redaction here: bear/event-sourcing >=dev-redact-params filters
- * credential/transport-shaped params by default (SemanticLogInvoker constructs
- * SensitiveParamsFilter when no #[Filtered] ParamsFilterInterface is bound) and marks a
- * filtered request `replayable: false` so SemanticLogExtractor excludes it from the event
- * stream. See that package's README ("Redacting sensitive params") for the contract.
+ * BeMart adds back one exact-name filter of its own ({@see AppParamsFilter}): the library's
+ * default SensitiveParamsFilter, bound as the fallback, does not match a generic `key` suffix
+ * (an idempotencyKey is domain input, not a secret) so `resetKey`/`authKey` need this app's own
+ * #[Filtered] ParamsFilterInterface. See that package's README ("Redacting sensitive params")
+ * for the transport/credential contract this composes with.
  */
 final class ObserveModule extends AbstractAppModule
 {
@@ -48,11 +50,14 @@ final class ObserveModule extends AbstractAppModule
         $bodyDir = $this->appMeta->logDir . '/es-bodies';
         FileBodyStore::clearDirectory($bodyDir);
 
+        $this->bind(ParamsFilterInterface::class)->annotatedWith(Filtered::class)
+            ->to(AppParamsFilter::class);
         $this->rename(InvokerInterface::class, self::ORIGINAL_INVOKER);
         $this->bind(InvokerInterface::class)
             ->toConstructor(SemanticLogInvoker::class, [
                 'invoker' => self::ORIGINAL_INVOKER,
                 'recordedMethods' => Recorded::class,
+                'paramsFilter' => Filtered::class,
             ])
             ->in(Scope::SINGLETON);
         // GET is not a state change, so extraction ignores it; recording it is what makes
