@@ -5,11 +5,8 @@
   "description": "BeMart — AI-driven EC-CUBE → BEAR.Sunday + Be Framework migration. BEAR.Sunday application layer.",
   "repositories": [
     {
-      "type": "path",
-      "url": "/Users/akihito/git/BEAR.EventSourcing-wt/redact-params",
-      "options": {
-        "symlink": false
-      }
+      "type": "vcs",
+      "url": "https://github.com/bearsunday/BEAR.EventSourcing.git"
     },
     {
       "type": "vcs",

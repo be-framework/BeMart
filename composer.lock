@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "073ddeaa334eaa1891730305024ab5c3",
+    "content-hash": "3903204f5b253fa04663c59dee0793b6",
     "packages": [
         {
             "name": "aura/cli",
@@ -7288,10 +7288,16 @@
         {
             "name": "bear/event-sourcing",
             "version": "dev-redact-params",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bearsunday/BEAR.EventSourcing.git",
+                "reference": "c9248344c69634e30f60f9bd6f935d9450bdbf56"
+            },
             "dist": {
-                "type": "path",
-                "url": "/Users/akihito/git/BEAR.EventSourcing-wt/redact-params",
-                "reference": "047d3173e92088b0b5ab428ed968cd8829b07b41"
+                "type": "zip",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.EventSourcing/zipball/c9248344c69634e30f60f9bd6f935d9450bdbf56",
+                "reference": "c9248344c69634e30f60f9bd6f935d9450bdbf56",
+                "shasum": ""
             },
             "require": {
                 "koriym/semantic-logger": "^0.9",
@@ -7367,10 +7373,7 @@
                 "issues": "https://github.com/bearsunday/BEAR.EventSourcing/issues",
                 "source": "https://github.com/bearsunday/BEAR.EventSourcing"
             },
-            "transport-options": {
-                "symlink": false,
-                "relative": false
-            }
+            "time": "2026-09-13T14:05:45+00:00"
         },
         {
             "name": "composer/pcre",
