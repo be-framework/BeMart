@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Input;
 
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured;
+use SensitiveParameter;
 
 /**
  * Input for `doSetTwoFactorAuth` — the admin registers a TOTP device
@@ -29,7 +30,7 @@ final readonly class SetTwoFactorAuthInput
      */
     public function __construct(
         public string $loginId,
-        public string $authKey,
+        #[SensitiveParameter] public string $authKey,
         public string $deviceToken,
     ) {
     }
