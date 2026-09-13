@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "95cc24ee750094ae769647287e95bf9c",
+    "content-hash": "073ddeaa334eaa1891730305024ab5c3",
     "packages": [
         {
             "name": "aura/cli",
@@ -7286,6 +7286,93 @@
             "time": "2026-06-03T02:59:18+00:00"
         },
         {
+            "name": "bear/event-sourcing",
+            "version": "dev-redact-params",
+            "dist": {
+                "type": "path",
+                "url": "/Users/akihito/git/BEAR.EventSourcing-wt/redact-params",
+                "reference": "047d3173e92088b0b5ab428ed968cd8829b07b41"
+            },
+            "require": {
+                "koriym/semantic-logger": "^0.9",
+                "php": "^8.3",
+                "ray/di": "^2.19"
+            },
+            "require-dev": {
+                "bear/query-repository": "1.x-dev",
+                "bear/resource": "^1.32",
+                "maglnet/composer-require-checker": "^4.14",
+                "phpunit/phpunit": "^11.5",
+                "ray/aura-sql-module": "^1.17",
+                "ray/media-query": "^1.1",
+                "squizlabs/php_codesniffer": "^3.11",
+                "vimeo/psalm": "^6.0"
+            },
+            "suggest": {
+                "bear/resource": "To observe BEAR.Resource execution with the InvokerInterface bridge (^1.32)",
+                "ray/media-query": "To back EventStoreInterface with SQL and to observe media queries as semantic log events (^1.1)"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "BEAR\\EventSourcing\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "BEAR\\EventSourcing\\Tests\\": "tests/",
+                    "FakeVendor\\Unified\\": "tests/Fixture/Unified/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ],
+                "observe": [
+                    "php examples/observe/observe.php"
+                ],
+                "phpcs": [
+                    "phpcs --standard=phpcs.xml"
+                ],
+                "psalm": [
+                    "psalm --monochrome --show-info=false"
+                ],
+                "require-checker": [
+                    "composer-require-checker check --config-file=./composer-require-checker.json composer.json"
+                ],
+                "tests": [
+                    "@phpcs",
+                    "@test",
+                    "@psalm"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "description": "Event sourcing primitives extracted from Semantic Logger observations",
+            "homepage": "https://github.com/bearsunday/BEAR.EventSourcing",
+            "keywords": [
+                "BEAR.Sunday",
+                "event-sourcing",
+                "events",
+                "semantic-logger"
+            ],
+            "support": {
+                "issues": "https://github.com/bearsunday/BEAR.EventSourcing/issues",
+                "source": "https://github.com/bearsunday/BEAR.EventSourcing"
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": false
+            }
+        },
+        {
             "name": "composer/pcre",
             "version": "3.4.0",
             "source": {
@@ -9444,6 +9531,7 @@
     "stability-flags": {
         "be-framework/be": 20,
         "bear/devtools": 20,
+        "bear/event-sourcing": 20,
         "bear/query-repository": 20,
         "bear/tool-use": 20,
         "my-vendor/be-mart-be": 20,
