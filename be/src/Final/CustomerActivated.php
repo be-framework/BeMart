@@ -9,6 +9,7 @@ use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
+use SensitiveParameter;
 
 /**
  * Customer activated — Final, proof a provisional customer turned
@@ -32,7 +33,7 @@ final readonly class CustomerActivated
     public int $customerStatus;
 
     public function __construct(
-        #[Input] string $secretKey,
+        #[Input] #[SensitiveParameter] string $secretKey,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] CustomerCommandInterface $customerCommand,
     ) {

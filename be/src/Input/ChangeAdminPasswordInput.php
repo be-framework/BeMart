@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Input;
 
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Final\AdminPasswordChanged;
+use SensitiveParameter;
 
 /**
  * Input for `doChangePassword` — the logged-in admin changes their own
@@ -34,9 +35,9 @@ final readonly class ChangeAdminPasswordInput
      * @psalm-taint-source input $changePasswordSecond
      */
     public function __construct(
-        public string $currentPassword,
-        public string $changePasswordFirst,
-        public string $changePasswordSecond,
+        #[SensitiveParameter] public string $currentPassword,
+        #[SensitiveParameter] public string $changePasswordFirst,
+        #[SensitiveParameter] public string $changePasswordSecond,
     ) {
     }
 }

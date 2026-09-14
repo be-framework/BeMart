@@ -154,7 +154,7 @@ final class EventSourcingExtractionTest extends TestCase
         $this->assertArrayNotHasKey(
             'csrfToken',
             $event->params,
-            'RedactingSemanticLogger must scrub csrfToken before it reaches an extracted event',
+            'SensitiveParamsFilter must scrub csrfToken before it reaches an extracted event',
         );
 
         // Re-extracting the same log must reproduce the same id (deterministic identity).
