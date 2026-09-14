@@ -8,6 +8,7 @@ use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
+use SensitiveParameter;
 
 /**
  * Two-factor auth configured — Final, proof an admin registered a TOTP
@@ -29,11 +30,10 @@ use Ray\InputQuery\Attribute\Input;
 final readonly class TwoFactorAuthConfigured
 {
     public string $loginId;
-    public string $authKey;
 
     public function __construct(
         #[Input] string $loginId,
-        #[Input] string $authKey,
+        #[Input] #[SensitiveParameter] string $authKey,
         #[Input] string $deviceToken,
         #[Inject] TwoFactorAuthInterface $twoFactorAuth,
     ) {
@@ -50,6 +50,5 @@ final readonly class TwoFactorAuthConfigured
         $twoFactorAuth->enable($loginId, $authKey);
 
         $this->loginId = $loginId;
-        $this->authKey = $authKey;
     }
 }

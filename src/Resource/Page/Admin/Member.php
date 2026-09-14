@@ -33,6 +33,7 @@ use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminMemberForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+use SensitiveParameter;
 
 use function array_values;
 use function assert;
@@ -165,10 +166,10 @@ class Member extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         string $loginId,
-        string $password,
+        #[SensitiveParameter] string $password,
         string $name,
         int $authority,
-        string|null $passwordConfirm = null,
+        #[SensitiveParameter] string|null $passwordConfirm = null,
         string|null $mode = null,
     ): static {
         $browserForm = $mode === 'member_form';

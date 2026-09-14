@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Input;
 
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Final\CustomerActivated;
+use SensitiveParameter;
 
 /**
  * Input for doActivateCustomer — Pilot 7.
@@ -26,7 +27,7 @@ final readonly class ActivateCustomerInput
      * @psalm-taint-source input $secretKey
      */
     public function __construct(
-        public string $secretKey,
+        #[SensitiveParameter] public string $secretKey,
     ) {
     }
 }

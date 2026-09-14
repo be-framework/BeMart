@@ -38,7 +38,6 @@ final class TwoFactorAuthConfiguredTest extends TestCase
 
         $this->assertInstanceOf(TwoFactorAuthConfigured::class, $final);
         $this->assertSame('fresh-admin', $final->loginId);
-        $this->assertSame(FakeTwoFactorAuth::FIXED_SECRET, $final->authKey);
         $this->assertTrue($this->twoFactorAuth->isEnabled('fresh-admin'));
     }
 

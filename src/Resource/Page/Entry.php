@@ -31,6 +31,7 @@ use MyVendor\BeMart\Be\Final\CustomerRegistered;
 use MyVendor\BeMart\Be\Input\RegisterCustomerInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\EntryForm;
+use SensitiveParameter;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -157,7 +158,7 @@ class Entry extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         string|null $email = null,
-        string|null $password = null,
+        #[SensitiveParameter] string|null $password = null,
         string|null $name01 = null,
         string|null $name02 = null,
         string|null $kana01 = null,
@@ -172,7 +173,7 @@ class Entry extends ResourceObject
         int|string|null $sex = null,
         int|string|null $job = null,
         string|null $email_confirm = null,
-        string|null $password_confirm = null,
+        #[SensitiveParameter] string|null $password_confirm = null,
         string|null $birth_year = null,
         string|null $birth_month = null,
         string|null $birth_day = null,
