@@ -15,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\SecretKeyNotFoundException;
 use MyVendor\BeMart\Be\Final\CustomerActivated;
 use MyVendor\BeMart\Be\Input\ActivateCustomerInput;
 use BEAR\Resource\Annotation\JsonSchema;
+use SensitiveParameter;
 
 use function assert;
 use function sprintf;
@@ -87,7 +88,7 @@ class Activate extends ResourceObject
     #[JsonSchema(schema: 'post-entry-activate.json', params: 'post-entry-activate.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfProtected]
-    public function onPost(string $secretKey): static
+    public function onPost(#[SensitiveParameter] string $secretKey): static
     {
         $final = ($this->becoming)(new ActivateCustomerInput(secretKey: $secretKey));
 

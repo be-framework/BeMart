@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminCustomerCreated;
 use MyVendor\BeMart\Be\Input\AdminCreateCustomerInput;
 use BEAR\Resource\Annotation\JsonSchema;
+use SensitiveParameter;
 
 use function assert;
 use function sprintf;
@@ -79,7 +80,7 @@ class CreateCustomer extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         string $email,
-        string $password,
+        #[SensitiveParameter] string $password,
         string $name01,
         string $name02,
         string|null $kana01 = null,

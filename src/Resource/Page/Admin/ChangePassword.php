@@ -22,6 +22,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminChangePasswordForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+use SensitiveParameter;
 
 use function assert;
 
@@ -108,9 +109,9 @@ class ChangePassword extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPost(
-        string $currentPassword,
-        string $changePasswordFirst,
-        string $changePasswordSecond,
+        #[SensitiveParameter] string $currentPassword,
+        #[SensitiveParameter] string $changePasswordFirst,
+        #[SensitiveParameter] string $changePasswordSecond,
     ): static {
         $final = ($this->becoming)(new ChangeAdminPasswordInput(
             currentPassword: $currentPassword,

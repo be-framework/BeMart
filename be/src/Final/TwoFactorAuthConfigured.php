@@ -30,7 +30,6 @@ use SensitiveParameter;
 final readonly class TwoFactorAuthConfigured
 {
     public string $loginId;
-    public string $authKey;
 
     public function __construct(
         #[Input] string $loginId,
@@ -51,6 +50,5 @@ final readonly class TwoFactorAuthConfigured
         $twoFactorAuth->enable($loginId, $authKey);
 
         $this->loginId = $loginId;
-        $this->authKey = $authKey;
     }
 }
