@@ -58,23 +58,25 @@ final class ExcludedResponseBodyStoreTest extends TestCase
 
     protected function tearDown(): void
     {
-        if ($this->bodyDir !== null) {
-            FileBodyStore::clearDirectory($this->bodyDir);
-            @rmdir($this->bodyDir);
+        try {
+            if ($this->bodyDir !== null) {
+                FileBodyStore::clearDirectory($this->bodyDir);
+                self::assertTrue(rmdir($this->bodyDir), 'temp body directory must be removable after clearing');
+            }
+        } finally {
             $this->bodyDir = null;
+            unset(
+                $_SESSION[HtmlAdminLoginChallengeAdapter::SETUP_CHALLENGE_KEY],
+                $_SESSION[HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY],
+                $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY],
+            );
         }
-
-        unset(
-            $_SESSION[HtmlAdminLoginChallengeAdapter::SETUP_CHALLENGE_KEY],
-            $_SESSION[HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY],
-            $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY],
-        );
     }
 
     /** @return array{0: ResourceInterface, 1: SemanticLoggerInterface, 2: Injector, 3: string} */
     private function buildGraph(): array
     {
-        $bodyDir = sys_get_temp_dir() . '/' . uniqid('bear-es-redact-body-', true);
+        $bodyDir = sys_get_temp_dir() . '/' . uniqid('bear-es-excluded-response-body-', true);
         FileBodyStore::clearDirectory($bodyDir);
         $this->bodyDir = $bodyDir;
         $logger = new SemanticLogger();
