@@ -2285,27 +2285,35 @@ docs/html-screen-migration-matrix.md, docs/skills/G-24-ray-media-query-boundary.
     (`password`/`token`/`secret`/`csrf` を含む key を redact) に加えて、BeMart 固有の
     `resetKey`/`authKey` (どちらも `Key` サフィックスでライブラリの標準ルールにマッチしない)
     を追加で redact する。
-  - `#[SensitiveParameter]` を credential を扱う `Be\Input`/`Be\Final` のコンストラクタ引数
-    (password 系・secretKey・resetKey・authKey・deviceToken) と、対応する Resource 層の
-    `onPost`/`onPut` 引数の両方に付与。前者は Input/Final 層の例外スタックトレース、後者は
-    `#[CsrfProtected]` インターセプタ等 Resource メソッド呼び出し全体を包む例外のスタック
-    トレースを、それぞれ守る。
+  - `#[SensitiveParameter]` を Resource 層の credential を扱う `onPost`/`onPut` 引数
+    全10箇所 (下記フロー一覧) に付与し、`#[CsrfProtected]` インターセプタ等
+    Resource メソッド呼び出し全体を包む例外のスタックトレースを守る。
+    `Be\Input`/`Be\Final` 側は既存分 (password 系・secretKey・resetKey・authKey) のみで、
+    `deviceToken` および `RegisterCustomerInput`/`AdminCreateCustomerInput`/
+    `CreateMemberInput` の `password` は **未対応のまま** — Input/Final 層の
+    例外スタックトレースにはまだこれらが平文で乗りうる (別途要対応)。
 
 ### 未決の設計帰結: `replayable:false` で消える成功イベント
 
 `ParamsFilterInterface` が redact した request が `replayable:false` としてマークされると、
 ログ自体には監査用に残るが、`SemanticLogExtractor` は抽出イベントストリームから
-**丸ごと除外する**。これは意図した動作だが影響範囲が広い: credential を伴う **成功した**
-書き込みが軒並み対象になる。
+**丸ごと除外する**。`tests/Module/EventSourcingExtractionTest.php::testCredentialBearingSuccessStaysInTheLogButIsExcludedFromEvents`
+が実証する通り、これは失敗リクエストに限らない: **成功した** admin ログイン (200) でも
+`password` が redact されるため `replayable:false` になり、イベントストリームには一切
+現れない。一般則: credential-shaped パラメータを持つ state-changing request は、成功可否に
+関わらず抽出イベントストリームから消える。今回 `#[SensitiveParameter]` を付与した
+Resource 層 10 箇所が対象例 (網羅ではなく代表例):
 
-- 会員登録 (`Entry\Activate::onPost` — `secretKey`)
+- ログイン (`Login::onPost`, `Admin\Login::onPost` — `password`)
+- 会員登録 (`Entry::onPost` — `password`/`password_confirm`)
+- 会員本登録の有効化 (`Entry\Activate::onPost` — `secretKey`)
 - 管理者作成 (`Admin\CreateCustomer::onPost`, `Admin\Member::onPost` — `password`)
 - パスワード変更 (`Admin\ChangePassword::onPost` — `currentPassword`/`changePasswordFirst`/`changePasswordSecond`)
 - パスワードリセット (`Reset::onPost` — `resetKey`/`password`)
-- 2FA 設定 (`Admin\TwoFactorAuthSet::onPut` — `deviceToken`/`authKey`)
+- 2FA 検証・設定 (`Admin\TwoFactorAuth::onPost`, `Admin\TwoFactorAuthSet::onPut` — `deviceToken`/`authKey`)
 
-抽出イベントストリームを監査証跡や event-sourcing の再生に使う場合、上記5フローの
-「成功した」という事実そのものがストリームに現れない。ログイン失敗の例だけでは
-この範囲の広さは伝わらないため、ここに明記する。対策 (例: `replayable:false` でも
-`EventOccurred` 相当の空詳細イベントだけは残す、等) は未着手・別途判断が必要。
+抽出イベントストリームを監査証跡や event-sourcing の再生に使う場合、ログインを含む
+上記フローの「成功した」という事実そのものがストリームに現れない。対策 (例:
+`replayable:false` でも `EventOccurred` 相当の空詳細イベントだけは残す、等) は
+未着手・別途判断が必要。
 
