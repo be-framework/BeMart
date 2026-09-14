@@ -39,6 +39,11 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
  * (an idempotencyKey is domain input, not a secret) so `resetKey`/`authKey` need this app's own
  * #[Filtered] ParamsFilterInterface. See that package's README ("Redacting sensitive params")
  * for the transport/credential contract this composes with.
+ *
+ * That filter only reaches request params. `SemanticLogInvoker` hands the full, unfiltered
+ * response to `BodyStoreInterface`, so `{@see ExcludedResponseBodyStore}` never persists a
+ * `page://` response body at all — that HTML-rendering layer is where a form embeds a credential
+ * for prefill (see its own docblock); the nested `app://` data layer a page wraps still is.
  */
 final class ObserveModule extends AbstractAppModule
 {
@@ -64,7 +69,8 @@ final class ObserveModule extends AbstractAppModule
         // reads visible in the tree.
         $this->bind(RecordedMethods::class)->annotatedWith(Recorded::class)
             ->toInstance(new RecordedMethods(RecordedMethods::WITH_READS));
-        $this->bind(BodyStoreInterface::class)->toInstance(new FileBodyStore($bodyDir));
+        $this->bind(BodyStoreInterface::class)
+            ->toInstance(new ExcludedResponseBodyStore(new FileBodyStore($bodyDir)));
         $this->install(new EventSourcingModule());
 
         // The cache log module owns the writer and the shutdown flush, so the application
