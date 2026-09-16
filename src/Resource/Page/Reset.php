@@ -63,7 +63,7 @@ class Reset extends ResourceObject
     #[JsonSchema(schema: 'get-reset.json', params: 'get-reset.param.json')]
     #[Link(rel: 'doResetPassword', href: 'page://self/reset', method: 'post')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
-    public function onGet(string|null $resetKey = null): static
+    public function onGet(#[SensitiveParameter] string|null $resetKey = null): static
     {
         $this->code = Code::OK;
         $this->body = [

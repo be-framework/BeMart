@@ -43,11 +43,15 @@ re-throw する。`$this->becoming(...)` 呼び出し中に Being/Final から�
 セットして return するだけなので、この経路の対象ではない**(`CsrfProtectedInterceptor::invoke()`
 で確認済み)。
 
-- **Resource 層**: credential を扱う `onPost`/`onPut` 10 箇所すべてに付与済み
-  (`Login`, `Admin\Login`, `Reset`, `Entry`(会員登録), `Entry\Activate`(有効化),
-  `Admin\ChangePassword`, `Admin\CreateCustomer`, `Admin\Member`, `Admin\TwoFactorAuth`,
-  `Admin\TwoFactorAuthSet`)。網羅性は
-  `tests/Resource/CredentialParameterSensitiveParameterTest.php` が境界契約として固定。
+- **Resource 層**: 名前が `/password|secret|token|resetKey|authKey/i` にマッチする
+  `on*` メソッド引数すべてに付与済み(`Login`, `Admin\Login`, `Reset`(`onGet`/`onPost`),
+  `Entry`(会員登録), `Entry\Activate`(有効化), `Admin\ChangePassword`,
+  `Admin\CreateCustomer`, `Admin\Member`, `Admin\TwoFactorAuth`, `Admin\TwoFactorAuthSet`)。
+  網羅性は `tests/Resource/CredentialParameterSensitiveParameterTest.php` が
+  **discovery ベース**で固定: `BEAR\AppMeta` が見つける全 Resource クラスを reflection し、
+  パターンに一致する引数に属性が無ければ fail する。許可リストではないので、新しい
+  credential 引数は annotate するまでこのテストが落ちる(手動監査で `Entry::onPost` と
+  `Reset::onGet` を見落とした経験からの設計)。
 - **`Be\Input`/`Be\Final` 層**: password 系・`secretKey`・`resetKey`・`authKey` は付与済み。
   **未対応(既知のギャップ)**: `deviceToken`
   (`SetTwoFactorAuthInput`/`TwoFactorAuthConfigured`/`TwoFactorAuthVerified`/
@@ -69,7 +73,7 @@ re-throw する。`$this->becoming(...)` 呼び出し中に Being/Final から�
 
 **一般則**: credential-shaped パラメータを持つ state-changing request は、成功可否に
 関わらず抽出イベントストリームから消える。`#[SensitiveParameter]` を付与した
-Resource 層 10 箇所が対象例(以下は代表例であり網羅ではない):
+Resource 層メソッドが対象例(以下は代表例であり網羅ではない):
 
 - ログイン(`Login::onPost`, `Admin\Login::onPost` — `password`)
 - 会員登録(`Entry::onPost` — `password`/`password_confirm`)

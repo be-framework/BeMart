@@ -2277,7 +2277,7 @@ docs/html-screen-migration-matrix.md, docs/skills/G-24-ray-media-query-boundary.
 `bear/event-sourcing`(`ObserveModule`)が記録する観測ログ・抽出イベントストリームから
 credential を守る作業。request params は `AppParamsFilter`、`page://` レスポンス body は
 `ExcludedResponseBodyStore`、PHP 例外スタックトレースは `#[SensitiveParameter]`
-(Resource 層 10 箇所 + `Be\Input`/`Be\Final` 層の一部)で守る。
+(credential 名パターンに一致する Resource `on*` 引数すべて + `Be\Input`/`Be\Final` 層の一部)で守る。
 
 **現在の redaction 範囲・既知のギャップ・`replayable:false` の運用上の帰結**(成功リクエスト
 でもイベントストリームから丸ごと消える設計)は
@@ -2289,9 +2289,9 @@ credential を守る作業。request params は `AppParamsFilter`、`page://` �
 - `src/Module/AppParamsFilter.php`(新規)、`src/Module/ExcludedResponseBodyStore.php`(新規)、
   `#[SensitiveParameter]` の Resource/Input/Final 層への付与、`TwoFactorAuthConfigured::$authKey`
   public property の削除、`tests/Resource/CredentialParameterSensitiveParameterTest.php`(新規、
-  境界契約テスト)。
+  discovery ベースの境界契約テスト — 手動監査は `Entry::onPost` と `Reset::onGet` を見落とした)。
 - 検証: `EventSourcingExtractionTest`/`AppParamsFilterTest`/`ExcludedResponseBodyStoreTest`/
-  `CredentialParameterSensitiveParameterTest` green、フルスイート 2787/2787 green、
+  `CredentialParameterSensitiveParameterTest` green、フルスイート 2778/2778 green、
   psalm 0 error。プロジェクト全体の phpcs は `getenv()` 禁止の pre-existing 違反 (4ファイル5件、
   `bin/page.php`・`public/page.php`・`src/Compatibility/Eccube/EccubeCustomizeAssetWriter.php`・
   `src/Compatibility/Eccube/EccubeTemplateCompatibility.php`、このブランチの変更とは無関係)
