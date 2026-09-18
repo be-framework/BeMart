@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Input;
 
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Being\CustomerRegistering;
+use SensitiveParameter;
 
 /**
  * Input for doRegisterCustomer — register a new customer (front-end).
@@ -58,7 +59,7 @@ final readonly class RegisterCustomerInput
      */
     public function __construct(
         public string $email,
-        public string $password,
+        #[SensitiveParameter] public string $password,
         public string $name01,
         public string $name02,
         public string|null $kana01 = null,

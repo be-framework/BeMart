@@ -34,7 +34,7 @@ final readonly class TwoFactorAuthConfigured
     public function __construct(
         #[Input] string $loginId,
         #[Input] #[SensitiveParameter] string $authKey,
-        #[Input] string $deviceToken,
+        #[Input] #[SensitiveParameter] string $deviceToken,
         #[Inject] TwoFactorAuthInterface $twoFactorAuth,
     ) {
         // Verify the first code against the candidate secret BEFORE

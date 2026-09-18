@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Input;
 
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Being\MemberCreating;
+use SensitiveParameter;
 
 /**
  * Input for doCreateMember — admin creates a new admin (Wave 8).
@@ -44,7 +45,7 @@ final readonly class CreateMemberInput
      */
     public function __construct(
         public string $loginId,
-        public string $password,
+        #[SensitiveParameter] public string $password,
         public string $name,
         public int $authority,
     ) {

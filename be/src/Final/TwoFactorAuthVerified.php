@@ -12,6 +12,7 @@ use MyVendor\BeMart\Be\Reason\Service\ClientIpInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
+use SensitiveParameter;
 
 /**
  * Two-factor auth verified — Final, proof a submitted TOTP code matched
@@ -43,7 +44,7 @@ final readonly class TwoFactorAuthVerified
 
     public function __construct(
         #[Input] string $loginId,
-        #[Input] string $deviceToken,
+        #[Input] #[SensitiveParameter] string $deviceToken,
         #[Inject] TwoFactorAuthInterface $twoFactorAuth,
         #[Inject] LoginHistoryStorageInterface $history,
         #[Inject] LoginAttemptGateInterface $gate,

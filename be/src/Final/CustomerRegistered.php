@@ -8,6 +8,7 @@ use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
+use SensitiveParameter;
 
 /**
  * Customer registered — Final, proof the new customer was persisted.
@@ -36,7 +37,7 @@ final readonly class CustomerRegistered
     public function __construct(
         #[Input] string $customerId,
         #[Input] string $email,
-        #[Input] string $passwordHash,
+        #[Input] #[SensitiveParameter] string $passwordHash,
         #[Input] string $name01,
         #[Input] string $name02,
         #[Input] string|null $kana01,

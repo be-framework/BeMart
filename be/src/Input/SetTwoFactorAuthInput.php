@@ -31,7 +31,7 @@ final readonly class SetTwoFactorAuthInput
     public function __construct(
         public string $loginId,
         #[SensitiveParameter] public string $authKey,
-        public string $deviceToken,
+        #[SensitiveParameter] public string $deviceToken,
     ) {
     }
 }

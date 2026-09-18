@@ -8,6 +8,7 @@ use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
 use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
+use SensitiveParameter;
 
 /**
  * Member created — Final, proof the new admin was persisted.
@@ -38,7 +39,7 @@ final readonly class MemberCreated
     public function __construct(
         #[Input] string $adminId,
         #[Input] string $loginId,
-        #[Input] string $passwordHash,
+        #[Input] #[SensitiveParameter] string $passwordHash,
         #[Input] string $name,
         #[Input] int $authority,
         #[Input] int $work,
