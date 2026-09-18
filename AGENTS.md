@@ -8,7 +8,7 @@ The implementation is a Composer project; ALPS artifacts are validated separatel
 
 - `vendor/bin/phpunit` runs the test suites (Resource / SQL / HTML render / HTTP hypermedia). SQL suites need a local MySQL 8.0 (or MariaDB) prepared from `sql/`.
 - `vendor/bin/psalm` runs static analysis + taint tracking.
-- `composer fake -- get '/products/list'` / `composer page -- get '/'` run serverless requests.
+- `composer fake -- get '/products'` / `composer page -- get '/'` run serverless requests.
 - `asd --validate alps.json` validates the ALPS profile before review or commit.
 - `asd -f html -o alps.json.html alps.json` / `asd -f svg -o alps.svg alps.json` regenerate the HTML/SVG; keep the `docs/` copies in sync.
 

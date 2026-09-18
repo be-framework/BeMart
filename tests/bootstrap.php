@@ -29,6 +29,16 @@ use Ray\Compiler\Compiler;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
+// #[RunInSeparateProcess] children re-run this bootstrap. Without this guard a
+// child would clear the script dirs the parent is still reading (the compile-
+// warmup race the shared-context compile exists to fix). Only the top-level
+// parent may clear+recompile; children inherit the process env and skip.
+if (getenv('BEMART_TEST_CONTEXTS_COMPILED') === '1') {
+    return;
+}
+
+putenv('BEMART_TEST_CONTEXTS_COMPILED=1');
+
 /**
  * The contexts more than one process touches. `test` / `test-admin` are driven in-process only,
  * by a plain Ray.Di injector, so nothing shares their script dir.

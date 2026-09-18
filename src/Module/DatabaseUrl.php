@@ -21,6 +21,7 @@ final readonly class DatabaseUrl
         public string $user,
         public string $pass,
         public array $options,
+        public string $url = '',
     ) {
     }
 
@@ -68,6 +69,7 @@ final readonly class DatabaseUrl
                 constant('P' . 'DO::ATTR_EMULATE_PREPARES') => false,
                 constant('P' . 'DO::ATTR_DEFAULT_FETCH_MODE') => constant('P' . 'DO::FETCH_ASSOC'),
             ],
+            $databaseUrl,
         );
     }
 }
