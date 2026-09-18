@@ -26,6 +26,7 @@ use MyVendor\BeMart\Be\Exception\ResetKeyInvalidException;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
+use MyVendor\BeMart\Module\ObserveModule;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -93,7 +94,7 @@ final class EventSourcingExtractionTest extends TestCase
             {
                 $this->rename(InvokerInterface::class, self::ORIGINAL_INVOKER);
                 $this->bind(ParamsFilterInterface::class)->annotatedWith(Filtered::class)
-                    ->toInstance(new SensitiveParamsFilter(['resetKey', 'authKey']));
+                    ->toInstance(new SensitiveParamsFilter(ObserveModule::EXTRA_CREDENTIALS));
                 $this->bind(InvokerInterface::class)
                     ->toConstructor(SemanticLogInvoker::class, [
                         'invoker' => self::ORIGINAL_INVOKER,

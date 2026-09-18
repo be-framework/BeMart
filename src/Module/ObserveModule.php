@@ -49,6 +49,14 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
  */
 final class ObserveModule extends AbstractAppModule
 {
+    /**
+     * Credential substrings the library's default filter deliberately does not match.
+     *
+     * Single source for the policy: `EventSourcingExtractionTest` builds its filter from this
+     * constant, so shortening the list here makes that test's redaction assertions fail.
+     */
+    public const array EXTRA_CREDENTIALS = ['resetKey', 'authKey'];
+
     private const ORIGINAL_INVOKER = 'original_invoker';
 
     #[Override]
@@ -58,7 +66,7 @@ final class ObserveModule extends AbstractAppModule
         FileBodyStore::clearDirectory($bodyDir);
 
         $this->bind(ParamsFilterInterface::class)->annotatedWith(Filtered::class)
-            ->toInstance(new SensitiveParamsFilter(['resetKey', 'authKey']));
+            ->toInstance(new SensitiveParamsFilter(self::EXTRA_CREDENTIALS));
         $this->rename(InvokerInterface::class, self::ORIGINAL_INVOKER);
         $this->bind(InvokerInterface::class)
             ->toConstructor(SemanticLogInvoker::class, [
