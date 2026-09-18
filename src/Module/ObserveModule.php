@@ -12,6 +12,7 @@ use BEAR\EventSourcing\Resource\BodyStoreInterface;
 use BEAR\EventSourcing\Resource\FileBodyStore;
 use BEAR\EventSourcing\Resource\ParamsFilterInterface;
 use BEAR\EventSourcing\Resource\SemanticLogInvoker;
+use BEAR\EventSourcing\Resource\SensitiveParamsFilter;
 use BEAR\Package\AbstractAppModule;
 use BEAR\QueryRepository\DevQueryRepositoryLogModule;
 use BEAR\RepositoryModule\Annotation\EtagPool;
@@ -34,11 +35,12 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
  * registers the package pointcuts a second time and every interceptor runs twice — the log
  * shows it as a scope nested in itself.
  *
- * BeMart adds back one exact-name filter of its own ({@see AppParamsFilter}): the library's
- * default SensitiveParamsFilter, bound as the fallback, does not match a generic `key` suffix
- * (an idempotencyKey is domain input, not a secret) so `resetKey`/`authKey` need this app's own
- * #[Filtered] ParamsFilterInterface. See that package's README ("Redacting sensitive params")
- * for the transport/credential contract this composes with.
+ * BeMart adds two of its own credential names to the library's default filter (bound as the
+ * fallback): the library's SensitiveParamsFilter deliberately does not match a generic `key`
+ * suffix (an idempotencyKey is domain input, not a secret), so `resetKey` (the single-use
+ * password-reset token) and `authKey` (the TOTP shared secret carried during two-factor setup)
+ * are passed as extra credential substrings. Each field's key still reaches the log; only its
+ * value is replaced with `SensitiveParamsFilter::FILTERED`.
  *
  * That filter only reaches request params. `SemanticLogInvoker` hands the full, unfiltered
  * response to `BodyStoreInterface`, so `{@see ExcludedResponseBodyStore}` never persists a
@@ -56,7 +58,7 @@ final class ObserveModule extends AbstractAppModule
         FileBodyStore::clearDirectory($bodyDir);
 
         $this->bind(ParamsFilterInterface::class)->annotatedWith(Filtered::class)
-            ->to(AppParamsFilter::class);
+            ->toInstance(new SensitiveParamsFilter(['resetKey', 'authKey']));
         $this->rename(InvokerInterface::class, self::ORIGINAL_INVOKER);
         $this->bind(InvokerInterface::class)
             ->toConstructor(SemanticLogInvoker::class, [

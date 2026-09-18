@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3903204f5b253fa04663c59dee0793b6",
+    "content-hash": "8465efcfea1835a6f00175f0e96ba7a0",
     "packages": [
         {
             "name": "aura/cli",
@@ -7287,22 +7287,25 @@
         },
         {
             "name": "bear/event-sourcing",
-            "version": "dev-redact-params",
+            "version": "1.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.EventSourcing.git",
-                "reference": "ac169f372dd26ff6941f9154c29474277229d0be"
+                "reference": "8616c825999227de2f7b065445082b177c479f01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.EventSourcing/zipball/ac169f372dd26ff6941f9154c29474277229d0be",
-                "reference": "ac169f372dd26ff6941f9154c29474277229d0be",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.EventSourcing/zipball/8616c825999227de2f7b065445082b177c479f01",
+                "reference": "8616c825999227de2f7b065445082b177c479f01",
                 "shasum": ""
             },
             "require": {
                 "koriym/semantic-logger": "^0.9",
                 "php": "^8.3",
                 "ray/di": "^2.19"
+            },
+            "conflict": {
+                "bear/resource": "<1.31"
             },
             "require-dev": {
                 "bear/query-repository": "1.x-dev",
@@ -7318,6 +7321,7 @@
                 "bear/resource": "To observe BEAR.Resource execution with the InvokerInterface bridge (^1.32)",
                 "ray/media-query": "To back EventStoreInterface with SQL and to observe media queries as semantic log events (^1.1)"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -7373,7 +7377,7 @@
                 "issues": "https://github.com/bearsunday/BEAR.EventSourcing/issues",
                 "source": "https://github.com/bearsunday/BEAR.EventSourcing"
             },
-            "time": "2026-09-13T16:25:51+00:00"
+            "time": "2026-09-17T09:48:05+00:00"
         },
         {
             "name": "composer/pcre",

@@ -6,6 +6,7 @@ namespace __NAMESPACE__\Module;
 
 use BEAR\RepositoryModule\Annotation\CacheLog;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
+use Override;
 use Ray\Di\ProviderInterface;
 
 /**
@@ -24,6 +25,7 @@ final class ObserveLoggerProvider implements ProviderInterface
     ) {
     }
 
+    #[Override]
     public function get(): SemanticLoggerInterface
     {
         return $this->logger;

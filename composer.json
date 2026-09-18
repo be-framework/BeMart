@@ -44,7 +44,7 @@
   },
   "require-dev": {
     "bear/api-doc": "1.x",
-    "bear/event-sourcing": "dev-redact-params",
+    "bear/event-sourcing": "1.x-dev",
     "cweagans/composer-patches": "^1.7",
     "doctrine/sql-formatter": "^1.5",
     "koriym/php-server": "^1.0",

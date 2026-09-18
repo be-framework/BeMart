@@ -15,6 +15,7 @@ use BEAR\EventSourcing\Resource\BodyStoreInterface;
 use BEAR\EventSourcing\Resource\NullBodyStore;
 use BEAR\EventSourcing\Resource\ParamsFilterInterface;
 use BEAR\EventSourcing\Resource\SemanticLogInvoker;
+use BEAR\EventSourcing\Resource\SensitiveParamsFilter;
 use BEAR\EventSourcing\SemanticLogExtractorInterface;
 use BEAR\Resource\InvokerInterface;
 use BEAR\Resource\ResourceInterface;
@@ -25,7 +26,6 @@ use MyVendor\BeMart\Be\Exception\ResetKeyInvalidException;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
-use MyVendor\BeMart\Module\AppParamsFilter;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -48,12 +48,15 @@ use function json_encode;
  * (state-changing only) — this is what actually proves the extractor enforces its own
  * write-only policy independent of what the invoker chose to record.
  *
- * No app-side redaction here beyond {@see AppParamsFilter}: bear/event-sourcing's
- * SemanticLogInvoker filters params by default (SensitiveParamsFilter), and this graph binds
- * the same #[Filtered] AppParamsFilter ObserveModule binds in production — proven below against
- * the real Checkout and Reset resources, not asserted in the abstract. Checkout's own params
- * (preOrderId + csrfToken) never include a credential-shaped key, so the request stays
- * `replayable: true` and is extracted normally.
+ * No app-side redaction here beyond binding two extra credential substrings into the library's
+ * own filter: bear/event-sourcing's SemanticLogInvoker filters params by default
+ * (SensitiveParamsFilter), and this graph binds `new SensitiveParamsFilter(['resetKey',
+ * 'authKey'])` the same way ObserveModule binds it in production — proven below against the
+ * real Checkout, Reset and Admin\TwoFactorAuthSet resources, not asserted in the abstract. A
+ * filtered key stays in the params with `SensitiveParamsFilter::FILTERED` as its value; a
+ * credential-bearing SUCCESS is still extracted, but with `Event::$replayable === false`.
+ * Checkout's own params (preOrderId + csrfToken) never include a credential-shaped key, so the
+ * request stays `replayable: true` and is extracted normally.
  */
 final class EventSourcingExtractionTest extends TestCase
 {
@@ -90,7 +93,7 @@ final class EventSourcingExtractionTest extends TestCase
             {
                 $this->rename(InvokerInterface::class, self::ORIGINAL_INVOKER);
                 $this->bind(ParamsFilterInterface::class)->annotatedWith(Filtered::class)
-                    ->to(AppParamsFilter::class);
+                    ->toInstance(new SensitiveParamsFilter(['resetKey', 'authKey']));
                 $this->bind(InvokerInterface::class)
                     ->toConstructor(SemanticLogInvoker::class, [
                         'invoker' => self::ORIGINAL_INVOKER,
@@ -151,11 +154,12 @@ final class EventSourcingExtractionTest extends TestCase
         // this is documented library behavior, not a wiring gap; the response body itself is
         // already proven above via $ro->body.
         $this->assertNull($event->result);
-        $this->assertArrayNotHasKey(
-            'csrfToken',
-            $event->params,
-            'SensitiveParamsFilter must scrub csrfToken before it reaches an extracted event',
+        $this->assertSame(
+            SensitiveParamsFilter::FILTERED,
+            $event->params['csrfToken'],
+            'csrfToken key must stay in the extracted params; only its value is withheld',
         );
+        $this->assertTrue($event->replayable, 'a transport token (csrf) must not affect replayability');
 
         // Re-extracting the same log must reproduce the same id (deterministic identity).
         $again = $extractor->extract($log);
@@ -203,12 +207,14 @@ final class EventSourcingExtractionTest extends TestCase
         );
     }
 
-    public function testCredentialBearingSuccessStaysInTheLogButIsExcludedFromEvents(): void
+    public function testCredentialBearingSuccessIsExtractedAsNonReplayable(): void
     {
         // Admin login's params (loginId + password + csrfToken) carry a genuine domain
-        // credential, not just transport metadata: SensitiveParamsFilter marks the request
-        // non-replayable, and the extractor must exclude it even though it succeeded — the
-        // library's own contract this test pins against BeMart's real Admin\Login resource.
+        // credential, not just transport metadata: SensitiveParamsFilter redacts it and marks
+        // the request non-replayable, but the library's contract is that the event is still
+        // extracted — a redacted credential withholds replay fidelity, not the fact that a
+        // successful write happened. This test pins that contract against BeMart's real
+        // Admin\Login resource, not an abstract params array.
         [$resource, $extractor, $logger] = $this->buildGraph(null);
 
         $ro = $resource->post('page://self/admin/login', [
@@ -220,25 +226,27 @@ final class EventSourcingExtractionTest extends TestCase
 
         $log = $logger->flush();
         $tree = json_decode(json_encode($log->toTreeArray()), true);
-        $this->assertArrayNotHasKey('password', $tree['open'][0]['context']['params']);
+        $this->assertSame(SensitiveParamsFilter::FILTERED, $tree['open'][0]['context']['params']['password']);
+        $this->assertSame('test-admin', $tree['open'][0]['context']['params']['loginId']);
         $this->assertFalse($tree['open'][0]['context']['replayable']);
 
         $events = $extractor->extract($log);
-        $this->assertCount(
-            0,
-            $events,
-            'a successful request with a redacted credential must not become an event, even '
-            . 'though it is still visible in the log for audit purposes',
-        );
+        $this->assertCount(1, $events, 'a successful request must be extracted even with a redacted credential');
+
+        $event = [...$events][0];
+        $this->assertFalse($event->replayable, 'a withheld credential must mark the event non-replayable');
+        $this->assertSame(SensitiveParamsFilter::FILTERED, $event->params['password']);
+        $this->assertSame('test-admin', $event->params['loginId']);
     }
 
-    public function testResetKeyIsRedactedByTheAppSpecificFilterTheLibraryDefaultMisses(): void
+    public function testResetKeyIsRedactedByObserveModulesExtraCredentialSubstring(): void
     {
         // bear/event-sourcing's SensitiveParamsFilter deliberately does not match a generic
         // `key` suffix (an idempotencyKey is domain input, not a secret), so resetKey — a
-        // real single-use password-reset credential — needs BeMart's own AppParamsFilter,
-        // bound above the same way ObserveModule binds it in production. This pins against
-        // the real Reset resource, not an abstract params array.
+        // real single-use password-reset credential — needs the extra credential substring
+        // this graph passes into SensitiveParamsFilter's constructor, the same way
+        // ObserveModule binds it in production. This pins against the real Reset resource, not
+        // an abstract params array.
         [$resource, $extractor, $logger] = $this->buildGraph(null);
 
         try {
@@ -255,24 +263,32 @@ final class EventSourcingExtractionTest extends TestCase
         $log = $logger->flush();
         $tree = json_decode(json_encode($log->toTreeArray()), true);
         $params = $tree['open'][0]['context']['params'];
-        $this->assertArrayNotHasKey(
-            'resetKey',
-            $params,
-            'AppParamsFilter must redact resetKey; the library default alone would not',
+        $this->assertSame(
+            SensitiveParamsFilter::FILTERED,
+            $params['resetKey'],
+            'the extra credential substring must redact resetKey; the library default alone would not',
         );
         $this->assertFalse($tree['open'][0]['context']['replayable']);
 
         $events = $extractor->extract($log);
-        $this->assertCount(0, $events, 'a redacted-credential request must not become an event');
+        $this->assertCount(
+            0,
+            $events,
+            'this request failed (ResetKeyInvalidException, code >= 400), which is why it is '
+            . 'excluded — not because resetKey was redacted; a redacted credential alone still '
+            . 'gets extracted, per testCredentialBearingSuccessIsExtractedAsNonReplayable',
+        );
     }
 
-    public function testAuthKeyIsRedactedByTheAppSpecificFilterToo(): void
+    public function testAuthKeyIsRedactedByObserveModulesExtraCredentialSubstring(): void
     {
-        // Same gap, the other AppParamsFilter::CREDENTIAL_KEYS entry: authKey is the TOTP
-        // shared secret carried during two-factor device setup. Pins against the real
+        // Same gap, the other extra credential substring ObserveModule binds: authKey is the
+        // TOTP shared secret carried during two-factor device setup. Pins against the real
         // Admin\TwoFactorAuthSet resource with no pending setup challenge in this graph, so
         // onPut returns FORBIDDEN directly (no exception) — simpler than resetKey's failure
-        // path, but the redaction must hold regardless of how the request resolves.
+        // path, but the redaction must hold regardless of how the request resolves. deviceToken
+        // is asserted too: it needs no app-specific help, since `token` is already a library
+        // default credential substring.
         [$resource, $extractor, $logger] = $this->buildGraph(null);
 
         $ro = $resource->put('page://self/admin/two-factor-auth-set', [
@@ -289,14 +305,25 @@ final class EventSourcingExtractionTest extends TestCase
         $log = $logger->flush();
         $tree = json_decode(json_encode($log->toTreeArray()), true);
         $params = $tree['open'][0]['context']['params'];
-        $this->assertArrayNotHasKey(
-            'authKey',
-            $params,
-            'AppParamsFilter must redact authKey; the library default alone would not',
+        $this->assertSame(
+            SensitiveParamsFilter::FILTERED,
+            $params['authKey'],
+            'the extra credential substring must redact authKey; the library default alone would not',
+        );
+        $this->assertSame(
+            SensitiveParamsFilter::FILTERED,
+            $params['deviceToken'],
+            'deviceToken must be redacted by the library default token rule, with no app help needed',
         );
         $this->assertFalse($tree['open'][0]['context']['replayable']);
 
         $events = $extractor->extract($log);
-        $this->assertCount(0, $events, 'a redacted-credential request must not become an event');
+        $this->assertCount(
+            0,
+            $events,
+            'this request failed (403, code >= 400), which is why it is excluded — not because '
+            . 'authKey was redacted; a redacted credential alone still gets extracted, per '
+            . 'testCredentialBearingSuccessIsExtractedAsNonReplayable',
+        );
     }
 }

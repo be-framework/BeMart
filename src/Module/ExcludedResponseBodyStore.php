@@ -20,8 +20,9 @@ use function str_starts_with;
  * {@see \MyVendor\BeMart\Resource\Page\Admin\TwoFactorAuthSet::onGet()} are the two resources this
  * was written against, but a `page://` body's exact shape (which fields a form fills, which
  * template renders what) is not something this decorator can enumerate and stay correct as pages
- * change. `AppParamsFilter` only redacts request params — `SemanticLogInvoker::responseContext()`
- * hands the full, unfiltered `$ro` to `BodyStoreInterface` — so a key-stripping filter on the
+ * change. The bound `#[Filtered] ParamsFilterInterface` only redacts request params —
+ * `SemanticLogInvoker::responseContext()` hands the full, unfiltered `$ro` to `BodyStoreInterface`
+ * — so a key-stripping filter on the
  * response body would still miss a value a form embeds in its own filled state independent of the
  * body array (TwoFactorAuthSet's `authKey`), and would need updating every time a new `page://`
  * resource echoes something sensitive. Skipping the whole `page://` scheme is a fixed boundary

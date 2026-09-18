@@ -84,7 +84,10 @@ BEAR.QueryRepository の `docs/` と `demo/` は `.gitattributes` で `export-ig
 ```bash
 php <skill>/harness/setup.php .
 php <skill>/harness/setup.php . bin/admin.php   # 別の入口の文脈を観測する
+php <skill>/harness/setup.php . public/index.php --context=html-app   # 1 ファイルに複数文脈がある場合
 ```
+
+`--context`の値は入口ファイル内に引用符付きリテラルとして存在しない場合でも書き込みは続行される(`note`で警告するのみ) — 環境変数や定数から文脈を組み立てる入口には元々一致するリテラルが無いため。
 
 これが書くもの:
 

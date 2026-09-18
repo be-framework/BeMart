@@ -15,6 +15,7 @@ use BEAR\EventSourcing\Resource\BodyStoreInterface;
 use BEAR\EventSourcing\Resource\FileBodyStore;
 use BEAR\EventSourcing\Resource\ParamsFilterInterface;
 use BEAR\EventSourcing\Resource\SemanticLogInvoker;
+use BEAR\EventSourcing\Resource\SensitiveParamsFilter;
 use BEAR\Resource\InvokerInterface;
 use BEAR\Resource\ResourceInterface;
 use FilesystemIterator;
@@ -22,7 +23,6 @@ use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
-use MyVendor\BeMart\Module\AppParamsFilter;
 use MyVendor\BeMart\Module\ExcludedResponseBodyStore;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -98,7 +98,7 @@ final class ExcludedResponseBodyStoreTest extends TestCase
             {
                 $this->rename(InvokerInterface::class, self::ORIGINAL_INVOKER);
                 $this->bind(ParamsFilterInterface::class)->annotatedWith(Filtered::class)
-                    ->to(AppParamsFilter::class);
+                    ->toInstance(new SensitiveParamsFilter(['resetKey', 'authKey']));
                 $this->bind(InvokerInterface::class)
                     ->toConstructor(SemanticLogInvoker::class, [
                         'invoker' => self::ORIGINAL_INVOKER,
