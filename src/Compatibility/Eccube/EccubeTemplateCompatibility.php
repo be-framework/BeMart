@@ -9,12 +9,12 @@ use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\TemplateArchive;
 use MyVendor\BeMart\Be\Reason\Service\TemplateCompatibilityInterface;
 use Override;
+use Ray\Di\Di\Named;
 
 use function array_key_exists;
 use function dirname;
 use function file_get_contents;
 use function file_put_contents;
-use function getenv;
 use function is_dir;
 use function is_file;
 use function is_string;
@@ -46,9 +46,11 @@ final class EccubeTemplateCompatibility implements TemplateCompatibilityInterfac
 
     public function __construct(
         private readonly TemplateStorageInterface $templates,
+        #[Named('databaseUrl')]
+        string|null $databaseUrl = null,
         string|null $selectedTemplateFile = null,
     ) {
-        $this->selectedTemplateFile = $selectedTemplateFile ?? $this->defaultSelectedTemplateFile();
+        $this->selectedTemplateFile = $selectedTemplateFile ?? $this->defaultSelectedTemplateFile($databaseUrl);
     }
 
     #[Override]
@@ -147,10 +149,9 @@ final class EccubeTemplateCompatibility implements TemplateCompatibilityInterfac
         return $templateId === '' ? null : $templateId;
     }
 
-    private function defaultSelectedTemplateFile(): string
+    private function defaultSelectedTemplateFile(string|null $databaseUrl): string
     {
-        $databaseUrl = getenv('DATABASE_URL');
-        $suffix = is_string($databaseUrl) && $databaseUrl !== '' ? md5($databaseUrl) : 'default';
+        $suffix = $databaseUrl === null || $databaseUrl === '' ? 'default' : md5($databaseUrl);
 
         return dirname(__DIR__, 3) . '/var/tmp/template-active-' . $suffix . '.txt';
     }

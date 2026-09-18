@@ -12,6 +12,10 @@
     <file>bin</file>
 
     <rule ref="Generic.PHP.ForbiddenFunctions">
+        <!-- Entry points select their context from the environment by design;
+             application code must not, so exclude only the process boundaries. -->
+        <exclude-pattern>*/public/*</exclude-pattern>
+        <exclude-pattern>*/bin/*</exclude-pattern>
         <exclude-pattern>*/src/Module/DatabaseUrl.php</exclude-pattern>
         <properties>
             <property name="forbiddenFunctions" type="array">
