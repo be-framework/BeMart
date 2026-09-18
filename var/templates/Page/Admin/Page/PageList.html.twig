@@ -116,7 +116,7 @@
         <p class="idea-admin-panel__hint">ページ名・URLスラッグ・テンプレートファイル名を入力して登録します</p>
     </div>
     <form method="post" action="/admin/page/page-list">
-        <input type="hidden" name="csrfToken" value="{{ csrf_token|default('') }}">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="idea-admin-panel__body">
             <div class="idea-admin-field">
                 <div class="idea-admin-field__label">
@@ -287,7 +287,7 @@
                   style="display:inline;">
                 <input type="hidden" name="_method" value="delete">
                 <input type="hidden" name="pageId" value="{{ page.pageId }}">
-                <input type="hidden" name="csrfToken" value="{{ csrf_token|default('') }}">
+                <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                 <button type="submit"
                         class="idea-admin-action idea-admin-action--destructive"
                         rel="doDeletePage">

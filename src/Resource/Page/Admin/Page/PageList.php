@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Final\AdminPageListFetched;
 use MyVendor\BeMart\Be\Final\PageCreated;
 use MyVendor\BeMart\Be\Input\CreatePageInput;
 use MyVendor\BeMart\Be\Input\GetAdminPageListInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -34,6 +35,7 @@ class PageList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -54,6 +56,7 @@ class PageList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'pages' => $final->pages,
+            'csrfToken' => $this->csrf->token,
         ];
 
         return $this;

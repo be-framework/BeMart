@@ -1,0 +1,150 @@
+{
+  "GET page://self/admin/base-info": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/category/category": {
+    "fields": 2,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/category/csv": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/category/edit": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/change-password": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/class-category/class-category-export": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/class-name/class-name-export": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/customer": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/customer-delivery-edit": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/delivery/delivery": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/delivery/delivery-list": {
+    "fields": 2,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/order/export-shipping": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/order/import-shipping": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/order/mail-confirm": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/order/send-mail": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/order/shipping-address": {
+    "fields": 2,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/order/shipping-notify-mail": {
+    "fields": 1,
+    "reason": "nullByDesign"
+  },
+  "GET page://self/admin/payment/payment": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/product-csv": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/product/csv-class-category": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/product/csv-product": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/product/edit": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/tag/tag-list": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/admin/two-factor-auth-edit": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/contact/confirm": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/entry/confirm": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/forgot-password": {
+    "fields": 1,
+    "reason": "nullByDesign"
+  },
+  "GET page://self/mypage/address": {
+    "fields": 1,
+    "reason": "nullByDesign"
+  },
+  "GET page://self/mypage/change": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/mypage/history": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/mypage/withdraw": {
+    "fields": 1,
+    "reason": "nullByDesign"
+  },
+  "GET page://self/mypage/withdraw-confirm": {
+    "fields": 1,
+    "reason": "nullByDesign"
+  },
+  "GET page://self/reset": {
+    "fields": 1,
+    "reason": "nullByDesign"
+  },
+  "GET page://self/shopping/login": {
+    "fields": 1,
+    "reason": "notPublished"
+  },
+  "GET page://self/shopping/shipping": {
+    "fields": 1,
+    "reason": "nullByDesign"
+  },
+  "GET page://self/shopping/shipping-edit": {
+    "fields": 1,
+    "reason": "nullByDesign"
+  },
+  "GET page://self/shopping/shipping-multiple-edit": {
+    "fields": 1,
+    "reason": "nullByDesign"
+  }
+}
