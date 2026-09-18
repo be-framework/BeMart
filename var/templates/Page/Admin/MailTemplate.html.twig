@@ -485,14 +485,18 @@ document.addEventListener('DOMContentLoaded', function () {
   </div>
   <div class="idea-admin-dialog__foot">
     <button id="delete-cancel" class="idea-admin-action" type="button">キャンセル</button>
-    <a
-      class="idea-admin-action idea-admin-action--destructive"
-      href="/admin/mail-template?mailTemplateId={{ Mail.id }}&_method=delete"
-      rel="doDeleteMailTemplate"
-    >
-      <i class="fa fa-trash" aria-hidden="true"></i>
-      削除する
-    </a>
+    <form method="post"
+          action="/admin/mail-template"
+          rel="doDeleteMailTemplate"
+          style="display:inline;">
+      <input type="hidden" name="_method" value="delete">
+      <input type="hidden" name="mailTemplateId" value="{{ Mail.id }}">
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <button class="idea-admin-action idea-admin-action--destructive" type="submit">
+        <i class="fa fa-trash" aria-hidden="true"></i>
+        削除する
+      </button>
+    </form>
   </div>
 </dialog>
 {% endif %}

@@ -259,6 +259,33 @@ final class AdminProductEditHtmlRenderTest extends TestCase
             ->toString();
     }
 
+    /**
+     * L2 — the delete affordance is a POST form, since the router honours
+     * `_method` only on POST. It lives outside the edit form because HTML
+     * forbids nested forms; the toolbar button reaches it by id.
+     */
+    public function testDeleteAffordanceIsAPostFormOutsideTheEditForm(): void
+    {
+        $html = $this->fetchEditModeHtml('p-test-001');
+
+        $this->assertMatchesRegularExpression(
+            '#<form id="product-delete-form"\s+method="post"\s+action="/admin/product"\s+rel="doDeleteProduct">#',
+            $html,
+            'delete form missing or malformed',
+        );
+        $this->assertStringContainsString('form="product-delete-form"', $html);
+        $this->assertStringContainsString('<input type="hidden" name="_method" value="delete">', $html);
+        $this->assertStringContainsString('<input type="hidden" name="productCode" value="p-test-001">', $html);
+        // Nested forms are invalid HTML and browsers drop the inner one, so
+        // every form opened before the delete form must already be closed.
+        $before = substr($html, 0, (int) strpos($html, '<form id="product-delete-form"'));
+        $this->assertSame(
+            substr_count($before, '<form'),
+            substr_count($before, '</form>'),
+            'delete form is nested inside another form',
+        );
+    }
+
     // ── @group ec-cube-parity-archived ───────────────────────────────────
 
     /**

@@ -24,6 +24,11 @@
     "note": "affordance で get /admin/product-list に届くが rel=\"goProductList\" が無い",
     "reason": "semantic-token-missing"
   },
+  "GET page://self/admin/block/block doDeleteBlock": {
+    "classification": "resourceOnly",
+    "note": "削除フォームは blockDeletable な既存ブロックのときだけ描画される。監査は blockId 無しの新規モードを描画するため affordance が無い。admin/payment/payment doUpdatePayment と同じ形",
+    "reason": "target-missing"
+  },
   "GET page://self/admin/block/block goBlockList": {
     "classification": "fail",
     "note": "affordance で get /admin/block/block-list に届くが rel=\"goBlockList\" が無い",
@@ -257,6 +262,11 @@
   "GET page://self/admin/mail-template doCreateMailTemplate": {
     "classification": "resourceOnly",
     "note": "一覧からは GET で作成ページへ遷移する。直接の POST form は無い",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/mail-template doDeleteMailTemplate": {
+    "classification": "resourceOnly",
+    "note": "削除フォームは isDeletable なテンプレートを選択したときだけ描画される。監査は未選択状態を描画するため、同じパスに残る更新フォーム（POST）だけが拾われる",
     "reason": "method-mismatch"
   },
   "GET page://self/admin/mail-template doUpdateMailTemplate": {
@@ -518,6 +528,11 @@
     "classification": "fail",
     "note": "affordance で post /admin/product に届くが rel=\"doCreateProduct\" が無い",
     "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/product/edit doDeleteProduct": {
+    "classification": "resourceOnly",
+    "note": "削除フォームは isEdit（productCode あり）のときだけ描画される。監査は新規モードを描画するため、同じパスに残る作成フォーム（POST）だけが拾われる。既存の doUpdateProduct 行と同じ理由",
+    "reason": "method-mismatch"
   },
   "GET page://self/admin/product/edit doUpdateProduct": {
     "classification": "resourceOnly",

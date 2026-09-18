@@ -129,7 +129,13 @@ final class AdminBlockListHtmlRenderTest extends TestCase
 
     public function testCreateFormHasCsrfTokenField(): void
     {
-        $this->assertStringContainsString('name="csrfToken"', $this->html);
+        // A hardcoded value="" once satisfied a name-only assertion while
+        // EccubeSharedCsrfTokenAdapter::isValid() rejected every submission.
+        $this->assertMatchesRegularExpression(
+            '/<input type="hidden" name="csrfToken" value="[^"]+">/',
+            $this->html,
+            'csrfToken must render a non-empty value',
+        );
     }
 
     public function testCreateFormHasBlockNameField(): void

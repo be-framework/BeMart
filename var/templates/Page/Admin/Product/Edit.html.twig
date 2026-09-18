@@ -237,12 +237,12 @@
           href="/admin/product-copy?productCode={{ productCode }}"
           rel="doCopyProduct"
         >複製</a>
-        <a
+        <button
           class="idea-admin-action idea-admin-action--destructive"
-          href="/admin/product?productCode={{ productCode }}&amp;_method=delete"
-          rel="doDeleteProduct"
+          type="submit"
+          form="product-delete-form"
           data-confirm="この商品を削除してよろしいですか？"
-        >削除</a>
+        >削除</button>
       {% endif %}
       <button class="idea-admin-action idea-admin-action--primary" type="submit">
         {{ isEdit ? '保存' : '登録' }}
@@ -251,6 +251,19 @@
   </div>
 
 </form>
+
+{# Outside the edit form: HTML forbids nested forms, so the delete button above
+   reaches this one by id. The router honours _method only on POST. #}
+{% if isEdit %}
+<form id="product-delete-form"
+      method="post"
+      action="/admin/product"
+      rel="doDeleteProduct">
+  <input type="hidden" name="_method" value="delete">
+  <input type="hidden" name="productCode" value="{{ productCode }}">
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+</form>
+{% endif %}
 
 {% if message is defined and message %}
   <p class="idea-admin-notice" role="alert">{{ message }}</p>

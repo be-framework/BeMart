@@ -65,6 +65,7 @@ class MailTemplate extends ResourceObject
     #[JsonSchema(schema: 'get-admin-mail-template.json')]
     #[Link(rel: 'doCreateMailTemplate', href: 'page://self/admin/mail-template/create', method: 'post')]
     #[Link(rel: 'doUpdateMailTemplate', href: 'page://self/admin/mail-template', method: 'post')]
+    #[Link(rel: 'doDeleteMailTemplate', href: 'page://self/admin/mail-template', method: 'delete')]
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]

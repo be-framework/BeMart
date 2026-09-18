@@ -6,6 +6,8 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
+use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
@@ -148,6 +150,61 @@ final class AdminMailTemplateHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('rel="goPaymentList"', $html);
         $this->assertStringContainsString('/admin/payment/payment-list', $html);
+    }
+
+    /**
+     * L2 — the delete affordance is a POST form, since the router honours
+     * `_method` only on POST. The fake fixture seeds no deletable template,
+     * so the storage is stubbed to reach the state that renders it.
+     */
+    public function testDeleteAffordanceIsAPostFormWhenDeletable(): void
+    {
+        $injector = HtmlTestInjector::getOverrideInstance(new class (new FakeAdminSession(self::TEST_ADMIN_ID)) extends AbstractModule {
+            public function __construct(private readonly FakeAdminSession $session)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(AdminSession::class)->toInstance($this->session);
+                $this->bind(MailTemplateStorageInterface::class)->toInstance(new class implements MailTemplateStorageInterface {
+                    public function list(): array
+                    {
+                        return [new MailTemplateEntity(9, '削除可能テンプレート', 'Mail/deletable.twig', '件名', 1)];
+                    }
+
+                    public function item(int $mailTemplateId): MailTemplateEntity|null
+                    {
+                        return $this->list()[0];
+                    }
+
+                    public function put(MailTemplateEntity $entity): void
+                    {
+                    }
+
+                    public function update(MailTemplateEntity $entity): void
+                    {
+                    }
+
+                    public function delete(int $mailTemplateId): void
+                    {
+                    }
+                });
+            }
+        });
+
+        $html = $injector->getInstance(ResourceInterface::class)
+            ->get('page://self/admin/mail-template', ['mailTemplateId' => 9])
+            ->toString();
+
+        $this->assertMatchesRegularExpression(
+            '#<form method="post"\s+action="/admin/mail-template"\s+rel="doDeleteMailTemplate"#',
+            $html,
+            'delete form missing or malformed',
+        );
+        $this->assertStringContainsString('<input type="hidden" name="_method" value="delete">', $html);
+        $this->assertStringContainsString('<input type="hidden" name="mailTemplateId" value="9">', $html);
     }
 
     /**
