@@ -117,23 +117,28 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('method="post"', $html);
     }
 
-    public function testTaxRuleListDeleteLinkHasCorrectHrefAndRel(): void
+    public function testTaxRuleListDeleteFormHasCorrectActionAndRel(): void
     {
         $html = $this->resource->get('page://self/admin/tax-rule/tax-rule-list')->toString();
 
         // The Fake storage seeds at least one tax-rule row; when present the
-        // delete affordance must use the doDeleteTaxRule href pattern.
+        // delete affordance must be a POST form, since the router honours
+        // `_method` only on POST.
         if (! str_contains($html, 'rel="doDeleteTaxRule"')) {
-            $this->markTestSkipped('No tax-rule rows rendered; delete link not present.');
+            $this->markTestSkipped('No tax-rule rows rendered; delete form not present.');
         }
 
-        // doDeleteTaxRule: /admin/tax-rule/tax-rule?taxRuleId=…&_method=delete
         $this->assertMatchesRegularExpression(
-            '#href="/admin/tax-rule/tax-rule\?taxRuleId=[^"]+&amp;_method=delete"#',
+            '#<form method="post"\s+action="/admin/tax-rule/tax-rule"\s+rel="doDeleteTaxRule"#',
             $html,
-            'doDeleteTaxRule link href pattern mismatch',
+            'doDeleteTaxRule form pattern mismatch',
         );
-        $this->assertStringContainsString('rel="doDeleteTaxRule"', $html);
+        $this->assertStringContainsString('<input type="hidden" name="_method" value="delete">', $html);
+        $this->assertMatchesRegularExpression(
+            '#<input type="hidden" name="taxRuleId" value="[^"]+">#',
+            $html,
+            'delete form must carry the row taxRuleId',
+        );
     }
 
     public function testTaxRuleListCsrfHiddenInputPresent(): void

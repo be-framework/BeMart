@@ -194,34 +194,45 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
     }
 
     /**
-     * L2 — delete affordance: per-row button carries the correct action URL
-     * (doDeletePayment) with HTTP method override, plus post-action marker.
+     * L2 — delete affordance: each row carries its own POST form, because the
+     * router honours `_method` only on POST (a GET anchor re-renders the list).
      */
     public function testPaymentListExposesDeleteAffordance(): void
     {
         $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
 
         $this->assertMatchesRegularExpression(
-            '#data-delete-url="/admin/payment/payment\?paymentId=[^&"]*&amp;_method=delete"#',
+            '#<form method="post"\s+action="/admin/payment/payment"\s+rel="doDeletePayment"#',
             $html,
-            'delete action URL missing or malformed',
+            'delete form missing or malformed',
         );
-        $this->assertStringContainsString('data-post-action="delete"', $html);
-        $this->assertStringContainsString('data-method="delete"', $html);
+        $this->assertStringContainsString('<input type="hidden" name="_method" value="delete">', $html);
+        $this->assertMatchesRegularExpression(
+            '#<input type="hidden" name="paymentId" value="[^"]+">#',
+            $html,
+            'delete form must carry the row paymentId',
+        );
     }
 
     /**
-     * L2 — visibility toggle carries rel="doUpdatePayment" and PUT method override.
+     * L2 — the visibility toggle is doToggleVisible (PUT /admin/toggle-visible),
+     * which is the transition alps.json gives PaymentList; doUpdatePayment
+     * belongs to the Payment edit state.
      */
     public function testPaymentListVisibilityToggleLinkIsCorrect(): void
     {
         $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
 
-        $this->assertStringContainsString('rel="doUpdatePayment"', $html);
         $this->assertMatchesRegularExpression(
-            '#href="/admin/payment/payment\?paymentId=[^"]*&amp;_method=put&amp;visible=#',
+            '#<form method="post"\s+action="/admin/toggle-visible"\s+rel="doToggleVisible"#',
             $html,
-            'visibility toggle href missing or malformed',
+            'visibility toggle form missing or malformed',
+        );
+        $this->assertStringContainsString('<input type="hidden" name="masterType" value="payment">', $html);
+        $this->assertMatchesRegularExpression(
+            '#<input type="hidden" name="visible" value="[01]">#',
+            $html,
+            'toggle must submit the target visibility',
         );
     }
 

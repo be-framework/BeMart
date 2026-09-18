@@ -129,12 +129,19 @@
                                             onclick="this.closest('dialog').close()">
                                         キャンセル
                                     </button>
-                                    <a class="idea-admin-action idea-admin-action--destructive"
-                                       href="/admin/tax-rule/tax-rule?taxRuleId={{ TaxRule.taxRuleId }}&amp;_method=delete"
-                                       rel="doDeleteTaxRule">
-                                        <i class="fa fa-trash fa-fw" aria-hidden="true"></i>
-                                        削除
-                                    </a>
+                                    <form method="post"
+                                          action="/admin/tax-rule/tax-rule"
+                                          rel="doDeleteTaxRule"
+                                          style="display:inline;">
+                                        <input type="hidden" name="_method" value="delete">
+                                        <input type="hidden" name="taxRuleId" value="{{ TaxRule.taxRuleId }}">
+                                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                                        <button class="idea-admin-action idea-admin-action--destructive"
+                                                type="submit">
+                                            <i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+                                            削除
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
