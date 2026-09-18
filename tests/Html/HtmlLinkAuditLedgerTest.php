@@ -10,8 +10,10 @@ use MyVendor\BeMart\Tests\Smoke\ResourceSmokeTest;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\NullCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Support\Html\HtmlLinkAuditLoggerInterface;
 use MyVendor\BeMart\Tests\Support\RecordingHtmlLinkAuditLogger;
 use Madapaja\TwigModule\Exception\TemplateNotFound;
@@ -45,6 +47,7 @@ final class HtmlLinkAuditLedgerTest extends TestCase
     private const LEDGER = __DIR__ . '/html-link-audit-ledger.json';
     private const CLASSIFICATIONS = ['resourceOnly', 'fail', 'targetOut'];
     public const ADMIN_ID = 'ad000000000000000000000000000001';
+    public const CUSTOMER_ID = 'customer-001';
 
     public function testEveryAuditWarningIsClassified(): void
     {
@@ -132,13 +135,9 @@ final class HtmlLinkAuditLedgerTest extends TestCase
             protected function configure(): void
             {
                 $this->bind(HtmlLinkAuditLoggerInterface::class)->toInstance($this->logger);
-                if ($this->admin) {
-                    $this->bind(AdminSession::class)->toInstance(new FakeAdminSession(HtmlLinkAuditLedgerTest::ADMIN_ID));
-                }
-
-                if ($this->customerId !== null) {
-                    $this->bind(CustomerSession::class)->toInstance(new FakeSession($this->customerId));
-                }
+                $this->bind(CsrfToken::class)->toInstance(new NullCsrfToken());
+                $this->bind(AdminSession::class)->toInstance(new FakeAdminSession($this->admin ? HtmlLinkAuditLedgerTest::ADMIN_ID : null));
+                $this->bind(CustomerSession::class)->toInstance(new FakeSession($this->customerId ?? HtmlLinkAuditLedgerTest::CUSTOMER_ID));
             }
         };
 
