@@ -31,6 +31,7 @@ final class MediaQueryRuntimeModule extends AbstractModule
         }
 
         $database = DatabaseUrl::fromEnvironment();
+        $this->bind()->annotatedWith('databaseUrl')->toInstance($database->url);
         /** @psalm-suppress InvalidArgument AuraSqlModule accepts driver option arrays keyed by driver constants. */
         $this->install(new AuraSqlModule(
             $database->dsn,

@@ -166,6 +166,12 @@ final class AppModule extends AbstractAppModule
             $this->appMeta->appDir . '/var/log/bemart.json',
         );
 
+        // Runtime-marker files (customize assets, active template) are keyed
+        // by DATABASE_URL so HTTP/browser readback shares state across
+        // requests. Non-SQL contexts get an empty default; the SQL context
+        // module overrides it with the actual URL.
+        $this->bind()->annotatedWith('databaseUrl')->toInstance('');
+
         $this->install(
             new JsonSchemaModule(
                 $this->appMeta->appDir . '/var/json_schema',

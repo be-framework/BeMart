@@ -47,7 +47,7 @@ Docker 以外に必要なものはありません。停止は `docker compose do
 ```bash
 vendor/bin/phpunit   # テスト（非 SQL スイートは DB 不要）
 vendor/bin/psalm     # 静的解析 + taint tracking
-composer fake -- get '/products/list'   # DB 不要の Fake context で動作確認
+composer fake -- get '/products'   # DB 不要の Fake context で動作確認
 ```
 
 ALPS の検証と再生成:

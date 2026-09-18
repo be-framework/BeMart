@@ -6,11 +6,11 @@ namespace MyVendor\BeMart\Compatibility\Eccube;
 
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use Override;
+use Ray\Di\Di\Named;
 
 use function dirname;
 use function file_get_contents;
 use function file_put_contents;
-use function getenv;
 use function is_array;
 use function is_dir;
 use function is_file;
@@ -37,9 +37,12 @@ final class EccubeCustomizeAssetWriter implements CustomizeAssetWriterInterface
 {
     private readonly string $stateFile;
 
-    public function __construct(string|null $stateFile = null)
-    {
-        $this->stateFile = $stateFile ?? $this->defaultStateFile();
+    public function __construct(
+        #[Named('databaseUrl')]
+        string|null $databaseUrl = null,
+        string|null $stateFile = null,
+    ) {
+        $this->stateFile = $stateFile ?? $this->defaultStateFile($databaseUrl);
     }
 
     #[Override]
@@ -105,10 +108,9 @@ final class EccubeCustomizeAssetWriter implements CustomizeAssetWriterInterface
         );
     }
 
-    private function defaultStateFile(): string
+    private function defaultStateFile(string|null $databaseUrl): string
     {
-        $databaseUrl = getenv('DATABASE_URL');
-        $suffix = $databaseUrl === false || $databaseUrl === '' ? 'default' : md5($databaseUrl);
+        $suffix = $databaseUrl === null || $databaseUrl === '' ? 'default' : md5($databaseUrl);
 
         return dirname(__DIR__, 3) . '/var/tmp/customize-assets-' . $suffix . '.json';
     }

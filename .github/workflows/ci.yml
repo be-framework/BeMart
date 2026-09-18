@@ -71,6 +71,9 @@ jobs:
       - name: Psalm
         run: composer psalm
 
+      - name: PHPCS
+        run: composer cs:php
+
       - name: PHPUnit
         run: composer test
 
