@@ -141,11 +141,17 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
         );
     }
 
-    public function testTaxRuleListCsrfHiddenInputPresent(): void
+    public function testTaxRuleListCsrfHiddenInputHasValue(): void
     {
         $html = $this->resource->get('page://self/admin/tax-rule/tax-rule-list')->toString();
 
-        $this->assertStringContainsString('name="csrfToken"', $html);
+        // Asserting the field name alone let an empty token through, which
+        // EccubeSharedCsrfTokenAdapter::isValid() rejects on submit.
+        $this->assertMatchesRegularExpression(
+            '/<input type="hidden" name="csrfToken" value="[^"]+">/',
+            $html,
+            'csrfToken must render a non-empty value',
+        );
     }
 
     // ── archived: EC-CUBE parity comparison ─────────────────────────────────

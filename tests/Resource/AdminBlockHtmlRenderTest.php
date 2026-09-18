@@ -178,6 +178,30 @@ final class AdminBlockHtmlRenderTest extends TestCase
         $this->assertStringContainsString('href="/admin/block/block-list"', $html);
     }
 
+    /**
+     * L2 — the delete affordance is a POST form, since the router honours
+     * `_method` only on POST. It renders only for a deletable block.
+     */
+    public function testDeleteAffordanceIsAPostFormForADeletableBlock(): void
+    {
+        $html = $this->resource->get('page://self/admin/block/block', ['blockId' => 'bk-user'])->toString();
+
+        $this->assertMatchesRegularExpression(
+            '#<form method="post"\s+action="/admin/block/block"\s+rel="doDeleteBlock"#',
+            $html,
+            'delete form missing or malformed',
+        );
+        $this->assertStringContainsString('<input type="hidden" name="_method" value="delete">', $html);
+        $this->assertStringContainsString('<input type="hidden" name="blockId" value="bk-user">', $html);
+    }
+
+    public function testSystemBlockOffersNoDeleteAffordance(): void
+    {
+        $html = $this->resource->get('page://self/admin/block/block', ['blockId' => 'bk-header'])->toString();
+
+        $this->assertStringNotContainsString('rel="doDeleteBlock"', $html);
+    }
+
     // ── EC-CUBE parity (retired) ───────────────────────────────────────────
 
     /**

@@ -60,6 +60,7 @@ class Edit extends ResourceObject
     #[JsonSchema(schema: 'get-admin-product-edit.json', params: 'get-admin-product-edit.param.json')]
     #[Link(rel: 'doCreateProduct', href: 'page://self/admin/product', method: 'post')]
     #[Link(rel: 'doUpdateProduct', href: 'page://self/admin/product', method: 'put')]
+    #[Link(rel: 'doDeleteProduct', href: 'page://self/admin/product', method: 'delete')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     public function onGet(string $productCode = ''): static
     {

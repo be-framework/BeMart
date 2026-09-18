@@ -236,13 +236,19 @@
             border-top:1px solid rgba(205,191,170,.4);
         ">
             <button class="idea-admin-action js-dialog-cancel" type="button">キャンセル</button>
-            <a
-                class="idea-admin-action idea-admin-action--destructive js-dialog-confirm"
-                href="/admin/block/block?blockId={{ blockId }}&_method=delete"
-            >
-                <i class="fa fa-trash" aria-hidden="true"></i>
-                削除する
-            </a>
+            <form method="post"
+                  action="/admin/block/block"
+                  rel="doDeleteBlock"
+                  style="display:inline;">
+                <input type="hidden" name="_method" value="delete">
+                <input type="hidden" name="blockId" value="{{ blockId }}">
+                <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                <button class="idea-admin-action idea-admin-action--destructive js-dialog-confirm"
+                        type="submit">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    削除する
+                </button>
+            </form>
         </div>
     </div>
 </div>

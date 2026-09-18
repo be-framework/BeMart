@@ -78,7 +78,8 @@ final class HttpSqlAdminMailTemplateFormTest extends TestCase
         $this->assertStringContainsString('value="' . $mailTemplateId . '"', $edit['body']);
         $this->assertStringContainsString('name="mail_subject"', $edit['body']);
         $this->assertStringContainsString('value="Initial HTTP subject"', $edit['body']);
-        $this->assertStringContainsString('/admin/mail-template?mailTemplateId=' . $mailTemplateId . '&_method=delete', $edit['body']);
+        $this->assertStringContainsString('action="/admin/mail-template"', $edit['body']);
+        $this->assertStringContainsString('<input type="hidden" name="_method" value="delete">', $edit['body']);
 
         $updatedSubject = 'Updated HTTP subject';
         $updated = $this->form('POST', '/admin/mail-template', [
@@ -93,7 +94,11 @@ final class HttpSqlAdminMailTemplateFormTest extends TestCase
         $this->assertSame(200, $afterUpdate['status'], $afterUpdate['body']);
         $this->assertStringContainsString('value="' . $updatedSubject . '"', $afterUpdate['body']);
 
-        $deleted = $this->form('POST', '/admin/mail-template?mailTemplateId=' . $mailTemplateId . '&_method=delete', [
+        // Submit what the page renders: the router honours `_method` only on
+        // POST, so the fields travel in the body, not the query.
+        $deleted = $this->form('POST', '/admin/mail-template', [
+            '_method' => 'delete',
+            'mailTemplateId' => (string) $mailTemplateId,
             'csrfToken' => $this->csrfToken($afterUpdate['body']),
         ]);
         $this->assertSame(303, $deleted['status'], $deleted['body']);
