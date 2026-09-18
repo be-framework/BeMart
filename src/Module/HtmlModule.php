@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
-use BEAR\Dev\Html\HtmlLinkAuditLoggerInterface;
-use BEAR\Dev\Html\LinkHeaderModule;
 use BEAR\Package\Provide\Representation\RouterReverseLinker;
 use BEAR\Resource\ReverseLinkerInterface;
 use BEAR\Sunday\Extension\Error\ThrowableHandlerInterface;
@@ -22,6 +20,8 @@ use MyVendor\BeMart\Provide\Error\HtmlThrowableHandler;
 use MyVendor\BeMart\Provide\Render\AdminAuthRedirectRenderer;
 use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\HtmlDownloadContentTypePolicy;
+use MyVendor\BeMart\Support\Html\HtmlLinkAuditLoggerInterface;
+use MyVendor\BeMart\Support\Html\LinkHeaderModule;
 use MyVendor\BeMart\Support\Html\SilentHtmlLinkAuditLogger;
 use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use MyVendor\BeMart\Support\Resource\HtmlAdminLoginFormSubmission;
@@ -50,7 +50,6 @@ final class HtmlModule extends AbstractModule
         // the login page, not as a template rendered with an empty body.
         // See AdminAuthRedirectRenderer. Resource-level 403s are unchanged.
         $this->override(new LinkHeaderModule(new AdminAuthRedirectModule(new TwigModule(options: $this->twigOptions))));
-        $this->bind(HtmlLinkAuditLoggerInterface::class)->to(SilentHtmlLinkAuditLogger::class);
         $this->bind(ReverseLinkerInterface::class)->to(RouterReverseLinker::class);
         $this->bind(AdminSession::class)->to(HtmlAdminSessionAdapter::class);
         $this->bind(CustomerSessionWriterInterface::class)->to(HtmlCustomerSessionWriter::class);
