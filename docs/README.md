@@ -42,6 +42,7 @@ title: "docs/ — ドキュメント索引"
 | [`tag.md`](tag.md) | タグ分類体系（`flow-*` / `src-*` 等、ワークフロー・ドメイン・アクター・情報源の命名規則）。 |
 | [`event-sourcing-observation.md`](event-sourcing-observation.md) | **event-sourcing 観測ログの credential 契約の正**。`SensitiveParamsFilter`(`[FILTERED]` placeholder、BeMart は `resetKey`/`authKey` を追加)/`ExcludedResponseBodyStore`/`#[SensitiveParameter]` の redaction 範囲と、`replayable:false` の event も `Event::$replayable` 付きで抽出される契約。 |
 | [`demo-operation.md`](demo-operation.md) | 公開デモの運用。資格情報を環境変数で与える方法と、seed 状態へ戻す定期リセット（systemd timer）。 |
+| [`html-link-audit.md`](html-link-audit.md) | HTML Link Audit の reason / classification の定義と、`tests/Html/html-link-audit-ledger.json`（未実装・要修正 affordance の台帳）の読み方。 |
 
 ## Published / Generated Files
 
