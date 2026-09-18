@@ -93,9 +93,15 @@ final class HttpSqlAdminBlockFormTest extends TestCase
         $this->assertSame(200, $listBeforeDelete['status'], $listBeforeDelete['body']);
         $this->assertStringContainsString($updatedBlockName, $listBeforeDelete['body']);
         $this->assertStringContainsString($updatedBlockFileName . '.twig', $listBeforeDelete['body']);
-        $this->assertStringContainsString('/admin/block/block?blockId=' . $blockId . '&_method=delete', $listBeforeDelete['body']);
+        $this->assertStringContainsString('action="/admin/block/block"', $listBeforeDelete['body']);
+        $this->assertStringContainsString('<input type="hidden" name="_method" value="delete">', $listBeforeDelete['body']);
+        $this->assertStringContainsString('<input type="hidden" name="blockId" value="' . $blockId . '">', $listBeforeDelete['body']);
 
-        $deleted = $this->form('POST', '/admin/block/block?blockId=' . $blockId . '&_method=delete', [
+        // Submit what the list page renders: the router honours `_method` only
+        // on POST, so the fields travel in the body, not the query.
+        $deleted = $this->form('POST', '/admin/block/block', [
+            '_method' => 'delete',
+            'blockId' => $blockId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 

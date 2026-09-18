@@ -328,12 +328,19 @@
                     class="idea-admin-action js-dialog-cancel">
               キャンセル
             </button>
-            <a href="/admin/block/block?blockId={{ Block.blockId }}&_method=delete"
-               class="idea-admin-action idea-admin-action--destructive js-dialog-confirm"
-               rel="doDeleteBlock">
-              <i class="fa fa-trash" aria-hidden="true"></i>
-              削除する
-            </a>
+            <form method="post"
+                  action="/admin/block/block"
+                  rel="doDeleteBlock"
+                  style="display:inline;">
+              <input type="hidden" name="_method" value="delete">
+              <input type="hidden" name="blockId" value="{{ Block.blockId }}">
+              <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+              <button type="submit"
+                      class="idea-admin-action idea-admin-action--destructive js-dialog-confirm">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                削除する
+              </button>
+            </form>
           </div>
         </div>
       </div>
@@ -398,7 +405,7 @@
           action="/admin/block/block-list"
           rel="doCreateBlock"
           aria-label="新規ブロック作成フォーム">
-      <input type="hidden" name="csrfToken" value="">
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
       {# Block name #}
       <div class="idea-admin-field">

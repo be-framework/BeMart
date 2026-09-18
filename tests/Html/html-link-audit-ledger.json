@@ -29,14 +29,9 @@
     "note": "affordance で get /admin/block/block-list に届くが rel=\"goBlockList\" が無い",
     "reason": "semantic-token-missing"
   },
-  "GET page://self/admin/block/block-list doDeleteBlock": {
-    "classification": "fail",
-    "note": "削除が GET anchor の ?_method=delete。router は POST でしか override しないので削除されない",
-    "reason": "method-mismatch"
-  },
   "GET page://self/admin/block/block-list doUpdateBlock": {
-    "classification": "fail",
-    "note": "更新が GET anchor の ?_method=put。router は POST でしか override しない",
+    "classification": "resourceOnly",
+    "note": "一覧に PUT の affordance は無い。ALPS は doUpdateBlock を Block（編集画面）の遷移として定義しており、一覧からは goBlock で編集画面へ移る。method-mismatch になるのは同じパス /admin/block/block を指す goBlock の GET anchor が拾われるため",
     "reason": "method-mismatch"
   },
   "GET page://self/admin/calendar doCreateCalendarHoliday": {
@@ -444,14 +439,9 @@
     "note": "一覧からは GET で登録ページへ遷移する。直接の POST form は無い",
     "reason": "method-mismatch"
   },
-  "GET page://self/admin/payment/payment-list doDeletePayment": {
-    "classification": "fail",
-    "note": "削除が GET anchor の ?_method=delete。router は POST でしか override しないので削除されない",
-    "reason": "method-mismatch"
-  },
   "GET page://self/admin/payment/payment-list doUpdatePayment": {
-    "classification": "fail",
-    "note": "表示切替が GET anchor の ?_method=put。router は POST でしか override しない",
+    "classification": "resourceOnly",
+    "note": "一覧に PUT の affordance は無い。表示切替は ALPS が PaymentList に与える doToggleVisible（PUT /admin/toggle-visible）に付け替えた。ALPS は doUpdatePayment を Payment（編集画面）の遷移として定義している。method-mismatch になるのは同じパス /admin/payment/payment を指す goPayment の GET anchor が拾われるため",
     "reason": "method-mismatch"
   },
   "GET page://self/admin/payment/payment-list goProductList": {
@@ -563,11 +553,6 @@
     "classification": "fail",
     "note": "affordance で post /admin/tax-rule/tax-rule-list に届くが rel=\"doCreateTaxRule\" が無い",
     "reason": "semantic-token-missing"
-  },
-  "GET page://self/admin/tax-rule/tax-rule-list doDeleteTaxRule": {
-    "classification": "fail",
-    "note": "削除が GET anchor の ?_method=delete。router は POST でしか override しないので削除されない",
-    "reason": "method-mismatch"
   },
   "GET page://self/admin/template/template-add doInstallTemplate": {
     "classification": "fail",

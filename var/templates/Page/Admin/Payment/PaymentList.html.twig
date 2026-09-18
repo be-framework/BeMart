@@ -108,20 +108,28 @@ tr.is-hidden-payment { opacity: .55; }
     updateMoveButtons();
 
     /* ── Delete dialog ────────────────────────────────────────────── */
+    /* Each row carries its own POST form, so deletion works without JS.
+       With JS the dialog intercepts the submit and confirms first. */
     var deleteDialog = document.getElementById('delete-dialog');
-    var deleteAnchor = document.getElementById('delete-confirm-link');
+    var deleteConfirm = document.getElementById('delete-confirm');
     var deleteLabel  = document.getElementById('delete-item-label');
+    var pendingForm  = null;
 
     document.querySelector('#payment-table-body').addEventListener('click', function (e) {
-        var btn = e.target.closest('[data-delete-url]');
+        var btn = e.target.closest('[data-delete-label]');
         if (!btn || !deleteDialog) return;
         e.preventDefault();
-        deleteLabel.textContent  = btn.dataset.deleteLabel || '';
-        deleteAnchor.href        = btn.dataset.deleteUrl;
+        pendingForm = btn.closest('form');
+        deleteLabel.textContent = btn.dataset.deleteLabel || '';
         deleteDialog.removeAttribute('hidden');
     });
 
+    deleteConfirm?.addEventListener('click', function () {
+        pendingForm?.submit();
+    });
+
     document.getElementById('delete-cancel')?.addEventListener('click', function () {
+        pendingForm = null;
         deleteDialog.setAttribute('hidden', '');
     });
 }());
@@ -224,23 +232,37 @@ tr.is-hidden-payment { opacity: .55; }
                        title="下へ">
                         <i class="fa fa-arrow-down" aria-hidden="true"></i>
                     </a>
-                    <a class="idea-admin-icon-btn action-visible"
-                       href="/admin/payment/payment?paymentId={{ Payment.paymentId }}&amp;_method=put&amp;visible={{ Payment.visible ? '0' : '1' }}"
-                       rel="doUpdatePayment"
-                       aria-label="{{ Payment.visible ? '非表示にする' : '表示する' }}"
-                       title="{{ Payment.visible ? '非表示にする' : '表示する' }}"
-                       data-confirm="false">
-                        <i class="fa fa-{{ Payment.visible ? 'eye' : 'eye-slash' }}" aria-hidden="true"></i>
-                    </a>
-                    <a class="idea-admin-icon-btn idea-admin-icon-btn--destructive"
-                       href="/admin/payment/payment?paymentId={{ Payment.paymentId }}&amp;_method=delete"
-                       rel="doDeletePayment"
-                       aria-label="削除"
-                       title="削除"
-                       data-delete-label="{{ Payment.paymentMethodName }}"
-                       data-delete-url="/admin/payment/payment?paymentId={{ Payment.paymentId }}&amp;_method=delete">
-                        <i class="fa fa-trash" aria-hidden="true"></i>
-                    </a>
+                    <form method="post"
+                          action="/admin/toggle-visible"
+                          rel="doToggleVisible"
+                          style="display:inline;">
+                        <input type="hidden" name="_method" value="put">
+                        <input type="hidden" name="masterType" value="payment">
+                        <input type="hidden" name="rowId" value="{{ Payment.paymentId }}">
+                        <input type="hidden" name="visible" value="{{ Payment.visible ? '0' : '1' }}">
+                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                        <button type="submit"
+                                class="idea-admin-icon-btn action-visible"
+                                aria-label="{{ Payment.visible ? '非表示にする' : '表示する' }}"
+                                title="{{ Payment.visible ? '非表示にする' : '表示する' }}">
+                            <i class="fa fa-{{ Payment.visible ? 'eye' : 'eye-slash' }}" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                    <form method="post"
+                          action="/admin/payment/payment"
+                          rel="doDeletePayment"
+                          style="display:inline;">
+                        <input type="hidden" name="_method" value="delete">
+                        <input type="hidden" name="paymentId" value="{{ Payment.paymentId }}">
+                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                        <button type="submit"
+                                class="idea-admin-icon-btn idea-admin-icon-btn--destructive"
+                                aria-label="削除"
+                                title="削除"
+                                data-delete-label="{{ Payment.paymentMethodName }}">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </form>
                 </td>
             </tr>
         {% endfor %}
@@ -267,14 +289,11 @@ tr.is-hidden-payment { opacity: .55; }
                 <button id="delete-cancel" type="button" class="idea-admin-action">
                     キャンセル
                 </button>
-                <a id="delete-confirm-link"
-                   class="idea-admin-action idea-admin-action--destructive"
-                   href="#"
-                   data-post-action="delete"
-                   data-method="delete"
-                   data-confirm="false">
+                <button id="delete-confirm"
+                        type="button"
+                        class="idea-admin-action idea-admin-action--destructive">
                     削除する
-                </a>
+                </button>
             </div>
         </div>
     </div>
