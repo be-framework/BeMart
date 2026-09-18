@@ -8,17 +8,13 @@ use Koriym\PhpServer\PhpServer;
 use PHPUnit\Framework\TestCase;
 
 use function bin2hex;
-use function dirname;
-use function escapeshellarg;
 use function explode;
 use function http_build_query;
-use function is_dir;
 use function is_string;
 use function preg_match;
 use function preg_quote;
 use function preg_split;
 use function random_bytes;
-use function shell_exec;
 use function sprintf;
 use function str_contains;
 use function sys_get_temp_dir;
@@ -44,7 +40,6 @@ final class HttpSqlAdminMailTemplateFormTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        self::clearCompiledContextCache();
         self::$server = new PhpServer(self::HOST, __DIR__ . '/html-sql-index.php');
         self::$server->start();
     }
@@ -198,14 +193,4 @@ final class HttpSqlAdminMailTemplateFormTest extends TestCase
         return ['status' => (int) $match[1], 'headers' => $headers, 'body' => $body];
     }
 
-    private static function clearCompiledContextCache(): void
-    {
-        $contextDir = dirname(__DIR__, 2) . '/var/tmp/html-eccube-sql-hal-app';
-        foreach (['di', 'injector', 'twig'] as $subDir) {
-            $path = $contextDir . '/' . $subDir;
-            if (is_dir($path)) {
-                shell_exec('rm -rf ' . escapeshellarg($path));
-            }
-        }
-    }
 }
