@@ -6,6 +6,10 @@
   "repositories": [
     {
       "type": "vcs",
+      "url": "https://github.com/bearsunday/BEAR.EventSourcing.git"
+    },
+    {
+      "type": "vcs",
       "url": "https://github.com/bearsunday/BEAR.DevTools.git"
     },
     {
@@ -40,6 +44,7 @@
   },
   "require-dev": {
     "bear/api-doc": "1.x",
+    "bear/event-sourcing": "1.x-dev",
     "cweagans/composer-patches": "^1.7",
     "doctrine/sql-formatter": "^1.5",
     "koriym/php-server": "^1.0",

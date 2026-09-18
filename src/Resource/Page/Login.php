@@ -22,6 +22,7 @@ use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\LoginForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+use SensitiveParameter;
 
 use function array_values;
 use function assert;
@@ -110,7 +111,7 @@ class Login extends ResourceObject
     #[JsonSchema(schema: 'post-login.json', params: 'post-login.param.json')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]
-    public function onPost(string|null $email = null, string|null $password = null, string|null $mode = null): static
+    public function onPost(string|null $email = null, #[SensitiveParameter] string|null $password = null, string|null $mode = null): static
     {
         $values = [
             'email' => $email ?? '',

@@ -24,6 +24,7 @@ use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+use SensitiveParameter;
 
 use function assert;
 
@@ -155,7 +156,7 @@ class TwoFactorAuthSet extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goTwoFactorAuth', href: 'page://self/admin/two-factor-auth')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
-    public function onPut(string $deviceToken, string|null $loginId = null, string|null $authKey = null, string|null $mode = null): static
+    public function onPut(#[SensitiveParameter] string $deviceToken, string|null $loginId = null, #[SensitiveParameter] string|null $authKey = null, string|null $mode = null): static
     {
         unset($loginId, $authKey);
 

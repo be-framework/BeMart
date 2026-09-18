@@ -2271,3 +2271,55 @@ docs/html-screen-migration-matrix.md, docs/skills/G-24-ray-media-query-boundary.
 - Twig に route name を追加したら Aura route map と coverage test を同時に更新する。
 - HTML には PUT / DELETE を出さない。更新・削除は POST form で送る。
 - SQL suite の green 判定は MariaDB で行う。MySQL 8/9 での大量失敗は baseline 違いとして扱う。
+
+## 2026-09-14 — event-sourcing 観測ログ: credential redaction と replayable の契約
+
+`bear/event-sourcing`(`ObserveModule`)が記録する観測ログ・抽出イベントストリームから
+credential を守る作業。request params はライブラリの `SensitiveParamsFilter`(BeMart は
+`resetKey`/`authKey` を追加 substring として渡す)、`page://` レスポンス body は
+`ExcludedResponseBodyStore`、PHP 例外スタックトレースは `#[SensitiveParameter]`
+(credential 名パターンに一致する Resource `on*` 引数と Be Input/Final/Being の `string`
+コンストラクタ引数すべて)で守る。
+
+**現在の redaction 範囲と `replayable` の契約**は
+[`event-sourcing-observation.md`](event-sourcing-observation.md) を正とする — ここでは
+構築の経緯のみ記録する。
+
+### 経緯: ライブラリ側の契約変更に追従した
+
+作業途中で [bearsunday/BEAR.EventSourcing#22](https://github.com/bearsunday/BEAR.EventSourcing/pull/22)
+がマージされ(`1.x` @ `8616c825`)、`dev-redact-params` @ `ac169f37` から 18 commit 進んだ。
+うち2点が BeMart 側の契約を反転させた:
+
+1. filter は key を **削除しない** — key は残り、値が `SensitiveParamsFilter::FILTERED` になる。
+   ライブラリの `SensitiveParamsFilter` がコンストラクタで追加 substring を受け取るように
+   なったので、BeMart 独自の `AppParamsFilter`(top-level `unset` のみ、ネスト非対応)は
+   weightless になり **削除**した。`ObserveModule` は
+   `toInstance(new SensitiveParamsFilter(['resetKey', 'authKey']))` を束縛する。
+2. `replayable:false` の request は **抽出される**(`Event::$replayable === false`)。
+   「成功した credential 付き書き込みがイベントストリームから丸ごと消える」という以前の
+   帰結は消滅した。
+
+`composer.json` は `dev-redact-params` → `1.x-dev` に張り替え(`composer` はブランチ名が
+数字始まりだと `dev-1.x` ではなく `1.x-dev` と表記する)。タグ付きリリースはまだ無い。
+`.claude/skills/bear-observe/` のコピーは vendor と byte 一致するよう再同期(BeMart 側で
+編集していなかったので上書きのみ)。`bear/resource` の floor 1.31 は 1.34.0 で充足。
+`sql/event_store` のコピーは BeMart に無いので schema 移行は不要。
+
+### 完了事項
+
+- `src/Module/ExcludedResponseBodyStore.php`(新規)、`src/Module/AppParamsFilter.php`(新規→
+  ライブラリ追従で削除)、`#[SensitiveParameter]` の Resource/Input/Final/Being 層への付与、
+  `TwoFactorAuthConfigured::$authKey` public property の削除、discovery ベースの境界契約テスト
+  2本(`tests/Resource/CredentialParameterSensitiveParameterTest.php`、
+  `be/tests/Domain/CredentialConstructorParameterSensitiveParameterTest.php` — 手動監査は
+  `Entry::onPost`・`Reset::onGet`・Be 層 7 引数を見落とした)。
+- 検証: `EventSourcingExtractionTest`/`ExcludedResponseBodyStoreTest`/両 discovery テスト green、
+  フルスイート green、psalm 0 error。プロジェクト全体の phpcs は `getenv()` 禁止の
+  pre-existing 違反 (4ファイル5件、`bin/page.php`・`public/page.php`・
+  `src/Compatibility/Eccube/EccubeCustomizeAssetWriter.php`・
+  `src/Compatibility/Eccube/EccubeTemplateCompatibility.php`、このブランチの変更とは無関係)
+  が残るため clean ではない。
+
+
+

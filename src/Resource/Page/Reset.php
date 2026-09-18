@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Input\ResetPasswordInput;
 use MyVendor\BeMart\Form\ResetForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+use SensitiveParameter;
 
 use function assert;
 
@@ -62,7 +63,7 @@ class Reset extends ResourceObject
     #[JsonSchema(schema: 'get-reset.json', params: 'get-reset.param.json')]
     #[Link(rel: 'doResetPassword', href: 'page://self/reset', method: 'post')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
-    public function onGet(string|null $resetKey = null): static
+    public function onGet(#[SensitiveParameter] string|null $resetKey = null): static
     {
         $this->code = Code::OK;
         $this->body = [
@@ -91,7 +92,7 @@ class Reset extends ResourceObject
     #[JsonSchema(schema: 'post-reset.json', params: 'post-reset.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfProtected]
-    public function onPost(string $resetKey, string $password): static
+    public function onPost(#[SensitiveParameter] string $resetKey, #[SensitiveParameter] string $password): static
     {
         $final = ($this->becoming)(new ResetPasswordInput(
             resetKey: $resetKey,

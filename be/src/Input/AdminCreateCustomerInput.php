@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Input;
 
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Being\AdminCustomerCreating;
+use SensitiveParameter;
 
 /**
  * Input for doCreateCustomer — admin creates a customer (management screen).
@@ -65,7 +66,7 @@ final readonly class AdminCreateCustomerInput
      */
     public function __construct(
         public string $email,
-        public string $password,
+        #[SensitiveParameter] public string $password,
         public string $name01,
         public string $name02,
         public string|null $kana01 = null,

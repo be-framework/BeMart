@@ -15,6 +15,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
+use SensitiveParameter;
 
 use function mb_strlen;
 
@@ -47,9 +48,9 @@ final readonly class AdminPasswordChanged
     public string $loginId;
 
     public function __construct(
-        #[Input] string $currentPassword,
-        #[Input] string $changePasswordFirst,
-        #[Input] string $changePasswordSecond,
+        #[Input] #[SensitiveParameter] string $currentPassword,
+        #[Input] #[SensitiveParameter] string $changePasswordFirst,
+        #[Input] #[SensitiveParameter] string $changePasswordSecond,
         #[Inject] AdminSession $adminSession,
         #[Inject] AdminQueryInterface $adminQuery,
         #[Inject] AdminCommandInterface $adminCommand,

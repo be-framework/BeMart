@@ -25,6 +25,7 @@ use MyVendor\BeMart\Form\AdminLoginForm;
 use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+use SensitiveParameter;
 
 use function array_values;
 use function assert;
@@ -122,7 +123,7 @@ class Login extends ResourceObject
     #[JsonSchema(schema: 'post-admin-login.json', params: 'post-admin-login.param.json')]
     #[Link(rel: 'goAdminTop', href: 'page://self/admin/index')]
     #[CsrfProtected]
-    public function onPost(string|null $loginId = null, string|null $password = null, string|null $mode = null): static
+    public function onPost(string|null $loginId = null, #[SensitiveParameter] string|null $password = null, string|null $mode = null): static
     {
         $values = [
             'loginId' => $loginId ?? '',

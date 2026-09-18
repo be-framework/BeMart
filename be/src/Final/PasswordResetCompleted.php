@@ -32,9 +32,9 @@ use SensitiveParameter;
  *
  * Public surface is intentionally minimal: only `customerId`. The
  * email is not echoed (the resource layer should not leak it back as
- * a confirmation field that could be probed), and the plaintext
- * password is consumed inside the constructor via
- * `#[SensitiveParameter]` so it never reaches a public property.
+ * a confirmation field that could be probed), and both the reset key
+ * and the plaintext password are consumed inside the constructor via
+ * `#[SensitiveParameter]` so neither reaches a public property.
  *
  * ALPS doc: "リセットキーを検証して新しいパスワードを保存する。
  * キーは1回のみ使用可。"
@@ -44,7 +44,7 @@ final readonly class PasswordResetCompleted
     public string $customerId;
 
     public function __construct(
-        #[Input] string $resetKey,
+        #[Input] #[SensitiveParameter] string $resetKey,
         #[Input] #[SensitiveParameter] string $password,
         #[Inject] PasswordResetTokenStorageInterface $tokenStorage,
         #[Inject] CustomerCommandInterface $customerCommand,

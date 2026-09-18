@@ -37,7 +37,7 @@ final readonly class ResetPasswordInput
      * @psalm-taint-source input $password
      */
     public function __construct(
-        public string $resetKey,
+        #[SensitiveParameter] public string $resetKey,
         #[SensitiveParameter] public string $password,
     ) {
     }

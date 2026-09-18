@@ -38,8 +38,11 @@ final class TwoFactorAuthConfiguredTest extends TestCase
 
         $this->assertInstanceOf(TwoFactorAuthConfigured::class, $final);
         $this->assertSame('fresh-admin', $final->loginId);
-        $this->assertSame(FakeTwoFactorAuth::FIXED_SECRET, $final->authKey);
         $this->assertTrue($this->twoFactorAuth->isEnabled('fresh-admin'));
+
+        // Security contract: the shared secret must not be readable off the Final at
+        // all (no property to dump/log), not merely unread by callers.
+        self::assertFalse(property_exists($final, 'authKey'));
     }
 
     public function testWrongFirstCodeRejected(): void
