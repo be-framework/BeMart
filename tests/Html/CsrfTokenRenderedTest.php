@@ -48,6 +48,14 @@ use const JSON_THROW_ON_ERROR;
  *                 the session (see EccubeSharedCsrfTokenAdapter's docblock).
  *   notPublished  the resource simply never publishes the field.
  *
+ * An empty ledger would not mean every page reaches the `CsrfToken` port. A
+ * template may fill the field from the `csrf_token()` Twig function instead,
+ * which reads `$_SESSION` directly, so the page renders non-empty while its
+ * resource publishes nothing and this sweep never sees it. Three pages do that
+ * today — `admin/category/category-list` (2 fields), `admin/product/csv-category`
+ * and `admin/product/csv-class-name` — and none of them appear below. They are
+ * tracked with the rest in #139.
+ *
  * @psalm-type Entry = array{fields: int, reason: string}
  */
 final class CsrfTokenRenderedTest extends TestCase
