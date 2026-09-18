@@ -99,6 +99,17 @@
       "maximum": 2147483647,
       "title": "件数",
       "description": "/admin/payment/payment-list のレスポンスで返す件数。一覧・集計・処理結果の規模を表す非負整数。"
+    },
+    "csrfToken": {
+      "title": "CSRFトークン",
+      "description": "一覧画面から送信する削除・表示切替フォーム用のCSRFトークン。",
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]*$"
     }
   },
   "additionalProperties": false,
@@ -322,6 +333,7 @@
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
     "payments",
-    "count"
+    "count",
+    "csrfToken"
   ]
 }

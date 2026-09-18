@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
@@ -43,6 +44,7 @@ class TaxRuleList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -61,6 +63,7 @@ class TaxRuleList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'taxRules' => $final->taxRules,
+            'csrfToken' => $this->csrf->token,
         ];
         // Phase 3: an empty AdminTaxRuleForm for the HTML list page
         // (var/templates/Page/Admin/TaxRule/TaxRuleList.html.twig) to

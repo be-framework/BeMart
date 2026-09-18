@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
@@ -31,6 +32,7 @@ class BlockList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -50,6 +52,7 @@ class BlockList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'blocks' => $final->blocks,
+            'csrfToken' => $this->csrf->token,
         ];
 
         return $this;

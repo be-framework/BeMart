@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
@@ -38,6 +39,7 @@ class PaymentList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -48,6 +50,7 @@ class PaymentList extends ResourceObject
     #[Link(rel: 'goPayment', href: 'page://self/admin/payment/payment', method: 'get')]
     #[Link(rel: 'doUpdatePayment', href: 'page://self/admin/payment/payment', method: 'put')]
     #[Link(rel: 'doDeletePayment', href: 'page://self/admin/payment/payment', method: 'delete')]
+    #[Link(rel: 'doToggleVisible', href: 'page://self/admin/toggle-visible', method: 'put')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     public function onGet(): static
@@ -60,6 +63,7 @@ class PaymentList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'payments' => $final->payments,
+            'csrfToken' => $this->csrf->token,
         ];
 
         return $this;
