@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f2d015bd9a2cfd9d5a3a1af24c60a709",
+    "content-hash": "6bcbec6c34b040019ca68b7803e304ad",
     "packages": [
         {
             "name": "aura/cli",
@@ -502,16 +502,16 @@
         },
         {
             "name": "be-framework/be",
-            "version": "dev-semantic-logger-0.9",
+            "version": "0.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/be-framework/Be.Framework.git",
-                "reference": "d6ca6d263119b8a687d9daa7284b424c6f9f9395"
+                "reference": "60fd5690d2a83442d645c8f678894a3222d7eefd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/be-framework/Be.Framework/zipball/d6ca6d263119b8a687d9daa7284b424c6f9f9395",
-                "reference": "d6ca6d263119b8a687d9daa7284b424c6f9f9395",
+                "url": "https://api.github.com/repos/be-framework/Be.Framework/zipball/60fd5690d2a83442d645c8f678894a3222d7eefd",
+                "reference": "60fd5690d2a83442d645c8f678894a3222d7eefd",
                 "shasum": ""
             },
             "require": {
@@ -530,6 +530,7 @@
                 "phpunit/phpunit": "^12.2",
                 "vimeo/psalm": "^6.0@dev"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -553,9 +554,9 @@
             "description": "Be Framework - The Ontological Programming Framework for PHP",
             "support": {
                 "issues": "https://github.com/be-framework/Be.Framework/issues",
-                "source": "https://github.com/be-framework/Be.Framework/tree/semantic-logger-0.9"
+                "source": "https://github.com/be-framework/Be.Framework/tree/0.x"
             },
-            "time": "2026-08-17T03:12:22+00:00"
+            "time": "2026-09-19T03:18:30+00:00"
         },
         {
             "name": "bear/app-meta",
@@ -2061,10 +2062,10 @@
             "dist": {
                 "type": "path",
                 "url": "be",
-                "reference": "582b54fe20c555993e476620e427f520c37864e1"
+                "reference": "6cc39777e8ed27fb0e7b9f43fb420ca74888deec"
             },
             "require": {
-                "be-framework/be": "dev-semantic-logger-0.9 as 0.1.0",
+                "be-framework/be": "0.x-dev as 0.1.0",
                 "php": "^8.3",
                 "ray/input-query": "^1.0",
                 "ray/media-query": "^1.1"
@@ -7292,12 +7293,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.EventSourcing.git",
-                "reference": "8616c825999227de2f7b065445082b177c479f01"
+                "reference": "e811a13a47c08f4795bcd223d31b7778a68ba30c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.EventSourcing/zipball/8616c825999227de2f7b065445082b177c479f01",
-                "reference": "8616c825999227de2f7b065445082b177c479f01",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.EventSourcing/zipball/e811a13a47c08f4795bcd223d31b7778a68ba30c",
+                "reference": "e811a13a47c08f4795bcd223d31b7778a68ba30c",
                 "shasum": ""
             },
             "require": {
@@ -7378,7 +7379,7 @@
                 "issues": "https://github.com/bearsunday/BEAR.EventSourcing/issues",
                 "source": "https://github.com/bearsunday/BEAR.EventSourcing"
             },
-            "time": "2026-09-17T09:48:05+00:00"
+            "time": "2026-09-19T03:17:37+00:00"
         },
         {
             "name": "composer/pcre",
@@ -9518,7 +9519,7 @@
     "aliases": [
         {
             "package": "be-framework/be",
-            "version": "dev-semantic-logger-0.9",
+            "version": "0.9999999.9999999.9999999-dev",
             "alias": "0.1.0",
             "alias_normalized": "0.1.0.0"
         },
