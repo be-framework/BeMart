@@ -38,11 +38,11 @@
         "null"
       ],
       "title": "CSRFトークン",
-      "description": "HTMLフォーム送信時のCSRFトークン。Resource境界ではCsrfProtected属性で検査され、業務入力ではない。",
+      "description": "HTMLフォーム送信時のCSRFトークン。Resource境界ではRay.Csrf CsrfToken属性で検査され、業務入力ではない。",
       "minLength": 0,
       "maxLength": 128,
       "pattern": "^[A-Za-z0-9._:-]*$",
-      "$comment": "transport boundary: HTMLフォーム共通のCSRF値。JsonSchemaでは形だけを契約し、真正性はCsrfProtectedで検査する。"
+      "$comment": "transport boundary: HTMLフォーム共通のCSRF値。JsonSchemaでは形だけを契約し、真正性はCsrfForbiddenInterceptorで検査する。"
     },
     "redirect_to": {
       "type": [

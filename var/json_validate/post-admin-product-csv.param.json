@@ -26,7 +26,7 @@
       "minLength": 0,
       "maxLength": 128,
       "pattern": "^[A-Za-z0-9._:-]*$",
-      "$comment": "CSV本文そのものはimport_fileアップロードからBootstrap境界でcsvへ展開される。csrfTokenはResource引数ではなくCsrfProtected境界で消費される。"
+      "$comment": "CSV本文そのものはimport_fileアップロードからBootstrap境界でcsvへ展開される。csrfTokenはResource引数ではなくRay.Csrf CsrfToken境界で消費される。"
     }
   },
   "additionalProperties": false,

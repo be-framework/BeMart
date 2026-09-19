@@ -4106,7 +4106,7 @@ POST.</div><div class="method-alps"><a href="../alps.json.html#goMypageWithdraw"
   <td rowspan="1" class="path-cell" id="path-shopping/checkout">/shopping/checkout</td>
   <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: the domain parameter arrives from the HTTP request body.</div><div class="method-desc">`$preOrderId` is a 40-hex-char id that PreOrderId Semantic
 format-validates. The CSRF boundary token is enforced declaratively by
-the CsrfProtected attribute.</div><div class="method-alps"><a href="../alps.json.html#doCheckout" class="alps-link">doCheckout</a></div></td>
+the Ray.Csrf CsrfToken attribute.</div><div class="method-alps"><a href="../alps.json.html#doCheckout" class="alps-link">doCheckout</a></div></td>
   <td><a href="../alps.json.html#preOrderId" class="param alps-param" title="仮注文ID">preOrderId</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">仮注文ID（入力） - 購入フローの一時セッショントークン（SHA1ハッシュ）。カートと受注を紐づける。予約注文（pre-order）IDではない。チェックアウト開始時に生成、注文確定またはカート破棄で消去 Fake観察文字長 40〜40; 観察値 &#039;deadbeefcafe1234567890abcdef01234567890a&#039;, &#039;deadbeefcafe1234567890abcdef01234567890b&#039;, &#039;aaaa00000000000000000000000000000000aaaa&#039;, &#039;past00000000000000000000000000000000past&#039;, &#039;deadbeefcafe1234567890abcdef01234567890c&#039;, &#039;bbbb00000000000000000000000000000000bbbb&#039;, &#039;cccc00000000000000000000000000000000cccc&#039;, &#039;aceface0000000000000000000000000000a11ce&#039;。</td>
@@ -8435,12 +8435,12 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 <tr>
   <td><span class="prop-name">csrfToken</span></td>
   <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">購入確認CSRFトークン - /shopping で表示する購入確認フォームの送信元検証トークン。/shopping/confirm へ進むPOSTで hidden input として送信され、CsrfProtected によりセッション上の信頼済みトークンと照合される。実HTTPでは64桁hex、test/fake文脈では deterministic token を使う。</td>
+  <td class="param-desc">購入確認CSRFトークン - /shopping で表示する購入確認フォームの送信元検証トークン。/shopping/confirm へ進むPOSTで hidden input として送信され、Ray.Csrf CsrfToken属性によりセッション上の信頼済みトークンと照合される。実HTTPでは64桁hex、test/fake文脈では deterministic token を使う。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minLength: 8</span>
       <span class="badge constraint">maxLength: 160</span>
       <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge constraint">$comment: 実HTTPではEccubeSharedCsrfTokenAdapter/BeMartTwigExtensionがPHPセッションに保存した64桁hexを返す。test/fake contextではFakeCsrfToken::TOKENを返すため、schemaはCSRF値の文字種・最小長のみ契約し、真正性はCsrfProtectedで検証する。</span>
+      <span class="badge constraint">$comment: 実HTTPではEccubeSharedCsrfTokenAdapter/BeMartTwigExtensionがPHPセッションに保存した64桁hexを返す。test/fake contextではFakeCsrfToken::TOKENを返すため、schemaはCSRF値の文字種・最小長のみ契約し、真正性はCsrfForbiddenInterceptorで検証する。</span>
       <span class="badge example">example: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef</span>
     </div></td>
 </tr>
@@ -20992,7 +20992,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 160</span>
       <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
-      <span class="badge constraint">$comment: CSRF値はCsrfProtected境界の責務。GET bodyではフォーム文脈を示すためにnullを許容する。</span>
+      <span class="badge constraint">$comment: CSRF値はRay.Csrf CsrfToken境界の責務。GET bodyではフォーム文脈を示すためにnullを許容する。</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -21893,7 +21893,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 160</span>
       <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
-      <span class="badge constraint">$comment: CSRF値はCsrfProtected境界の責務。GET bodyではフォーム文脈を示すためにnullを許容する。</span>
+      <span class="badge constraint">$comment: CSRF値はRay.Csrf CsrfToken境界の責務。GET bodyではフォーム文脈を示すためにnullを許容する。</span>
     </div></td>
 </tr>
 <tr>

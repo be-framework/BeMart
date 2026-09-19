@@ -6237,7 +6237,7 @@
             "post": {
                 "operationId": "doCheckout",
                 "summary": "Phase B Slice 9: the domain parameter arrives from the HTTP request body.",
-                "description": "`$preOrderId` is a 40-hex-char id that PreOrderId Semantic\nformat-validates. The CSRF boundary token is enforced declaratively by\nthe CsrfProtected attribute.",
+                "description": "`$preOrderId` is a 40-hex-char id that PreOrderId Semantic\nformat-validates. The CSRF boundary token is enforced declaratively by\nthe Ray.Csrf CsrfToken attribute.",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -17673,13 +17673,13 @@
                     },
                     "csrfToken": {
                         "title": "\u8cfc\u5165\u78ba\u8a8dCSRF\u30c8\u30fc\u30af\u30f3",
-                        "description": "/shopping \u3067\u8868\u793a\u3059\u308b\u8cfc\u5165\u78ba\u8a8d\u30d5\u30a9\u30fc\u30e0\u306e\u9001\u4fe1\u5143\u691c\u8a3c\u30c8\u30fc\u30af\u30f3\u3002/shopping/confirm \u3078\u9032\u3080POST\u3067 hidden input \u3068\u3057\u3066\u9001\u4fe1\u3055\u308c\u3001CsrfProtected \u306b\u3088\u308a\u30bb\u30c3\u30b7\u30e7\u30f3\u4e0a\u306e\u4fe1\u983c\u6e08\u307f\u30c8\u30fc\u30af\u30f3\u3068\u7167\u5408\u3055\u308c\u308b\u3002\u5b9fHTTP\u3067\u306f64\u6841hex\u3001test/fake\u6587\u8108\u3067\u306f deterministic token \u3092\u4f7f\u3046\u3002",
+                        "description": "/shopping \u3067\u8868\u793a\u3059\u308b\u8cfc\u5165\u78ba\u8a8d\u30d5\u30a9\u30fc\u30e0\u306e\u9001\u4fe1\u5143\u691c\u8a3c\u30c8\u30fc\u30af\u30f3\u3002/shopping/confirm \u3078\u9032\u3080POST\u3067 hidden input \u3068\u3057\u3066\u9001\u4fe1\u3055\u308c\u3001Ray.Csrf CsrfToken\u5c5e\u6027\u306b\u3088\u308a\u30bb\u30c3\u30b7\u30e7\u30f3\u4e0a\u306e\u4fe1\u983c\u6e08\u307f\u30c8\u30fc\u30af\u30f3\u3068\u7167\u5408\u3055\u308c\u308b\u3002\u5b9fHTTP\u3067\u306f64\u6841hex\u3001test/fake\u6587\u8108\u3067\u306f deterministic token \u3092\u4f7f\u3046\u3002",
                         "type": "string",
                         "minLength": 8,
                         "maxLength": 160,
                         "pattern": "^[A-Za-z0-9_.:-]+$",
                         "example": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-                        "$comment": "\u5b9fHTTP\u3067\u306fEccubeSharedCsrfTokenAdapter/BeMartTwigExtension\u304cPHP\u30bb\u30c3\u30b7\u30e7\u30f3\u306b\u4fdd\u5b58\u3057\u305f64\u6841hex\u3092\u8fd4\u3059\u3002test/fake context\u3067\u306fFakeCsrfToken::TOKEN\u3092\u8fd4\u3059\u305f\u3081\u3001schema\u306fCSRF\u5024\u306e\u6587\u5b57\u7a2e\u30fb\u6700\u5c0f\u9577\u306e\u307f\u5951\u7d04\u3057\u3001\u771f\u6b63\u6027\u306fCsrfProtected\u3067\u691c\u8a3c\u3059\u308b\u3002"
+                        "$comment": "\u5b9fHTTP\u3067\u306fEccubeSharedCsrfTokenAdapter/BeMartTwigExtension\u304cPHP\u30bb\u30c3\u30b7\u30e7\u30f3\u306b\u4fdd\u5b58\u3057\u305f64\u6841hex\u3092\u8fd4\u3059\u3002test/fake context\u3067\u306fFakeCsrfToken::TOKEN\u3092\u8fd4\u3059\u305f\u3081\u3001schema\u306fCSRF\u5024\u306e\u6587\u5b57\u7a2e\u30fb\u6700\u5c0f\u9577\u306e\u307f\u5951\u7d04\u3057\u3001\u771f\u6b63\u6027\u306fCsrfForbiddenInterceptor\u3067\u691c\u8a3c\u3059\u308b\u3002"
                     }
                 },
                 "additionalProperties": false,
@@ -69763,7 +69763,7 @@
                         "minLength": 0,
                         "maxLength": 160,
                         "pattern": "^[A-Za-z0-9_.:-]*$",
-                        "$comment": "CSRF\u5024\u306fCsrfProtected\u5883\u754c\u306e\u8cac\u52d9\u3002GET body\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u3092\u793a\u3059\u305f\u3081\u306bnull\u3092\u8a31\u5bb9\u3059\u308b\u3002"
+                        "$comment": "CSRF\u5024\u306fRay.Csrf CsrfToken\u5883\u754c\u306e\u8cac\u52d9\u3002GET body\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u3092\u793a\u3059\u305f\u3081\u306bnull\u3092\u8a31\u5bb9\u3059\u308b\u3002"
                     }
                 },
                 "additionalProperties": false,
@@ -73199,7 +73199,7 @@
                         "minLength": 0,
                         "maxLength": 160,
                         "pattern": "^[A-Za-z0-9_.:-]*$",
-                        "$comment": "CSRF\u5024\u306fCsrfProtected\u5883\u754c\u306e\u8cac\u52d9\u3002GET body\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u3092\u793a\u3059\u305f\u3081\u306bnull\u3092\u8a31\u5bb9\u3059\u308b\u3002"
+                        "$comment": "CSRF\u5024\u306fRay.Csrf CsrfToken\u5883\u754c\u306e\u8cac\u52d9\u3002GET body\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u3092\u793a\u3059\u305f\u3081\u306bnull\u3092\u8a31\u5bb9\u3059\u308b\u3002"
                     },
                     "submitTo": {
                         "type": "object",

@@ -113,7 +113,7 @@ $sourceEvidenceFor = static function (string $source): string {
         $evidence[] = 'source: mail/notification';
     }
 
-    if (preg_match('/CsrfProtected|Unauthorized|AdminSession|Session/i', $source) === 1) {
+    if (preg_match('/#\[CsrfToken(\]|\()|Unauthorized|AdminSession|Session/i', $source) === 1) {
         $evidence[] = 'source: auth/csrf boundary';
     }
 
