@@ -12,12 +12,12 @@ use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Koriym\FileUpload\ErrorFileUpload;
 use Koriym\FileUpload\FileUpload;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\TemplateInstalled;
 use MyVendor\BeMart\Be\Input\InstallTemplateInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminTemplateAddForm;
 use Ray\InputQuery\Attribute\InputFile;
 use Ray\WebFormModule\FormFactory;
@@ -46,7 +46,7 @@ class TemplateAdd extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrfToken,
+        private readonly CsrfTokenInterface $csrfToken,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
@@ -71,7 +71,7 @@ class TemplateAdd extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'form' => $form,
-            'csrfToken' => $this->csrfToken->token,
+            'csrfToken' => $this->csrfToken->issue(),
         ];
 
         return $this;
@@ -86,7 +86,7 @@ class TemplateAdd extends ResourceObject
      */
     #[Alps('doInstallTemplate')]
     #[JsonSchema(schema: 'post-admin-template-template-add.json', params: 'post-admin-template-template-add.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list')]
     #[Link(rel: 'doSelectTemplate', href: 'page://self/admin/template/template-list', method: 'put')]
     public function onPost(

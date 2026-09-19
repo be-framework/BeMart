@@ -10,14 +10,14 @@ use Be\Framework\Exception\SemanticVariableException;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\ContactContentsFormatException;
 use MyVendor\BeMart\Be\Exception\EmailFormatException;
 use MyVendor\BeMart\Be\Exception\Name01FormatException;
 use MyVendor\BeMart\Be\Exception\Name02FormatException;
 use MyVendor\BeMart\Be\Final\ContactSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitContactInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\ContactForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -44,7 +44,7 @@ class Contact extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -79,7 +79,7 @@ class Contact extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/contact',
             ],
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty ContactForm for the HTML port to render
             // via `{{ form.input(...) }}`. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ContactForm::class),
@@ -98,7 +98,7 @@ class Contact extends ResourceObject
     #[Alps('doSubmitContact')]
     #[JsonSchema(schema: 'post-contact.json', params: 'post-contact.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string|null $contactName01 = null,
         string|null $contactName02 = null,
@@ -193,7 +193,7 @@ class Contact extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/contact',
             ],
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
             'errors' => $errors,
             'form' => $this->failedForm($values, $errors),

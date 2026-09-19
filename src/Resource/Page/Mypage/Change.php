@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -127,7 +127,7 @@ class Change extends ResourceObject
     #[JsonSchema(schema: 'post-mypage-change.json', params: 'post-mypage-change.param.json')]
     #[Link(rel: 'goMypageChangeComplete', href: 'page://self/mypage/change-complete')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $email,
         string|null $name01 = null,

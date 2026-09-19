@@ -9,7 +9,7 @@ use BEAR\Resource\Annotation\JsonSchema;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
 use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
@@ -39,7 +39,7 @@ class Create extends ResourceObject
     #[Link(rel: 'goMailTemplateList', href: 'page://self/admin/mail-template', method: 'get')]
     #[Link(rel: 'doUpdateMailTemplate', href: 'page://self/admin/mail-template', method: 'post')]
     #[Link(rel: 'doDeleteMailTemplate', href: 'page://self/admin/mail-template', method: 'delete')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $mailTemplateName,
         string $fileName,

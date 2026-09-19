@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Payment;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
@@ -39,7 +39,7 @@ class PaymentList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -63,7 +63,7 @@ class PaymentList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'payments' => $final->payments,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -80,7 +80,7 @@ class PaymentList extends ResourceObject
     #[Alps('doCreatePayment')]
     #[JsonSchema(schema: 'post-admin-payment-payment-list.json', params: 'post-admin-payment-payment-list.param.json')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $paymentMethodName,
         int $charge = 0,

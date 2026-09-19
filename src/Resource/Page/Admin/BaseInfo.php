@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -128,7 +128,7 @@ class BaseInfo extends ResourceObject
     #[JsonSchema(schema: 'post-admin-base-info.json', params: 'post-admin-base-info.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $shopName,
         string|null $shopKana = null,

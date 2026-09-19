@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -48,7 +48,7 @@ class UnsupportedRoute extends ResourceObject
     /** ALPS `doAdminUnsupportedRoute` に対応する POST 操作。 */
     #[Alps('doAdminUnsupportedRoute')]
     #[JsonSchema(schema: 'post-admin-unsupported-route.json', params: 'post-admin-unsupported-route.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $routeName = '', string|null $returnTo = null): static
     {
         if ($this->adminSession->adminId === null) {

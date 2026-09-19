@@ -23,11 +23,11 @@
         "null"
       ],
       "title": "CSRFトークン（再注文フォーム）",
-      "description": "マイページ注文履歴詳細から再注文を実行するフォーム送信元を検証するトークン。Resource引数ではなくCsrfProtected境界で消費される。",
+      "description": "マイページ注文履歴詳細から再注文を実行するフォーム送信元を検証するトークン。Resource引数ではなくRay.Csrf CsrfToken境界で消費される。",
       "minLength": 0,
       "maxLength": 160,
       "pattern": "^[A-Za-z0-9._:-]*$",
-      "$comment": "csrfTokenはResource引数ではなくCsrfProtectedインターセプタで検証される。"
+      "$comment": "csrfTokenはResource引数ではなくCsrfForbiddenInterceptorで検証される。"
     }
   },
   "additionalProperties": false,

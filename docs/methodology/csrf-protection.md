@@ -5,15 +5,24 @@ title: "CSRF protection"
 
 # CSRF protection
 
-BeMart の CSRF 対応は、Resource の業務入力へ token を混ぜず、HTML/HTTP boundary の検証として扱う。
+BeMart の CSRF 対応は、Resource の業務入力へ token を混ぜず、HTML/HTTP boundary の検証として扱う。この境界原則は Ray.Csrf 移行後も変わらない。
 
-## 現状
+## 現状（Ray.Csrf 移行後）
 
-mutating Resource method には `#[CsrfProtected]` を付け、手書き guard ではなく属性で CSRF 必須を宣言している。
+mutating Resource method には `Ray\Csrf\Attribute\CsrfToken` を付け、手書き guard ではなく属性で CSRF 必須を宣言している（旧 `#[CsrfProtected]` から 1:1 で置き換え済み）。
 
-`CsrfProtectedInterceptor` は対象 `ResourceObject->uri->query[$bodyField]` から token を読む。標準の Resource invocation が request body/query を ResourceObject の URI query として保持するため、Resource method の引数へ `csrfToken` を追加する必要はない。
+token の発行・検証は `Ray\Csrf\CsrfTokenInterface`（`issue()` / `verify(string)` / `clear()`）が境界になる。旧 `MyVendor\BeMart\Be\Reason\Service\CsrfToken`（`$token` プロパティ + `isValid()`）port は削除済みで、Resource は `Ray\Csrf\CsrfTokenInterface` を直接注入され、`$this->csrf->issue()` で token を form affordance に載せる。
 
-missing / invalid token は interceptor が `403 Forbidden` と `['message' => 'Invalid or missing CSRF token.']` に変換する。専用例外による変換は使わない。
+**セッションキーは EC-CUBE 互換を維持するため、Ray.Csrf 標準の `SessionCsrfToken` は使わない。** `SessionCsrfToken` は `ray_csrf_token` という private const のセッションキーに固定されており、設定変更もサブクラス化（`final`）もできない。EC-CUBE 側が `_csrf_token` へ Symfony Forms token を mirror する契約（Slice 8）と衝突するため、`EccubeModule` は `CsrfTokenInterface` を `EccubeSharedCsrfTokenAdapter`（`_csrf_token` を読み書き）へ直接 bind し、`SessionCsrfToken` は本番/開発いずれの実行コンテキストにも登場しない。Fake context（`FakeModule`）は同様に `Fake\Service\NullCsrfToken` / `FakeCsrfToken` を bind する。
+
+token の wire field 名は Ray.Csrf の既定値 `_csrf_token` ではなく、既存テンプレート/JS が送る `csrfToken` を `AppModule` で `CsrfTokenField` に明示的に設定して維持している。個別の Resource が別名を使う場合は `#[CsrfToken(field: '...')]` で上書きできる（Ray.Csrf の機能そのまま）。
+
+missing / invalid token の扱いは、`MyVendor\BeMart\Interceptor\CsrfForbiddenInterceptor` が `403 Forbidden` と `['message' => 'Invalid or missing CSRF token.']` に変換する。Ray.Csrf 標準の `Interceptor\CsrfTokenInterceptor` は例外を投げる設計だが、採用していない。理由は二つ:
+
+1. mutating Resource の既存テストは一貫して `$ro->code` / `$ro->body['message']` を直接検証しており、`expectException()` を使う設計ではない。例外化すると呼び出し側の契約が二種類に分裂する。
+2. Ray.Csrf の `CsrfTokenInterceptor` は token が **欠落している** 場合、`CsrfTokenInterface::verify()` を一切呼ばずに常に拒否する。これは `Fake\Service\NullCsrfToken`（CSRF が主題でないテスト用に「何を送っても通す」ことを契約とするフェイク）の前提と衝突する。`CsrfForbiddenInterceptor` は token 抽出には Ray.Csrf の `Http\RequestTokenInterface`（header → resource query → post の順で検索する `CompositeRequestToken`）と `Http\CsrfTokenField` をそのまま再利用しつつ、欠落時も空文字列として必ず `verify()` へ渡し、最終判断を bound された `CsrfTokenInterface` に委ねる — この「port が最終判断者」という構造は移行前の `CsrfProtectedInterceptor` と同じである。
+
+`Ray\Csrf\Attribute\SameOrigin` / `Interceptor\SameOriginInterceptor`（Origin/Referer/`Sec-Fetch-Site` ベースの二重防御）はライブラリに同梱されているが、このリリースでは配線していない。導入は新機能の追加であり、本移行のスコープ外。
 
 `RequestQueryCapturingInvoker` / `RequestQueryContext` は削除済みである。Resource invocation 境界を横取りして request query を singleton stack に積む独自実装は再導入しない。
 
@@ -44,16 +53,4 @@ Resource は業務操作の意味を表す。CSRF token はブラウザフォー
 - CSRF のために Resource の業務入力名を変更する。
 - `RequestQueryCapturingInvoker` / `RequestQueryContext` または同等の request capture stack を再導入する。
 - #61 と同じ方向、つまり Resource 契約へ CSRF token を漏らす修正を再導入する。
-
-## 次に調査すべき標準参照
-
-将来 Ray.Csrf 等へ寄せる場合は、次の標準参照を調べた後に行う。
-
-1. BEAR.Skeleton の Bootstrap / Injector / AppModule における Web boundary と Resource 呼び出しの分離。
-2. MyVendor.Cms の Bootstrap / Injector / AppModule / conventions における form token と Resource 境界の扱い。
-3. `bear/package` の Injector / Module / Context 実装。
-4. Ray.Csrf の想定する token 発行・検証境界。
-5. BEAR.Sunday 標準の Transfer / Responder / Router / Resource 呼び出し経路。
-6. BeMart 既存実装で、標準境界から外れている箇所と、それを残す場合の理由。
-
-標準実装で解けるなら標準へ寄せる。標準実装では解けない場合だけ、理由を ADR または PR 本文に明記し、最小限の独自境界として実装する。
+- 本番/開発コンテキストで `Ray\Csrf\SessionCsrfToken` を bind する（EC-CUBE のセッションキー契約を壊すため）。

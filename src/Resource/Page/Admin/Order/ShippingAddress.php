@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -117,7 +117,7 @@ class ShippingAddress extends ResourceObject
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'doUpdateShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[Link(rel: 'doUpdateOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $orderNo,
         string $addressId,
@@ -149,7 +149,7 @@ class ShippingAddress extends ResourceObject
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'doSelectShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'post')]
     #[Link(rel: 'doUpdateTrackingNumber', href: 'page://self/admin/order/tracking-number', method: 'put')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $orderNo,
         string $name01,

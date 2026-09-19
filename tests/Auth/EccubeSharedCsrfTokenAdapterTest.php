@@ -8,7 +8,7 @@ use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit tests for the Slice 8 production CSRF adapter.
+ * Unit tests for the Slice 8 production CSRF adapter (Ray\Csrf\CsrfTokenInterface).
  *
  * The adapter has two resolution paths:
  *   1. $_SESSION[_csrf_token] matches submitted token (HTTP context, or
@@ -33,7 +33,7 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
 
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $this->assertTrue($adapter->isValid('session-token-abc'));
+        $this->assertTrue($adapter->verify('session-token-abc'));
     }
 
     public function testReturnsFalseWhenSubmittedTokenDoesNotMatchSession(): void
@@ -42,23 +42,14 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
 
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $this->assertFalse($adapter->isValid('different-token'));
+        $this->assertFalse($adapter->verify('different-token'));
     }
 
     public function testReturnsFalseWhenSubmittedTokenDoesNotMatchGeneratedSessionReference(): void
     {
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $this->assertFalse($adapter->isValid('any-token'));
-    }
-
-    public function testReturnsFalseForNullToken(): void
-    {
-        $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'session-token-abc';
-
-        $adapter = new EccubeSharedCsrfTokenAdapter();
-
-        $this->assertFalse($adapter->isValid(null));
+        $this->assertFalse($adapter->verify('any-token'));
     }
 
     public function testReturnsFalseForEmptyToken(): void
@@ -67,7 +58,7 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
 
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $this->assertFalse($adapter->isValid(''));
+        $this->assertFalse($adapter->verify(''));
     }
 
     public function testEmptyStringSessionTreatedAsNoReference(): void
@@ -76,8 +67,8 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
 
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $this->assertFalse($adapter->isValid(''));
-        $this->assertFalse($adapter->isValid('any-token'));
+        $this->assertFalse($adapter->verify(''));
+        $this->assertFalse($adapter->verify('any-token'));
     }
 
     public function testNonStringSessionTreatedAsNoReference(): void
@@ -88,7 +79,7 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
 
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $this->assertFalse($adapter->isValid('12345'));
+        $this->assertFalse($adapter->verify('12345'));
     }
 
     public function testCustomSessionKeyHonored(): void
@@ -98,51 +89,62 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
 
         $adapter = new EccubeSharedCsrfTokenAdapter(sessionKey: 'alt_csrf_field');
 
-        $this->assertTrue($adapter->isValid('alt-token-value'));
-        $this->assertFalse($adapter->isValid('session-token-abc'));
+        $this->assertTrue($adapter->verify('alt-token-value'));
+        $this->assertFalse($adapter->verify('session-token-abc'));
     }
 
-    public function testTokenReturnsStoredSessionReference(): void
+    public function testIssueReturnsStoredSessionReference(): void
     {
         $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'session-token-abc';
 
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $this->assertSame('session-token-abc', $adapter->token);
+        $this->assertSame('session-token-abc', $adapter->issue());
     }
 
-    public function testTokenSeedsAReferenceWhenSessionIsEmpty(): void
+    public function testIssueSeedsAReferenceWhenSessionIsEmpty(): void
     {
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $token = $adapter->token;
+        $token = $adapter->issue();
 
         // A reference is generated, stored back into the session, and
-        // accepted by the matching isValid() call — the form-render ->
+        // accepted by the matching verify() call — the form-render ->
         // form-POST round-trip the interface guarantees.
         $this->assertNotSame('', $token);
         $this->assertSame($token, $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY]);
-        $this->assertTrue($adapter->isValid($token));
+        $this->assertTrue($adapter->verify($token));
     }
 
-    public function testTokenDoesNotRotateAnExistingReference(): void
+    public function testIssueDoesNotRotateAnExistingReference(): void
     {
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $first = $adapter->token;
-        $second = $adapter->token;
+        $first = $adapter->issue();
+        $second = $adapter->issue();
 
         // Concurrent form pages in one session must all carry the same
         // valid token — token seeds once, never rotates.
         $this->assertSame($first, $second);
     }
 
-    public function testTokenHonorsACustomSessionKey(): void
+    public function testIssueHonorsACustomSessionKey(): void
     {
         $_SESSION['alt_csrf_field'] = 'alt-token-value';
 
         $adapter = new EccubeSharedCsrfTokenAdapter(sessionKey: 'alt_csrf_field');
 
-        $this->assertSame('alt-token-value', $adapter->token);
+        $this->assertSame('alt-token-value', $adapter->issue());
+    }
+
+    public function testClearRemovesTheStoredReference(): void
+    {
+        $adapter = new EccubeSharedCsrfTokenAdapter();
+        $token = $adapter->issue();
+
+        $adapter->clear();
+
+        $this->assertArrayNotHasKey(EccubeSharedCsrfTokenAdapter::SESSION_KEY, $_SESSION);
+        $this->assertFalse($adapter->verify($token));
     }
 }

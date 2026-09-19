@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassCategory;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -49,7 +49,7 @@ class ClassCategory extends ResourceObject
     #[Alps('doUpdateClassCategory')]
     #[JsonSchema(schema: 'put-admin-class-category-class-category.json', params: 'put-admin-class-category-class-category.param.json')]
     #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $classCategoryId,
         string|null $classCategoryName = null,
@@ -85,7 +85,7 @@ class ClassCategory extends ResourceObject
     #[Alps('doDeleteClassCategory')]
     #[JsonSchema(schema: 'delete-admin-class-category-class-category.json', params: 'delete-admin-class-category-class-category.param.json')]
     #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $classCategoryId): static
     {
         $final = ($this->becoming)(new DeleteClassCategoryInput(classCategoryId: $classCategoryId));

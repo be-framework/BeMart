@@ -10,7 +10,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\AdminNotFoundException;
 use MyVendor\BeMart\Be\Exception\InvalidCurrentPasswordException;
 use MyVendor\BeMart\Be\Exception\PasswordConfirmationMismatchException;
@@ -106,7 +106,7 @@ class ChangePassword extends ResourceObject
      */
     #[Alps('doChangePassword')]
     #[JsonSchema(schema: 'post-admin-change-password.json', params: 'post-admin-change-password.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPost(
         #[SensitiveParameter] string $currentPassword,

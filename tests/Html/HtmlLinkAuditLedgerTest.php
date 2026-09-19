@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\NullCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Support\Html\HtmlLinkAuditLoggerInterface;
 use MyVendor\BeMart\Tests\Support\RecordingHtmlLinkAuditLogger;
 use Madapaja\TwigModule\Exception\TemplateNotFound;
@@ -135,7 +135,7 @@ final class HtmlLinkAuditLedgerTest extends TestCase
             protected function configure(): void
             {
                 $this->bind(HtmlLinkAuditLoggerInterface::class)->toInstance($this->logger);
-                $this->bind(CsrfToken::class)->toInstance(new NullCsrfToken());
+                $this->bind(CsrfTokenInterface::class)->toInstance(new NullCsrfToken());
                 $this->bind(AdminSession::class)->toInstance(new FakeAdminSession($this->admin ? HtmlLinkAuditLedgerTest::ADMIN_ID : null));
                 $this->bind(CustomerSession::class)->toInstance(new FakeSession($this->customerId ?? HtmlLinkAuditLedgerTest::CUSTOMER_ID));
             }

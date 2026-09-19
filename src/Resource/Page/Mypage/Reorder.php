@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -52,7 +52,7 @@ class Reorder extends ResourceObject
     #[Alps('doReorder')]
     #[JsonSchema(schema: 'post-mypage-reorder.json', params: 'post-mypage-reorder.param.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $orderNo): static
     {
         $final = ($this->becoming)(new ReorderInput(

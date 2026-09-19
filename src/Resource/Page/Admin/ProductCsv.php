@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -89,7 +89,7 @@ class ProductCsv extends ResourceObject
     #[Alps('doCreateProduct')]
     #[JsonSchema(schema: 'post-admin-product-csv.json', params: 'post-admin-product-csv.param.json')]
     #[Link(rel: 'goExportCategory', href: 'page://self/admin/category/csv')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $csv): static
     {
         $handle = fopen('php://memory', 'w+');

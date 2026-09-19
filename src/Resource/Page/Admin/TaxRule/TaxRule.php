@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\TaxRule;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -44,7 +44,7 @@ class TaxRule extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-tax-rule-tax-rule.json', params: 'delete-admin-tax-rule-tax-rule.param.json')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
     #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $taxRuleId): static
     {
         $final = ($this->becoming)(new DeleteTaxRuleInput(taxRuleId: $taxRuleId));

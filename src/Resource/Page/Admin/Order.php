@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,7 +17,7 @@ use MyVendor\BeMart\Be\Final\AdminOrderFetched;
 use MyVendor\BeMart\Be\Final\AdminOrderUpdated;
 use MyVendor\BeMart\Be\Input\AdminUpdateOrderInput;
 use MyVendor\BeMart\Be\Input\GetAdminOrderInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -57,7 +57,7 @@ class Order extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -100,7 +100,7 @@ class Order extends ResourceObject
             'items' => $final->items,
             'itemCount' => $final->itemCount,
             'customer' => $final->customer,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'orderStatusOptions' => [
                 1 => '新規受付',
                 3 => '注文取消',
@@ -128,7 +128,7 @@ class Order extends ResourceObject
     #[JsonSchema(schema: 'put-admin-order.json', params: 'put-admin-order.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'doUpdateOrderStatus', href: 'page://self/admin/order-status', method: 'post')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $orderNo,
         int|null $discount = null,

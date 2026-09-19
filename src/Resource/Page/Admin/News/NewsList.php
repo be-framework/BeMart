@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\News;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -67,7 +67,7 @@ class NewsList extends ResourceObject
     #[Alps('doCreateNews')]
     #[JsonSchema(schema: 'post-admin-news-news-list.json', params: 'post-admin-news-news-list.param.json')]
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $newsTitle,
         string $publishDate,

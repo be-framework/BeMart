@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -23,7 +23,7 @@ use MyVendor\BeMart\Be\Input\AdminCreateProductInput;
 use MyVendor\BeMart\Be\Input\AdminDeleteProductInput;
 use MyVendor\BeMart\Be\Input\AdminUpdateProductInput;
 use MyVendor\BeMart\Be\Input\GetAdminProductInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -55,7 +55,7 @@ class Product extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
@@ -91,7 +91,7 @@ class Product extends ResourceObject
             'categoryNames' => $final->categoryNames,
             'tagNames' => $final->tagNames,
             'classNames' => $final->classNames,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'productStatusOptions' => [
                 1 => '公開',
                 2 => '非公開',
@@ -116,7 +116,7 @@ class Product extends ResourceObject
      */
     #[Alps('doCreateProduct')]
     #[JsonSchema(schema: 'post-admin-product.json', params: 'post-admin-product.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $productCode,
         string $productName,
@@ -169,7 +169,7 @@ class Product extends ResourceObject
     #[Alps('doUpdateProduct')]
     #[JsonSchema(schema: 'put-admin-product.json', params: 'put-admin-product.param.json')]
     #[Link(rel: 'goProductList', href: 'page://self/products')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $productCode,
         string|null $productName = null,
@@ -215,7 +215,7 @@ class Product extends ResourceObject
      */
     #[Alps('doDeleteProduct')]
     #[JsonSchema(schema: 'delete-admin-product.json', params: 'delete-admin-product.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(
         string $productCode,
     ): static {

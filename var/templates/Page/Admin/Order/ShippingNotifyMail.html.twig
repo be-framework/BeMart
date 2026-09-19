@@ -22,7 +22,7 @@
     GET  /admin/order                       — goOrder (back link)
 
   FORM: no AdminOrderMailForm needed — only hidden fields on POST.
-  CSRF: csrfToken from resource body; CsrfProtected on onPost.
+  CSRF: csrfToken from resource body; Ray.Csrf CsrfToken attribute on onPost.
 
   UX rationale (clean-room, no EC-CUBE mirror):
   - Narrow centered card: this is a single irreversible action;

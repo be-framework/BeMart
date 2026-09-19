@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Cart;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -61,7 +61,7 @@ class Item extends ResourceObject
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'doRemoveCartItem', href: 'page://self/cart/item', method: 'delete')]
     #[Link(rel: 'goCheckoutEntry', href: 'page://self/shopping')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $productCode,
         int|null $quantity = null,
@@ -135,7 +135,7 @@ class Item extends ResourceObject
     #[Alps('doUpdateCartItemQuantity')]
     #[JsonSchema(schema: 'put-cart-item.json', params: 'put-cart-item.param.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $productCode,
         int $quantity,
@@ -174,7 +174,7 @@ class Item extends ResourceObject
     #[Alps('doRemoveCartItem')]
     #[JsonSchema(schema: 'delete-cart-item.json', params: 'delete-cart-item.param.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(
         string $productCode,
         string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
