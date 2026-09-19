@@ -2062,7 +2062,7 @@
             "dist": {
                 "type": "path",
                 "url": "be",
-                "reference": "6cc39777e8ed27fb0e7b9f43fb420ca74888deec"
+                "reference": "2af920313bc6a519e1c9e11346cbbfe54095528a"
             },
             "require": {
                 "be-framework/be": "0.x-dev as 0.1.0",
