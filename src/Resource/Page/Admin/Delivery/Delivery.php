@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Delivery;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -108,7 +108,7 @@ class Delivery extends ResourceObject
     #[Alps('doUpdateDelivery')]
     #[JsonSchema(schema: 'put-admin-delivery-delivery.json', params: 'put-admin-delivery-delivery.param.json')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $deliveryId,
         string|null $deliveryName = null,
@@ -140,7 +140,7 @@ class Delivery extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-delivery-delivery.json', params: 'delete-admin-delivery-delivery.param.json')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $deliveryId): static
     {
         $final = ($this->becoming)(new DeleteDeliveryInput(deliveryId: $deliveryId));

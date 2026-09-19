@@ -21,8 +21,8 @@ use function str_starts_with;
  * stack frame redacts it when an exception propagates through that frame (e.g. a
  * re-thrown SemanticVariableException, or a throw during $this->becoming(...)).
  * The attribute protects only that one frame, not the whole trace or any copy of
- * the value held elsewhere; #[CsrfProtected] never throws (403 body + return), so
- * it is not part of this rationale.
+ * the value held elsewhere; CsrfForbiddenInterceptor never throws (403 body +
+ * return), so it is not part of this rationale.
  *
  * Discovery-based, not an allowlist: a manual audit previously missed
  * Entry::onPost's $password/$password_confirm, and a hardcoded map would miss the

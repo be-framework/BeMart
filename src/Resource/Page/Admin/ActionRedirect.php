@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -45,7 +45,7 @@ class ActionRedirect extends ResourceObject
     /** ALPS `doAdminActionRedirect` に対応する POST 操作。 */
     #[Alps('doAdminActionRedirect')]
     #[JsonSchema(schema: 'post-admin-action-redirect.json', params: 'post-admin-action-redirect.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string|null $returnTo = null): static
     {
         if (! $this->authorized()) {

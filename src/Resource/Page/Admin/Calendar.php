@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -20,7 +20,7 @@ use MyVendor\BeMart\Be\Input\DeleteCalendarHolidayInput;
 use MyVendor\BeMart\Be\Input\GetAdminCalendarInput;
 use MyVendor\BeMart\Be\Input\UpdateCalendarHolidayInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminCalendarForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -37,7 +37,7 @@ class Calendar extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
@@ -79,7 +79,7 @@ class Calendar extends ResourceObject
     #[Alps('doUpdateCalendar')]
     #[JsonSchema(schema: 'post-admin-calendar.json', params: 'post-admin-calendar.param.json')]
     #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $operation = 'update',
         string $title = '',
@@ -131,7 +131,7 @@ class Calendar extends ResourceObject
     #[Alps('doDeleteCalendarHoliday')]
     #[JsonSchema(schema: 'delete-admin-calendar.json', params: 'delete-admin-calendar.param.json')]
     #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string|int|null $calendarId = null): static
     {
         if ($this->adminSession->adminId === null) {
@@ -192,7 +192,7 @@ class Calendar extends ResourceObject
             'form' => $form,
             'calendars' => $items,
             'errors' => [],
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
     }
 }

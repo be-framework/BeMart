@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -75,7 +75,7 @@ class ImportShipping extends ResourceObject
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'goExportShipping', href: 'page://self/admin/order/export-shipping', method: 'get')]
     #[Link(rel: 'goExportCustomer', href: 'page://self/admin/customer-csv')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $csv): static
     {
         $final = ($this->becoming)(new AdminImportShippingCsvInput(csv: $csv));

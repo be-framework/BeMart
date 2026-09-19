@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6bcbec6c34b040019ca68b7803e304ad",
+    "content-hash": "43c0022fc54b3ceb9d2d42319056b3ed",
     "packages": [
         {
             "name": "aura/cli",
@@ -3769,6 +3769,61 @@
                 "source": "https://github.com/ray-di/Ray.Compiler/tree/1.16.0"
             },
             "time": "2026-08-14T08:03:36+00:00"
+        },
+        {
+            "name": "ray/csrf",
+            "version": "1.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ray-di/Ray.Csrf.git",
+                "reference": "9cf4ae68bd78402912afe33191096113c9e03a2d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ray-di/Ray.Csrf/zipball/9cf4ae68bd78402912afe33191096113c9e03a2d",
+                "reference": "9cf4ae68bd78402912afe33191096113c9e03a2d",
+                "shasum": ""
+            },
+            "require": {
+                "bear/resource": "^1.32",
+                "ext-session": "*",
+                "php": "^8.2",
+                "ray/aop": "^2.18",
+                "ray/di": "^2.18"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.8",
+                "phpunit/phpunit": "^10.5"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ray\\Csrf\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "description": "CSRF protection module for Ray.Di / BEAR.Resource applications",
+            "support": {
+                "issues": "https://github.com/ray-di/Ray.Csrf/issues",
+                "source": "https://github.com/ray-di/Ray.Csrf/tree/1.x"
+            },
+            "time": "2026-06-29T02:42:59+00:00"
         },
         {
             "name": "ray/di",
@@ -9544,6 +9599,7 @@
         "bear/query-repository": 20,
         "bear/tool-use": 20,
         "my-vendor/be-mart-be": 20,
+        "ray/csrf": 20,
         "ray/fake-query": 20
     },
     "prefer-stable": false,

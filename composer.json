@@ -35,6 +35,7 @@
     "madapaja/twig-module": "^2.7",
     "my-vendor/be-mart-be": "@dev",
     "nyholm/psr7": "^1.8",
+    "ray/csrf": "1.x-dev",
     "ray/di": "^2.18",
     "ray/input-query": "^1.0",
     "ray/media-query": "^1.1",

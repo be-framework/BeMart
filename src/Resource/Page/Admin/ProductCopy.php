@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -47,7 +47,7 @@ class ProductCopy extends ResourceObject
     #[JsonSchema(schema: 'post-admin-product-copy.json', params: 'post-admin-product-copy.param.json')]
     #[Link(rel: 'goProduct', href: 'page://self/admin/product', method: 'get')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $productCode,
         string $newProductCode,

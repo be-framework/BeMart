@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,7 +17,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderStatusUpdated;
 use MyVendor\BeMart\Be\Input\AdminUpdateOrderStatusInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminOrderStatusForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -63,7 +63,7 @@ class OrderStatus extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
@@ -94,7 +94,7 @@ class OrderStatus extends ResourceObject
         $this->body = [
             'form' => $form,
             'orderStatuses' => AdminOrderStatusForm::rows(),
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -116,7 +116,7 @@ class OrderStatus extends ResourceObject
      */
     #[Alps('doUpdateOrderStatusList')]
     #[JsonSchema(schema: 'put-admin-order-status.json', params: 'put-admin-order-status.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         array $orderStatuses = [],
         string|null $orderStatusRows = null,
@@ -152,7 +152,7 @@ class OrderStatus extends ResourceObject
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'goOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'get')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $orderNo,
         int $orderStatus,

@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Resource\Page;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function preg_match;
@@ -32,7 +32,7 @@ class UnsupportedRoute extends ResourceObject
     /** ALPS `doUnsupportedRoute` に対応する POST 操作。 */
     #[Alps('doUnsupportedRoute')]
     #[JsonSchema(schema: 'post-unsupported-route.json', params: 'post-unsupported-route.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $routeName = '', string|null $returnTo = null): static
     {
         $this->code = Code::OK;

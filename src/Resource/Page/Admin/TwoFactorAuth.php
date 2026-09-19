@@ -11,7 +11,7 @@ use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use Be\Framework\SemanticVariable\ValidationMessageHandler;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
@@ -20,7 +20,7 @@ use MyVendor\BeMart\Be\Final\TwoFactorAuthVerified;
 use MyVendor\BeMart\Be\Input\VerifyTwoFactorAuthInput;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use Ray\WebFormModule\FormFactory;
@@ -60,7 +60,7 @@ class TwoFactorAuth extends ResourceObject
         private readonly HtmlAdminLoginChallengeAdapter $loginChallenge,
         private readonly AdminSession $adminSession,
         private readonly AdminQueryInterface $adminQuery,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly AdminLoginFormSubmissionInterface $formSubmission,
     ) {
     }
@@ -84,7 +84,7 @@ class TwoFactorAuth extends ResourceObject
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuth',
             'fields' => ['deviceToken', 'csrfToken'],
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty AdminTwoFactorAuthForm for the HTML port.
             'form' => $this->formFactory->newInstance(AdminTwoFactorAuthForm::class),
         ];
@@ -136,7 +136,7 @@ class TwoFactorAuth extends ResourceObject
      */
     #[Alps('doVerifyTwoFactorAuth')]
     #[JsonSchema(schema: 'post-admin-two-factor-auth.json', params: 'post-admin-two-factor-auth.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPost(#[SensitiveParameter] string $deviceToken, string|null $loginId = null, string|null $mode = null): static

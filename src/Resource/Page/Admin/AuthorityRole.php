@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -21,7 +21,7 @@ use MyVendor\BeMart\Be\Input\UpdateAuthorityRulesInput;
 use MyVendor\BeMart\Be\Input\UpdateAuthorityRoleInput;
 use MyVendor\BeMart\Be\Reason\Query\AuthorityRoleRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -69,7 +69,7 @@ class AuthorityRole extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly AuthorityRoleRuleStorageInterface $authorityRules,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
@@ -111,7 +111,7 @@ class AuthorityRole extends ResourceObject
                 ['id' => 1, 'label' => '店舗オーナー'],
             ],
             'rules' => $ruleRows,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -132,7 +132,7 @@ class AuthorityRole extends ResourceObject
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     #[Link(rel: 'goLoginHistoryList', href: 'page://self/admin/login-history')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string|null $loginId = null,
         int|null $authority = null,

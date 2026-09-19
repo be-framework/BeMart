@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -83,7 +83,7 @@ class CategoryList extends ResourceObject
     #[Alps('doCreateCategory')]
     #[JsonSchema(schema: 'post-admin-category-category-list.json', params: 'post-admin-category-category-list.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $categoryName,
         int $sortNo,

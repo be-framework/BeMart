@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\TaxRule;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
@@ -44,7 +44,7 @@ class TaxRuleList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -63,7 +63,7 @@ class TaxRuleList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'taxRules' => $final->taxRules,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
         // Phase 3: an empty AdminTaxRuleForm for the HTML list page
         // (var/templates/Page/Admin/TaxRule/TaxRuleList.html.twig) to
@@ -86,7 +86,7 @@ class TaxRuleList extends ResourceObject
     #[Alps('doCreateTaxRule')]
     #[JsonSchema(schema: 'post-admin-tax-rule-tax-rule-list.json', params: 'post-admin-tax-rule-tax-rule-list.param.json')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         float $taxRate,
         string $applyDate,

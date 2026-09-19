@@ -11,7 +11,7 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\RequestInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 
 use function array_filter;
 use function array_slice;
@@ -41,7 +41,7 @@ use function usort;
 class Products extends ResourceObject
 {
     public function __construct(
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -93,7 +93,7 @@ class Products extends ResourceObject
             'transitionId' => 'goProductList',
             'totalItemCount' => $totalItemCount,
             'products' => $pagedProducts,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'filters' => [
                 'name' => $name,
                 'nameKeyword' => $nameKeyword,

@@ -8,7 +8,7 @@ use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Auth\EccubeSharedSessionAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Override;
 use Ray\Di\AbstractModule;
@@ -26,6 +26,6 @@ final class EccubeModule extends AbstractModule
     {
         $this->bind(CustomerSession::class)->to(EccubeSharedSessionAdapter::class);
         $this->bind(AdminSession::class)->to(HtmlAdminSessionAdapter::class);
-        $this->bind(CsrfToken::class)->to(EccubeSharedCsrfTokenAdapter::class);
+        $this->bind(CsrfTokenInterface::class)->to(EccubeSharedCsrfTokenAdapter::class);
     }
 }

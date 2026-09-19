@@ -14,7 +14,7 @@ use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
 use MyVendor\BeMart\Be\Reason\Query\LoginAttemptGateInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Provide\Error\ExceptionStatusMapper;
 use PHPUnit\Framework\TestCase;
@@ -34,7 +34,7 @@ final class AdminLoginResourceTest extends TestCase
         $base->override(new class extends AbstractModule {
             protected function configure(): void
             {
-                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
+                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
             }
         });
 

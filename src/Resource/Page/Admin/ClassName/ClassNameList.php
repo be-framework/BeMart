@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassName;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -76,7 +76,7 @@ class ClassNameList extends ResourceObject
     #[Alps('doCreateClassName')]
     #[JsonSchema(schema: 'post-admin-class-name-class-name-list.json', params: 'post-admin-class-name-class-name-list.param.json')]
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $classNameLabel): static
     {
         $final = ($this->becoming)(new CreateClassNameInput(classNameLabel: $classNameLabel));

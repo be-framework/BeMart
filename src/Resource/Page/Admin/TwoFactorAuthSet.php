@@ -10,7 +10,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
@@ -18,7 +18,7 @@ use MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured;
 use MyVendor\BeMart\Be\Input\SetTwoFactorAuthInput;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
@@ -63,7 +63,7 @@ class TwoFactorAuthSet extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly AdminQueryInterface $adminQuery,
         private readonly TwoFactorAuthInterface $twoFactorAuth,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly AdminLoginFormSubmissionInterface $formSubmission,
     ) {
     }
@@ -102,7 +102,7 @@ class TwoFactorAuthSet extends ResourceObject
             // the QR-code account name; empty when no setup challenge exists.
             'memberName' => $challenge?->loginId ?? '',
             'shopName' => 'BeMart',
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'form' => $form,
         ];
 
@@ -153,7 +153,7 @@ class TwoFactorAuthSet extends ResourceObject
      */
     #[Alps('doSetTwoFactorAuth')]
     #[JsonSchema(schema: 'put-admin-two-factor-auth-set.json', params: 'put-admin-two-factor-auth-set.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     #[Link(rel: 'goTwoFactorAuth', href: 'page://self/admin/two-factor-auth')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPut(#[SensitiveParameter] string $deviceToken, string|null $loginId = null, #[SensitiveParameter] string|null $authKey = null, string|null $mode = null): static

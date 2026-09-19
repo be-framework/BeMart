@@ -185,12 +185,12 @@ final class HtmlAdminSessionAdapterTest extends TestCase
         $this->startActiveSession();
         $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = 'ad000000000000000000000000000001';
         $sessionIdBeforeLogout = session_id();
-        $tokenBeforeLogout = (new EccubeSharedCsrfTokenAdapter())->token;
+        $tokenBeforeLogout = (new EccubeSharedCsrfTokenAdapter())->issue();
 
         $this->htmlResource()->post('page://self/admin/logout', ['csrfToken' => FakeCsrfToken::TOKEN]);
 
         $this->assertNotSame($sessionIdBeforeLogout, session_id());
-        $this->assertFalse((new EccubeSharedCsrfTokenAdapter())->isValid($tokenBeforeLogout));
+        $this->assertFalse((new EccubeSharedCsrfTokenAdapter())->verify($tokenBeforeLogout));
     }
 
     #[RunInSeparateProcess]

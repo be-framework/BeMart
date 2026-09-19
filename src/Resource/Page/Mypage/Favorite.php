@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -45,7 +45,7 @@ class Favorite extends ResourceObject
     #[JsonSchema(schema: 'post-mypage-favorite.json', params: 'post-mypage-favorite.param.json')]
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     #[Link(rel: 'goProduct', href: 'page://self/product')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $productCode): static
     {
         $final = ($this->becoming)(new AddFavoriteInput(productCode: $productCode));
@@ -81,7 +81,7 @@ class Favorite extends ResourceObject
     #[JsonSchema(schema: 'delete-mypage-favorite.json', params: 'delete-mypage-favorite.param.json')]
     #[Link(rel: 'goMypageWithdraw', href: 'page://self/mypage/withdraw')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $productCode): static
     {
         $final = ($this->becoming)(new RemoveFavoriteInput(productCode: $productCode));

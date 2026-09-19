@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,7 +17,7 @@ use MyVendor\BeMart\Be\Final\AdminPageListFetched;
 use MyVendor\BeMart\Be\Final\PageCreated;
 use MyVendor\BeMart\Be\Input\CreatePageInput;
 use MyVendor\BeMart\Be\Input\GetAdminPageListInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -35,7 +35,7 @@ class PageList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -56,7 +56,7 @@ class PageList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'pages' => $final->pages,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -71,7 +71,7 @@ class PageList extends ResourceObject
     #[Alps('doCreatePage')]
     #[JsonSchema(schema: 'post-admin-page-page-list.json', params: 'post-admin-page-page-list.param.json')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $pageName,
         string $pageUrl,

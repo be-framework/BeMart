@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,7 +17,7 @@ use MyVendor\BeMart\Be\Final\TradeLawUpdated;
 use MyVendor\BeMart\Be\Input\GetTradeLawInput;
 use MyVendor\BeMart\Be\Input\UpdateTradeLawInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminTradeLawForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -48,7 +48,7 @@ class TradeLaw extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -81,7 +81,7 @@ class TradeLaw extends ResourceObject
             'form' => $form,
             'tradeLawRows' => $rows,
             'tradeLawBody' => $final->tradeLawBody,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -131,7 +131,7 @@ class TradeLaw extends ResourceObject
     #[JsonSchema(schema: 'post-admin-trade-law.json', params: 'post-admin-trade-law.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     #[Link(rel: 'goContentCss', href: 'page://self/admin/content/css')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string|null $tradeLawBody = null,
         string|null $mode = null,

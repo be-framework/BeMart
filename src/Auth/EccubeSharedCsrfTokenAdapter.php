@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Auth;
 
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use Override;
+use Ray\Csrf\CsrfTokenInterface;
 
 use function bin2hex;
 use function hash_equals;
@@ -20,18 +20,17 @@ use const PHP_SAPI;
 use const PHP_SESSION_ACTIVE;
 
 /**
- * Production CsrfToken adapter — validates submitted tokens
+ * Production Ray\Csrf\CsrfTokenInterface adapter — validates submitted tokens
  * against the trusted reference stored in PHP's `$_SESSION` (alongside
  * the flat customerId key Slice 7 already shares with EC-CUBE).
  *
- * Phase B Slice 8 (CSRF guard, BEAR side only). The matching EC-CUBE
- * side — a small EventListener that mirrors the active Symfony Forms /
- * EC-CUBE CSRF token to {@see SESSION_KEY} on form render — is **not yet
- * implemented**. Until that ships, every production HTTP POST resolves
- * to "no stored token" → 403. The
- * adapter is the BEAR-side half of the contract, not a complete
- * production CSRF path; this matches Slice 7's split-implementation
- * convention.
+ * Ray.Csrf's own SessionCsrfToken stores its reference under a private,
+ * unconfigurable `ray_csrf_token` session key. BeMart binds
+ * Ray\Csrf\CsrfTokenInterface to this adapter instead, so the stored key stays
+ * {@see SESSION_KEY} (`_csrf_token`) — the flat string EC-CUBE's Symfony Forms
+ * CSRF token is meant to mirror on form render, matching Slice 7's
+ * split-implementation convention. Until that EC-CUBE-side mirror ships,
+ * every production HTTP POST resolves to "no stored token" → rejected.
  *
  * Wire model (BEAR ↔ EC-CUBE bridge):
  *
@@ -52,17 +51,16 @@ use const PHP_SESSION_ACTIVE;
  * Comparison is always timing-safe (`hash_equals`). Empty strings and
  * non-string types are rejected before comparison.
  *
- * Token value (`$token`): the adapter snapshots the reference
- * already stored under {@see SESSION_KEY}, or — when none is present —
- * generates a cryptographically strong one and stores it back, so a
- * form render and its subsequent POST agree even before the EC-CUBE
- * EventListener mirror ships. It never rotates a reference it finds:
- * rotation is driven by the session lifecycle, where the customer/admin
- * session writers and {@see HtmlAdminLoginChallengeAdapter} discard the
- * reference on every authentication state change and let the next read
- * here mint a fresh one.
+ * `issue()`: returns the reference already stored under {@see SESSION_KEY},
+ * or — when none is present — generates a cryptographically strong one and
+ * stores it back, so a form render and its subsequent POST agree even before
+ * the EC-CUBE EventListener mirror ships. It never rotates a reference it
+ * finds: rotation is driven by the session lifecycle, where the
+ * customer/admin session writers and {@see HtmlAdminLoginChallengeAdapter}
+ * discard the reference on every authentication state change and let the
+ * next `issue()` mint a fresh one.
  */
-final readonly class EccubeSharedCsrfTokenAdapter extends CsrfToken
+final readonly class EccubeSharedCsrfTokenAdapter implements CsrfTokenInterface
 {
     /**
      * Flat-string session key holding the trusted CSRF reference. EC-CUBE
@@ -75,35 +73,16 @@ final readonly class EccubeSharedCsrfTokenAdapter extends CsrfToken
     public function __construct(
         private string $sessionKey = self::SESSION_KEY,
     ) {
-        $this->ensureSessionStarted();
-        parent::__construct($this->resolveToken());
     }
 
     #[Override]
-    public function isValid(string|null $token): bool
+    public function issue(): string
     {
-        if (! is_string($token) || $token === '') {
-            return false;
-        }
+        $this->ensureSessionStarted();
 
-        $session = isset($_SESSION) ? $_SESSION : [];
-        /** @var mixed $stored */
-        $stored = $session[$this->sessionKey] ?? null;
-        if (is_string($stored) && $stored !== '' && hash_equals($stored, $token)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /** @return non-empty-string */
-    private function resolveToken(): string
-    {
-        $session = isset($_SESSION) ? $_SESSION : [];
-        /** @var mixed $stored */
-        $stored = $session[$this->sessionKey] ?? null;
-        if (is_string($stored) && $stored !== '') {
-            return $stored;
+        $existing = $this->storedToken();
+        if ($existing !== null) {
+            return $existing;
         }
 
         $token = bin2hex(random_bytes(32));
@@ -112,6 +91,36 @@ final readonly class EccubeSharedCsrfTokenAdapter extends CsrfToken
         }
 
         return $token;
+    }
+
+    #[Override]
+    public function verify(string $candidate): bool
+    {
+        if ($candidate === '') {
+            return false;
+        }
+
+        $this->ensureSessionStarted();
+        $stored = $this->storedToken();
+
+        return $stored !== null && hash_equals($stored, $candidate);
+    }
+
+    #[Override]
+    public function clear(): void
+    {
+        $this->ensureSessionStarted();
+        unset($_SESSION[$this->sessionKey]);
+    }
+
+    /** @return non-empty-string|null */
+    private function storedToken(): string|null
+    {
+        $session = isset($_SESSION) ? $_SESSION : [];
+        /** @var mixed $stored */
+        $stored = $session[$this->sessionKey] ?? null;
+
+        return is_string($stored) && $stored !== '' ? $stored : null;
     }
 
     private function ensureSessionStarted(): void

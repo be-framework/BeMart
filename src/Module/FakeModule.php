@@ -33,7 +33,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClientIpInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface;
@@ -88,7 +88,7 @@ final class FakeModule extends AbstractAppModule
         $this->bind(AdminSession::class)->toInstance($adminSession);
         $this->bind(NullCsrfToken::class)->toInstance($csrf);
         $this->bind(FakeCsrfToken::class);
-        $this->bind(CsrfToken::class)->toInstance($csrf);
+        $this->bind(CsrfTokenInterface::class)->toInstance($csrf);
 
         $twoFactorAuth = new FakeTwoFactorAuth();
         $securityConfig = new FakeSecurityConfigWriter();
