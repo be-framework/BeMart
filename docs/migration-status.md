@@ -89,9 +89,10 @@ already implements the import (the router turns an `import_file` upload into the
 
 `Admin/CustomerDeliveryEdit.php`, `Admin/Customer.php`, and
 `Admin/Product/ProductClass.php` were three more entries, fixed for #143: each
-gained an admin-specific Be Input/Final (`AdminUpdateCustomerDeliveryAddressInput`,
-`AdminDeleteCustomerDeliveryAddressInput`, `AdminUpdateCustomerInput`,
-`AdminRegisterProductClassInput`) distinct from the storefront transitions —
+gained an admin-specific Be Input/Final (`AdminCreateCustomerDeliveryAddressInput`,
+`AdminUpdateCustomerDeliveryAddressInput`, `AdminDeleteCustomerDeliveryAddressInput`,
+`AdminUpdateCustomerInput`, `AdminRegisterProductClassInput`) distinct from the
+storefront transitions —
 `UpdateCustomerAddressInput` omits `customerId` on purpose and derives the owner
 from the customer session, which is the opposite of an administrator editing
 someone else's row.

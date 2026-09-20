@@ -10,8 +10,8 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
-use MyVendor\BeMart\Be\Final\ProductClassRegistered;
-use MyVendor\BeMart\Be\Input\RegisterProductClassInput;
+use MyVendor\BeMart\Be\Final\AdminProductClassRegistered;
+use MyVendor\BeMart\Be\Input\AdminRegisterProductClassInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminProductClassForm;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
@@ -43,7 +43,7 @@ use function urlencode;
  *
  * POST faithfully ports the single-row 登録 (register) write: it
  * registers one ProductClass SKU for the supplied productCode via the
- * Be domain ({@see RegisterProductClassInput} → {@see ProductClassRegistered}),
+ * Be domain ({@see AdminRegisterProductClassInput} → {@see AdminProductClassRegistered}),
  * mirroring the canonical
  * {@see \MyVendor\BeMart\Resource\Page\Admin\Delivery\DeliveryList} onPost.
  *
@@ -128,7 +128,7 @@ class ProductClass extends ResourceObject
         int|string|null $delivery_fee = 0,
         string|null $product_code = null,
     ): static {
-        $final = ($this->becoming)(new RegisterProductClassInput(
+        $final = ($this->becoming)(new AdminRegisterProductClassInput(
             productCode: $productCode,
             price02: $this->toInt($price02),
             stock: $this->toInt($stock),
@@ -136,7 +136,7 @@ class ProductClass extends ResourceObject
             deliveryFee: $this->toInt($delivery_fee),
         ));
 
-        assert($final instanceof ProductClassRegistered);
+        assert($final instanceof AdminProductClassRegistered);
 
         ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/product/product-class?productCode=%s', urlencode($final->productCode)));
         $this->body = [

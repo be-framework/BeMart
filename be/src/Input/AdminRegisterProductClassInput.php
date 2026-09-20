@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Input;
 
 use Be\Framework\Attribute\Be;
-use MyVendor\BeMart\Be\Final\ProductClassRegistered;
+use MyVendor\BeMart\Be\Final\AdminProductClassRegistered;
 
 /**
  * Input for doRegisterProductClass — admin registers one product 規格
  * (SKU) row for a product, carrying its sale price / stock / unlimited
  * flag / delivery fee (product-class-write).
  *
- *   RegisterProductClassInput → ProductClassRegistered (Direct, admin
- *                                                       AUTHZ)
+ *   AdminRegisterProductClassInput → AdminProductClassRegistered (Direct,
+ *                                                       admin AUTHZ)
  */
-#[Be(ProductClassRegistered::class)]
-final readonly class RegisterProductClassInput
+#[Be(AdminProductClassRegistered::class)]
+final readonly class AdminRegisterProductClassInput
 {
     /**
      * @psalm-taint-source input $productCode

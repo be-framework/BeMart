@@ -16,14 +16,14 @@ use Ray\InputQuery\Attribute\Input;
  * Product class registered — Final, proof a new 規格 (SKU) row was
  * persisted by an admin operation (product-class-write).
  *
- *   RegisterProductClassInput → ProductClassRegistered (Direct, admin
- *                                                       AUTHZ)
+ *   AdminRegisterProductClassInput → AdminProductClassRegistered (Direct,
+ *                                                       admin AUTHZ)
  *
  * AUTHZ: the admin firewall is the FIRST statement — an admin-supplied
  * productCode can never be persisted unauthenticated. stock is nulled
  * when stockUnlimited is true, mirroring dtb_product_class semantics.
  */
-final readonly class ProductClassRegistered
+final readonly class AdminProductClassRegistered
 {
     public string $productClassId;
     public string $productCode;
