@@ -46,8 +46,8 @@ class Log extends ResourceObject
         private readonly string $logPath,
     ) {
     }
-    /** ALPS `goAdminLog` に対応する GET 操作。 */
-    #[Alps('goAdminLog')]
+    /** ALPS `goLog` に対応する GET 操作。 */
+    #[Alps('goLog')]
     #[JsonSchema(schema: 'get-admin-log.json')]
 
     public function onGet(): static

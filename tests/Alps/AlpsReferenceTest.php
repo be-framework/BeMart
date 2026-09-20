@@ -10,7 +10,6 @@ use RecursiveIteratorIterator;
 use SplFileInfo;
 
 use function array_diff;
-use function array_merge;
 use function array_unique;
 use function array_values;
 use function count;
@@ -29,55 +28,25 @@ use const PREG_SET_ORDER;
  * implement one of its transitions. Nothing verified that the id exists:
  * `asd --validate` checks the profile, not the references into it.
  *
- * Nineteen references had drifted. They are listed below, split by what each
- * one needs, because the fix differs per group and every one of them is a
- * decision about the canonical profile rather than about code.
+ * Nineteen references had drifted; fifteen were resolved (#143 — the
+ * customer, customer-delivery-edit, and product-class dead forms; the
+ * log/order-pdf/order-mail-confirm/template-add id renames; and the
+ * route-gate/fallback/placeholder ids, which dropped `#[Alps]` since they
+ * answer a URL that EC-CUBE has and BeMart deliberately does not model as
+ * an application transition). The remaining four are listed below.
  */
 final class AlpsReferenceTest extends TestCase
 {
     /**
-     * Route-gate and fallback plumbing. These answer a URL that EC-CUBE has
-     * and BeMart deliberately does not model as an application transition.
-     * Either the profile gains gate descriptors, or these stop carrying
-     * `#[Alps]` — they are not screens a client can discover.
-     */
-    private const ROUTE_GATE = [
-        'doActionRedirect',
-        'doAdminActionRedirect',
-        'doAdminUnsupportedRoute',
-        'doUnsupportedRoute',
-        'goActionRedirect',
-        'goAdminActionRedirect',
-        'goAdminUnsupportedRoute',
-        'goUnsupportedRoute',
-    ];
-
-    /** A rendered placeholder, not a transition. */
-    private const PLACEHOLDER = [
-        'goAdminEmptyPage',
-    ];
-
-    /**
      * Screens and actions that exist as ported markup but were never added to
-     * the profile. `goAdminOrderMailConfirm` is the closest to a plain rename:
-     * the profile carries `goOrderMailConfirm` already. The rest are genuinely
-     * absent — `goAdminOrderOrderPdf` and `goShoppingShippingMultipleEdit` are
-     * editor screens distinct from the `goExportOrderPdf` and
-     * `goShoppingShippingMultiple` transitions they link to.
-     *
-     * Four of these are also the four remaining dead forms
-     * ({@see \MyVendor\BeMart\Tests\Router\TemplateFormActionTest}), so the
-     * write handler and the descriptor land together.
+     * the profile. Two of these are also the two remaining dead forms
+     * ({@see \MyVendor\BeMart\Tests\Router\TemplateFormActionTest}:
+     * `goAdminContentFileManager` / `goAdminTwoFactorAuthEdit`), so the write
+     * handler and the descriptor land together when those are picked up.
      */
     private const SCREEN_GAP = [
         'doCreateMailTemplate',
         'goAdminContentFileManager',
-        'goAdminCustomerDeliveryEdit',
-        'goAdminLog',
-        'goAdminOrderMailConfirm',
-        'goAdminOrderOrderPdf',
-        'goAdminProductProductClass',
-        'goAdminTemplateTemplateAdd',
         'goAdminTwoFactorAuthEdit',
         'goShoppingShippingMultipleEdit',
     ];
@@ -106,7 +75,7 @@ final class AlpsReferenceTest extends TestCase
     /** @return list<string> */
     private function known(): array
     {
-        return array_merge(self::ROUTE_GATE, self::PLACEHOLDER, self::SCREEN_GAP);
+        return self::SCREEN_GAP;
     }
 
     /** @return list<string> */
