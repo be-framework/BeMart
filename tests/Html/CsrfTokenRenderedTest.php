@@ -12,6 +12,7 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\NullCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Csrf\CsrfTokenInterface;
+use MyVendor\BeMart\Module\BeMartTwigExtension;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Tests\Smoke\ResourceSmokeTest;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
@@ -97,18 +98,34 @@ final class CsrfTokenRenderedTest extends TestCase
      * `csrf_token_for_anchor()`) Twig function instead of the resource-published value renders
      * non-empty and slips past that sweep entirely (that was the #139 blindspot for
      * `admin/category/category-list`, `admin/product/csv-category`,
-     * `admin/product/csv-class-name`). Guard the closed ledger directly: no template may call
-     * either session-reading helper at all. Matches the bare function-name prefix (not just
-     * `csrf_token(`) so `csrf_token_for_anchor(` — a second, distinct function that delegates to
-     * the same $_SESSION read — cannot slip past this guard the way it slipped past the original
-     * #139 sweep.
+     * `admin/product/csv-class-name`). Guard the closed ledger directly, two ways:
+     *
+     *  1. Structurally: {@see \MyVendor\BeMart\Module\BeMartTwigExtension} must not register a
+     *     Twig function whose name starts with `csrf_token` at all — this catches any future
+     *     $_SESSION-reading variant by shape, not by name list.
+     *  2. Textually: a regex sweep over every template source, as a second line of defence in
+     *     case a call site is ever wired through a differently-named Twig registration.
      */
     public function testNoTemplateFallsBackToTheSessionReadingCsrfHelper(): void
     {
+        $extension = new BeMartTwigExtension();
+        $functionNames = [];
+        foreach ($extension->getFunctions() as $function) {
+            $functionNames[] = $function->getName();
+        }
+
+        foreach ($functionNames as $name) {
+            $this->assertFalse(
+                str_starts_with($name, 'csrf_token'),
+                "BeMartTwigExtension exposes a \$_SESSION-reading csrf_token* Twig function ('{$name}'); " .
+                'templates must use the resource-published csrfToken value instead.',
+            );
+        }
+
         $offenders = [];
         foreach ($this->twigFiles() as $file) {
             $contents = (string) file_get_contents($file->getPathname());
-            if (preg_match('/\bcsrf_token(?:_for_anchor)?\(/', $contents) === 1) {
+            if (preg_match('/\bcsrf_token\w*\s*\(/', $contents) === 1) {
                 $offenders[] = $file->getPathname();
             }
         }
@@ -123,7 +140,14 @@ final class CsrfTokenRenderedTest extends TestCase
 
     public function testLedgerEntriesAreWellFormed(): void
     {
-        foreach ($this->ledger() as $key => $entry) {
+        $ledger = $this->ledger();
+
+        // This PR closed the ledger's original 37 entries to {}. Assert that explicitly so the
+        // loop below isn't a vacuous no-assertion pass; if an entry is ever reopened, it still
+        // gets its reason validated against the allow-list.
+        $this->assertSame([], $ledger, 'The csrf-empty-token ledger should stay empty; if this fails, new entries below still get validated.');
+
+        foreach ($ledger as $key => $entry) {
             $this->assertContains($entry['reason'], self::REASONS, $key);
         }
     }
