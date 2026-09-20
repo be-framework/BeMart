@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Final\BaseInfoUpdated;
 use MyVendor\BeMart\Be\Input\GetBaseInfoInput;
 use MyVendor\BeMart\Be\Input\UpdateBaseInfoInput;
 use MyVendor\BeMart\Form\AdminShopMasterForm;
+use Ray\Csrf\CsrfTokenInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -49,6 +50,7 @@ class BaseInfo extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -103,6 +105,7 @@ class BaseInfo extends ResourceObject
             'businessHour' => $final->businessHour,
             'shopEmail01' => $final->shopEmail01,
             'shopMessage' => $final->shopMessage,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

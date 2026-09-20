@@ -19,6 +19,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderMailForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+use Ray\Csrf\CsrfTokenInterface;
 
 use function assert;
 
@@ -46,6 +47,7 @@ class SendMail extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -85,6 +87,7 @@ class SendMail extends ResourceObject
         $this->body = [
             'form' => $form,
             'orderNo' => $orderNo,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

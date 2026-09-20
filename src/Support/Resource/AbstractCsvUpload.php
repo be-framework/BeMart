@@ -10,6 +10,7 @@ use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminCsvUploadForm;
 use Ray\WebFormModule\FormFactory;
+use Ray\Csrf\CsrfTokenInterface;
 
 use function assert;
 
@@ -35,6 +36,7 @@ abstract class AbstractCsvUpload extends ResourceObject
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -70,6 +72,7 @@ abstract class AbstractCsvUpload extends ResourceObject
             'csvTitle' => $this->csvTitle(),
             'skeletonRoute' => $this->skeletonRoute(),
             'columns' => $this->columns(),
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

@@ -38,7 +38,7 @@ final class ShoppingShippingResourceTest extends TestCase
         $this->assertSame('page://self/shopping/shipping', $ro->body['submitTo']['href']);
         // Address data lookup is a Wave-future TODO — empty list for now.
         $this->assertSame([], $ro->body['addresses']);
-        $this->assertNull($ro->body['csrfToken']);
+        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnGetShippingEditReturnsExpectedShape(): void
@@ -53,7 +53,7 @@ final class ShoppingShippingResourceTest extends TestCase
         $this->assertContains('csrfToken', $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/shopping/shipping-edit', $ro->body['submitTo']['href']);
-        $this->assertNull($ro->body['csrfToken']);
+        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnGetShippingMultipleReturnsExpectedShape(): void
