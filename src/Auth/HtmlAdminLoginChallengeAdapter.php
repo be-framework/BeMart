@@ -69,13 +69,6 @@ final class HtmlAdminLoginChallengeAdapter implements AdminLoginChallengeInterfa
         return $this->challengeFrom($session[self::SETUP_CHALLENGE_KEY] ?? null, requiresAuthKey: true);
     }
 
-    /**
-     * Drop a pending challenge without elevating the session.
-     *
-     * Used when the challenge is refused rather than answered (too many
-     * codes tried): the pre-auth identity must not survive, or the next
-     * request would resume the same challenge.
-     */
     #[Override]
     public function abandonVerification(): void
     {
