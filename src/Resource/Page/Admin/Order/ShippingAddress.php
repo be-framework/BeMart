@@ -145,7 +145,7 @@ class ShippingAddress extends ResourceObject
      * @psalm-taint-source input $addr02
      * @psalm-taint-source input $phoneNumber
      */
-    #[Alps('doUpdateShippingAddress')]
+    #[Alps('doUpdateOrderShippingAddress')]
     #[JsonSchema(schema: 'put-admin-order-shipping-address.json', params: 'put-admin-order-shipping-address.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'doSelectShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'post')]

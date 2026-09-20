@@ -150,6 +150,11 @@ final class AdminTemplateListHtmlRenderTest extends TestCase
             $html,
             'goTemplateInstall link missing',
         );
+        $this->assertStringContainsString(
+            'rel="goTemplateInstall"',
+            $html,
+            'goTemplateInstall rel token missing (must not be paired with the ALPS-orphaned goTemplateAdd)',
+        );
     }
 
     /**
