@@ -47,9 +47,6 @@ final class TemplateFormActionTest extends TestCase
      */
     private const KNOWN_DEAD = [
         'src/Resource/Page/Admin/Content/FileManager.php',
-        'src/Resource/Page/Admin/Customer.php',
-        'src/Resource/Page/Admin/CustomerDeliveryEdit.php',
-        'src/Resource/Page/Admin/Product/ProductClass.php',
         'src/Resource/Page/Admin/TwoFactorAuthEdit.php',
     ];
 
