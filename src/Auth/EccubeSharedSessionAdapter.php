@@ -6,13 +6,7 @@ namespace MyVendor\BeMart\Auth;
 
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 
-use function headers_sent;
 use function is_string;
-use function session_name;
-use function session_start;
-use function session_status;
-
-use const PHP_SESSION_ACTIVE;
 
 /**
  * Production CustomerSession adapter — reads PHP's `$_SESSION` using
@@ -45,13 +39,13 @@ use const PHP_SESSION_ACTIVE;
  *      starts the session under the same cookie name and reads the flat
  *      key. No Symfony deps required on the BEAR side.
  *
-     * CLI safety: in `bin/app.php` we have no HTTP context. CLI requests are
-     * anonymous unless a context module binds a different CustomerSession.
-     * Application code must not inspect process environment to decide auth.
+ * CLI safety: in `bin/app.php` we have no HTTP context. CLI requests are
+ * anonymous unless a context module binds a different CustomerSession.
+ * Application code must not inspect process environment to decide auth.
  *
- * Headers-sent safety: if `session_start()` cannot run (output already
- * flushed), we treat the request as anonymous. Domain code already
- * handles `customerId === null` correctly.
+ * Which cookie name starts the session, and whether one starts at all, is a
+ * context/DI decision - see {@see SessionStarterInterface} and #93. Headers-sent
+ * safety and the "not started" → anonymous fallback live there now.
  */
 final readonly class EccubeSharedSessionAdapter extends CustomerSession
 {
@@ -70,10 +64,10 @@ final readonly class EccubeSharedSessionAdapter extends CustomerSession
     public const CUSTOMER_ID_KEY = 'customer_id';
 
     public function __construct(
-        private string $cookieName = self::COOKIE_NAME,
+        private SessionStarterInterface $sessionStarter = new CookieSessionStarter(self::COOKIE_NAME),
         private string $sessionKey = self::CUSTOMER_ID_KEY,
     ) {
-        $this->ensureSessionStarted();
+        $this->sessionStarter->ensureStarted();
         parent::__construct($this->readCustomerId());
     }
 
@@ -91,36 +85,5 @@ final readonly class EccubeSharedSessionAdapter extends CustomerSession
         }
 
         return null;
-    }
-
-    private function ensureSessionStarted(): void
-    {
-        // CLI has no real session. Tests can still poke $_SESSION directly;
-        // this adapter just won't try to start a session machinery that
-        // would emit a warning or fail.
-        if (PHP_SAPI === 'cli') {
-            return;
-        }
-
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            return;
-        }
-
-        if (headers_sent()) {
-            // Cannot start a session now; treat request as anonymous.
-            return;
-        }
-
-        session_name($this->cookieName);
-        // No error suppression: if session_start emits a warning, surface
-        // it. The headers_sent() guard above covers the common case;
-        // other failures (session.save_path unwritable, etc.) are
-        // operator-config issues that must be visible in the error log,
-        // not silently swallowed into "request is anonymous".
-        session_start([
-            'use_strict_mode' => true,
-            'cookie_httponly' => true,
-            'cookie_samesite' => 'Lax',
-        ]);
     }
 }

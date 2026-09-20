@@ -13,6 +13,7 @@ use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use Be\Framework\Module\BeModule;
 use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Cache\ProductCacheInvalidator;
+use MyVendor\BeMart\Auth\AdminLoginChallengeInterface;
 use MyVendor\BeMart\Auth\AdminSessionWriterInterface;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
@@ -212,6 +213,7 @@ final class AppModule extends AbstractAppModule
         // A Final announces a product change; this is what turns the announcement into cache work
         $this->bind(ProductCacheInvalidatorInterface::class)->to(ProductCacheInvalidator::class);
         $this->bind(HtmlAdminLoginChallengeAdapter::class);
+        $this->bind(AdminLoginChallengeInterface::class)->to(HtmlAdminLoginChallengeAdapter::class);
         $this->bind(CustomerSessionWriterInterface::class)->to(NoopCustomerSessionWriter::class)->in(Scope::SINGLETON);
         $this->bind(AdminSessionWriterInterface::class)->to(NoopAdminSessionWriter::class)->in(Scope::SINGLETON);
         $this->bind(CartSessionPrefixInterface::class)->to(NoopCartSessionPrefix::class)->in(Scope::SINGLETON);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Auth;
 
+use Override;
+
 use function is_string;
 use function session_regenerate_id;
 use function session_status;
@@ -23,11 +25,12 @@ use const PHP_SESSION_ACTIVE;
  * logout ({@see HtmlAdminSessionWriter}); elevation happens inside an
  * already-authenticated session, so it does not rotate it again.
  */
-final class HtmlAdminLoginChallengeAdapter
+final class HtmlAdminLoginChallengeAdapter implements AdminLoginChallengeInterface
 {
     public const VERIFY_CHALLENGE_KEY = 'admin_2fa_verify_challenge';
     public const SETUP_CHALLENGE_KEY = 'admin_2fa_setup_challenge';
 
+    #[Override]
     public function startVerification(string $adminId, string $loginId): void
     {
         $session = &$this->session();
@@ -38,6 +41,7 @@ final class HtmlAdminLoginChallengeAdapter
         ];
     }
 
+    #[Override]
     public function startSetup(string $adminId, string $loginId, string $authKey): void
     {
         $session = &$this->session();
@@ -49,6 +53,7 @@ final class HtmlAdminLoginChallengeAdapter
         ];
     }
 
+    #[Override]
     public function verificationChallenge(): AdminTwoFactorChallenge|null
     {
         $session = &$this->session();
@@ -56,6 +61,7 @@ final class HtmlAdminLoginChallengeAdapter
         return $this->challengeFrom($session[self::VERIFY_CHALLENGE_KEY] ?? null, requiresAuthKey: false);
     }
 
+    #[Override]
     public function setupChallenge(): AdminTwoFactorChallenge|null
     {
         $session = &$this->session();
@@ -70,12 +76,14 @@ final class HtmlAdminLoginChallengeAdapter
      * codes tried): the pre-auth identity must not survive, or the next
      * request would resume the same challenge.
      */
+    #[Override]
     public function abandonVerification(): void
     {
         $session = &$this->session();
         unset($session[self::VERIFY_CHALLENGE_KEY]);
     }
 
+    #[Override]
     public function completeVerification(AdminTwoFactorChallenge $challenge): void
     {
         $this->regenerateActiveSessionId();
@@ -84,6 +92,7 @@ final class HtmlAdminLoginChallengeAdapter
         $session[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = $challenge->adminId;
     }
 
+    #[Override]
     public function completeSetup(AdminTwoFactorChallenge $challenge): void
     {
         $this->regenerateActiveSessionId();
@@ -92,6 +101,7 @@ final class HtmlAdminLoginChallengeAdapter
         $session[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = $challenge->adminId;
     }
 
+    #[Override]
     public function regenerateActiveSessionId(): void
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
