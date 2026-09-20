@@ -52,8 +52,11 @@ final class DevModule extends AbstractAppModule
      * Body generations retained alongside log sessions (same count passed to
      * DevQueryRepositoryLogModule below): a log's body_ref keeps resolving for as long as the
      * log itself survives, and neither is pruned without the other (issue #134).
+     *
+     * Matches DevQueryRepositoryLogModule's own default so aligning the two lifetimes does not
+     * shorten the log history the bear-observe skill tells people to read back through.
      */
-    private const int KEEP_GENERATIONS = 20;
+    private const int KEEP_GENERATIONS = 100;
 
     #[Override]
     protected function configure(): void
