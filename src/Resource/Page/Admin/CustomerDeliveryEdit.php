@@ -49,6 +49,15 @@ use function urlencode;
  * Admin-only — the AUTHZ guard rejects an anonymous admin with 403,
  * matching the sibling Setting/System Tier-2 renderers ({@see System},
  * {@see Security}, {@see TwoFactorAuthEdit}).
+ *
+ * KNOWN UI LIMITATION (#143): the rendered form has no `addressId` hidden
+ * field and no existing-address list, so `onPost` can only ever take the
+ * addressId-empty (create) branch and `onDelete` cannot be reached at all
+ * from this page today — both are exercised directly in
+ * {@see \MyVendor\BeMart\Tests\Resource\AdminCustomerDeliveryEditResourceTest}
+ * but have no click path. Wiring an edit/delete affordance per existing
+ * address (e.g. from `/admin/customer`'s address list) is a separate,
+ * larger UI slice than the dead-form fix #143 scoped.
  */
 class CustomerDeliveryEdit extends ResourceObject
 {
