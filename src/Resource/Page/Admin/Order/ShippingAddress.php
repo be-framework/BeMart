@@ -80,7 +80,6 @@ class ShippingAddress extends ResourceObject
      */
     #[Alps('doSelectShippingAddress')]
     #[JsonSchema(schema: 'get-admin-order-shipping-address.json', params: 'get-admin-order-shipping-address.param.json')]
-    #[Link(rel: 'doUpdateShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[Link(rel: 'doUpdateOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[Link(rel: 'doSelectShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'post')]
     public function onGet(string $orderNo = ''): static
@@ -118,7 +117,6 @@ class ShippingAddress extends ResourceObject
     #[Alps('doSelectShippingAddress')]
     #[JsonSchema(schema: 'post-admin-order-shipping-address.json', params: 'post-admin-order-shipping-address.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
-    #[Link(rel: 'doUpdateShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[Link(rel: 'doUpdateOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[CsrfToken]
     public function onPost(

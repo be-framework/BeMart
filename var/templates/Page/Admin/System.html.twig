@@ -89,7 +89,11 @@
 
 {% block main %}
 
-{# ── Logout (only #[Link] on this resource without page UI) ──────────────── #}
+{# ── Logout (only #[Link] on this resource without page UI). Per-page, not
+   a shared admin-base.html.twig topbar form: a dozen other admin pages
+   don't publish csrfToken, so a shared form would render an empty token on
+   those and fail CSRF in production. Duplicate this form on the specific
+   pages that need it (see #131). ────────────────────────────────────── #}
 <div style="text-align:right; margin-bottom:1rem;">
     <form method="post" action="/admin/logout" rel="doAdminLogout" style="display:inline;">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">

@@ -12,7 +12,7 @@
 
   ACTIONS (derived from #[Link] annotations on TemplateList):
     GET  /admin/template/template-list                                  — goTemplateList (this page)
-    GET  /admin/template/template-add                                   — goTemplateAdd / goTemplateInstall
+    GET  /admin/template/template-add                                   — goTemplateInstall
     PUT  /admin/template/template-list?_method=put                     — doSelectTemplate (activate)
     POST /admin/template/template-list?templateId=…                    — doDownloadTemplate
     DELETE /admin/template/template-list?templateId=…&_method=delete   — doDeleteTemplate
