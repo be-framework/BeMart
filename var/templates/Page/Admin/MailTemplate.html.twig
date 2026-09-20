@@ -228,6 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
       id="form1"
       method="post"
       action="/admin/mail-template"
+      rel="doUpdateMailTemplate"
     >
       <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
       <div class="idea-admin-field">
@@ -436,6 +437,10 @@ document.addEventListener('DOMContentLoaded', function () {
         <i class="fa fa-arrow-left" aria-hidden="true"></i>
         支払方法設定
       </a>
+      <a href="/admin/order/send-mail" rel="goOrderMail" style="margin-left:1rem;">
+        <i class="fa fa-envelope" aria-hidden="true"></i>
+        受注メール送信
+      </a>
     </div>
     <div class="idea-admin-toolbar__actions">
       <button class="idea-admin-action idea-admin-action--primary" type="submit">
@@ -516,6 +521,10 @@ document.addEventListener('DOMContentLoaded', function () {
     <a href="/admin/payment/payment-list" rel="goPaymentList">
       <i class="fa fa-arrow-left" aria-hidden="true"></i>
       支払方法設定
+    </a>
+    <a href="/admin/order/send-mail" rel="goOrderMail" style="margin-left:1rem;">
+      <i class="fa fa-envelope" aria-hidden="true"></i>
+      受注メール送信
     </a>
   </div>
 </div>

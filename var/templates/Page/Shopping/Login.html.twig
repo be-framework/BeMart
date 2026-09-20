@@ -42,6 +42,7 @@
           id="shopping_login"
           method="post"
           action="/login"
+          rel="doLogin"
           novalidate>
       <input type="hidden" name="_target_path" value="/shopping">
       <input type="hidden" name="_failure_path" value="/shopping/login">
@@ -69,7 +70,7 @@
 
       <div class="idea-auth-links">
         {# rel=goCustomerRegistration → page://self/entry #}
-        <a class="idea-link" href="/entry">新規会員登録</a>
+        <a class="idea-link" href="/entry" rel="goCustomerRegistration">新規会員登録</a>
         <a class="idea-link" href="/forgot-password">パスワードをお忘れの方</a>
       </div>
     </form>
@@ -80,7 +81,7 @@
     <h2 class="idea-section-title">ゲスト購入</h2>
     <p class="idea-muted">会員登録なしで購入できます。お届け先と連絡先を入力して、そのままご注文手続きへ進んでください。</p>
     {# rel=goShoppingNonMember → page://self/shopping/non-member #}
-    <a class="idea-button idea-button--wide" href="/shopping/non-member">ゲスト購入へ進む</a>
+    <a class="idea-button idea-button--wide" href="/shopping/non-member" rel="goShoppingNonMember">ゲスト購入へ進む</a>
     <a class="idea-link idea-summary-link" href="/cart">カートに戻る</a>
   </article>
 </section>

@@ -73,6 +73,7 @@
   id="category_edit_form"
   method="post"
   action="/admin/category/category?categoryId={{ categoryId }}"
+  rel="doUpdateCategory"
   novalidate
 >
   <input type="hidden" name="_method" value="put">
@@ -197,6 +198,7 @@
         id="delete_form"
         method="post"
         action="/admin/category/category?categoryId={{ categoryId }}"
+        rel="doDeleteCategory"
         style="display:inline;"
       >
         <input type="hidden" name="_method" value="delete">

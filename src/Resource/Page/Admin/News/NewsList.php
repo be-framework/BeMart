@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Final\AdminNewsListFetched;
 use MyVendor\BeMart\Be\Final\NewsCreated;
 use MyVendor\BeMart\Be\Input\CreateNewsInput;
 use MyVendor\BeMart\Be\Input\GetAdminNewsListInput;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -31,6 +32,7 @@ class NewsList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -51,6 +53,7 @@ class NewsList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'news' => $final->news,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

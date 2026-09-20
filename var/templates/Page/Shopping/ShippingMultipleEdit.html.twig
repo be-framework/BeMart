@@ -35,6 +35,7 @@
   <form class="idea-checkout-panel idea-address-form h-adr"
         method="post"
         action="/shopping/shipping-multiple-edit"
+        rel="doAddMultipleShippingAddress"
         novalidate>
     <span class="p-country-name" aria-hidden="true">Japan</span>
     <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
@@ -45,7 +46,7 @@
         <h2 class="idea-section-title">お名前・フリガナ</h2>
       </div>
       {# rel=goShoppingShippingMultiple → page://self/shopping/shipping-multiple #}
-      <a class="idea-link" href="/shopping/shipping-multiple">複数配送先の指定に戻る</a>
+      <a class="idea-link" href="/shopping/shipping-multiple" rel="goShoppingShippingMultiple">複数配送先の指定に戻る</a>
     </div>
 
     <div class="idea-form-grid idea-form-grid--two">

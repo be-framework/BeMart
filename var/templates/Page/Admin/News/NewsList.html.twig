@@ -157,17 +157,22 @@
              title="編集">
             <i class="fa fa-pencil" aria-hidden="true"></i>
           </a>
-          {# Static delete affordance — rel=doDeleteNews is the contract #}
-          <a class="idea-admin-icon-btn"
-             href="/admin/news/news?newsId={{ item.newsId|url_encode }}&_method=delete"
-             rel="doDeleteNews"
-             title="削除"
-             style="color: #a9472e; border-color: rgba(169,71,46,.3);"
-             data-news-id="{{ item.newsId }}"
-             data-news-title="{{ item.newsTitle|e('html_attr') }}"
-             onclick="event.preventDefault(); newsListOpenDelete(this);">
-            <i class="fa fa-trash" aria-hidden="true"></i>
-          </a>
+          {# Delete affordance — rel=doDeleteNews is the contract #}
+          <form method="post"
+                action="/admin/news/news?newsId={{ item.newsId|url_encode }}"
+                rel="doDeleteNews"
+                style="display:inline;"
+                data-news-id="{{ item.newsId }}"
+                data-news-title="{{ item.newsTitle|e('html_attr') }}"
+                onsubmit="event.preventDefault(); newsListOpenDelete(this);">
+            <input type="hidden" name="_method" value="delete">
+            <input type="hidden" name="newsId" value="{{ item.newsId }}">
+            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+            <button type="submit" class="idea-admin-icon-btn" title="削除"
+                    style="color: #a9472e; border-color: rgba(169,71,46,.3);">
+              <i class="fa fa-trash" aria-hidden="true"></i>
+            </button>
+          </form>
         </td>
 
       </tr>
@@ -216,6 +221,7 @@
       <button class="idea-admin-action" type="button" onclick="newsListCloseDelete()">キャンセル</button>
       <form id="news-delete-form" method="post" action="" style="display:inline;">
         <input type="hidden" name="_method" value="delete">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">
           <i class="fa fa-trash" aria-hidden="true"></i>
           削除する

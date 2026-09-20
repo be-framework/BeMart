@@ -125,6 +125,7 @@
   role="form"
   method="post"
   action="/admin/order/shipping-address?orderNo={{ orderNo|default('')|url_encode }}"
+  rel="doUpdateOrderShippingAddress doUpdateShippingAddress"
   novalidate
 >
   <input type="hidden" name="_method" value="put">
@@ -292,6 +293,7 @@
       id="shipping_address_pick_form"
       method="post"
       action="/admin/order/shipping-address"
+      rel="doSelectShippingAddress"
       novalidate
     >
       <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">

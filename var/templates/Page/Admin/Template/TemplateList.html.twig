@@ -80,6 +80,7 @@
   id="template-select-form"
   method="post"
   action="/admin/template/template-list?_method=put"
+  rel="doSelectTemplate"
 >
   <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
   <input type="hidden" id="template-id-hidden" name="templateId" value="">
@@ -138,6 +139,7 @@
             <form
               method="post"
               action="/admin/template/template-list?templateId={{ template.templateId }}"
+              rel="doDownloadTemplate"
               style="display:contents;"
             >
               <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
@@ -221,6 +223,7 @@
       <form
         method="post"
         action="/admin/template/template-list?templateId={{ template.templateId }}&_method=delete"
+        rel="doDeleteTemplate"
         style="display:contents;"
       >
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
