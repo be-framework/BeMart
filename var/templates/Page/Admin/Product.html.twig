@@ -105,6 +105,7 @@
   id="idea-product-form"
   method="post"
   action="/admin/product?productCode={{ productCode }}"
+  rel="doUpdateProduct"
   novalidate
 >
   <input type="hidden" name="_method"   value="put">
@@ -408,7 +409,7 @@
         class="idea-admin-action"
         onclick="document.getElementById('copy-modal').hidden=true"
       >キャンセル</button>
-      <form method="post" action="/admin/product-copy" style="display:inline;">
+      <form method="post" action="/admin/product-copy" rel="doCopyProduct" style="display:inline;">
         <input type="hidden" name="productCode" value="{{ productCode }}">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <button type="submit" class="idea-admin-action idea-admin-action--primary" rel="doCopyProduct">
@@ -443,7 +444,7 @@
         class="idea-admin-action"
         onclick="document.getElementById('delete-modal').hidden=true"
       >キャンセル</button>
-      <form method="post" action="/admin/product?productCode={{ productCode }}" style="display:inline;">
+      <form method="post" action="/admin/product?productCode={{ productCode }}" rel="doDeleteProduct" style="display:inline;">
         <input type="hidden" name="_method"   value="delete">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <button type="submit" class="idea-admin-action idea-admin-action--destructive" rel="doDeleteProduct">

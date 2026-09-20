@@ -64,6 +64,7 @@
       id="calendar_item_new"
       method="post"
       action="/admin/calendar?operation=create"
+      rel="doCreateCalendarHoliday"
       novalidate
     >
       <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
@@ -143,6 +144,7 @@
               id="edit-form-{{ item.id }}"
               method="post"
               action="/admin/calendar?operation=update"
+              rel="doUpdateCalendar"
               novalidate
             >
               <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
@@ -246,6 +248,7 @@
                   id="delete-form-{{ item.id }}"
                   method="post"
                   action="/admin/calendar?calendarId={{ item.id }}&_method=delete"
+                  rel="doDeleteCalendarHoliday"
                   style="display:inline;"
                 >
                   <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">

@@ -83,6 +83,7 @@
       method="post"
       action="/admin/category/category-list"
       aria-label="カテゴリ新規登録"
+      rel="doCreateCategory"
     >
       <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
 
@@ -323,6 +324,7 @@
       <form
         method="post"
         action="/admin/category/category?categoryId={{ category.categoryId }}&_method=delete"
+        rel="doDeleteCategory"
         style="display:contents;"
       >
         <input type="hidden" name="_method" value="delete">

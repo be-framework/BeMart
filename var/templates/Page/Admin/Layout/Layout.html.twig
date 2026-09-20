@@ -173,6 +173,7 @@
   id="layout-editor-form"
   method="post"
   action="/admin/layout/layout{% if layoutId is defined and layoutId %}?layoutId={{ layoutId }}&_method=put{% endif %}"
+  rel="doUpdateLayout"
   novalidate
 >
   <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">

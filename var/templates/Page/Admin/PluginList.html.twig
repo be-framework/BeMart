@@ -172,6 +172,7 @@
               method="post"
               action="/admin/plugin-enable"
               aria-label="{{ plugin.pluginName }}を有効化"
+              rel="doEnablePlugin"
               style="display:inline;"
             >
               <input type="hidden" name="pluginCode" value="{{ plugin.pluginCode }}">
@@ -192,6 +193,7 @@
               method="post"
               action="/admin/plugin-disable"
               aria-label="{{ plugin.pluginName }}を無効化"
+              rel="doDisablePlugin"
               style="display:inline;"
             >
               <input type="hidden" name="pluginCode" value="{{ plugin.pluginCode }}">
@@ -250,7 +252,7 @@
         onclick="this.closest('dialog').close()"
       >キャンセル</button>
       {# DELETE /admin/plugin (doUninstallPlugin) via hidden _method #}
-      <form method="post" action="/admin/plugin" style="display:contents;">
+      <form method="post" action="/admin/plugin" rel="doUninstallPlugin" style="display:contents;">
         <input type="hidden" name="_method" value="delete">
         <input type="hidden" name="pluginCode" value="{{ plugin.pluginCode }}">
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">

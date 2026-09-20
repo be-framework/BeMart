@@ -89,6 +89,17 @@
 
 {% block main %}
 
+{# ── Logout (only #[Link] on this resource without page UI) ──────────────── #}
+<div style="text-align:right; margin-bottom:1rem;">
+    <form method="post" action="/admin/logout" rel="doAdminLogout" style="display:inline;">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <button type="submit" class="idea-admin-action">
+            <i class="fa fa-sign-out" aria-hidden="true"></i>
+            ログアウト
+        </button>
+    </form>
+</div>
+
 {#
   ── Highlighted KPI strip: the 3 most operationally relevant values ──────
   PHP Version / OS / Application are surfaced prominently at the top.

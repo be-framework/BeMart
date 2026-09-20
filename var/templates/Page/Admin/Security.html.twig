@@ -5,7 +5,7 @@
 {% set sub_title = 'システム' %}
 
 {% block main %}
-<form method="post" action="/admin/security?_method=put" novalidate>
+<form method="post" action="/admin/security?_method=put" rel="doUpdateSecurity" novalidate>
     <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
     <div class="idea-admin-layout">
