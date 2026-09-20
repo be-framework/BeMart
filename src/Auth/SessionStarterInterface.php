@@ -9,8 +9,9 @@ namespace MyVendor\BeMart\Auth;
  *
  * The cookie name and start policy are a context/DI decision, not something a Resource or Auth
  * adapter should hardcode - see issue #93. {@see CookieSessionStarter} carries the production
- * cookie policy; {@see NullSessionStarter} is for contexts that must never touch PHP's session
- * machinery (e.g. no HTTP origin, or a fake/test context that stands session state up itself).
+ * cookie policy, bound explicitly by {@see \MyVendor\BeMart\Module\HtmlModule} and
+ * {@see \MyVendor\BeMart\Module\EccubeModule}, and used as every adapter's constructor default so
+ * direct instantiation (unit tests) keeps working without a context.
  */
 interface SessionStarterInterface
 {
