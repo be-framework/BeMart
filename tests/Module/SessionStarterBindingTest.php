@@ -16,6 +16,8 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 use ReflectionProperty;
 
+use function dirname;
+
 /**
  * #93 moved session-start policy out of Auth/ adapter internals and into context/DI. This is the
  * test that actually holds that boundary: without it, deleting the bind() lines in HtmlModule /
@@ -53,9 +55,12 @@ final class SessionStarterBindingTest extends TestCase
         $this->assertSame(EccubeSharedSessionAdapter::COOKIE_NAME, self::cookieNameOf($starter));
     }
 
-    public function testFakeModuleBindsSessionStarterToNullSessionStarter(): void
+    public function testTestModuleBindsSessionStarterToNullSessionStarter(): void
     {
-        $injector = new Injector(new TestModule(new Meta('MyVendor\\BeMart', 'test')));
+        $injector = new Injector(
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
+            dirname(__DIR__, 2) . '/var/tmp/test',
+        );
 
         $this->assertInstanceOf(NullSessionStarter::class, $injector->getInstance(SessionStarterInterface::class));
     }
