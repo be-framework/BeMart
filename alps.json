@@ -1225,7 +1225,8 @@
         "descriptor": [
           {"href": "#TaxRule"},
           {"href": "#goTaxRuleList"},
-          {"href": "#doCreateTaxRule"}
+          {"href": "#doCreateTaxRule"},
+          {"href": "#doDeleteTaxRule"}
         ]
       },
 

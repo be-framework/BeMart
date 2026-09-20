@@ -61,6 +61,7 @@ class Block extends ResourceObject
     #[Alps('goBlock')]
     #[JsonSchema(schema: 'get-admin-block-block.json', params: 'get-admin-block-block.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
+    #[Link(rel: 'doUpdateBlock', href: 'page://self/admin/block/block', method: 'put')]
     #[Link(rel: 'doDeleteBlock', href: 'page://self/admin/block/block', method: 'delete')]
     public function onGet(string|null $blockId = null): static
     {
