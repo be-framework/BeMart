@@ -112,6 +112,14 @@ const FLOWS = [
         'purge' => 'app://self/product/stock?productCode=sample-001',
         'embeds' => true,
     ],
+    // The same number, reached the way an admin edit reaches it: every writer of stock announces
+    // `product-corpus`, so the resource holding stock has to be stored under that key too.
+    'product-stock-corpus' => [
+        'read' => 'app://self/product/stock?productCode=sample-001',
+        'write' => null,
+        'purgeTags' => ['product-corpus'],
+        'embeds' => false,
+    ],
     // A page that carries a CSRF token must NOT be cached; what it must do is hit the child it
     // embeds. Caching it would hand one shopper's token to the next.
     'products-page' => [

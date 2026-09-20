@@ -31,7 +31,7 @@ else
 fi
 
 status=0
-for flow in help help-revalidate help-cdn help-cache-down agent-catalog agent-product products-app products-page product-stock products-corpus-tag shopping-complete customer-profile; do
+for flow in help help-revalidate help-cdn help-cache-down agent-catalog agent-product products-app products-page product-stock product-stock-corpus products-corpus-tag shopping-complete customer-profile; do
     if "$PHP" var/loop/verify-cache.php "$flow" > "var/loop/last-$flow.txt" 2>&1; then
         printf 'oracle %-14s ok\n' "$flow"
     else
