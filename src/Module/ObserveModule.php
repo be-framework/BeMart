@@ -8,6 +8,7 @@ use BEAR\EventSourcing\Filtered;
 use BEAR\EventSourcing\Module\EventSourcingModule;
 use BEAR\EventSourcing\Recorded;
 use BEAR\EventSourcing\RecordedMethods;
+use BEAR\EventSourcing\Resource\BodyStoreException;
 use BEAR\EventSourcing\Resource\BodyStoreInterface;
 use BEAR\EventSourcing\Resource\FileBodyStore;
 use BEAR\EventSourcing\Resource\ParamsFilterInterface;
@@ -22,6 +23,20 @@ use Koriym\SemanticLogger\SemanticLoggerInterface;
 use Override;
 use Ray\Di\Scope;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
+
+use function array_slice;
+use function bin2hex;
+use function count;
+use function glob;
+use function gmdate;
+use function max;
+use function microtime;
+use function random_bytes;
+use function rmdir;
+use function sort;
+use function sprintf;
+
+use const GLOB_ONLYDIR;
 
 /**
  * Observation context: `observe-` prefix on the app context (`cli-observe-fake-hal-app`).
@@ -57,13 +72,25 @@ final class ObserveModule extends AbstractAppModule
      */
     public const array EXTRA_CREDENTIALS = ['resetKey', 'authKey'];
 
+    /**
+     * Body generations retained alongside log sessions (same count passed to
+     * DevQueryRepositoryLogModule below): a log's body_ref keeps resolving for as long as the
+     * log itself survives, and neither is pruned without the other (issue #134).
+     */
+    private const int KEEP_GENERATIONS = 20;
+
     private const ORIGINAL_INVOKER = 'original_invoker';
 
     #[Override]
     protected function configure(): void
     {
-        $bodyDir = $this->appMeta->logDir . '/es-bodies';
-        FileBodyStore::clearDirectory($bodyDir);
+        $bodiesRoot = $this->appMeta->logDir . '/es-bodies';
+        self::pruneStaleGenerations($bodiesRoot, self::KEEP_GENERATIONS);
+        // One subdirectory per request: FileBodyStore's body sequence restarts at 1 on every
+        // injector build, so a directory shared across sessions would let two sessions
+        // overwrite each other's numbered files. The key sorts chronologically, matching the
+        // shape of DevQueryRepositoryLogModule's own session filenames.
+        $bodyDir = $bodiesRoot . '/' . self::generationKey();
 
         $this->bind(ParamsFilterInterface::class)->annotatedWith(Filtered::class)
             ->toInstance(new SensitiveParamsFilter(self::EXTRA_CREDENTIALS));
@@ -85,7 +112,7 @@ final class ObserveModule extends AbstractAppModule
 
         // The cache log module owns the writer and the shutdown flush, so the application
         // writes no flush of its own.
-        $this->install(new DevQueryRepositoryLogModule($this->appMeta->logDir . '/observe'));
+        $this->install(new DevQueryRepositoryLogModule($this->appMeta->logDir . '/observe', self::KEEP_GENERATIONS));
         // One request, one tree: the resource invoker records into the logger the sink flushes.
         $this->bind(SemanticLoggerInterface::class)
             ->toProvider(ObserveLoggerProvider::class)->in(Scope::SINGLETON);
@@ -95,5 +122,35 @@ final class ObserveModule extends AbstractAppModule
             ->toProvider(DevPoolProvider::class)->in(Scope::SINGLETON);
         $this->bind(AdapterInterface::class)->annotatedWith(EtagPool::class)
             ->toProvider(DevPoolProvider::class)->in(Scope::SINGLETON);
+    }
+
+    /** Sortable per-request key: zero-padded so lexical order is chronological order. */
+    private static function generationKey(): string
+    {
+        $now = microtime(true);
+        $seconds = (int) $now;
+        $micro = (int) (($now - (float) $seconds) * 1_000_000.0);
+
+        return gmdate('Ymd-His', $seconds) . '-' . sprintf('%06d', $micro) . '-' . bin2hex(random_bytes(4));
+    }
+
+    /**
+     * Deletes body generations beyond $keep, oldest first, leaving room for the one this
+     * request is about to create. Mirrors LogFileWriter::prune()'s own retention count, so a
+     * body generation is never pruned while the log session that references it still exists.
+     */
+    private static function pruneStaleGenerations(string $bodiesRoot, int $keep): void
+    {
+        $generations = glob($bodiesRoot . '/*', GLOB_ONLYDIR) ?: [];
+        sort($generations);
+        $overflow = max(0, count($generations) - $keep + 1);
+        foreach (array_slice($generations, 0, $overflow) as $stale) {
+            try {
+                FileBodyStore::clearDirectory($stale);
+                rmdir($stale);
+            } catch (BodyStoreException) {
+                // A sibling process pruning the same generation concurrently is not an error.
+            }
+        }
     }
 }
