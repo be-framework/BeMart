@@ -40,8 +40,6 @@ class BlockList extends ResourceObject
     #[Alps('goBlockList')]
     #[JsonSchema(schema: 'get-admin-block-block-list.json')]
     #[Link(rel: 'doCreateBlock', href: 'page://self/admin/block/block-list', method: 'post')]
-    #[Link(rel: 'doUpdateBlock', href: 'page://self/admin/block/block', method: 'put')]
-    #[Link(rel: 'doDeleteBlock', href: 'page://self/admin/block/block', method: 'delete')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetAdminBlockListInput());

@@ -256,9 +256,8 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     {
         $blockId = $this->bodyValue($response, 'blockId');
         $this->assertIsString($blockId);
-        $blockList = $this->follow($response, 'goBlockList');
 
-        $updated = $this->resource->put($this->linkHref($blockList, 'doUpdateBlock'), [
+        $updated = $this->resource->put($this->linkHref($response, 'doUpdateBlock'), [
             'blockId' => $blockId,
             'blockName' => 'Workflow Block Updated ' . self::$suffix,
             'blockFileName' => 'workflow_block_updated_' . self::$suffix,
@@ -278,9 +277,12 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     {
         $blockId = $this->bodyValue($response, 'blockId');
         $this->assertIsString($blockId);
-        $blockList = $this->follow($response, 'goBlockList');
+        // doUpdateBlock's PUT does not redirect (Code::OK, no Location); the ALPS-correct
+        // doDeleteBlock link lives on the single-row Block GET, so re-fetch it directly - a
+        // real client returning to a bookmarked item page would do the same.
+        $block = $this->resource->get('page://self/admin/block/block', ['blockId' => $blockId]);
 
-        $deleted = $this->resource->delete($this->linkHref($blockList, 'doDeleteBlock'), [
+        $deleted = $this->resource->delete($this->linkHref($block, 'doDeleteBlock'), [
             'blockId' => $blockId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);

@@ -58,6 +58,7 @@ class Payment extends ResourceObject
     #[Alps('doUpdatePayment')]
     #[JsonSchema(schema: 'get-admin-payment-payment.json', params: 'get-admin-payment-payment.param.json')]
     #[Link(rel: 'doUpdatePayment', href: 'page://self/admin/payment/payment', method: 'put')]
+    #[Link(rel: 'doDeletePayment', href: 'page://self/admin/payment/payment', method: 'delete')]
     public function onGet(string $paymentId = ''): static
     {
         $final = ($this->becoming)(new GetAdminPaymentListInput());
