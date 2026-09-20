@@ -29,8 +29,8 @@ use function assert;
 /**
  * EC-CUBE doUpdateBlock + doDeleteBlock — single-row endpoint (Wave 9).
  *
- * ALPS has no goBlock — the admin edits a block from the list view
- * directly. Only PUT and DELETE are exposed here for the domain.
+ * `onGet` is ALPS `goBlock`. Only PUT and DELETE are exposed to the domain
+ * here; the list view (`BlockList`) links to this state via `goBlock`.
  *
  * Phase 3 — HTML FORM page. `onGet` exposes an {@see AdminBlockForm}
  * (Ray.WebFormModule AbstractForm) as `body['form']` so the admin block
