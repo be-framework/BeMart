@@ -29,8 +29,11 @@ use function assert;
 /**
  * EC-CUBE doUpdateBlock + doDeleteBlock — single-row endpoint (Wave 9).
  *
- * `onGet` is ALPS `goBlock`. Only PUT and DELETE are exposed to the domain
- * here; the list view (`BlockList`) links to this state via `goBlock`.
+ * `onGet` maps to ALPS `goBlock`, an `alps-route-gate` placeholder descriptor
+ * (route existence only, not a fully modelled transition). Only PUT and
+ * DELETE are exposed to the domain here; `BlockList::onGet()` links to
+ * `doCreateBlock` only, not `goBlock` — there is no list-to-detail
+ * hypermedia link for this state today.
  *
  * Phase 3 — HTML FORM page. `onGet` exposes an {@see AdminBlockForm}
  * (Ray.WebFormModule AbstractForm) as `body['form']` so the admin block
