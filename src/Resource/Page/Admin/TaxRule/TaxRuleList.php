@@ -36,8 +36,13 @@ use function urlencode;
  *
  * Per the alps.json profile, there is NO `doUpdateTaxRule` — edits flow
  * as delete + create so the applyDate audit trail remains explicit.
- * The single-row affordance (`doDeleteTaxRule`) lives at
- * `page://self/admin/tax-rule/tax-rule`.
+ *
+ * `doDeleteTaxRule`'s href (`page://self/admin/tax-rule/tax-rule`) is declared here, on the
+ * list, unlike doUpdateBlock/doDeleteBlock/doUpdatePayment/doDeletePayment (see #136), which
+ * moved to their single-row Block/Payment GET views. TaxRule has no such view - only onDelete,
+ * no onGet - so there is nowhere else to declare it without inventing a goTaxRule state ALPS
+ * doesn't have. alps.json's TaxRuleList descriptor connects #doDeleteTaxRule accordingly, so the
+ * list is the ALPS-correct - not merely convenient - place for this one.
  */
 class TaxRuleList extends ResourceObject
 {
