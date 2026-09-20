@@ -15,6 +15,7 @@ use MyVendor\BeMart\Support\Html\HtmlLinkAuditor;
 use MyVendor\BeMart\Support\Html\LinkHeaderModule;
 use MyVendor\BeMart\Support\Html\LinkHeaderRenderer;
 use MyVendor\BeMart\Tests\Fake\Html\LinkedResourceObject;
+use MyVendor\BeMart\Tests\Fake\Html\NonSemanticAnchorRenderer;
 use MyVendor\BeMart\Tests\Fake\Html\SemanticAnchorRenderer;
 use MyVendor\BeMart\Tests\Support\RecordingHtmlLinkAuditLogger;
 use Override;
@@ -60,7 +61,29 @@ final class LinkHeaderRendererTest extends TestCase
 
         $this->assertSame('<a href="/next" class="goNext">Next</a>', $view);
         $this->assertSame('</next>; rel="goNext"; method="get"', $ro->headers['Link']);
-        $this->assertSame([], $logger->drain());
+        $this->assertSame([], $logger->drain(), 'the rendered anchor already carries the rel; nothing should be flagged');
+    }
+
+    public function testAuditedRendererFlagsAnAnchorMissingItsSemanticToken(): void
+    {
+        $logger = new RecordingHtmlLinkAuditLogger();
+        $renderer = new AuditedLinkHeaderRenderer(
+            new LinkHeaderRenderer(
+                new NonSemanticAnchorRenderer(),
+                new NullReverseLinker(),
+            ),
+            new HtmlLinkAuditor($logger),
+        );
+        $ro = new LinkedResourceObject();
+        $ro->uri = new Uri('page://self/current');
+        $ro->uri->method = 'get';
+        $ro->body = [];
+
+        $renderer->render($ro);
+
+        $warnings = $logger->drain();
+        $this->assertSame('goNext', $warnings[0]['rel'] ?? null);
+        $this->assertSame('semantic-token-missing', $warnings[0]['reason'] ?? null);
     }
 
     public function testModuleRenamesPreviousRenderer(): void
@@ -85,7 +108,7 @@ final class LinkHeaderRendererTest extends TestCase
             #[Override]
             protected function configure(): void
             {
-                $this->bind(RenderInterface::class)->to(SemanticAnchorRenderer::class);
+                $this->bind(RenderInterface::class)->to(NonSemanticAnchorRenderer::class);
                 $this->bind(ReverseLinkerInterface::class)->to(NullReverseLinker::class);
             }
         }));
@@ -112,6 +135,8 @@ final class LinkHeaderRendererTest extends TestCase
 
         $renderer->render($ro);
 
-        $this->assertSame([], $logger->drain(), 'the fake anchor already carries the rel; nothing should be flagged');
+        $warnings = $logger->drain();
+        $this->assertSame('goNext', $warnings[0]['rel'] ?? null, 'the module wiring must actually reach the auditor, not just resolve to the audited class');
+        $this->assertSame('semantic-token-missing', $warnings[0]['reason'] ?? null);
     }
 }

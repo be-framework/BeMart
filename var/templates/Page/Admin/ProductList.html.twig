@@ -206,21 +206,21 @@
                         class="idea-admin-action action-submit"
                         data-action="/admin/product-bulk-status"
                         data-product-status="1"
-                        token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}">
+                        token-for-anchor="{{ csrfToken }}">
                     公開
                 </button>
                 <button type="button"
                         class="idea-admin-action action-submit"
                         data-action="/admin/product-bulk-status"
                         data-product-status="2"
-                        token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}">
+                        token-for-anchor="{{ csrfToken }}">
                     非公開
                 </button>
                 <button type="button"
                         class="idea-admin-action action-submit"
                         data-action="/admin/product-bulk-status"
                         data-product-status="3"
-                        token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}">
+                        token-for-anchor="{{ csrfToken }}">
                     廃止
                 </button>
             </div>
@@ -275,7 +275,7 @@
                                value="{{ Product.productCode }}"
                                id="check_{{ Product.productCode }}"
                                data-delete-url="/admin/product?productCode={{ Product.productCode }}&_method=delete"
-                               token-for-anchor="{{ csrf_token_for_anchor('admin_product_delete') }}">
+                               token-for-anchor="{{ csrfToken }}">
                     </td>
                     <td class="idea-admin-table__thumb">
                         <a href="/admin/product/edit?productCode={{ Product.productCode }}">
@@ -369,7 +369,7 @@
                                        class="idea-admin-action idea-admin-action--primary"
                                        data-confirm="false"
                                        data-method="post"
-                                       token-for-anchor="{{ csrf_token_for_anchor('admin_product_product_copy') }}">
+                                       token-for-anchor="{{ csrfToken }}">
                                         複製
                                     </a>
                                 </div>
