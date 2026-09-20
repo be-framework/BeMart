@@ -47,9 +47,9 @@ Counts are ALPS transitions per flow. `✓` done · `~` partial · `✗` pending
 | flow-favorite | ✓ 3 | ✓ | ✓ | ✓ | ✓ storefront |
 | flow-inquiry (contact form) | ✓ 2 | ✓ | ✓ | ✓ (`Contact` has no table) | ✓ storefront |
 | flow-admin-auth | ✓ 1 | ✓ | ✓ | ✓ | ✓ admin |
-| flow-manage-product | ✓ 24 | ~ (no Be transition for product CSV import — `ProductCsv::onPost` parses inline; category/class CSV paths go through Be) | ✓ | ✓ | ✓ admin (list/tag/class + product/category/csv editors + product-class register done) |
-| flow-manage-order | ✓ 13 | ~ (PDF fidelity residual; shipping CSV persistence connected) | ✓ | ✓ | ✓ admin (list + edit/shipping/mail/mail_confirm/pdf/csv-shipping done) |
-| flow-manage-customer | ✓ 6 | ✓ | ✓ | ✓ | ✓ admin (list + customer edit + customer-delivery-edit done) |
+| flow-manage-product | ✓ 26 | ~ (no Be transition for product CSV import — `ProductCsv::onPost` parses inline; category/class CSV paths go through Be) | ✓ | ✓ | ✓ admin (list/tag/class + product/category/csv editors + product-class register done) |
+| flow-manage-order | ✓ 14 | ~ (PDF fidelity residual; shipping CSV persistence connected) | ✓ | ✓ | ✓ admin (list + edit/shipping/mail/mail_confirm/pdf/csv-shipping done) |
+| flow-manage-customer | ✓ 11 | ✓ | ✓ | ✓ | ✓ admin (list + customer edit + customer-delivery-edit done) |
 | flow-manage-shop | ✓ 15 | ✓ | ✓ | ✓ | ✓ admin (payment/delivery/tax list + calendar/csv/order-status/tradelaw + payment/delivery edits + shop-master editors done) |
 | flow-manage-content | ✓ 9 | ✓ | ✓ | ✓ | ~ admin (news/page/css/js/cache/maintenance done; `content/file-manager` renders POST forms with no write handler — see §2.1) |
 | flow-manage-cms (layout/block) | ✓ 8 | ✓ | ~ (Template list/add only) | ✓ | ✓ admin (layout/block/template list + template_add done) |
@@ -61,7 +61,7 @@ Counts are ALPS transitions per flow. `✓` done · `~` partial · `✗` pending
 
 Layer-specific notes:
 
-- **ALPS: 216 transitions** — the older 144-transition snapshot has been superseded by route-gate additions and several behavioral descriptors that make route/fallback decisions explicit.
+- **ALPS: 217 transitions** — the older 144-transition snapshot has been superseded by route-gate additions and several behavioral descriptors that make route/fallback decisions explicit.
 - **SQL: 150/150** — every `#[DbQuery]` id has a matching SQL file under `var/sql/`, and the smoke coverage test enforces this pairing.
 - **HTML: storefront ✓ / admin ✓ (in scope)** — `var/templates` holds **133 `.html.twig` files**: 43 storefront/non-admin pages, 72 admin pages/partials, 15 Block widgets, and 3 frames (`base.html.twig`, `admin-base.html.twig`, `admin-login-base.html.twig`). The remaining admin Store/Plugin install/search subtree is out of scope because the plugin runtime is excluded. The render-diff fidelity tests (`tests/Resource/*HtmlRenderTest.php`) activate only when the gitignored `tools/ec-cube-source/` 4.3 clone is present.
 - **flow-manage-cms Resource** — `Admin/Template/TemplateList.php` + `TemplateAdd` exist for the CMS template feature; layout/block resources are present but the CMS template-management surface is partial — *unverified* in full.
