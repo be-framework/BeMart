@@ -93,18 +93,22 @@ final class CsrfTokenRenderedTest extends TestCase
 
     /**
      * The regex sweep in {@see testEveryPageWithAnEmptyCsrfFieldIsRecorded} only catches an
-     * *empty* rendered field; a template that fills it via the `csrf_token()` Twig function
-     * instead of the resource-published value renders non-empty and slips past that sweep
-     * entirely (that was the #139 blindspot for `admin/category/category-list`,
-     * `admin/product/csv-category`, `admin/product/csv-class-name`). Guard the closed ledger
-     * directly: no template may call the session-reading helper at all.
+     * *empty* rendered field; a template that fills it via the `csrf_token()` (or
+     * `csrf_token_for_anchor()`) Twig function instead of the resource-published value renders
+     * non-empty and slips past that sweep entirely (that was the #139 blindspot for
+     * `admin/category/category-list`, `admin/product/csv-category`,
+     * `admin/product/csv-class-name`). Guard the closed ledger directly: no template may call
+     * either session-reading helper at all. Matches the bare function-name prefix (not just
+     * `csrf_token(`) so `csrf_token_for_anchor(` — a second, distinct function that delegates to
+     * the same $_SESSION read — cannot slip past this guard the way it slipped past the original
+     * #139 sweep.
      */
     public function testNoTemplateFallsBackToTheSessionReadingCsrfHelper(): void
     {
         $offenders = [];
         foreach ($this->twigFiles() as $file) {
             $contents = (string) file_get_contents($file->getPathname());
-            if (str_contains($contents, 'csrf_token(')) {
+            if (preg_match('/\bcsrf_token(?:_for_anchor)?\(/', $contents) === 1) {
                 $offenders[] = $file->getPathname();
             }
         }
