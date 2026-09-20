@@ -11,6 +11,7 @@ use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminCustomerDeliveryForm;
 use Ray\WebFormModule\FormFactory;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -33,6 +34,7 @@ class CustomerDeliveryEdit extends ResourceObject
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -66,6 +68,7 @@ class CustomerDeliveryEdit extends ResourceObject
         $this->body = [
             'form' => $form,
             'customerId' => $customerId,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

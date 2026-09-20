@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Final\AdminDeliveryListFetched;
 use MyVendor\BeMart\Be\Final\DeliveryCreated;
 use MyVendor\BeMart\Be\Input\CreateDeliveryInput;
 use MyVendor\BeMart\Be\Input\GetAdminDeliveryListInput;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -37,6 +38,7 @@ class DeliveryList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -57,6 +59,7 @@ class DeliveryList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'deliveries' => $final->deliveries,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

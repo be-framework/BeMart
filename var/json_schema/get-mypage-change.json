@@ -192,6 +192,15 @@
       "title": "会社名",
       "description": "法人顧客の社名。B2B取引やインボイスで使用 Fake観察文字長 10〜11; 観察値 'Acme Corp.', '株式会社EC-CUBE'; null 24/32。",
       "example": "Acme Corp."
+    },
+    "csrfToken": {
+      "title": "CSRFトークン",
+      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "example": "fake-csrf-token-bemart-2026"
     }
   },
   "additionalProperties": false,
@@ -418,6 +427,7 @@
     "customerId",
     "name01",
     "email",
-    "addr01"
+    "addr01",
+    "csrfToken"
   ]
 }

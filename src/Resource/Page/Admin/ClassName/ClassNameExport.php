@@ -12,6 +12,7 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ClassNameCsvExported;
 use MyVendor\BeMart\Be\Input\ExportClassNameInput;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -29,6 +30,7 @@ class ClassNameExport extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -49,7 +51,10 @@ class ClassNameExport extends ResourceObject
         // Japanese 規格名 decode correctly instead of mis-declaring Shift_JIS.
         $this->headers['Content-Type'] = 'text/csv; charset=UTF-8';
         $this->headers['Content-Disposition'] = $final->document->contentDisposition;
-        $this->body = $final->document->content;
+        $this->body = [
+            'content' => $final->document->content,
+            'csrfToken' => $this->csrf->issue(),
+        ];
 
         return $this;
     }

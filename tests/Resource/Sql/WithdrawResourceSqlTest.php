@@ -98,7 +98,7 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(['csrfToken'], $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/mypage/withdraw', $ro->body['submitTo']['href']);
-        $this->assertNull($ro->body['csrfToken']);
+        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnGetShowsCurrentCustomer(): void

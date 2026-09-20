@@ -18,6 +18,7 @@ use MyVendor\BeMart\Be\Input\SendShippingNotifyMailInput;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use BEAR\Resource\Annotation\JsonSchema;
+use Ray\Csrf\CsrfTokenInterface;
 
 use function assert;
 
@@ -44,6 +45,7 @@ class ShippingNotifyMail extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly OrderQueryInterface $orders,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -78,7 +80,7 @@ class ShippingNotifyMail extends ResourceObject
             'orderNo' => $order->orderNo,
             'customerId' => $order->customerId,
             'message' => '出荷通知メールを送信します。よろしいですか？',
-            'csrfToken' => null,
+            'csrfToken' => $this->csrf->issue(),
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/admin/order/shipping-notify-mail',

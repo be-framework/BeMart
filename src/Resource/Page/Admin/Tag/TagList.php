@@ -20,6 +20,7 @@ use MyVendor\BeMart\Be\Input\GetAdminTagListInput;
 use MyVendor\BeMart\Form\AdminTagForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+use Ray\Csrf\CsrfTokenInterface;
 
 use function assert;
 
@@ -32,6 +33,7 @@ class TagList extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -50,6 +52,7 @@ class TagList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'tags' => $final->tags,
+            'csrfToken' => $this->csrf->issue(),
         ];
         // Phase 3: an empty AdminTagForm for the HTML list page to render
         // the inline-create input via `{{ form.input('name') }}`. JSON

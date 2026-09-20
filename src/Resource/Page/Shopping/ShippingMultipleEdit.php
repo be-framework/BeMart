@@ -11,6 +11,7 @@ use BEAR\Resource\ResourceObject;
 use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Form\ShoppingShippingEditForm;
 use Ray\WebFormModule\FormFactory;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -47,6 +48,7 @@ class ShippingMultipleEdit extends ResourceObject
 {
     public function __construct(
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -83,7 +85,7 @@ class ShippingMultipleEdit extends ResourceObject
                 'href' => 'page://self/shopping/shipping-multiple-edit',
             ],
             'staticContent' => null,
-            'csrfToken' => null,
+            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty ShoppingShippingEditForm (the shared
             // CustomerAddressType shape) for the HTML port to render the
             // address inputs. JSON contexts ignore it.

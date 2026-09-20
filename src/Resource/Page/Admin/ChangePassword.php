@@ -21,6 +21,7 @@ use MyVendor\BeMart\Be\Input\ChangeAdminPasswordInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminChangePasswordForm;
 use Ray\WebFormModule\FormFactory;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 use SensitiveParameter;
 
@@ -51,6 +52,7 @@ class ChangePassword extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -82,6 +84,7 @@ class ChangePassword extends ResourceObject
             // to render via `{{ form.input(...) }}`. JSON contexts ignore
             // it.
             'form' => $this->formFactory->newInstance(AdminChangePasswordForm::class),
+            'csrfToken' => $this->csrf->issue(),
         ];
         assert($this->body['form'] instanceof AdminChangePasswordForm);
 

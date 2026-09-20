@@ -19,6 +19,7 @@ use MyVendor\BeMart\Be\Final\CategoryCreated;
 use MyVendor\BeMart\Be\Input\CreateCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryListInput;
 use BEAR\Resource\Annotation\JsonSchema;
+use Ray\Csrf\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -47,6 +48,7 @@ class CategoryList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -69,6 +71,7 @@ class CategoryList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'categories' => $final->categories,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

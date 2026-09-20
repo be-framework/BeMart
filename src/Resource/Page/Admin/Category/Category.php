@@ -20,6 +20,7 @@ use MyVendor\BeMart\Be\Final\CategoryUpdated;
 use MyVendor\BeMart\Be\Input\DeleteCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryInput;
 use MyVendor\BeMart\Be\Input\UpdateCategoryInput;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -42,6 +43,7 @@ class Category extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -66,6 +68,7 @@ class Category extends ResourceObject
             'categoryName' => $final->categoryName,
             'parentId' => $final->parentId,
             'sortNo' => $final->sortNo,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

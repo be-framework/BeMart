@@ -8,6 +8,7 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -38,8 +39,7 @@ use BEAR\Resource\Annotation\JsonSchema;
  * var/templates/README.md) no AbstractForm is needed; the form-page
  * recipe's `<Name>Form` exists for screens that render `<input>` fields.
  * The submit target is doWithdrawCustomer (`page://self/mypage/withdraw`,
- * POST). `csrfToken` stays null — the EventListener mirrors the live
- * Symfony token into the body for the subsequent POST.
+ * POST).
  *
  * The Mypage navi welcome line reads `name01`/`name02` from the page
  * body, which are absent here (the customer name is a MISSING BODY
@@ -50,6 +50,11 @@ use BEAR\Resource\Annotation\JsonSchema;
  */
 class WithdrawConfirm extends ResourceObject
 {
+    public function __construct(
+        private readonly CsrfTokenInterface $csrf,
+    ) {
+    }
+
     /** ALPS `goMypageWithdrawConfirm` に対応する GET 操作。 */
     #[Alps('goMypageWithdrawConfirm')]
     #[JsonSchema(schema: 'get-mypage-withdraw-confirm.json')]
@@ -65,7 +70,7 @@ class WithdrawConfirm extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/mypage/withdraw',
             ],
-            'csrfToken' => null,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

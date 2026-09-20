@@ -22,6 +22,7 @@ use MyVendor\BeMart\Be\Input\GetAdminDeliveryListInput;
 use MyVendor\BeMart\Be\Input\UpdateDeliveryInput;
 use MyVendor\BeMart\Form\AdminDeliveryForm;
 use Ray\WebFormModule\FormFactory;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -42,6 +43,7 @@ class Delivery extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -94,6 +96,7 @@ class Delivery extends ResourceObject
             'form' => $form,
             'deliveryId' => $deliveryId,
             'delivery' => $delivery,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
