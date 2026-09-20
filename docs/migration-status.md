@@ -49,7 +49,7 @@ Counts are ALPS transitions per flow. `✓` done · `~` partial · `✗` pending
 | flow-admin-auth | ✓ 1 | ✓ | ✓ | ✓ | ✓ admin |
 | flow-manage-product | ✓ 26 | ~ (no Be transition for product CSV import — `ProductCsv::onPost` parses inline; category/class CSV paths go through Be) | ✓ | ✓ | ✓ admin (list/tag/class + product/category/csv editors + product-class register done) |
 | flow-manage-order | ✓ 14 | ~ (PDF fidelity residual; shipping CSV persistence connected) | ✓ | ✓ | ✓ admin (list + edit/shipping/mail/mail_confirm/pdf/csv-shipping done) |
-| flow-manage-customer | ✓ 11 | ✓ | ✓ | ✓ | ✓ admin (list + customer edit + customer-delivery-edit done) |
+| flow-manage-customer | ✓ 11 | ✓ | ✓ | ✓ | ~ admin (list + customer edit done; customer-delivery-edit creates new addresses only — update/delete are unreachable from the UI, see `CustomerDeliveryEdit.php` docblock) |
 | flow-manage-shop | ✓ 15 | ✓ | ✓ | ✓ | ✓ admin (payment/delivery/tax list + calendar/csv/order-status/tradelaw + payment/delivery edits + shop-master editors done) |
 | flow-manage-content | ✓ 9 | ✓ | ✓ | ✓ | ~ admin (news/page/css/js/cache/maintenance done; `content/file-manager` renders POST forms with no write handler — see §2.1) |
 | flow-manage-cms (layout/block) | ✓ 8 | ✓ | ~ (Template list/add only) | ✓ | ✓ admin (layout/block/template list + template_add done) |
