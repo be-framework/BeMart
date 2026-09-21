@@ -10,19 +10,20 @@ use BEAR\Sunday\Extension\Error\ThrowableHandlerInterface;
 use Madapaja\TwigModule\TwigModule;
 use MyVendor\BeMart\Auth\AdminSessionWriterInterface;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
+use MyVendor\BeMart\Auth\CookieSessionStarter;
+use MyVendor\BeMart\Auth\EccubeSharedSessionAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionWriter;
 use MyVendor\BeMart\Auth\HtmlCartSessionPrefix;
 use MyVendor\BeMart\Auth\HtmlCustomerSessionWriter;
 use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
+use MyVendor\BeMart\Auth\SessionStarterInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Provide\Error\HtmlThrowableHandler;
 use MyVendor\BeMart\Provide\Render\AdminAuthRedirectRenderer;
 use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\HtmlDownloadContentTypePolicy;
-use MyVendor\BeMart\Support\Html\HtmlLinkAuditLoggerInterface;
 use MyVendor\BeMart\Support\Html\LinkHeaderModule;
-use MyVendor\BeMart\Support\Html\SilentHtmlLinkAuditLogger;
 use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use MyVendor\BeMart\Support\Resource\HtmlAdminLoginFormSubmission;
 use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
@@ -51,6 +52,10 @@ final class HtmlModule extends AbstractModule
         // See AdminAuthRedirectRenderer. Resource-level 403s are unchanged.
         $this->override(new LinkHeaderModule(new AdminAuthRedirectModule(new TwigModule(options: $this->twigOptions))));
         $this->bind(ReverseLinkerInterface::class)->to(RouterReverseLinker::class);
+        // Same cookie EccubeModule uses for the eccube-bridge context - see #93. Explicit here
+        // so a plain HTML context (no EC-CUBE bridge) still gets a session without HtmlAdminSessionAdapter
+        // hardcoding a cross-reference to it.
+        $this->bind(SessionStarterInterface::class)->toInstance(new CookieSessionStarter(EccubeSharedSessionAdapter::COOKIE_NAME));
         $this->bind(AdminSession::class)->to(HtmlAdminSessionAdapter::class);
         $this->bind(CustomerSessionWriterInterface::class)->to(HtmlCustomerSessionWriter::class);
         $this->bind(AdminSessionWriterInterface::class)->to(HtmlAdminSessionWriter::class);

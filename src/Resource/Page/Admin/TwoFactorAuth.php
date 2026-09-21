@@ -12,8 +12,8 @@ use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use Be\Framework\SemanticVariable\ValidationMessageHandler;
 use Ray\Csrf\Attribute\CsrfToken;
+use MyVendor\BeMart\Auth\AdminLoginChallengeInterface;
 use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
-use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
 use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
 use MyVendor\BeMart\Be\Final\TwoFactorAuthVerified;
@@ -57,7 +57,7 @@ class TwoFactorAuth extends ResourceObject
     public function __construct(
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
-        private readonly HtmlAdminLoginChallengeAdapter $loginChallenge,
+        private readonly AdminLoginChallengeInterface $loginChallenge,
         private readonly AdminSession $adminSession,
         private readonly AdminQueryInterface $adminQuery,
         private readonly CsrfTokenInterface $csrf,
