@@ -11,6 +11,7 @@ use BEAR\Resource\Code;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use Ray\Csrf\Attribute\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ClassCategoryCsvImported;
 use MyVendor\BeMart\Be\Input\ImportClassCategoryCsvInput;
@@ -39,10 +40,11 @@ class CsvClassCategory extends AbstractCsvUpload
     public function __construct(
         AdminSession $adminSession,
         FormFactory $formFactory,
+        CsrfTokenInterface $csrf,
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
-        parent::__construct($adminSession, $formFactory);
+        parent::__construct($adminSession, $formFactory, $csrf);
     }
 
     /** ALPS `goExportClassCategory` に対応する GET 操作。 */

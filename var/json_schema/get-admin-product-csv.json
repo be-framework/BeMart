@@ -25,6 +25,15 @@
       "$comment": "CSV列の業務妥当性はCSV互換サービスで検査する。ここではJSON境界上の文字列サイズを契約する。",
       "title": "輸送ペイロード",
       "description": "CSVインポート/エクスポート本文。列構造の詳細はCSV互換サービス境界で検査する。"
+    },
+    "csrfToken": {
+      "title": "CSRFトークン",
+      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "example": "fake-csrf-token-bemart-2026"
     }
   },
   "additionalProperties": false,
@@ -248,6 +257,7 @@
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
     "count",
-    "csv"
+    "csv",
+    "csrfToken"
   ]
 }

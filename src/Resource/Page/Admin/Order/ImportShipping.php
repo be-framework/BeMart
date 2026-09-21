@@ -14,6 +14,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminShippingCsvImported;
 use MyVendor\BeMart\Be\Input\AdminImportShippingCsvInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -35,6 +36,7 @@ class ImportShipping extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -61,7 +63,7 @@ class ImportShipping extends ResourceObject
         }
 
         $this->code = Code::OK;
-        $this->body = [];
+        $this->body = ['csrfToken' => $this->csrf->issue()];
 
         return $this;
     }

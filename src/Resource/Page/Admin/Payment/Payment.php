@@ -23,6 +23,7 @@ use MyVendor\BeMart\Be\Input\UpdatePaymentMethodAdminInput;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+use Ray\Csrf\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -42,6 +43,7 @@ class Payment extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -98,6 +100,7 @@ class Payment extends ResourceObject
             'form' => $form,
             'paymentId' => $paymentId,
             'payment' => $payment,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

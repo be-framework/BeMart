@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Final\CategoryCsvExported;
 use MyVendor\BeMart\Be\Final\CategoryCsvImported;
 use MyVendor\BeMart\Be\Input\ExportCategoryInput;
 use MyVendor\BeMart\Be\Input\ImportCategoryCsvInput;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -39,6 +40,7 @@ class Csv extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -58,6 +60,7 @@ class Csv extends ResourceObject
         $this->body = [
             'csv' => $final->csv,
             'rowCount' => $final->rowCount,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

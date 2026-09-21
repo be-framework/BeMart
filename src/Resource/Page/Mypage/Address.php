@@ -23,6 +23,7 @@ use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Form\AddressForm;
 use Ray\WebFormModule\FormFactory;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
@@ -59,6 +60,7 @@ class Address extends ResourceObject
         private readonly AddressStorageInterface $addresses,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -144,7 +146,7 @@ class Address extends ResourceObject
             'submitTo' => $addressId === null
                 ? ['method' => 'POST', 'href' => 'page://self/mypage/address-list']
                 : ['method' => 'PUT', 'href' => 'page://self/mypage/address'],
-            'csrfToken' => null,
+            'csrfToken' => $this->csrf->issue(),
             'form' => $form,
         ];
 

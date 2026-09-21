@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Final\AdminCustomerFetched;
 use MyVendor\BeMart\Be\Input\GetAdminCustomerInput;
 use MyVendor\BeMart\Form\AdminCustomerForm;
 use Ray\WebFormModule\FormFactory;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -60,6 +61,7 @@ class Customer extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -129,6 +131,7 @@ class Customer extends ResourceObject
             'totalSpent' => $final->totalSpent,
             'favorites' => $final->favorites,
             'favoriteCount' => $final->favoriteCount,
+            'csrfToken' => $this->csrf->issue(),
         ];
         // Phase 3: an AdminCustomerForm pre-filled with the persisted
         // profile, for the HTML edit page (Customer.html.twig) to render

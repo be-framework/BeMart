@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Final\PasswordResetCompleted;
 use MyVendor\BeMart\Be\Input\ResetPasswordInput;
 use MyVendor\BeMart\Form\ResetForm;
 use Ray\WebFormModule\FormFactory;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 use SensitiveParameter;
 
@@ -43,6 +44,7 @@ class Reset extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -54,8 +56,6 @@ class Reset extends ResourceObject
      * Anonymous-accessible (the reset-key check is the POST's job). The
      * `resetKey` arrives as a query param on the emailed reset link and
      * is carried into a hidden form field for the subsequent POST.
-     * `csrfToken` stays `null` — the EventListener mirrors the Symfony
-     * token into the session for the POST (same as Login).
      *
      * @psalm-taint-source input $resetKey
      */
@@ -74,7 +74,7 @@ class Reset extends ResourceObject
                 'href' => 'page://self/reset',
             ],
             'resetKey' => $resetKey,
-            'csrfToken' => null,
+            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty ResetForm for the HTML port to render
             // via `{{ form.input(...) }}`. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ResetForm::class),
