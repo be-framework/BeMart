@@ -24,10 +24,10 @@
     <p class="idea-eyebrow">Account menu</p>
     <ul class="idea-account-nav__list">
       <li class="is-active"><a href="/mypage">注文履歴</a></li>
-      <li><a href="/mypage/favorite-list">お気に入り</a></li>
-      <li><a href="/mypage/change">会員情報の変更</a></li>
-      <li><a href="/mypage/address-list">お届け先の管理</a></li>
-      <li><a href="/mypage/withdraw">退会手続き</a></li>
+      <li><a href="/mypage/favorite-list" rel="goFavoriteList">お気に入り</a></li>
+      <li><a href="/mypage/change" rel="goMypageChange">会員情報の変更</a></li>
+      <li><a href="/mypage/address-list" rel="goCustomerAddressList">お届け先の管理</a></li>
+      <li><a href="/mypage/withdraw" rel="goMypageWithdraw">退会手続き</a></li>
     </ul>
   </nav>
 
@@ -39,7 +39,7 @@
           <p class="idea-eyebrow">Order history</p>
           <h2 class="idea-section-title">最近の注文</h2>
         </div>
-        <a class="idea-link" href="/mypage/history">すべての履歴を見る</a>
+        <a class="idea-link" href="/mypage/order-history" rel="goOrderHistory">すべての履歴を見る</a>
       </div>
 
       <div class="idea-order-list">
@@ -53,7 +53,7 @@
               <div class="idea-order-card__summary">
                 <strong>¥{{ order.total|number_format }}</strong>
                 <span class="idea-muted">ステータス {{ order.orderStatus }}</span>
-                <a class="idea-link" href="/mypage/history?orderNo={{ order.orderNo }}">詳細</a>
+                <a class="idea-link" href="/mypage/history?orderNo={{ order.orderNo }}" rel="goMypageHistory">詳細</a>
               </div>
             </div>
 
@@ -79,7 +79,7 @@
         <p class="idea-eyebrow">No orders yet</p>
         <h2>注文履歴はまだありません。</h2>
         <p class="idea-muted">暮らしの入口から、気になる道具を見つけてください。</p>
-        <a class="idea-button" href="/products">商品を探す</a>
+        <a class="idea-button" href="/products" rel="goProductList">商品を探す</a>
       </div>
     {% endif %}
 

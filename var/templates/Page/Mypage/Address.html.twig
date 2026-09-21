@@ -47,12 +47,13 @@
             {{ addressId is not null ? 'お届け先の変更' : '新しいお届け先' }}
           </h2>
         </div>
-        <a class="idea-link" href="/mypage/address-list">一覧に戻る</a>
+        <a class="idea-link" href="/mypage/address-list" rel="goCustomerAddressList">一覧に戻る</a>
       </div>
 
       <form
         method="post"
         action="{{ submitTo.href|replace({'page://self': ''}) }}"
+        rel="doCreateCustomerAddress"
         novalidate
         class="h-adr idea-address-form"
       >

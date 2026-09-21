@@ -53,11 +53,11 @@
 
       <p class="idea-muted">退会すると、注文履歴・お届け先・お気に入りなど、アカウントに保存されているすべての情報が削除されます。この操作は取り消せません。</p>
 
-      <form method="post" action="/mypage/withdraw" class="idea-withdraw-confirm__form">
+      <form method="post" action="/mypage/withdraw" rel="doWithdrawCustomer" class="idea-withdraw-confirm__form">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="idea-form-actions">
           <button type="submit" class="idea-button idea-withdraw-confirm__submit">退会を実行する</button>
-          <a href="/mypage" class="idea-button idea-button--light idea-withdraw-confirm__cancel">キャンセル</a>
+          <a href="/mypage" class="idea-button idea-button--light idea-withdraw-confirm__cancel" rel="goMypage">キャンセル</a>
         </div>
       </form>
 

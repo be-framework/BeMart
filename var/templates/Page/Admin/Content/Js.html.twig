@@ -52,7 +52,8 @@
 {% block main %}
 <form id="js-edit-form"
       method="post"
-      action="/admin/content/js?_method=put">
+      action="/admin/content/js?_method=put"
+      rel="doUpdateContentJs">
 
     <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
     <input type="hidden" name="mode"      value="content_operation_form">

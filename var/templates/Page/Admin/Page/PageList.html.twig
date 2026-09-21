@@ -115,7 +115,7 @@
         <h3>新規ページ作成</h3>
         <p class="idea-admin-panel__hint">ページ名・URLスラッグ・テンプレートファイル名を入力して登録します</p>
     </div>
-    <form method="post" action="/admin/page/page-list">
+    <form method="post" action="/admin/page/page-list" rel="doCreatePage">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="idea-admin-panel__body">
             <div class="idea-admin-field">
@@ -283,6 +283,7 @@
             </button>
             <form method="post"
                   action="/admin/page/page"
+                  rel="doDeletePage"
                   data-delete-url="/admin/page/page?pageId={{ page.pageId }}&_method=delete"
                   style="display:inline;">
                 <input type="hidden" name="_method" value="delete">

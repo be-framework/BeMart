@@ -95,17 +95,20 @@
     /* ── Delete confirmation dialog ──────────────────────────────────── */
     var dialog = document.getElementById('js-delete-dialog');
     var dialogMsg = dialog ? dialog.querySelector('.js-dialog-message') : null;
-    var dialogConfirm = dialog ? dialog.querySelector('.js-dialog-confirm') : null;
+    var dialogForm = document.getElementById('js-dialog-confirm-form');
+    var dialogTagId = dialogForm ? dialogForm.querySelector('input[name="tagId"]') : null;
 
-    document.addEventListener('click', function (e) {
-        var trigger = e.target.closest('[data-delete-url]');
-        if (!trigger || !dialog) return;
-        e.preventDefault();
-        if (dialogMsg) dialogMsg.textContent = trigger.dataset.deleteMessage || '';
-        if (dialogConfirm) dialogConfirm.href = trigger.dataset.deleteUrl;
-        dialog.removeAttribute('hidden');
-        dialog.setAttribute('aria-modal', 'true');
-        if (dialogConfirm) dialogConfirm.focus();
+    document.querySelectorAll('form[rel="doDeleteTag"]').forEach(function (rowForm) {
+        rowForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (!dialog || !dialogForm) return;
+            if (dialogMsg) dialogMsg.textContent = rowForm.dataset.deleteMessage || '';
+            dialogForm.action = rowForm.action;
+            if (dialogTagId) dialogTagId.value = rowForm.querySelector('input[name="tagId"]').value;
+            dialog.removeAttribute('hidden');
+            dialog.setAttribute('aria-modal', 'true');
+            dialogForm.querySelector('button[type="submit"]').focus();
+        });
     });
 
     document.addEventListener('click', function (e) {
@@ -149,6 +152,7 @@
             method="post"
             action="/admin/tag/tag-list"
             aria-label="タグ新規登録フォーム"
+            rel="doCreateTag"
         >
             <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
             <div class="idea-admin-field">
@@ -211,14 +215,23 @@
                             title="下へ"
                             aria-label="{{ Tag.tagName }} を下へ移動"
                         ><i class="fa fa-arrow-down" aria-hidden="true"></i></button>
-                        <a
-                            class="idea-admin-icon-btn idea-admin-text-btn--danger"
-                            href="#"
-                            data-delete-url="/admin/tag/tag?tagId={{ Tag.tagId }}"
+                        <form
+                            method="post"
+                            action="/admin/tag/tag?tagId={{ Tag.tagId }}"
+                            rel="doDeleteTag"
+                            style="display:inline;"
                             data-delete-message="{{ Tag.tagName }} を削除してよろしいですか？"
-                            aria-label="{{ Tag.tagName }} を削除"
-                            title="削除"
-                        ><i class="fa fa-trash" aria-hidden="true"></i></a>
+                        >
+                            <input type="hidden" name="_method" value="delete">
+                            <input type="hidden" name="tagId" value="{{ Tag.tagId }}">
+                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                            <button
+                                type="submit"
+                                class="idea-admin-icon-btn idea-admin-text-btn--danger"
+                                aria-label="{{ Tag.tagName }} を削除"
+                                title="削除"
+                            ><i class="fa fa-trash" aria-hidden="true"></i></button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}
@@ -262,14 +275,15 @@
                 class="idea-admin-action js-dialog-cancel"
                 type="button"
             >キャンセル</button>
-            <a
-                class="idea-admin-action idea-admin-action--destructive js-dialog-confirm"
-                href="#"
-                data-method="delete"
-            >
-                <i class="fa fa-trash" aria-hidden="true"></i>
-                削除する
-            </a>
+            <form id="js-dialog-confirm-form" method="post" action="" style="display:inline;">
+                <input type="hidden" name="_method" value="delete">
+                <input type="hidden" name="tagId" value="">
+                <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                <button type="submit" class="idea-admin-action idea-admin-action--destructive">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    削除する
+                </button>
+            </form>
         </div>
     </div>
 </div>

@@ -38,6 +38,7 @@
   <form class="idea-checkout-panel idea-guest-form h-adr"
         method="post"
         action="/shopping/shipping-edit"
+        rel="doUpdateShippingAddress"
         novalidate>
     <span class="p-country-name" aria-hidden="true">Japan</span>
     <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
@@ -48,7 +49,7 @@
         <h2 class="idea-section-title">お届け先の住所</h2>
       </div>
       {# rel=goShoppingShipping → /shopping/shipping #}
-      <a class="idea-link" href="/shopping/shipping">お届け先の選択に戻る</a>
+      <a class="idea-link" href="/shopping/shipping" rel="goShoppingShipping">お届け先の選択に戻る</a>
     </div>
 
     <div class="idea-form-grid idea-form-grid--two">

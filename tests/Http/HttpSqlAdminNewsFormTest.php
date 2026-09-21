@@ -103,7 +103,7 @@ final class HttpSqlAdminNewsFormTest extends TestCase
         $listBeforeDelete = $this->request('GET', '/admin/news/news-list');
         $this->assertSame(200, $listBeforeDelete['status'], $listBeforeDelete['body']);
         $this->assertStringContainsString($updatedTitle, $listBeforeDelete['body']);
-        $this->assertStringContainsString('/admin/news/news?newsId=' . $newsId . '&_method=delete', $listBeforeDelete['body']);
+        $this->assertStringContainsString('action="/admin/news/news?newsId=' . $newsId . '"', $listBeforeDelete['body']);
 
         $deleted = $this->form('POST', '/admin/news/news?newsId=' . $newsId . '&_method=delete', [
             'csrfToken' => self::CSRF_TOKEN,

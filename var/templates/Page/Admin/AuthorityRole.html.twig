@@ -224,7 +224,7 @@
 {% endblock %}
 
 {% block main %}
-<form name="form1" method="post" action="/admin/authority-role" id="authority-role-form" role="form" novalidate>
+<form name="form1" method="post" action="/admin/authority-role" rel="doUpdateAuthorityRole" id="authority-role-form" role="form" novalidate>
   <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
   {% if message is defined and message %}

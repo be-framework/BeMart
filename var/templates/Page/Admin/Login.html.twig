@@ -192,7 +192,7 @@
     </div>
     {% endif %}
 
-    <form method="post" action="/admin/login" novalidate>
+    <form method="post" action="/admin/login" rel="doAdminLogin" novalidate>
       <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
       <input type="hidden" name="mode" value="login">
 

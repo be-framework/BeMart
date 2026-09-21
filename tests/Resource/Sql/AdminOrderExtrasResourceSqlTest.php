@@ -21,7 +21,7 @@ use function str_contains;
  * {@see \MyVendor\BeMart\Tests\Resource\AdminOrderExtrasResourceTest}:
  *
  *   - POST /admin/order/shipping-address   doSelectShippingAddress
- *   - PUT  /admin/order/shipping-address   doUpdateShippingAddress
+ *   - PUT  /admin/order/shipping-address   doUpdateOrderShippingAddress
  *   - GET  /admin/order/export-shipping    goExportShipping
  *
  * Those three URIs are the ones that exercise

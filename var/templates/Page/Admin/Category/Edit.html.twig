@@ -75,6 +75,7 @@
   role="form"
   method="post"
   action="{{ isEdit ? '/admin/category/category?_method=put' : '/admin/category/category-list' }}"
+  rel="doCreateCategory"
   novalidate
 >
   <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">

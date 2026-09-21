@@ -144,7 +144,8 @@
     <div class="idea-admin-panel__body">
         <form id="idea-create-form"
               method="post"
-              action="/admin/class-category/class-category-list">
+              action="/admin/class-category/class-category-list"
+              rel="doCreateClassCategory">
             {% if classNameId %}
                 <input type="hidden" name="classNameId" value="{{ classNameId }}">
             {% endif %}
@@ -225,6 +226,7 @@
                     <form class="idea-admin-inline-edit-form"
                           method="post"
                           action="/admin/class-category/class-category?classCategoryId={{ cat.classCategoryId|url_encode }}&amp;_method=put"
+                          rel="doUpdateClassCategory"
                           style="display:flex;gap:.5rem;align-items:center;">
                         <input class="idea-admin-inline-input"
                                type="text"

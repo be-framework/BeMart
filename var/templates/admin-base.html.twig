@@ -44,11 +44,11 @@
                         <i class="fa fa-angle-down fa-fw idea-admin-sidenav__caret" aria-hidden="true"></i>
                     </button>
                     <ul class="idea-admin-sidenav__sub" id="nav-product" hidden>
-                        <li><a href="/admin/product-list">商品一覧</a></li>
+                        <li><a href="/admin/product-list" rel="goProductList">商品一覧</a></li>
                         <li><a href="/admin/product-new">商品登録</a></li>
                         <li><a href="/admin/class-name/class-name-list">規格管理</a></li>
                         <li><a href="/admin/class-category/class-category-list">規格分類管理</a></li>
-                        <li><a href="/admin/category/category-list">カテゴリ管理</a></li>
+                        <li><a href="/admin/category/category-list" rel="goCategoryList">カテゴリ管理</a></li>
                         <li><a href="/admin/tag/tag-list">タグ管理</a></li>
                     </ul>
                 </li>
@@ -61,7 +61,7 @@
                         <i class="fa fa-angle-down fa-fw idea-admin-sidenav__caret" aria-hidden="true"></i>
                     </button>
                     <ul class="idea-admin-sidenav__sub" id="nav-order" hidden>
-                        <li><a href="/admin/order-list">受注一覧</a></li>
+                        <li><a href="/admin/order-list" rel="goOrderList">受注一覧</a></li>
                         <li><a href="/admin/order-status">対応状況管理</a></li>
                         <li><a href="/admin/order/export-order">受注CSV出力</a></li>
                         <li><a href="/admin/order/export-shipping">出荷CSV出力</a></li>
@@ -76,7 +76,7 @@
                         <i class="fa fa-angle-down fa-fw idea-admin-sidenav__caret" aria-hidden="true"></i>
                     </button>
                     <ul class="idea-admin-sidenav__sub" id="nav-customer" hidden>
-                        <li><a href="/admin/customer-list">会員一覧</a></li>
+                        <li><a href="/admin/customer-list" rel="goCustomerList">会員一覧</a></li>
                         <li><a href="/admin/customer-csv">会員CSV出力</a></li>
                     </ul>
                 </li>
@@ -89,13 +89,13 @@
                         <i class="fa fa-angle-down fa-fw idea-admin-sidenav__caret" aria-hidden="true"></i>
                     </button>
                     <ul class="idea-admin-sidenav__sub" id="nav-content" hidden>
-                        <li><a href="/admin/news/news-list">新着情報管理</a></li>
-                        <li><a href="/admin/page/page-list">ページ管理</a></li>
+                        <li><a href="/admin/news/news-list" rel="goNewsList">新着情報管理</a></li>
+                        <li><a href="/admin/page/page-list" rel="goPageList">ページ管理</a></li>
                         <li><a href="/admin/layout/layout-list">レイアウト管理</a></li>
-                        <li><a href="/admin/block/block-list">ブロック管理</a></li>
+                        <li><a href="/admin/block/block-list" rel="goBlockList">ブロック管理</a></li>
                         <li><a href="/admin/content/css">CSS管理</a></li>
                         <li><a href="/admin/content/js">JavaScript管理</a></li>
-                        <li><a href="/admin/content/cache">キャッシュ管理</a></li>
+                        <li><a href="/admin/content/cache" rel="goContentCache">キャッシュ管理</a></li>
                     </ul>
                 </li>
 
@@ -109,10 +109,10 @@
                     <ul class="idea-admin-sidenav__sub" id="nav-setting" hidden>
                         <li><a href="/admin/base-info">基本設定</a></li>
                         <li><a href="/admin/delivery/delivery-list">配送方法設定</a></li>
-                        <li><a href="/admin/payment/payment-list">支払方法設定</a></li>
+                        <li><a href="/admin/payment/payment-list" rel="goPaymentList">支払方法設定</a></li>
                         <li><a href="/admin/tax-rule/tax-rule-list">税率設定</a></li>
                         <li><a href="/admin/csv-config">CSV出力項目設定</a></li>
-                        <li><a href="/admin/member-list">メンバー管理</a></li>
+                        <li><a href="/admin/member-list" rel="goMemberList">メンバー管理</a></li>
                         <li><a href="/admin/authority-role">権限管理</a></li>
                         <li><a href="/admin/security">セキュリティ管理</a></li>
                     </ul>
@@ -127,8 +127,8 @@
                     </button>
                     <ul class="idea-admin-sidenav__sub" id="nav-store" hidden>
                         <li><a href="/admin/plugin-list">プラグイン一覧</a></li>
-                        <li><a href="/admin/template/template-list">テンプレート一覧</a></li>
-                        <li><a href="/admin/template/template-add">テンプレートアップロード</a></li>
+                        <li><a href="/admin/template/template-list" rel="goTemplateList">テンプレート一覧</a></li>
+                        <li><a href="/admin/template/template-add" rel="goTemplateInstall">テンプレートアップロード</a></li>
                     </ul>
                 </li>
 

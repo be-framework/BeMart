@@ -27,7 +27,7 @@
       <p class="idea-form-error" role="alert">{{ message }}</p>
     {% endif %}
 
-    <form class="idea-auth-form" method="post" action="/reset" novalidate>
+    <form class="idea-auth-form" method="post" action="/reset" rel="doResetPassword" novalidate>
       <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
       <input type="hidden" name="resetKey" value="{{ resetKey|default('') }}">
 

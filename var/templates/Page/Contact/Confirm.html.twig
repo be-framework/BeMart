@@ -20,7 +20,7 @@
 </section>
 
 <section class="idea-container idea-section">
-  <form class="idea-checkout-panel" method="post" action="/contact" novalidate>
+  <form class="idea-checkout-panel" method="post" action="/contact" rel="doSubmitContact" novalidate>
     <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
     <div class="idea-panel-head">

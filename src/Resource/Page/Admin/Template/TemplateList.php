@@ -42,7 +42,6 @@ class TemplateList extends ResourceObject
     /** ALPS `goTemplateList` に対応する GET 操作。 */
     #[Alps('goTemplateList')]
     #[JsonSchema(schema: 'get-admin-template-template-list.json')]
-    #[Link(rel: 'goTemplateAdd', href: 'page://self/admin/template/template-add')]
     #[Link(rel: 'goTemplateInstall', href: 'page://self/admin/template/template-add', method: 'get')]
     #[Link(rel: 'doSelectTemplate', href: 'page://self/admin/template/template-list', method: 'put')]
     #[Link(rel: 'doDownloadTemplate', href: 'page://self/admin/template/template-list', method: 'post')]

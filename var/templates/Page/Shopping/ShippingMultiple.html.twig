@@ -14,7 +14,7 @@
     [x] 「新規お届け先を追加する」リンク → /shopping/shipping-multiple-edit
     [x] CSRF トークン (csrfToken)
     [x] POST /shopping/shipping-multiple (doSelectShippingAddress)
-    [x] 戻る → /shopping (goShopping)
+    [x] 戻る → /shopping (goShopping) / /shopping/shipping (goShoppingShipping)
     [x] cartItems / addresses が空の場合のフォールバック表示
 
   POST フィールド構造 (Resource.onPost 引数 $allocations):
@@ -131,8 +131,10 @@
   <div class="idea-form-actions">
     {# rel=doSelectShippingAddress → POST /shopping/shipping-multiple #}
     <button type="submit" class="idea-button">お届け先を確定する</button>
+    {# rel=goShoppingShipping → 単一配送先の選択に戻る #}
+    <a class="idea-link" href="/shopping/shipping" rel="goShoppingShipping">配送先選択に戻る</a>
     {# rel=goShopping → /shopping #}
-    <a class="idea-link" href="/shopping">ご注文手続きに戻る</a>
+    <a class="idea-link" href="/shopping" rel="goShopping">ご注文手続きに戻る</a>
   </div>
 </form>
 
@@ -146,7 +148,8 @@
       配送対象の商品がありません
     </h2>
     <p class="idea-muted">カートに商品を追加してから、複数配送先の設定をお試しください。</p>
-    <a class="idea-button" href="/shopping">ご注文手続きに戻る</a>
+    <a class="idea-button" href="/shopping/shipping" rel="goShoppingShipping">配送先選択に戻る</a>
+    <a class="idea-button" href="/shopping" rel="goShopping">ご注文手続きに戻る</a>
   </div>
 </section>
 
