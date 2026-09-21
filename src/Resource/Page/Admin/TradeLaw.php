@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,7 +17,7 @@ use MyVendor\BeMart\Be\Final\TradeLawUpdated;
 use MyVendor\BeMart\Be\Input\GetTradeLawInput;
 use MyVendor\BeMart\Be\Input\UpdateTradeLawInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminTradeLawForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;

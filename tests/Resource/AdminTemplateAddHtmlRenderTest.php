@@ -102,7 +102,7 @@ final class AdminTemplateAddHtmlRenderTest extends TestCase
 
     /**
      * L1 — CSRF token hidden field rendered.
-     * Required for doInstallTemplate POST to pass the Ray.Csrf CsrfToken check.
+     * Required for doInstallTemplate POST to pass the BEAR.Csrf CsrfToken check.
      */
     public function testTemplateAddRendersCsrfToken(): void
     {

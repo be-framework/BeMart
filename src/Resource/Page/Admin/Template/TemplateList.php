@@ -10,7 +10,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\TemplateNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminTemplateListFetched;
@@ -21,7 +21,7 @@ use MyVendor\BeMart\Be\Input\DeleteTemplateInput;
 use MyVendor\BeMart\Be\Input\DownloadTemplateInput;
 use MyVendor\BeMart\Be\Input\GetAdminTemplateListInput;
 use MyVendor\BeMart\Be\Input\SelectTemplateInput;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;

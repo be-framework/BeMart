@@ -15,7 +15,7 @@ use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedOrderAccessException;
 use MyVendor\BeMart\Be\Final\MypageHistoryFetched;
 use MyVendor\BeMart\Be\Input\GetMypageHistoryInput;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -21,7 +21,7 @@ use MyVendor\BeMart\Be\Input\DeletePageInput;
 use MyVendor\BeMart\Be\Input\GetAdminPageInput;
 use MyVendor\BeMart\Be\Input\UpdatePageInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminPageForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;

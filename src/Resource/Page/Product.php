@@ -12,7 +12,7 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Final\ProductFetched;
 use MyVendor\BeMart\Be\Input\GetProductInput;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AddCartForm;
 use MyVendor\BeMart\Support\ProductImageCatalog;
 use Ray\WebFormModule\FormFactory;

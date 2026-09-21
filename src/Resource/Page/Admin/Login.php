@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +19,7 @@ use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
 use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\AdminAuthenticated;
 use MyVendor\BeMart\Be\Input\AdminLoginInput;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminLoginForm;
 use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;

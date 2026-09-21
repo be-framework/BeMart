@@ -10,7 +10,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\AdminNotFoundException;
 use MyVendor\BeMart\Be\Exception\InvalidCurrentPasswordException;
 use MyVendor\BeMart\Be\Exception\PasswordConfirmationMismatchException;
@@ -21,7 +21,7 @@ use MyVendor\BeMart\Be\Input\ChangeAdminPasswordInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminChangePasswordForm;
 use Ray\WebFormModule\FormFactory;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 use SensitiveParameter;
 

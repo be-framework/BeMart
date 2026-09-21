@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function preg_match;

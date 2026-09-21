@@ -86,13 +86,13 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeSecurityConfigWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTemplateCompatibility;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
-use Ray\Csrf\Attribute\CsrfToken;
-use Ray\Csrf\Http\CompositeRequestToken;
-use Ray\Csrf\Http\CsrfTokenField;
-use Ray\Csrf\Http\HeaderRequestToken;
-use Ray\Csrf\Http\PostRequestToken;
-use Ray\Csrf\Http\RequestTokenInterface;
-use Ray\Csrf\Http\ResourceQueryRequestToken;
+use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Http\CompositeRequestToken;
+use BEAR\Csrf\Http\CsrfTokenField;
+use BEAR\Csrf\Http\HeaderRequestToken;
+use BEAR\Csrf\Http\PostRequestToken;
+use BEAR\Csrf\Http\RequestTokenInterface;
+use BEAR\Csrf\Http\ResourceQueryRequestToken;
 use MyVendor\BeMart\Interceptor\CsrfForbiddenInterceptor;
 use MyVendor\BeMart\Provide\Transfer\ApiDownloadContentTypePolicy;
 use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
@@ -186,7 +186,7 @@ final class AppModule extends AbstractAppModule
             ),
         );
 
-        // BeMart's default wire field name predates Ray.Csrf; keep it so
+        // BeMart's default wire field name predates BEAR.Csrf; keep it so
         // existing templates/JS that submit `csrfToken` need no changes.
         $this->bind(CsrfTokenField::class)->toInstance(new CsrfTokenField('csrfToken'));
         $this->bind(HeaderRequestToken::class);
@@ -194,10 +194,10 @@ final class AppModule extends AbstractAppModule
         $this->bind(PostRequestToken::class);
         $this->bind(RequestTokenInterface::class)->to(CompositeRequestToken::class);
 
-        // CsrfForbiddenInterceptor reuses Ray.Csrf's field/token-lookup
+        // CsrfForbiddenInterceptor reuses BEAR.Csrf's field/token-lookup
         // primitives but keeps BeMart's non-throwing 403-ResourceObject
         // contract (see docs/methodology/csrf-protection.md) instead of
-        // Ray.Csrf's own throwing Interceptor\CsrfTokenInterceptor.
+        // BEAR.Csrf's own throwing Interceptor\CsrfTokenInterceptor.
         $this->bindPriorityInterceptor(
             $this->matcher->subclassesOf(ResourceObject::class),
             $this->matcher->annotatedWith(CsrfToken::class),

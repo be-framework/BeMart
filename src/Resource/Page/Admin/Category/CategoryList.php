@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +19,7 @@ use MyVendor\BeMart\Be\Final\CategoryCreated;
 use MyVendor\BeMart\Be\Input\CreateCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryListInput;
 use BEAR\Resource\Annotation\JsonSchema;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;

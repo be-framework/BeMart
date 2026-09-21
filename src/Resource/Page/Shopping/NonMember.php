@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -24,7 +24,7 @@ use MyVendor\BeMart\Be\Exception\PostalCodeFormatException;
 use MyVendor\BeMart\Be\Exception\PrefFormatException;
 use MyVendor\BeMart\Be\Final\NonMemberSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitNonMemberInput;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\NonMemberForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;

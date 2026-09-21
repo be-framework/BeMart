@@ -14,7 +14,7 @@ use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use MyVendor\BeMart\Be\Final\ShoppingFetched;
 use MyVendor\BeMart\Be\Input\GetShoppingInput;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\ShoppingOrderForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;

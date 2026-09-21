@@ -14,7 +14,7 @@ use MyVendor\BeMart\Be\Final\CartsFetched;
 use MyVendor\BeMart\Be\Input\GetCartsInput;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_map;

@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\NullCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Support\Html\AuditedLinkHeaderModule;
 use MyVendor\BeMart\Support\Html\HtmlLinkAuditLoggerInterface;
 use MyVendor\BeMart\Tests\Support\RecordingHtmlLinkAuditLogger;

@@ -10,7 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;

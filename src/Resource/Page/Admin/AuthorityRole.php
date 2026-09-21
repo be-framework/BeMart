@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -21,7 +21,7 @@ use MyVendor\BeMart\Be\Input\UpdateAuthorityRulesInput;
 use MyVendor\BeMart\Be\Input\UpdateAuthorityRoleInput;
 use MyVendor\BeMart\Be\Reason\Query\AuthorityRoleRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;

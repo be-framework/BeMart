@@ -34,7 +34,6 @@ _No parameters required_
 
 | Relation | URL |
 |----------|-----|
-| goTemplateAdd | [<code>page://self/admin/template/template-add</code>](/admin/template/template-add.md) |
 | goTemplateInstall | [<code>page://self/admin/template/template-add</code>](/admin/template/template-add.md) |
 | doSelectTemplate | [<code>page://self/admin/template/template-list</code>](/admin/template/template-list.md) |
 | doDownloadTemplate | [<code>page://self/admin/template/template-list</code>](/admin/template/template-list.md) |

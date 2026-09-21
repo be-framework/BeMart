@@ -15,8 +15,8 @@ use MyVendor\BeMart\Be\Input\AdminRegisterProductClassInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminProductClassForm;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
-use Ray\Csrf\Attribute\CsrfToken;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\CsrfTokenInterface;
 use Ray\WebFormModule\FormFactory;
 
 use function assert;

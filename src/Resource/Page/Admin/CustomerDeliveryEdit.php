@@ -19,9 +19,9 @@ use MyVendor\BeMart\Be\Input\AdminUpdateCustomerDeliveryAddressInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminCustomerDeliveryForm;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use Ray\WebFormModule\FormFactory;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;

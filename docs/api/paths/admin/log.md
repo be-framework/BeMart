@@ -15,9 +15,9 @@ bound; an absent file renders the template's 「ログがありません」.
 
 
 ## GET
-ALPS `goAdminLog` に対応する GET 操作。
+ALPS `goLog` に対応する GET 操作。
 
-**ALPS**: `goAdminLog`
+**ALPS**: `goLog`
 
 
 

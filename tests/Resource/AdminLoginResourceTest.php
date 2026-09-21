@@ -14,7 +14,7 @@ use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
 use MyVendor\BeMart\Be\Reason\Query\LoginAttemptGateInterface;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Provide\Error\ExceptionStatusMapper;
 use PHPUnit\Framework\TestCase;

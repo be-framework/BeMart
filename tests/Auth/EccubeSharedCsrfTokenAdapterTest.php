@@ -8,7 +8,7 @@ use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit tests for the Slice 8 production CSRF adapter (Ray\Csrf\CsrfTokenInterface).
+ * Unit tests for the Slice 8 production CSRF adapter (BEAR\Csrf\CsrfTokenInterface).
  *
  * The adapter has two resolution paths:
  *   1. $_SESSION[_csrf_token] matches submitted token (HTTP context, or

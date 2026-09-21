@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Auth;
 
 use Override;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 
 use function bin2hex;
 use function hash_equals;
@@ -13,17 +13,19 @@ use function is_string;
 use function random_bytes;
 
 /**
- * Production Ray\Csrf\CsrfTokenInterface adapter — validates submitted tokens
+ * Production BEAR\Csrf\CsrfTokenInterface adapter — validates submitted tokens
  * against the trusted reference stored in PHP's `$_SESSION` (alongside
  * the flat customerId key Slice 7 already shares with EC-CUBE).
  *
- * Ray.Csrf's own SessionCsrfToken stores its reference under a private,
- * unconfigurable `ray_csrf_token` session key. BeMart binds
- * Ray\Csrf\CsrfTokenInterface to this adapter instead, so the stored key stays
- * {@see SESSION_KEY} (`_csrf_token`) — the flat string EC-CUBE's Symfony Forms
- * CSRF token is meant to mirror on form render, matching Slice 7's
- * split-implementation convention. Until that EC-CUBE-side mirror ships,
- * every production HTTP POST resolves to "no stored token" → rejected.
+ * BEAR.Csrf's own SessionCsrfStore could hold the reference under
+ * {@see SESSION_KEY} — the session key became injectable in BEAR.Csrf#5 — but
+ * it calls `session_start()` directly, while EC-CUBE's session is scoped by
+ * cookie name and must be opened through SessionStarterInterface. BeMart binds
+ * BEAR\Csrf\CsrfTokenInterface to this adapter for that boundary, keeping the
+ * stored key `_csrf_token`: the flat string EC-CUBE's Symfony Forms CSRF token
+ * is meant to mirror on form render, matching Slice 7's split-implementation
+ * convention. Until that EC-CUBE-side mirror ships, every production HTTP POST
+ * resolves to "no stored token" → rejected.
  *
  * Wire model (BEAR ↔ EC-CUBE bridge):
  *

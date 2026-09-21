@@ -14,7 +14,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ProductListFetched;
 use MyVendor\BeMart\Be\Input\GetProductListInput;
 use MyVendor\BeMart\Form\AdminProductSearchForm;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 

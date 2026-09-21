@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -56,7 +56,7 @@ class Checkout extends ResourceObject
      * Phase B Slice 9: the domain parameter arrives from the HTTP request body.
      * `$preOrderId` is a 40-hex-char id that PreOrderId Semantic
      * format-validates. The CSRF boundary token is enforced declaratively by
-     * the Ray.Csrf CsrfToken attribute.
+     * the BEAR.Csrf CsrfToken attribute.
      *
      * @psalm-taint-source input $preOrderId
      */

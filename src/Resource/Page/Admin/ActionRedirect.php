@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use Ray\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use BEAR\Resource\Annotation\JsonSchema;
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Smoke;
 
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Override;
 use Ray\Di\AbstractModule;

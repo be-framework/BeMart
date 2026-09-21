@@ -18,7 +18,7 @@ use MyVendor\BeMart\Be\Input\GetAdminCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryListInput;
 use MyVendor\BeMart\Form\AdminCategoryForm;
 use Ray\WebFormModule\FormFactory;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;

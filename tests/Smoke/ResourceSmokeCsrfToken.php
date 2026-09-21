@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Smoke;
 
 use Override;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 
 final readonly class ResourceSmokeCsrfToken implements CsrfTokenInterface
 {

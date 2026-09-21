@@ -13,12 +13,12 @@ use MyVendor\BeMart\Interceptor\CsrfForbiddenInterceptor;
 use PHPUnit\Framework\TestCase;
 use Ray\Aop\MethodInvocation;
 use Ray\Aop\ReflectionMethod;
-use Ray\Csrf\Attribute\CsrfToken;
-use Ray\Csrf\Http\CompositeRequestToken;
-use Ray\Csrf\Http\CsrfTokenField;
-use Ray\Csrf\Http\HeaderRequestToken;
-use Ray\Csrf\Http\PostRequestToken;
-use Ray\Csrf\Http\ResourceQueryRequestToken;
+use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Http\CompositeRequestToken;
+use BEAR\Csrf\Http\CsrfTokenField;
+use BEAR\Csrf\Http\HeaderRequestToken;
+use BEAR\Csrf\Http\PostRequestToken;
+use BEAR\Csrf\Http\ResourceQueryRequestToken;
 
 final class CsrfForbiddenInterceptorTest extends TestCase
 {

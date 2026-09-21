@@ -12,7 +12,7 @@ use MyVendor\BeMart\Auth\SessionStarterInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Override;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use Ray\Di\AbstractModule;
 
 /**

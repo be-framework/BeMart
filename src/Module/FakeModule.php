@@ -35,7 +35,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClientIpInterface;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface;

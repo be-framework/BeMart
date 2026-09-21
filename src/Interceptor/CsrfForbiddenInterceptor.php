@@ -9,27 +9,27 @@ use BEAR\Resource\ResourceObject;
 use Override;
 use Ray\Aop\MethodInterceptor;
 use Ray\Aop\MethodInvocation;
-use Ray\Csrf\Attribute\CsrfToken;
-use Ray\Csrf\CsrfTokenInterface;
-use Ray\Csrf\Http\CsrfTokenField;
-use Ray\Csrf\Http\RequestTokenInterface;
+use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\Http\CsrfTokenField;
+use BEAR\Csrf\Http\RequestTokenInterface;
 
 /**
- * Verifies CSRF tokens using Ray.Csrf's own field resolution and
+ * Verifies CSRF tokens using BEAR.Csrf's own field resolution and
  * header/query/post token lookup (Http\RequestTokenInterface), but keeps
  * BeMart's established, non-throwing 403 ResourceObject contract instead of
- * Ray.Csrf's own Interceptor\CsrfTokenInterceptor, for two reasons
- * (see docs/methodology/csrf-protection.md):
+ * BEAR.Csrf's own Interceptor\CsrfTokenInterceptor
+ * (see docs/methodology/csrf-protection.md).
  *
- *  - Every mutating Resource test asserts `$ro->code`/`$ro->body['message']`
- *    directly, never `expectException()`, for a CSRF rejection.
- *  - Ray.Csrf's own interceptor always rejects a missing token before ever
- *    consulting CsrfTokenInterface::verify(), which would break
- *    Fake\Service\NullCsrfToken's contract of accepting any request —
- *    including one with no token at all — for tests whose subject isn't
- *    CSRF. Calling verify() unconditionally (missing token becomes '')
- *    keeps that decision where BeMart has always made it: in the bound
- *    CsrfTokenInterface.
+ * Every mutating Resource test asserts `$ro->code` / `$ro->body['message']`
+ * directly, never `expectException()`, for a CSRF rejection. That is the
+ * reason this class exists.
+ *
+ * It originally had a second reason: BEAR.Csrf's interceptor rejected a
+ * missing token before ever consulting CsrfTokenInterface::verify(), which
+ * broke Fake\Service\NullCsrfToken's contract of accepting any request.
+ * That was reported as BEAR.Csrf#4 and fixed — upstream now submits a missing
+ * token as '' — so only the response-shape reason remains.
  */
 final readonly class CsrfForbiddenInterceptor implements MethodInterceptor
 {
