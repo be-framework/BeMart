@@ -341,7 +341,7 @@
     },
     "csrfToken": {
       "title": "購入確認CSRFトークン",
-      "description": "/shopping で表示する購入確認フォームの送信元検証トークン。/shopping/confirm へ進むPOSTで hidden input として送信され、Ray.Csrf CsrfToken属性によりセッション上の信頼済みトークンと照合される。実HTTPでは64桁hex、test/fake文脈では deterministic token を使う。",
+      "description": "/shopping で表示する購入確認フォームの送信元検証トークン。/shopping/confirm へ進むPOSTで hidden input として送信され、BEAR.Csrf CsrfToken属性によりセッション上の信頼済みトークンと照合される。実HTTPでは64桁hex、test/fake文脈では deterministic token を使う。",
       "type": "string",
       "minLength": 8,
       "maxLength": 160,

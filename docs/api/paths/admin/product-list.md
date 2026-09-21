@@ -4,9 +4,7 @@
 EC-CUBE goProductList — 商品一覧（管理画面） (Wave 8, admin filter
 search + pagination).
 
-Safe read for the resource's own GET (no CSRF on this transition). The rendered page still
-carries a csrfToken for the bulk status / delete / copy anchors embedded per row - those are
-mutations on other resources, not this one. Admin-only — the Be Final raises
+Safe read. No CSRF (read-only). Admin-only — the Be Final raises
 UnauthorizedAdminAccessException when AdminSession reports
 no admin session, which we map to 403. The customer-facing product
 list (when it lands) will be a sibling resource at a different URL.
@@ -44,7 +42,6 @@ ALPS `goProductList` に対応する GET 操作。
 
 | Name | Type | Description | Required | Constraints | Example |
 |------|------|-------------|----------|-------------|---------|
-| csrfToken | string | CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。 | Required | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 | filters | object|null | 検索条件 - /admin/product-list の一覧表示を制御するページング/検索条件。件数、開始位置、並び順、前後リンクをクライアントが再現するための値。 | Required | {"properties":{"nameKeyword":{"type":["string","null"],"minLength":0,"maxLength":255,"title":"\u540d\u524d\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9","description":"/admin/product-list \u306e\u691c\u7d22\u6761\u4ef6\u3002\u5546\u54c1\u540d\u30fb\u4f1a\u54e1\u540d\u30fb\u7ba1\u7406\u8005\u540d\u306a\u3069\u3001\u3053\u306e\u4e00\u89a7\u753b\u9762\u3067\u540d\u524d\u3068\u3057\u3066\u6271\u3046\u8868\u793a\u540d\u3092\u90e8\u5206\u4e00\u81f4\u691c\u7d22\u3059\u308b\u3002","example":"\u9234\u6728"},"offset":{"type":["integer","null"],"minimum":0,"maximum":2147483647,"title":"\u958b\u59cb\u4f4d\u7f6e","description":"/admin/product-list \u306e\u4e00\u89a7\u8868\u793a\u3092\u5236\u5fa1\u3059\u308b\u30da\u30fc\u30b8\u30f3\u30b0/\u691c\u7d22\u6761\u4ef6\u3002\u4ef6\u6570\u3001\u958b\u59cb\u4f4d\u7f6e\u3001\u4e26\u3073\u9806\u3001\u524d\u5f8c\u30ea\u30f3\u30af\u3092\u30af\u30e9\u30a4\u30a2\u30f3\u30c8\u304c\u518d\u73fe\u3059\u308b\u305f\u3081\u306e\u5024\u3002"},"limit":{"type":["integer","null"],"minimum":0,"maximum":2147483647,"title":"\u8868\u793a\u4ef6\u6570","description":"/admin/product-list \u306e\u4e00\u89a7\u8868\u793a\u3092\u5236\u5fa1\u3059\u308b\u30da\u30fc\u30b8\u30f3\u30b0/\u691c\u7d22\u6761\u4ef6\u3002\u4ef6\u6570\u3001\u958b\u59cb\u4f4d\u7f6e\u3001\u4e26\u3073\u9806\u3001\u524d\u5f8c\u30ea\u30f3\u30af\u3092\u30af\u30e9\u30a4\u30a2\u30f3\u30c8\u304c\u518d\u73fe\u3059\u308b\u305f\u3081\u306e\u5024\u3002"}},"additionalProperties":false,"required":["nameKeyword","offset","limit"]} |  |
 | count | int|null | 件数 - /admin/product-list のレスポンスで返す件数。一覧・集計・処理結果の規模を表す非負整数。 | Required | {"minimum":0,"maximum":2147483647} |  |
 | searchForm | object|array|null | 検索フォーム - /admin/product-list のレスポンスで保持するフォーム文脈。Aura/WebForm由来の内部構造は別境界の責務で、ここではResource上の役割を示す。 | Optional | {"$comment":"Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"} |  |

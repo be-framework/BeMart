@@ -79,17 +79,6 @@
         "$comment": "配列要素はFake/Resourceで観察された既知propertyに固定する。新しい列が必要になった場合はSemantic-Ex観察に追加してschemaを更新する。"
       },
       "minItems": 0
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "一覧画面から送信する作成・削除フォーム用のCSRFトークン。",
-      "type": [
-        "string",
-        "null"
-      ],
-      "minLength": 0,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]*$"
     }
   },
   "additionalProperties": false,
@@ -313,7 +302,6 @@
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
     "count",
-    "blocks",
-    "csrfToken"
+    "blocks"
   ]
 }

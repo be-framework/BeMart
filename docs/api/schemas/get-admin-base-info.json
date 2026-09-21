@@ -147,15 +147,6 @@
       "title": "ショップ名英語",
       "description": "ショップの英語名。多言語対応やメール署名等で使用 Fake観察文字長 12〜12; 観察値 'EC-CUBE SHOP'。",
       "example": "EC-CUBE SHOP"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     }
   },
   "additionalProperties": false,
@@ -378,7 +369,6 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
-    "csrfToken",
     "shopKana",
     "businessHour",
     "addr01",

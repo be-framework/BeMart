@@ -40,15 +40,6 @@
       "minLength": 0,
       "maxLength": 64,
       "example": "sample-001"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     }
   },
   "additionalProperties": false,
@@ -272,7 +263,6 @@
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
     "product",
-    "productCode",
-    "csrfToken"
+    "productCode"
   ]
 }

@@ -59,7 +59,6 @@ _No parameters required_
 | companyName | string|null | 会社名 - 法人顧客の社名。B2B取引やインボイスで使用 Fake観察文字長 10〜11; 観察値 'Acme Corp.', '株式会社EC-CUBE'; null 24/32。 | Optional | {"minLength":0,"maxLength":32} | Acme Corp. |
 | shopMessage | string|null | ショップメッセージ - 「当サイトについて」ページ（Help/about.twig）に表示する店舗からのメッセージ Fake観察文字長 20〜20; 観察値 'ようこそ、EC-CUBE SHOP へ。'。 | Required | {"minLength":0,"maxLength":2000} | ようこそ、EC-CUBE SHOP へ。 |
 | shopNameEng | string|null | ショップ名英語 - ショップの英語名。多言語対応やメール署名等で使用 Fake観察文字長 12〜12; 観察値 'EC-CUBE SHOP'。 | Required | {"minLength":0,"maxLength":32} | EC-CUBE SHOP |
-| csrfToken | string | CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。 | Required | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 
 #### Links
 

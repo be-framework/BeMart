@@ -22,9 +22,9 @@ firewall is refused with 403.
 
 
 ## GET
-ALPS `goOrderMailConfirm` に対応する GET 操作。
+ALPS `goAdminOrderMailConfirm` に対応する GET 操作。
 
-**ALPS**: `goOrderMailConfirm`
+**ALPS**: `goAdminOrderMailConfirm`
 
 
 
@@ -42,7 +42,6 @@ ALPS `goOrderMailConfirm` に対応する GET 操作。
 | Name | Type | Description | Required | Constraints | Example |
 |------|------|-------------|----------|-------------|---------|
 | orderNo | string|null | 注文番号 - 顧客向けの注文番号。フォーマットはカスタマイズ可能 Fake観察文字長 32〜32; 観察値 'past0000000000000000000000000001'。 | Required | {"minLength":0,"maxLength":64} | past0000000000000000000000000001 |
-| csrfToken | string | CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。 | Required | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 
 #### Links
 

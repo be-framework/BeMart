@@ -19,9 +19,9 @@ blank against empty JSON-backed fake storage — no storage is seeded.
 
 
 ## GET
-ALPS `goTemplateInstall` に対応する GET 操作。
+ALPS `goAdminTemplateTemplateAdd` に対応する GET 操作。
 
-**ALPS**: `goTemplateInstall`
+**ALPS**: `goAdminTemplateTemplateAdd`
 
 
 

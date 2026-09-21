@@ -56,7 +56,6 @@ _No parameters required_
 | countCustomers | int|null | 会員数 - /admin/index のレスポンスで返す会員数。一覧、集計、CSV処理結果の規模を表す非負の数値。 | Required | {"minimum":0,"maximum":2147483647} |  |
 | countProducts | int|null | 商品数 - /admin/index のレスポンスで返す商品数。一覧、集計、CSV処理結果の規模を表す非負の数値。 | Required | {"minimum":0,"maximum":2147483647} |  |
 | salesYesterday | int|null | 昨日売上 - /admin/index のレスポンスで返す昨日売上。一覧、集計、CSV処理結果の規模を表す非負の数値。 | Required | {"minimum":0,"maximum":999999999} | 1200 |
-| csrfToken | string | CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。 | Required | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 
 #### Links
 
@@ -65,3 +64,4 @@ _No parameters required_
 | goMemberList | [<code>page://self/admin/member-list</code>](/admin/member-list.md) |
 | goContentCache | [<code>page://self/admin/content/cache</code>](/admin/content/cache.md) |
 | doAdminLogout | [<code>page://self/admin/logout</code>](/admin/logout.md) |
+| goAdminLogout | [<code>page://self/admin/login</code>](/admin/login.md) |

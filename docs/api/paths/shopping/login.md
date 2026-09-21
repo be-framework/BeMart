@@ -48,7 +48,6 @@ _No parameters required_
 | submitTo | string|null | フォーム送信先リンク - /shopping/login のフォーム送信に使う送信先リンク。HTTPメソッドと遷移先をまとめ、unsafe操作の入口を明示する。 | Optional | {"minLength":0,"maxLength":255} |  |
 | staticContent | string|null | 静的コンテンツ - /shopping/login で表示する規約・ヘルプ・エラー等の静的ページ本文とセクション情報。 | Optional | {"minLength":0,"maxLength":255} |  |
 | transitionId | string | ALPS遷移ID - このレスポンス/操作が対応するALPS遷移ID。クライアントの状態遷移追跡に使う。 | Required | {"minLength":2,"maxLength":96,"pattern":"^(go|do)[A-Z][A-Za-z0-9]*$"} | doAddCartItem |
-| csrfToken | string | CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。 | Required | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 
 #### Links
 

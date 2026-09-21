@@ -76,7 +76,10 @@
     "csrfToken": {
       "title": "処理識別子",
       "description": "フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
+      "type": [
+        "string",
+        "null"
+      ],
       "minLength": 8,
       "maxLength": 160,
       "pattern": "^[A-Za-z0-9_.:-]+$",
@@ -303,7 +306,6 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
-    "transitionId",
-    "csrfToken"
+    "transitionId"
   ]
 }

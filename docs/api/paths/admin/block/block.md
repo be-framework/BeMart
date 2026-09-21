@@ -3,11 +3,8 @@
 # /admin/block/block
 EC-CUBE doUpdateBlock + doDeleteBlock — single-row endpoint (Wave 9).
 
-`onGet` maps to ALPS `goBlock`, an `alps-route-gate` placeholder descriptor
-(route existence only, not a fully modelled transition). Only PUT and
-DELETE are exposed to the domain here; `BlockList::onGet()` links to
-`doCreateBlock` only, not `goBlock` — there is no list-to-detail
-hypermedia link for this state today.
+ALPS has no goBlock — the admin edits a block from the list view
+directly. Only PUT and DELETE are exposed here for the domain.
 
 Phase 3 — HTML FORM page. `onGet` exposes an {@see \AdminBlockForm}
 (Ray.WebFormModule AbstractForm) as `body['form']` so the admin block
@@ -54,8 +51,6 @@ The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
 | Relation | URL |
 |----------|-----|
 | goBlockList | [<code>page://self/admin/block/block-list</code>](/admin/block/block-list.md) |
-| doUpdateBlock | [<code>page://self/admin/block/block</code>](/admin/block/block.md) |
-| doDeleteBlock | [<code>page://self/admin/block/block</code>](/admin/block/block.md) |
 ## PUT
 ALPS `doUpdateBlock` に対応する PUT 操作。
 

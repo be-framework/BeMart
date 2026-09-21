@@ -51,15 +51,6 @@
       "maxLength": 128,
       "pattern": "^[A-Za-z0-9._:@/-]*$",
       "$comment": "BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     }
   },
   "additionalProperties": false,
@@ -282,7 +273,6 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
-    "csrfToken",
     "parentId",
     "categoryName",
     "sortNo",

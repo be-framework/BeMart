@@ -45,15 +45,6 @@
       },
       "minItems": 0,
       "$comment": "単一詳細画面では未選択/初期表示に空配列、取得済み状態にobjectが現れる。不透明な詳細構造は既知propertyを優先し、追加キーは互換境界として許容する。"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     }
   },
   "additionalProperties": false,
@@ -276,7 +267,6 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
-    "csrfToken",
     "deliveryId"
   ]
 }

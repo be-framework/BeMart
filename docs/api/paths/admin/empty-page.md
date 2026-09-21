@@ -23,6 +23,8 @@ Renders the empty admin extension-slot page.
 Admin-only: returns 403 for an anonymous request — the same
 firewall contract as the other admin pages.
 
+**ALPS**: `goAdminEmptyPage`
+
 
 
 ### Request

@@ -53,15 +53,6 @@
       ],
       "title": "PHP情報表示可否",
       "description": "/admin/system の処理状態を示すPHP情報表示可否。画面表示や冪等処理結果の分岐に使う真偽値。"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     }
   },
   "additionalProperties": false,
@@ -284,7 +275,6 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
-    "phpinfoEnabled",
-    "csrfToken"
+    "phpinfoEnabled"
   ]
 }

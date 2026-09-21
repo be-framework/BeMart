@@ -38,13 +38,16 @@
       "example": "出荷通知メールを送信します。よろしいですか？"
     },
     "csrfToken": {
-      "type": "string",
+      "type": [
+        "string",
+        "null"
+      ],
       "title": "出荷通知メール送信フォームCSRFトークン",
-      "description": "POST /admin/order/shipping-notify-mail のhidden inputで送るCSRFトークン。",
-      "minLength": 8,
+      "description": "POST /admin/order/shipping-notify-mail のhidden inputで送るCSRFトークン。Resource bodyではnullでも、Twigが実フォーム用トークンを補う。",
+      "minLength": 0,
       "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
+      "pattern": "^[A-Za-z0-9_.:-]*$",
+      "$comment": "CSRF値はBEAR.Csrf CsrfToken境界の責務。GET bodyではフォーム文脈を示すためにnullを許容する。"
     },
     "submitTo": {
       "type": "object",

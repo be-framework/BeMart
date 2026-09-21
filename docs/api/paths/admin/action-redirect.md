@@ -13,6 +13,10 @@ domain transitions are added incrementally.
 
 
 ## GET
+ALPS `goAdminActionRedirect` に対応する GET 操作。
+
+**ALPS**: `goAdminActionRedirect`
+
 
 
 ### Request
@@ -31,6 +35,10 @@ domain transitions are added incrementally.
 | message | string|null | リダイレクトメッセージ - /admin/action-redirect のレスポンスに含まれる処理結果メッセージ。注文時お問い合わせ欄ではなく、画面遷移や完了表示のための通知文。 | Optional | {"minLength":0,"maxLength":32} | 配送は平日希望です。 |
 
 ## POST
+ALPS `doAdminActionRedirect` に対応する POST 操作。
+
+**ALPS**: `doAdminActionRedirect`
+
 
 
 ### Request

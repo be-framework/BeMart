@@ -20,9 +20,9 @@ faithful with empty JSON-backed fake storage.
 
 
 ## GET
-ALPS `goOrderPdf` に対応する GET 操作。
+ALPS `goAdminOrderOrderPdf` に対応する GET 操作。
 
-**ALPS**: `goOrderPdf`
+**ALPS**: `goAdminOrderOrderPdf`
 
 
 

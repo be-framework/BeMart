@@ -33,8 +33,7 @@ ALPS `goExportClassCategory` に対応する GET 操作。
 
 | Name | Type | Description | Required | Constraints | Example |
 |------|------|-------------|----------|-------------|---------|
-| content | string | CSVエクスポート本文 - /admin/class-category/class-category-export が返すCSV本文。列意味はCSV互換サービス側、JSON境界では文字列として契約する。 | Required | {"minLength":0,"maxLength":5000000,"$comment":"CSV\u5217\u306e\u610f\u5473\u691c\u67fb\u306fCSV\u4e92\u63db\u30b5\u30fc\u30d3\u30b9\u3067\u6271\u3044\u3001\u3053\u3053\u3067\u306f\u30ec\u30b9\u30dd\u30f3\u30b9\u672c\u6587\u3068\u3057\u3066\u306e\u6587\u5b57\u5217\u30b5\u30a4\u30ba\u3092\u691c\u67fb\u3059\u308b\u3002"} |  |
-| csrfToken | string | CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。 | Required | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
+| value | string | CSVエクスポート本文 - /admin/class-category/class-category-export が返すCSV本文。列意味はCSV互換サービス側、JSON境界では文字列として契約する。 | Required | {"minLength":0,"maxLength":5000000,"$comment":"CSV\u5217\u306e\u610f\u5473\u691c\u67fb\u306fCSV\u4e92\u63db\u30b5\u30fc\u30d3\u30b9\u3067\u6271\u3044\u3001\u3053\u3053\u3067\u306f\u30ec\u30b9\u30dd\u30f3\u30b9\u672c\u6587\u3068\u3057\u3066\u306e\u6587\u5b57\u5217\u30b5\u30a4\u30ba\u3092\u691c\u67fb\u3059\u308b\u3002"} |  |
 
 #### Links
 
