@@ -9,15 +9,8 @@ use Ray\Csrf\CsrfTokenInterface;
 
 use function bin2hex;
 use function hash_equals;
-use function headers_sent;
 use function is_string;
 use function random_bytes;
-use function session_name;
-use function session_start;
-use function session_status;
-
-use const PHP_SAPI;
-use const PHP_SESSION_ACTIVE;
 
 /**
  * Production Ray\Csrf\CsrfTokenInterface adapter — validates submitted tokens
@@ -42,11 +35,8 @@ use const PHP_SESSION_ACTIVE;
  *      JSON / form body, and asks this adapter to compare it against
  *      `$_SESSION[SESSION_KEY]` using `hash_equals`.
  *
- * CLI safety: in `bin/app.php` there is no HTTP origin to defend. CLI
- * requests use the token in $_SESSION when a test or context module supplies
- * one; otherwise POSTs fail the CSRF check the same way an anonymous browser
- * request would. Application code must not inspect process environment to
- * decide the trusted token.
+ * Which cookie starts the session backing $_SESSION, and whether one starts
+ * at all, is a context/DI decision - see {@see SessionStarterInterface} and #93.
  *
  * Comparison is always timing-safe (`hash_equals`). Empty strings and
  * non-string types are rejected before comparison.
@@ -71,6 +61,7 @@ final readonly class EccubeSharedCsrfTokenAdapter implements CsrfTokenInterface
     public const SESSION_KEY = '_csrf_token';
 
     public function __construct(
+        private SessionStarterInterface $sessionStarter = new CookieSessionStarter(EccubeSharedSessionAdapter::COOKIE_NAME),
         private string $sessionKey = self::SESSION_KEY,
     ) {
     }
@@ -78,7 +69,7 @@ final readonly class EccubeSharedCsrfTokenAdapter implements CsrfTokenInterface
     #[Override]
     public function issue(): string
     {
-        $this->ensureSessionStarted();
+        $this->sessionStarter->ensureStarted();
 
         $existing = $this->storedToken();
         if ($existing !== null) {
@@ -100,7 +91,7 @@ final readonly class EccubeSharedCsrfTokenAdapter implements CsrfTokenInterface
             return false;
         }
 
-        $this->ensureSessionStarted();
+        $this->sessionStarter->ensureStarted();
         $stored = $this->storedToken();
 
         return $stored !== null && hash_equals($stored, $candidate);
@@ -109,7 +100,7 @@ final readonly class EccubeSharedCsrfTokenAdapter implements CsrfTokenInterface
     #[Override]
     public function clear(): void
     {
-        $this->ensureSessionStarted();
+        $this->sessionStarter->ensureStarted();
         unset($_SESSION[$this->sessionKey]);
     }
 
@@ -121,27 +112,5 @@ final readonly class EccubeSharedCsrfTokenAdapter implements CsrfTokenInterface
         $stored = $session[$this->sessionKey] ?? null;
 
         return is_string($stored) && $stored !== '' ? $stored : null;
-    }
-
-    private function ensureSessionStarted(): void
-    {
-        if (PHP_SAPI === 'cli') {
-            return;
-        }
-
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            return;
-        }
-
-        if (headers_sent()) {
-            return;
-        }
-
-        session_name(EccubeSharedSessionAdapter::COOKIE_NAME);
-        session_start([
-            'use_strict_mode' => true,
-            'cookie_httponly' => true,
-            'cookie_samesite' => 'Lax',
-        ]);
     }
 }

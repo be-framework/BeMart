@@ -21,7 +21,5 @@ final class LinkHeaderModule extends AbstractModule
     {
         $this->rename(RenderInterface::class, 'html');
         $this->bind(RenderInterface::class)->to(LinkHeaderRenderer::class)->in(Scope::SINGLETON);
-        $this->bind(HtmlLinkAuditor::class);
-        $this->bind(HtmlLinkAuditLoggerInterface::class)->to(SilentHtmlLinkAuditLogger::class);
     }
 }

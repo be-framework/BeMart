@@ -142,14 +142,16 @@ final class CsrfTokenRenderedTest extends TestCase
     {
         $ledger = $this->ledger();
 
-        // This PR closed the ledger's original 37 entries to {}. Assert that explicitly so the
-        // loop below isn't a vacuous no-assertion pass; if an entry is ever reopened, it still
-        // gets its reason validated against the allow-list.
-        $this->assertSame([], $ledger, 'The csrf-empty-token ledger should stay empty; if this fails, new entries below still get validated.');
-
+        // Validate first, assert closed-state last: if a failing assertSame([], $ledger) ran
+        // *before* this loop, a reopened entry would never get its reason checked - exactly the
+        // silent-masking bug this ordering avoids. The final assertSame always fires (0 or more
+        // loop iterations don't affect it), so this PR's closed-ledger claim stays a real,
+        // non-vacuous assertion instead of "no entries, so no assertions ran".
         foreach ($ledger as $key => $entry) {
             $this->assertContains($entry['reason'], self::REASONS, $key);
         }
+
+        $this->assertSame([], $ledger, 'The csrf-empty-token ledger reopened; entries above were still checked for a valid reason.');
     }
 
     /** @return array<string, Entry> */

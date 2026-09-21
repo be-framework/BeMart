@@ -48,8 +48,6 @@ class PaymentList extends ResourceObject
     #[JsonSchema(schema: 'get-admin-payment-payment-list.json')]
     #[Link(rel: 'doCreatePayment', href: 'page://self/admin/payment/payment-list', method: 'post')]
     #[Link(rel: 'goPayment', href: 'page://self/admin/payment/payment', method: 'get')]
-    #[Link(rel: 'doUpdatePayment', href: 'page://self/admin/payment/payment', method: 'put')]
-    #[Link(rel: 'doDeletePayment', href: 'page://self/admin/payment/payment', method: 'delete')]
     #[Link(rel: 'doToggleVisible', href: 'page://self/admin/toggle-visible', method: 'put')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
