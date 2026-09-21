@@ -254,6 +254,31 @@ final class ObserveModuleBodyRetentionTest extends TestCase
         );
     }
 
+    public function testAForeignDirectoryDoesNotCostARealGeneration(): void
+    {
+        $root = dirname(__DIR__, 2) . '/var/log/' . self::CONTEXT . '/es-bodies';
+        mkdir($root, 0775, true);
+        // `tmp` sorts AFTER the timestamped names (ASCII puts letters after digits), so counting it
+        // inflates the overflow while the oldest-first slice stays entirely ours — the shape that
+        // silently costs one real generation per stray directory.
+        $foreign = $root . '/tmp';
+        mkdir($foreign, 0775, true);
+
+        $owned = [];
+        for ($i = 0; $i < ObserveModule::KEEP_GENERATIONS; $i++) {
+            $dir = $root . '/' . sprintf('20200101-000000-%06d-0000000%d', $i, $i % 10);
+            mkdir($dir, 0775, true);
+            file_put_contents($dir . '/.bear-es-bodies', '');
+            $owned[] = $dir;
+        }
+
+        $this->buildSession(new SemanticLogger());
+
+        $survivors = self::generations();
+        $this->assertContains($owned[0], $survivors, 'exactly the retention count is owned, so none may be pruned');
+        $this->assertContains($foreign, $survivors, 'a directory the body store does not own must be left alone');
+    }
+
     /** @return list<string> */
     private static function generations(): array
     {

@@ -30,6 +30,7 @@ use function count;
 use function glob;
 use function gmdate;
 use function is_dir;
+use function is_file;
 use function max;
 use function microtime;
 use function random_bytes;
@@ -60,6 +61,11 @@ final class DevModule extends AbstractAppModule
      * shorten the log history the bear-observe skill tells people to read back through.
      */
     private const int KEEP_GENERATIONS = 100;
+    /**
+     * Ownership marker FileBodyStore writes into each directory it manages; its own copy of this
+     * name is private, so pruning re-states it rather than miscounting a directory it does not own.
+     */
+    private const string BODY_STORE_MARKER = '.bear-es-bodies';
 
     #[Override]
     protected function configure(): void
@@ -147,7 +153,20 @@ final class DevModule extends AbstractAppModule
      */
     private static function pruneStaleGenerations(string $bodiesRoot, int $keep): void
     {
-        $generations = glob($bodiesRoot . '/*', GLOB_ONLYDIR) ?: [];
+        // Only directories carrying FileBodyStore's ownership marker. Counting anything else
+        // toward the cap over-prunes: a foreign directory that sorts newer than the generations
+        // (any lowercase name does — ASCII puts letters after digits) inflates the overflow while
+        // the oldest-first slice stays entirely ours, so one stray `es-bodies/tmp` permanently
+        // costs one real generation and shrinks the body window below the log window.
+        $generations = [];
+        foreach (glob($bodiesRoot . '/*', GLOB_ONLYDIR) ?: [] as $candidate) {
+            if (! is_file($candidate . '/' . self::BODY_STORE_MARKER)) {
+                continue;
+            }
+
+            $generations[] = $candidate;
+        }
+
         sort($generations);
         $overflow = max(0, count($generations) - $keep);
         foreach (array_slice($generations, 0, $overflow) as $stale) {
