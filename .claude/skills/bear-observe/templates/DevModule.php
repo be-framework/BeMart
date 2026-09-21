@@ -154,7 +154,10 @@ final class DevModule extends AbstractAppModule
             try {
                 FileBodyStore::clearDirectory($stale);
             } catch (BodyStoreException) {
-                // A sibling process pruning the same generation concurrently is not an error.
+                // Skipped, not reported: a sibling process pruning the same generation wins the
+                // race, and a directory without FileBodyStore's ownership marker is refused on
+                // purpose. Neither is this module's to fix, and an unowned directory is left
+                // where it is rather than deleted.
                 continue;
             }
 
