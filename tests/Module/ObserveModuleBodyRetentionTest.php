@@ -25,14 +25,19 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 use function dirname;
 use function file_get_contents;
+use function file_put_contents;
+use function glob;
 use function is_dir;
 use function json_decode;
 use function json_encode;
+use function mkdir;
 use function rmdir;
+use function sprintf;
 use function str_starts_with;
 use function substr;
 use function unlink;
 
+use const GLOB_ONLYDIR;
 use const JSON_THROW_ON_ERROR;
 
 /**
@@ -198,5 +203,62 @@ final class ObserveModuleBodyRetentionTest extends TestCase
             (string) file_get_contents($bodyPath1),
             "the first session's body content must remain unchanged after a third session",
         );
+    }
+
+    public function testAnInjectorThatRecordsNothingAddsNoGeneration(): void
+    {
+        // configure() runs before routing knows the request method, so a build that goes on to
+        // record nothing (an OPTIONS preflight, a process that never dispatches) must not consume
+        // a generation. If it did, the body window would advance without the log window and
+        // retention would eventually prune a generation a retained log still points at.
+        $this->buildSession(new SemanticLogger());
+        $this->buildSession(new SemanticLogger());
+        $this->buildSession(new SemanticLogger());
+
+        $this->assertSame(
+            [],
+            self::generations(),
+            'building an injector without storing a body must not create a generation directory',
+        );
+    }
+
+    public function testGenerationsBeyondTheRetentionCountArePrunedOldestFirst(): void
+    {
+        $root = dirname(__DIR__, 2) . '/var/log/' . self::CONTEXT . '/es-bodies';
+        mkdir($root, 0775, true);
+        // One more than the module keeps, so the deletion branch has to run. The `.bear-es-bodies`
+        // marker is what FileBodyStore::clearDirectory() checks before deleting anything, so a
+        // generation without it is refused — planting it is what makes these fixtures real.
+        $planted = [];
+        for ($i = 0; $i <= ObserveModule::KEEP_GENERATIONS; $i++) {
+            $dir = $root . '/' . sprintf('20200101-000000-%06d-0000000%d', $i, $i % 10);
+            mkdir($dir, 0775, true);
+            file_put_contents($dir . '/.bear-es-bodies', '');
+            file_put_contents($dir . '/000001.json', '{}');
+            $planted[] = $dir;
+        }
+
+        $this->buildSession(new SemanticLogger());
+
+        $survivors = self::generations();
+        $this->assertCount(
+            ObserveModule::KEEP_GENERATIONS,
+            $survivors,
+            'the retention count is the ceiling, and the deletion branch must enforce it',
+        );
+        $this->assertNotContains($planted[0], $survivors, 'the oldest generation must be the one pruned');
+        $this->assertContains(
+            $planted[ObserveModule::KEEP_GENERATIONS],
+            $survivors,
+            'the newest generation must survive',
+        );
+    }
+
+    /** @return list<string> */
+    private static function generations(): array
+    {
+        $found = glob(dirname(__DIR__, 2) . '/var/log/' . self::CONTEXT . '/es-bodies/*', GLOB_ONLYDIR);
+
+        return $found === false ? [] : $found;
     }
 }
