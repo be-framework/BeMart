@@ -242,7 +242,7 @@ $log = $logger->flush();                    // その場で受け取る(以降�
 | 依存の伝播 | `save_*` の `tags` ↔ `invalidate` の `tags` の突き合わせ。`depends_on` を出すのは `#[Cacheable]` の親だけで、donut の親は出さない(§4) |
 | 何回リソースが走ったか | `resource_request` の数。N+1 は同じ URI の兄弟が並ぶ形で出る |
 | どこで時間を使ったか | `durationMs`。親から子を引いた残りがその層の自前のコスト |
-| 何を返したか | `body_ref` のファイル(`var/log/<context>/es-bodies/`) |
+| 何を返したか | `body_ref` のファイル(`var/log/<context>/es-bodies/<generation>/`。generation はリクエストごとのディレクトリで、ログと同じ本数だけ残る) |
 
 読み間違えやすい 4 点(いずれも実測):
 
