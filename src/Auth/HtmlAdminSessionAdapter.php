@@ -6,14 +6,7 @@ namespace MyVendor\BeMart\Auth;
 
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 
-use function headers_sent;
 use function is_string;
-use function session_name;
-use function session_start;
-use function session_status;
-
-use const PHP_SAPI;
-use const PHP_SESSION_ACTIVE;
 
 /**
  * HTML-context admin session adapter.
@@ -21,25 +14,29 @@ use const PHP_SESSION_ACTIVE;
  * `public/index.php` starts the cookie-backed PHP session for the HTML context
  * before dispatch. This adapter snapshots the flat admin id written by the html
  * admin login/logout resources.
+ *
+ * Which cookie starts that session is a context/DI decision - see
+ * {@see SessionStarterInterface} and #93.
  */
 final class HtmlAdminSessionAdapter extends AdminSession
 {
     public const ADMIN_ID_KEY = 'admin_id';
 
-    public function __construct()
-    {
-        parent::__construct(self::readAdminId());
+    public function __construct(
+        private readonly SessionStarterInterface $sessionStarter = new CookieSessionStarter(EccubeSharedSessionAdapter::COOKIE_NAME),
+    ) {
+        parent::__construct($this->readAdminId());
     }
 
     public function refresh(): void
     {
-        $this->adminId = self::readAdminId();
+        $this->adminId = $this->readAdminId();
     }
 
     /** @return non-empty-string|null */
-    private static function readAdminId(): string|null
+    private function readAdminId(): string|null
     {
-        self::ensureSessionStarted();
+        $this->sessionStarter->ensureStarted();
         $session = isset($_SESSION) ? $_SESSION : [];
         /** @var mixed $raw */
         $raw = $session[self::ADMIN_ID_KEY] ?? null;
@@ -48,27 +45,5 @@ final class HtmlAdminSessionAdapter extends AdminSession
         }
 
         return null;
-    }
-
-    private static function ensureSessionStarted(): void
-    {
-        if (PHP_SAPI === 'cli') {
-            return;
-        }
-
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            return;
-        }
-
-        if (headers_sent()) {
-            return;
-        }
-
-        session_name(EccubeSharedSessionAdapter::COOKIE_NAME);
-        session_start([
-            'use_strict_mode' => true,
-            'cookie_httponly' => true,
-            'cookie_samesite' => 'Lax',
-        ]);
     }
 }

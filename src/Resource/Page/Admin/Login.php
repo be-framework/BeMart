@@ -12,7 +12,7 @@ use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use Be\Framework\SemanticVariable\ValidationMessageHandler;
-use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
+use MyVendor\BeMart\Auth\AdminLoginChallengeInterface;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Exception\AdminLoginFailedException;
 use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
@@ -77,7 +77,7 @@ class Login extends ResourceObject
         private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly TwoFactorAuthInterface $twoFactorAuth,
-        private readonly HtmlAdminLoginChallengeAdapter $loginChallenge,
+        private readonly AdminLoginChallengeInterface $loginChallenge,
         private readonly AdminLoginFormSubmissionInterface $formSubmission,
     ) {
     }
