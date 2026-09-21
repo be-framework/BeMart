@@ -27,6 +27,7 @@ use function bin2hex;
 use function count;
 use function glob;
 use function gmdate;
+use function is_dir;
 use function max;
 use function microtime;
 use function random_bytes;
@@ -123,10 +124,20 @@ final class DevModule extends AbstractAppModule
         foreach (array_slice($generations, 0, $overflow) as $stale) {
             try {
                 FileBodyStore::clearDirectory($stale);
-                rmdir($stale);
             } catch (BodyStoreException) {
                 // A sibling process pruning the same generation concurrently is not an error.
+                continue;
             }
+
+            // The directory is empty by now, so removing it is cosmetic: leaving one behind
+            // orphans nothing, because the log that referenced its bodies is pruned too. A
+            // concurrent prune can win the race between these two calls, so an unchecked
+            // rmdir() would emit a warning for a state that is already the desired one.
+            if (! is_dir($stale)) {
+                continue;
+            }
+
+            @rmdir($stale);
         }
     }
 }
