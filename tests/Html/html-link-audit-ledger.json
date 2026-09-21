@@ -174,9 +174,29 @@
     "note": "affordance で post /admin/csv-config に届くが rel=\"doUpdateCsv\" が無い",
     "reason": "semantic-token-missing"
   },
+  "GET page://self/admin/customer doUpdateCustomerProfile": {
+    "classification": "fail",
+    "note": "affordance で post /admin/customer に届くが rel=\"doUpdateCustomerProfile\" が無い",
+    "reason": "semantic-token-missing"
+  },
   "GET page://self/admin/customer goCustomerList": {
     "classification": "fail",
     "note": "affordance で get /admin/customer-list に届くが rel=\"goCustomerList\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/customer-delivery-edit doCreateCustomerDeliveryAddress": {
+    "classification": "fail",
+    "note": "affordance で post /admin/customer-delivery-edit に届くが rel=\"doCreateCustomerDeliveryAddress\" が無い",
+    "reason": "semantic-token-missing"
+  },
+  "GET page://self/admin/customer-delivery-edit doDeleteCustomerDeliveryAddress": {
+    "classification": "resourceOnly",
+    "note": "このエディタに削除 form は無い。お届け先の削除導線は未実装（別スコープ）",
+    "reason": "method-mismatch"
+  },
+  "GET page://self/admin/customer-delivery-edit doUpdateCustomerDeliveryAddress": {
+    "classification": "fail",
+    "note": "affordance で post /admin/customer-delivery-edit に届くが rel=\"doUpdateCustomerDeliveryAddress\" が無い",
     "reason": "semantic-token-missing"
   },
   "GET page://self/admin/customer-delivery-edit goCustomerList": {
@@ -538,6 +558,11 @@
     "classification": "resourceOnly",
     "note": "productCode 無しの新規モードでは PUT form を描画しない",
     "reason": "method-mismatch"
+  },
+  "GET page://self/admin/product/product-class doRegisterProductClass": {
+    "classification": "fail",
+    "note": "affordance で post /admin/product/product-class に届くが rel=\"doRegisterProductClass\" が無い",
+    "reason": "semantic-token-missing"
   },
   "GET page://self/admin/product/product-class goProduct": {
     "classification": "resourceOnly",

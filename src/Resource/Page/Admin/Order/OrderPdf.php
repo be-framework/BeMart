@@ -40,10 +40,10 @@ class OrderPdf extends ResourceObject
     }
 
     /**
-     * ALPS `goAdminOrderOrderPdf` に対応する GET 操作。
+     * ALPS `goOrderPdf` に対応する GET 操作。
      * @psalm-taint-source input $orderNo
      */
-    #[Alps('goAdminOrderOrderPdf')]
+    #[Alps('goOrderPdf')]
     #[JsonSchema(schema: 'get-admin-order-order-pdf.json', params: 'get-admin-order-order-pdf.param.json')]
     #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf', method: 'get')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]

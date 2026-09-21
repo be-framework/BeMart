@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
-use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Ray\Csrf\Attribute\CsrfToken;
@@ -15,8 +14,6 @@ use function preg_match;
 /** Safe placeholder for template routes that are not backed by a resource yet. */
 class UnsupportedRoute extends ResourceObject
 {
-    /** ALPS `goUnsupportedRoute` に対応する GET 操作。 */
-    #[Alps('goUnsupportedRoute')]
     #[JsonSchema(schema: 'get-unsupported-route.json', params: 'get-unsupported-route.param.json')]
     public function onGet(string $routeName = ''): static
     {
@@ -29,8 +26,6 @@ class UnsupportedRoute extends ResourceObject
         return $this;
     }
 
-    /** ALPS `doUnsupportedRoute` に対応する POST 操作。 */
-    #[Alps('doUnsupportedRoute')]
     #[JsonSchema(schema: 'post-unsupported-route.json', params: 'post-unsupported-route.param.json')]
     #[CsrfToken]
     public function onPost(string $routeName = '', string|null $returnTo = null): static
