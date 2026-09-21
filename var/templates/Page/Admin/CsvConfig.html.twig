@@ -308,7 +308,7 @@
 </div>
 
 {# ── Main form ──────────────────────────────────────────────────────────── #}
-<form id="csv-config-form" method="post" action="/admin/csv-config" novalidate>
+<form id="csv-config-form" method="post" action="/admin/csv-config" rel="doUpdateCsv" novalidate>
   <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
   <input type="hidden" name="csvType"   value="{{ csvType|default(3) }}">
 

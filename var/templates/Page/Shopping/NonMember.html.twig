@@ -36,6 +36,7 @@
   <form class="idea-checkout-panel idea-guest-form h-adr"
         method="post"
         action="/shopping/non-member"
+        rel="doSubmitNonMember"
         novalidate>
     <span class="p-country-name" aria-hidden="true">Japan</span>
     <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">

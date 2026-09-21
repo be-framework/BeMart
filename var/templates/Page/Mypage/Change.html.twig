@@ -36,7 +36,7 @@
 </section>
 
 <section class="idea-container idea-section idea-section--tight">
-  <form class="h-adr" method="post" action="/mypage/change" novalidate>
+  <form class="h-adr" method="post" action="/mypage/change" rel="doUpdateCustomer" novalidate>
     <span class="p-country-name" aria-hidden="true">Japan</span>
     <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
@@ -228,7 +228,7 @@
       {# 送信 #}
       <div class="idea-form-actions">
         <button type="submit" class="idea-button">変更を保存する</button>
-        <a href="/mypage" class="idea-muted" style="font-size:.9rem;">マイページへ戻る</a>
+        <a href="/mypage" class="idea-muted" rel="goMypage" style="font-size:.9rem;">マイページへ戻る</a>
       </div>
 
     </div>

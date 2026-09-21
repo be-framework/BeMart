@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\News;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Final\AdminNewsListFetched;
 use MyVendor\BeMart\Be\Final\NewsCreated;
 use MyVendor\BeMart\Be\Input\CreateNewsInput;
 use MyVendor\BeMart\Be\Input\GetAdminNewsListInput;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -31,6 +32,7 @@ class NewsList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -51,6 +53,7 @@ class NewsList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'news' => $final->news,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -67,7 +70,7 @@ class NewsList extends ResourceObject
     #[Alps('doCreateNews')]
     #[JsonSchema(schema: 'post-admin-news-news-list.json', params: 'post-admin-news-news-list.param.json')]
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $newsTitle,
         string $publishDate,

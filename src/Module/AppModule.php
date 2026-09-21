@@ -13,6 +13,7 @@ use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use Be\Framework\Module\BeModule;
 use MyVendor\BeMart\Be\Reason\Service\ProductCacheInvalidatorInterface;
 use MyVendor\BeMart\Cache\ProductCacheInvalidator;
+use MyVendor\BeMart\Auth\AdminLoginChallengeInterface;
 use MyVendor\BeMart\Auth\AdminSessionWriterInterface;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
@@ -85,8 +86,14 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeSecurityConfigWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTemplateCompatibility;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
-use MyVendor\BeMart\Annotation\CsrfProtected;
-use MyVendor\BeMart\Interceptor\CsrfProtectedInterceptor;
+use Ray\Csrf\Attribute\CsrfToken;
+use Ray\Csrf\Http\CompositeRequestToken;
+use Ray\Csrf\Http\CsrfTokenField;
+use Ray\Csrf\Http\HeaderRequestToken;
+use Ray\Csrf\Http\PostRequestToken;
+use Ray\Csrf\Http\RequestTokenInterface;
+use Ray\Csrf\Http\ResourceQueryRequestToken;
+use MyVendor\BeMart\Interceptor\CsrfForbiddenInterceptor;
 use MyVendor\BeMart\Provide\Transfer\ApiDownloadContentTypePolicy;
 use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\DownloadResponder;
@@ -179,10 +186,22 @@ final class AppModule extends AbstractAppModule
             ),
         );
 
+        // BeMart's default wire field name predates Ray.Csrf; keep it so
+        // existing templates/JS that submit `csrfToken` need no changes.
+        $this->bind(CsrfTokenField::class)->toInstance(new CsrfTokenField('csrfToken'));
+        $this->bind(HeaderRequestToken::class);
+        $this->bind(ResourceQueryRequestToken::class);
+        $this->bind(PostRequestToken::class);
+        $this->bind(RequestTokenInterface::class)->to(CompositeRequestToken::class);
+
+        // CsrfForbiddenInterceptor reuses Ray.Csrf's field/token-lookup
+        // primitives but keeps BeMart's non-throwing 403-ResourceObject
+        // contract (see docs/methodology/csrf-protection.md) instead of
+        // Ray.Csrf's own throwing Interceptor\CsrfTokenInterceptor.
         $this->bindPriorityInterceptor(
             $this->matcher->subclassesOf(ResourceObject::class),
-            $this->matcher->annotatedWith(CsrfProtected::class),
-            [CsrfProtectedInterceptor::class],
+            $this->matcher->annotatedWith(CsrfToken::class),
+            [CsrfForbiddenInterceptor::class],
         );
 
         // Be Framework: BecomingInterface, SemanticLogger, semantic validator,
@@ -194,6 +213,7 @@ final class AppModule extends AbstractAppModule
         // A Final announces a product change; this is what turns the announcement into cache work
         $this->bind(ProductCacheInvalidatorInterface::class)->to(ProductCacheInvalidator::class);
         $this->bind(HtmlAdminLoginChallengeAdapter::class);
+        $this->bind(AdminLoginChallengeInterface::class)->to(HtmlAdminLoginChallengeAdapter::class);
         $this->bind(CustomerSessionWriterInterface::class)->to(NoopCustomerSessionWriter::class)->in(Scope::SINGLETON);
         $this->bind(AdminSessionWriterInterface::class)->to(NoopAdminSessionWriter::class)->in(Scope::SINGLETON);
         $this->bind(CartSessionPrefixInterface::class)->to(NoopCartSessionPrefix::class)->in(Scope::SINGLETON);

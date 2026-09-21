@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
-use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function preg_match;
@@ -22,8 +21,6 @@ use function preg_match;
  */
 class ActionRedirect extends ResourceObject
 {
-    /** ALPS `goActionRedirect` に対応する GET 操作。 */
-    #[Alps('goActionRedirect')]
     #[JsonSchema(schema: 'get-action-redirect.json', params: 'get-action-redirect.param.json')]
     public function onGet(string|null $returnTo = null): static
     {
@@ -32,10 +29,8 @@ class ActionRedirect extends ResourceObject
         return $this;
     }
 
-    /** ALPS `doActionRedirect` に対応する POST 操作。 */
-    #[Alps('doActionRedirect')]
     #[JsonSchema(schema: 'post-action-redirect.json', params: 'post-action-redirect.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string|null $returnTo = null): static
     {
         $this->redirect($returnTo);

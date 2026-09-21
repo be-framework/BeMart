@@ -4,19 +4,27 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Smoke;
 
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use Override;
+use Ray\Csrf\CsrfTokenInterface;
 
-final readonly class ResourceSmokeCsrfToken extends CsrfToken
+final readonly class ResourceSmokeCsrfToken implements CsrfTokenInterface
 {
-    public function __construct()
+    private const TOKEN = 'resource-smoke-csrf-token';
+
+    #[Override]
+    public function issue(): string
     {
-        parent::__construct('resource-smoke-csrf-token');
+        return self::TOKEN;
     }
 
     #[Override]
-    public function isValid(string|null $token): bool
+    public function verify(string $candidate): bool
     {
         return true;
+    }
+
+    #[Override]
+    public function clear(): void
+    {
     }
 }

@@ -116,7 +116,7 @@ final class FavoriteListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('value="delete"', $html);
     }
 
-    /** L2: delete form carries a CSRF token field (field name: csrfToken, per CsrfProtected annotation). */
+    /** L2: delete form carries a CSRF token field (field name: csrfToken, per Ray.Csrf CsrfToken attribute). */
     public function testDeleteFormHasCsrfTokenField(): void
     {
         $html = $this->resource->get('page://self/mypage/favorite-list')->toString();

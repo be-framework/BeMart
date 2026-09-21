@@ -10,13 +10,13 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException;
 use MyVendor\BeMart\Be\Final\OrderConfirmed;
 use MyVendor\BeMart\Be\Final\OrderConfirmFailed;
 use MyVendor\BeMart\Be\Input\ConfirmOrderInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -54,7 +54,7 @@ class Confirm extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -85,7 +85,7 @@ class Confirm extends ResourceObject
     #[JsonSchema(schema: 'get-shopping-confirm.json', params: 'post-shopping-confirm.param.json')]
     #[Link(rel: 'doCheckout', href: 'page://self/shopping/checkout', method: 'post')]
     #[Link(rel: 'goShoppingError', href: 'page://self/shopping/error')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $preOrderId,
         int $payment = 2,
@@ -153,7 +153,7 @@ class Confirm extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/shopping/checkout',
             ],
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

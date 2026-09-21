@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Payment;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -23,6 +23,7 @@ use MyVendor\BeMart\Be\Input\UpdatePaymentMethodAdminInput;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+use Ray\Csrf\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -42,6 +43,7 @@ class Payment extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -58,6 +60,7 @@ class Payment extends ResourceObject
     #[Alps('doUpdatePayment')]
     #[JsonSchema(schema: 'get-admin-payment-payment.json', params: 'get-admin-payment-payment.param.json')]
     #[Link(rel: 'doUpdatePayment', href: 'page://self/admin/payment/payment', method: 'put')]
+    #[Link(rel: 'doDeletePayment', href: 'page://self/admin/payment/payment', method: 'delete')]
     public function onGet(string $paymentId = ''): static
     {
         $final = ($this->becoming)(new GetAdminPaymentListInput());
@@ -97,6 +100,7 @@ class Payment extends ResourceObject
             'form' => $form,
             'paymentId' => $paymentId,
             'payment' => $payment,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -114,7 +118,7 @@ class Payment extends ResourceObject
     #[Alps('doUpdatePayment')]
     #[JsonSchema(schema: 'put-admin-payment-payment.json', params: 'put-admin-payment-payment.param.json')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $paymentId,
         string|null $paymentMethodName = null,
@@ -155,7 +159,7 @@ class Payment extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-payment-payment.json', params: 'delete-admin-payment-payment.param.json')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $paymentId): static
     {
         $final = ($this->becoming)(new DeletePaymentMethodAdminInput(paymentId: $paymentId));

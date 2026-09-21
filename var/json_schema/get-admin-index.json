@@ -258,6 +258,15 @@
       "minimum": 0,
       "maximum": 999999999,
       "example": 1200
+    },
+    "csrfToken": {
+      "title": "CSRFトークン",
+      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "example": "fake-csrf-token-bemart-2026"
     }
   },
   "additionalProperties": false,
@@ -488,6 +497,7 @@
     "orderStatuses",
     "countCustomers",
     "countProducts",
-    "salesYesterday"
+    "salesYesterday",
+    "csrfToken"
   ]
 }

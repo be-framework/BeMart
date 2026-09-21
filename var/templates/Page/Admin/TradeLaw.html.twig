@@ -20,7 +20,7 @@
 
   ACTION
   ─────────────────────────────────────────────────────────────
-  POST /admin/trade-law   doUpdateTradeLaw  (CsrfProtected, mode=trade_law_form)
+  POST /admin/trade-law   doUpdateTradeLaw  (Ray.Csrf CsrfToken, mode=trade_law_form)
     → 303 redirect to /admin/trade-law
 
   LINKS (from #[Link] annotations)
@@ -197,6 +197,7 @@
   role="form"
   method="post"
   action="/admin/trade-law"
+  rel="doUpdateTradeLaw"
   novalidate
 >
   <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">

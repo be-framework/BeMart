@@ -48,8 +48,8 @@ trace 表示のみ(呼び出しチェーンの他フレームや、同じ値を�
 スタック上にある間に、その内側で例外が発生・伝播する」場合
 (例: `Login::onPost` は browser-form でない経路で `SemanticVariableException` を
 re-throw する。`$this->becoming(...)` 呼び出し中に Being/Final から例外が投げられる
-場合も同様)。**`#[CsrfProtected]` インターセプタは検証失敗時に例外を投げず 403 body を
-セットして return するだけなので、この経路の対象ではない**(`CsrfProtectedInterceptor::invoke()`
+場合も同様)。**`#[Ray\Csrf\Attribute\CsrfToken]` インターセプタは検証失敗時に例外を投げず 403 body を
+セットして return するだけなので、この経路の対象ではない**(`MyVendor\BeMart\Interceptor\CsrfForbiddenInterceptor::invoke()`
 で確認済み)。
 
 - **Resource 層**: 名前が `/password|secret|token|resetKey|authKey/i` にマッチする

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -78,7 +78,7 @@ class DeleteCustomer extends ResourceObject
     #[Alps('doDeleteCustomer')]
     #[JsonSchema(schema: 'post-admin-delete-customer.json', params: 'post-admin-delete-customer.param.json')]
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $customerId,
     ): static {

@@ -8,7 +8,7 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -66,7 +66,7 @@ class ShippingMultiple extends ResourceObject
     #[Alps('doSelectShippingAddress')]
     #[JsonSchema(schema: 'post-shopping-shipping-multiple.json', params: 'post-shopping-shipping-multiple.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(array $allocations = []): static
     {
         $this->code = Code::SEE_OTHER;

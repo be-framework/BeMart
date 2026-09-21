@@ -7,6 +7,8 @@ namespace MyVendor\BeMart\Module;
 use BEAR\Package\AbstractAppModule;
 use MyVendor\BeMart\Be\Reason\Fake\Query\InMemoryLoginHistoryStorage;
 use MyVendor\BeMart\Be\Reason\Fake\Service\InMemoryPreOrderClaim;
+use MyVendor\BeMart\Auth\NullSessionStarter;
+use MyVendor\BeMart\Auth\SessionStarterInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeClientIp;
@@ -33,7 +35,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClientIpInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface;
@@ -88,7 +90,11 @@ final class FakeModule extends AbstractAppModule
         $this->bind(AdminSession::class)->toInstance($adminSession);
         $this->bind(NullCsrfToken::class)->toInstance($csrf);
         $this->bind(FakeCsrfToken::class);
-        $this->bind(CsrfToken::class)->toInstance($csrf);
+        $this->bind(CsrfTokenInterface::class)->toInstance($csrf);
+
+        $sessionStarter = new NullSessionStarter();
+        $this->bind(NullSessionStarter::class)->toInstance($sessionStarter);
+        $this->bind(SessionStarterInterface::class)->toInstance($sessionStarter);
 
         $twoFactorAuth = new FakeTwoFactorAuth();
         $securityConfig = new FakeSecurityConfigWriter();

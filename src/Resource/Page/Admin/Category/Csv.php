@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Final\CategoryCsvExported;
 use MyVendor\BeMart\Be\Final\CategoryCsvImported;
 use MyVendor\BeMart\Be\Input\ExportCategoryInput;
 use MyVendor\BeMart\Be\Input\ImportCategoryCsvInput;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -39,6 +40,7 @@ class Csv extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -58,6 +60,7 @@ class Csv extends ResourceObject
         $this->body = [
             'csv' => $final->csv,
             'rowCount' => $final->rowCount,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -71,7 +74,7 @@ class Csv extends ResourceObject
     #[JsonSchema(schema: 'post-admin-category-csv.json', params: 'post-admin-category-csv.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $csv): static
     {
         $final = ($this->becoming)(new ImportCategoryCsvInput(csv: $csv));

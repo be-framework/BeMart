@@ -8,7 +8,8 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -27,6 +28,11 @@ use BEAR\Resource\Annotation\JsonSchema;
  */
 class Shipping extends ResourceObject
 {
+    public function __construct(
+        private readonly CsrfTokenInterface $csrf,
+    ) {
+    }
+
     /**
      * ALPS `goShoppingShipping` に対応する GET 操作。
      * @todo Wave-future: surface the authenticated customer's
@@ -52,7 +58,7 @@ class Shipping extends ResourceObject
             ],
             'staticContent' => null,
             'addresses' => [],
-            'csrfToken' => null,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -73,7 +79,7 @@ class Shipping extends ResourceObject
     #[Alps('doSelectShippingAddress')]
     #[JsonSchema(schema: 'post-shopping-shipping.json', params: 'post-shopping-shipping.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string|null $shippingAddressId = null): static
     {
         $this->code = Code::SEE_OTHER;

@@ -215,12 +215,12 @@
 
     {# --- アクション --- #}
     <div class="idea-actions" style="margin-top:.5rem;">
-      <form method="post" action="/mypage/reorder">
+      <form method="post" action="/mypage/reorder" rel="doReorder">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <input type="hidden" name="orderNo" value="{{ orderNo }}">
         <button class="idea-button" type="submit">この注文を再注文する</button>
       </form>
-      <a class="idea-button idea-button--light" href="/mypage">マイページに戻る</a>
+      <a class="idea-button idea-button--light" href="/mypage" rel="goMypage">マイページに戻る</a>
     </div>
 
   </div>

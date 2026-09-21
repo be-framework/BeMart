@@ -31,7 +31,6 @@ final class LinkHeaderRenderer implements RenderInterface
         #[Named('html')]
         private readonly RenderInterface $renderer,
         private readonly ReverseLinkerInterface $reverseLinker,
-        private readonly HtmlLinkAuditor $auditor,
     ) {
     }
 
@@ -44,7 +43,6 @@ final class LinkHeaderRenderer implements RenderInterface
         $links = $this->links($ro);
         $this->appendLinkHeader($ro, $links);
         $ro->view = $this->renderer->render($ro);
-        $this->auditor->audit($links, $ro->view);
 
         return $ro->view;
     }
@@ -72,8 +70,16 @@ final class LinkHeaderRenderer implements RenderInterface
         $ro->headers[self::HEADER] = $header;
     }
 
-    /** @return list<LinkHeader> */
-    private function links(ResourceObject $ro): array
+    /**
+     * The #[Link] annotations a resource's handler method declares.
+     *
+     * Public because {@see AuditedLinkHeaderRenderer} - a test-only decorator, never wired into a
+     * production context - needs the same list this render() pass computes to audit it against the
+     * rendered HTML. A pure read of method annotations; safe to compute twice.
+     *
+     * @return list<LinkHeader>
+     */
+    public function links(ResourceObject $ro): array
     {
         $method = 'on' . ucfirst($ro->uri->method);
         if (! method_exists($ro, $method)) {

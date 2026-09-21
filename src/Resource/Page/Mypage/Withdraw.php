@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
@@ -18,6 +18,7 @@ use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
 use MyVendor\BeMart\Be\Input\WithdrawCustomerInput;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -47,6 +48,7 @@ class Withdraw extends ResourceObject
         private readonly CartSessionPrefixInterface $cartSessionPrefix,
         private readonly MutationResponseInterface $mutationResponse,
         private readonly CustomerSessionWriterInterface $sessionWriter,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -59,9 +61,7 @@ class Withdraw extends ResourceObject
      *
      * Surfaces the current customer's email + name01/name02 so the
      * confirm page can render "退会されるアカウント: name01 name02
-     * (email)". `csrfToken` body field stays `null` — EventListener
-     * mirrors the Symfony token into the session for the subsequent
-     * POST.
+     * (email)".
      */
     #[Alps('goMypageWithdraw')]
     #[JsonSchema(schema: 'get-mypage-withdraw.json')]
@@ -97,7 +97,7 @@ class Withdraw extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/mypage/withdraw',
             ],
-            'csrfToken' => null,
+            'csrfToken' => $this->csrf->issue(),
             'customerId' => (string) $profile->body['customerId'],
             'email' => (string) $profile->body['email'],
             'name01' => (string) $profile->body['name01'],
@@ -112,7 +112,7 @@ class Withdraw extends ResourceObject
     #[JsonSchema(schema: 'post-mypage-withdraw.json', params: 'post-mypage-withdraw.param.json')]
     #[Link(rel: 'goMypageWithdrawComplete', href: 'page://self/mypage/withdraw-complete')]
     #[Link(rel: 'goTop', href: 'page://self/')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(): static
     {
         $final = ($this->becoming)(new WithdrawCustomerInput(

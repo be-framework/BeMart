@@ -159,6 +159,7 @@
 
 {% block main %}
 
+
 {# ── Context banner (shows parent product SKU) ─────────────────────────────── #}
 {% if productCode is not empty %}
 <div class="idea-admin-notice idea-admin-notice--info" role="status">
@@ -286,9 +287,11 @@
           role="form"
           method="post"
           action="/admin/product/product-class"
+          rel="doRegisterProductClass"
           novalidate
         >
-          <input type="hidden" name="parentProductCode" value="{{ productCode|default('') }}">
+          <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
+          <input type="hidden" name="productCode" value="{{ productCode|default('') }}">
 
           <div class="idea-admin-variant-form-col">
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Block;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +19,7 @@ use MyVendor\BeMart\Be\Input\DeleteBlockInput;
 use MyVendor\BeMart\Be\Input\GetAdminBlockInput;
 use MyVendor\BeMart\Be\Input\UpdateBlockInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminBlockForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -29,8 +29,11 @@ use function assert;
 /**
  * EC-CUBE doUpdateBlock + doDeleteBlock — single-row endpoint (Wave 9).
  *
- * ALPS has no goBlock — the admin edits a block from the list view
- * directly. Only PUT and DELETE are exposed here for the domain.
+ * `onGet` maps to ALPS `goBlock`, an `alps-route-gate` placeholder descriptor
+ * (route existence only, not a fully modelled transition). Only PUT and
+ * DELETE are exposed to the domain here; `BlockList::onGet()` links to
+ * `doCreateBlock` only, not `goBlock` — there is no list-to-detail
+ * hypermedia link for this state today.
  *
  * Phase 3 — HTML FORM page. `onGet` exposes an {@see AdminBlockForm}
  * (Ray.WebFormModule AbstractForm) as `body['form']` so the admin block
@@ -44,7 +47,7 @@ class Block extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
@@ -61,6 +64,7 @@ class Block extends ResourceObject
     #[Alps('goBlock')]
     #[JsonSchema(schema: 'get-admin-block-block.json', params: 'get-admin-block-block.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
+    #[Link(rel: 'doUpdateBlock', href: 'page://self/admin/block/block', method: 'put')]
     #[Link(rel: 'doDeleteBlock', href: 'page://self/admin/block/block', method: 'delete')]
     public function onGet(string|null $blockId = null): static
     {
@@ -78,7 +82,7 @@ class Block extends ResourceObject
                 'blockName' => '',
                 'blockFileName' => '',
                 'blockDeletable' => true,
-                'csrfToken' => $this->csrf->token,
+                'csrfToken' => $this->csrf->issue(),
             ];
             $this->body['form'] = $this->editForm($this->body);
 
@@ -95,7 +99,7 @@ class Block extends ResourceObject
             'blockName' => $final->blockName,
             'blockFileName' => $final->blockFileName,
             'blockDeletable' => $final->blockDeletable,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
         $this->body['form'] = $this->editForm($this->body);
 
@@ -125,7 +129,7 @@ class Block extends ResourceObject
     #[Alps('doUpdateBlock')]
     #[JsonSchema(schema: 'put-admin-block-block.json', params: 'put-admin-block-block.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $blockId,
         string|null $blockName = null,
@@ -158,7 +162,7 @@ class Block extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-block-block.json', params: 'delete-admin-block-block.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $blockId): static
     {
         $final = ($this->becoming)(new DeleteBlockInput(blockId: $blockId));

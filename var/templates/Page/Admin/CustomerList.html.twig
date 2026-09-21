@@ -162,6 +162,7 @@
             <a
               class="idea-admin-meta__link"
               href="/admin/customer?customerId={{ customer.customerId }}"
+              rel="goCustomer"
             >{{ customer.name01 }}&nbsp;{{ customer.name02 }}</a>
           </td>
 
@@ -218,7 +219,7 @@
         type="button"
         onclick="this.closest('dialog').close()"
       >キャンセル</button>
-      <form method="post" action="/admin/delete-customer" style="display:contents;">
+      <form method="post" action="/admin/delete-customer" rel="doDeleteCustomer" style="display:contents;">
         <input type="hidden" name="customerId" value="{{ customer.customerId }}">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">

@@ -192,7 +192,7 @@ final class AdminOrderShippingNotifyMailHtmlRenderTest extends TestCase
         );
     }
 
-    /** L2 — action: hidden csrfToken field present (CsrfProtected on onPost). */
+    /** L2 — action: hidden csrfToken field present (Ray.Csrf CsrfToken attribute on onPost). */
     public function testHiddenCsrfTokenFieldPresent(): void
     {
         $html = $this->resource->get(

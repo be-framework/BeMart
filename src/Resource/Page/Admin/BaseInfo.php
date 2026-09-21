@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Final\BaseInfoUpdated;
 use MyVendor\BeMart\Be\Input\GetBaseInfoInput;
 use MyVendor\BeMart\Be\Input\UpdateBaseInfoInput;
 use MyVendor\BeMart\Form\AdminShopMasterForm;
+use Ray\Csrf\CsrfTokenInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -49,6 +50,7 @@ class BaseInfo extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -103,6 +105,7 @@ class BaseInfo extends ResourceObject
             'businessHour' => $final->businessHour,
             'shopEmail01' => $final->shopEmail01,
             'shopMessage' => $final->shopMessage,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -128,7 +131,7 @@ class BaseInfo extends ResourceObject
     #[JsonSchema(schema: 'post-admin-base-info.json', params: 'post-admin-base-info.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $shopName,
         string|null $shopKana = null,

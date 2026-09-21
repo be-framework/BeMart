@@ -38,7 +38,7 @@ use function str_contains;
  *   - GET  /admin/order/export-order-pdf    goExportOrderPdf
  *   - POST /admin/order/import-shipping     doImportShippingCsv (stub)
  *   - POST /admin/order/shipping-address    doSelectShippingAddress
- *   - PUT  /admin/order/shipping-address    doUpdateShippingAddress
+ *   - PUT  /admin/order/shipping-address    doUpdateOrderShippingAddress
  */
 #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminOrderExtrasResourceTest extends TestCase

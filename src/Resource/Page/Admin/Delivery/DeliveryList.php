@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Delivery;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Final\AdminDeliveryListFetched;
 use MyVendor\BeMart\Be\Final\DeliveryCreated;
 use MyVendor\BeMart\Be\Input\CreateDeliveryInput;
 use MyVendor\BeMart\Be\Input\GetAdminDeliveryListInput;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -37,6 +38,7 @@ class DeliveryList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -57,6 +59,7 @@ class DeliveryList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'deliveries' => $final->deliveries,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -70,7 +73,7 @@ class DeliveryList extends ResourceObject
     #[Alps('doCreateDelivery')]
     #[JsonSchema(schema: 'post-admin-delivery-delivery-list.json', params: 'post-admin-delivery-delivery-list.param.json')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $deliveryName,
         bool $visible = true,

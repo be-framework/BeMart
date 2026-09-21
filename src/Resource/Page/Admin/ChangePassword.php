@@ -10,7 +10,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\AdminNotFoundException;
 use MyVendor\BeMart\Be\Exception\InvalidCurrentPasswordException;
 use MyVendor\BeMart\Be\Exception\PasswordConfirmationMismatchException;
@@ -21,6 +21,7 @@ use MyVendor\BeMart\Be\Input\ChangeAdminPasswordInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminChangePasswordForm;
 use Ray\WebFormModule\FormFactory;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 use SensitiveParameter;
 
@@ -51,6 +52,7 @@ class ChangePassword extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -82,6 +84,7 @@ class ChangePassword extends ResourceObject
             // to render via `{{ form.input(...) }}`. JSON contexts ignore
             // it.
             'form' => $this->formFactory->newInstance(AdminChangePasswordForm::class),
+            'csrfToken' => $this->csrf->issue(),
         ];
         assert($this->body['form'] instanceof AdminChangePasswordForm);
 
@@ -106,7 +109,7 @@ class ChangePassword extends ResourceObject
      */
     #[Alps('doChangePassword')]
     #[JsonSchema(schema: 'post-admin-change-password.json', params: 'post-admin-change-password.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPost(
         #[SensitiveParameter] string $currentPassword,

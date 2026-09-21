@@ -9,6 +9,7 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -33,14 +34,15 @@ class MailConfirm extends ResourceObject
 {
     public function __construct(
         private readonly AdminSession $adminSession,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
     /**
-     * ALPS `goAdminOrderMailConfirm` に対応する GET 操作。
+     * ALPS `goOrderMailConfirm` に対応する GET 操作。
      * @psalm-taint-source input $orderNo
      */
-    #[Alps('goAdminOrderMailConfirm')]
+    #[Alps('goOrderMailConfirm')]
     #[JsonSchema(schema: 'get-admin-order-mail-confirm.json', params: 'get-admin-order-mail-confirm.param.json')]
     #[Link(rel: 'doSendOrderMail', href: 'page://self/admin/order/send-mail', method: 'post')]
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
@@ -56,6 +58,7 @@ class MailConfirm extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'orderNo' => $orderNo,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

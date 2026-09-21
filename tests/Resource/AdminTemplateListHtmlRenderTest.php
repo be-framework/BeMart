@@ -139,16 +139,21 @@ final class AdminTemplateListHtmlRenderTest extends TestCase
 
     /**
      * L2 — Link href / rel contract.
-     * goTemplateAdd: GET /admin/template/template-add
+     * goTemplateInstall: GET /admin/template/template-add
      */
-    public function testTemplateListContainsGoTemplateAddLink(): void
+    public function testTemplateListContainsGoTemplateInstallLink(): void
     {
         $html = $this->resource->get('page://self/admin/template/template-list')->toString();
 
         $this->assertStringContainsString(
             'href="/admin/template/template-add"',
             $html,
-            'goTemplateAdd link missing',
+            'goTemplateInstall link missing',
+        );
+        $this->assertStringContainsString(
+            'rel="goTemplateInstall"',
+            $html,
+            'goTemplateInstall rel token missing (must not be paired with the ALPS-orphaned goTemplateAdd)',
         );
     }
 

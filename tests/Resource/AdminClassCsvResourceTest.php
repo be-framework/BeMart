@@ -62,7 +62,7 @@ final class AdminClassCsvResourceTest extends TestCase
         // (regression guard for issue #30: the two exports must not swap
         // their Content-Disposition filenames).
         $this->assertSame('attachment; filename="class_name.csv"', $ro->headers['Content-Disposition']);
-        $this->assertTrue(is_string($ro->body));
+        $this->assertTrue(is_string($ro->body['content']));
     }
 
     public function testExportClassCategoryDownload(): void

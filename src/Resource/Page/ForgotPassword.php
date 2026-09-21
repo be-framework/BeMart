@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,6 +15,7 @@ use MyVendor\BeMart\Be\Final\PasswordResetRequested;
 use MyVendor\BeMart\Be\Input\RequestPasswordResetInput;
 use MyVendor\BeMart\Form\ForgotForm;
 use Ray\WebFormModule\FormFactory;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -43,6 +44,7 @@ class ForgotPassword extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -52,8 +54,6 @@ class ForgotPassword extends ResourceObject
      *
      * Pure form-info endpoint: no Be Framework, no domain logic.
      * Anonymous-accessible (returns 200 regardless of session state).
-     * `csrfToken` stays `null` — the EventListener mirrors the Symfony
-     * token into the session for the subsequent POST (same as Login).
      */
     #[Alps('doRequestPasswordReset')]
     #[JsonSchema(schema: 'get-forgot-password.json')]
@@ -69,7 +69,7 @@ class ForgotPassword extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/forgot-password',
             ],
-            'csrfToken' => null,
+            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty ForgotForm for the HTML port to render
             // via `{{ form.input(...) }}`. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ForgotForm::class),
@@ -85,7 +85,7 @@ class ForgotPassword extends ResourceObject
     #[Alps('doRequestPasswordReset')]
     #[JsonSchema(schema: 'post-forgot-password.json', params: 'post-forgot-password.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $email): static
     {
         $final = ($this->becoming)(new RequestPasswordResetInput(email: $email));

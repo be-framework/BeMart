@@ -110,7 +110,7 @@
       "minLength": 0,
       "maxLength": 160,
       "pattern": "^[A-Za-z0-9_.:-]*$",
-      "$comment": "CSRF値はCsrfProtected境界の責務。GET bodyではフォーム文脈を示すためにnullを許容する。"
+      "$comment": "CSRF値はRay.Csrf CsrfToken境界の責務。GET bodyではフォーム文脈を示すためにnullを許容する。"
     }
   },
   "additionalProperties": false,

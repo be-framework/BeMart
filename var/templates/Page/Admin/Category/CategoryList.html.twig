@@ -83,8 +83,9 @@
       method="post"
       action="/admin/category/category-list"
       aria-label="カテゴリ新規登録"
+      rel="doCreateCategory"
     >
-      <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_category') }}">
+      <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
 
       <div class="idea-admin-cat-create">
 
@@ -323,11 +324,12 @@
       <form
         method="post"
         action="/admin/category/category?categoryId={{ category.categoryId }}&_method=delete"
+        rel="doDeleteCategory"
         style="display:contents;"
       >
         <input type="hidden" name="_method" value="delete">
         <input type="hidden" name="categoryId" value="{{ category.categoryId }}">
-        <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_category_delete') }}">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">
           削除
         </button>

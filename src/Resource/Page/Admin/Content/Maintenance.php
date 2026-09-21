@@ -9,12 +9,12 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MaintenanceToggled;
 use MyVendor\BeMart\Be\Input\ToggleMaintenanceInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -36,7 +36,7 @@ class Maintenance extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly BecomingInterface $becoming,
         private readonly MaintenanceModeInterface $maintenance,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -56,7 +56,7 @@ class Maintenance extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'isMaintenance' => $this->maintenance->isEnabled(),
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -71,7 +71,7 @@ class Maintenance extends ResourceObject
     #[Alps('doToggleMaintenance')]
     #[JsonSchema(schema: 'put-admin-content-maintenance.json', params: 'put-admin-content-maintenance.param.json')]
     #[Link(rel: 'goSystemInfo', href: 'page://self/admin/system')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(bool $enabled, string|null $mode = null): static
     {
         $final = ($this->becoming)(new ToggleMaintenanceInput(enabled: $enabled));

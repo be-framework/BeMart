@@ -125,9 +125,11 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     {
         $paymentId = $this->bodyValue($response, 'paymentId');
         $this->assertIsString($paymentId);
-        $paymentList = $this->follow($response, 'goPaymentList');
+        // doCreatePayment's Location points at the single-row Payment GET, which is where
+        // ALPS assigns doUpdatePayment - follow it there directly.
+        $payment = $this->followLocation($response);
 
-        $updated = $this->resource->put($this->linkHref($paymentList, 'doUpdatePayment'), [
+        $updated = $this->resource->put($this->linkHref($payment, 'doUpdatePayment'), [
             'paymentId' => $paymentId,
             'paymentMethodName' => self::$paymentName . ' Updated',
             'charge' => 330,
@@ -166,9 +168,11 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     {
         $paymentId = $this->bodyValue($response, 'paymentId');
         $this->assertIsString($paymentId);
-        $paymentList = $this->follow($response, 'goPaymentList');
+        // doUpdatePayment's Location points at the single-row Payment GET, which is where
+        // ALPS assigns doDeletePayment - follow it there directly.
+        $payment = $this->followLocation($response);
 
-        $deleted = $this->resource->delete($this->linkHref($paymentList, 'doDeletePayment'), [
+        $deleted = $this->resource->delete($this->linkHref($payment, 'doDeletePayment'), [
             'paymentId' => $paymentId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);

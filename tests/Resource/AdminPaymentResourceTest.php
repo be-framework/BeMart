@@ -10,7 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
@@ -56,7 +56,7 @@ final class AdminPaymentResourceTest extends TestCase
                 if ($this->htmlMutation) {
                     $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
                 }
-                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
+                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
             }
         };
         $base->override($override);

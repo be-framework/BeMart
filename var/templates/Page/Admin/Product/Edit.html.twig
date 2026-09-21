@@ -56,6 +56,7 @@
   role="form"
   method="post"
   action="{{ isEdit ? '/admin/product?_method=put' : '/admin/product' }}"
+  rel="doCreateProduct"
   novalidate
 >
   <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">

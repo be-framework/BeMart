@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -22,6 +22,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderShippingForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+use Ray\Csrf\CsrfTokenInterface;
 
 use function assert;
 
@@ -59,6 +60,7 @@ class ShippingAddress extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -78,7 +80,6 @@ class ShippingAddress extends ResourceObject
      */
     #[Alps('doSelectShippingAddress')]
     #[JsonSchema(schema: 'get-admin-order-shipping-address.json', params: 'get-admin-order-shipping-address.param.json')]
-    #[Link(rel: 'doUpdateShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[Link(rel: 'doUpdateOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[Link(rel: 'doSelectShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'post')]
     public function onGet(string $orderNo = ''): static
@@ -101,6 +102,7 @@ class ShippingAddress extends ResourceObject
         $this->body = [
             'form' => $form,
             'orderNo' => $orderNo,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -115,9 +117,8 @@ class ShippingAddress extends ResourceObject
     #[Alps('doSelectShippingAddress')]
     #[JsonSchema(schema: 'post-admin-order-shipping-address.json', params: 'post-admin-order-shipping-address.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
-    #[Link(rel: 'doUpdateShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[Link(rel: 'doUpdateOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $orderNo,
         string $addressId,
@@ -144,12 +145,12 @@ class ShippingAddress extends ResourceObject
      * @psalm-taint-source input $addr02
      * @psalm-taint-source input $phoneNumber
      */
-    #[Alps('doUpdateShippingAddress')]
+    #[Alps('doUpdateOrderShippingAddress')]
     #[JsonSchema(schema: 'put-admin-order-shipping-address.json', params: 'put-admin-order-shipping-address.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'doSelectShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'post')]
     #[Link(rel: 'doUpdateTrackingNumber', href: 'page://self/admin/order/tracking-number', method: 'put')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $orderNo,
         string $name01,

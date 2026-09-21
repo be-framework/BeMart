@@ -126,7 +126,7 @@ final class HtmlSessionAdapterTest extends TestCase
         // Pinned while anonymous: the cart rows keyed by this prefix must stay
         // reachable after the id rotates.
         $cartPrefix = (new HtmlCartSessionPrefix())->prefix();
-        $anonymousToken = (new EccubeSharedCsrfTokenAdapter())->token;
+        $anonymousToken = (new EccubeSharedCsrfTokenAdapter())->issue();
 
         $ro = $this->htmlResource()->post('page://self/login', [
             'email' => 'login-test@example.com',
@@ -137,7 +137,7 @@ final class HtmlSessionAdapterTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($sessionIdBeforeLogin, $cartPrefix);
         $this->assertNotSame($sessionIdBeforeLogin, session_id());
-        $this->assertFalse((new EccubeSharedCsrfTokenAdapter())->isValid($anonymousToken));
+        $this->assertFalse((new EccubeSharedCsrfTokenAdapter())->verify($anonymousToken));
         $this->assertSame($cartPrefix, (new HtmlCartSessionPrefix())->prefix());
     }
 
@@ -148,14 +148,14 @@ final class HtmlSessionAdapterTest extends TestCase
         $this->startActiveSession();
         $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = '10000000aaaa1111bbbb2222cccc3333';
         $sessionIdBeforeLogout = session_id();
-        $tokenBeforeLogout = (new EccubeSharedCsrfTokenAdapter())->token;
+        $tokenBeforeLogout = (new EccubeSharedCsrfTokenAdapter())->issue();
 
         $this->htmlResource()->post('page://self/logout', [
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertNotSame($sessionIdBeforeLogout, session_id());
-        $this->assertFalse((new EccubeSharedCsrfTokenAdapter())->isValid($tokenBeforeLogout));
+        $this->assertFalse((new EccubeSharedCsrfTokenAdapter())->verify($tokenBeforeLogout));
     }
 
     private function htmlResource(): ResourceInterface

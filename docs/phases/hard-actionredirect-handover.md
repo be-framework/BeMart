@@ -68,7 +68,7 @@ grep -oP 'data-implementation-status="安全退避\(ActionRedirect\)" data-diffi
 ## 正準パターン（残作業もこれに従う）
 
 - **Resource→Be起動**: `src/Resource/Page/Admin/ToggleVisible.php` — `BecomingInterface` 注入 →
-  `($this->becoming)(new XxxInput(...))` → ドメイン例外を HTTP コードへマップ → `assert($final instanceof XxxFinal)`。`#[CsrfProtected]` 必須。
+  `($this->becoming)(new XxxInput(...))` → ドメイン例外を HTTP コードへマップ → `assert($final instanceof XxxFinal)`。`#[Ray\Csrf\Attribute\CsrfToken]` 必須。
 - **Be層**: Input(`#[Be(Final::class)]` readonly + `@psalm-taint-source`)→ Semantic(型検証、全 Input param に対応する Semantic を置く＝「0 notices」規約)→ Final(`#[Input]`/`#[Inject]`、AUTHZ は `AdminSession->adminId===null`)。
 - **境界サービス**: port=`be/src/Reason/Service/`、実装=`src/Compatibility/Eccube/`、Fake=`tests/Fake/Reason/Service/`。`src/Module/AppModule.php` で `->to(Eccube実装)->in(SINGLETON)`、`src/Module/FakeModule.php` で `toInstance(Fake)`。
 - **テスト**: domain=`be/tests/Domain/`、resource=`tests/Resource/`。`TestModule` + `AbstractModule` override で `AdminSession`（や他の Fake）を差し替える。

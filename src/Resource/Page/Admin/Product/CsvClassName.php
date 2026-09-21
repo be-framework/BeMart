@@ -10,7 +10,8 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ClassNameCsvImported;
 use MyVendor\BeMart\Be\Input\ImportClassNameCsvInput;
@@ -39,10 +40,11 @@ class CsvClassName extends AbstractCsvUpload
     public function __construct(
         AdminSession $adminSession,
         FormFactory $formFactory,
+        CsrfTokenInterface $csrf,
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
-        parent::__construct($adminSession, $formFactory);
+        parent::__construct($adminSession, $formFactory, $csrf);
     }
 
     /** ALPS `goExportClassName` に対応する GET 操作。 */
@@ -65,7 +67,7 @@ class CsvClassName extends AbstractCsvUpload
     #[Alps('doImportClassNameCsv')]
     #[JsonSchema(schema: 'post-admin-product-csv-class-name.json', params: 'post-admin-product-csv-class-name.param.json')]
     #[Link(rel: 'goExportClassCategory', href: 'page://self/admin/class-category/class-category-export')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $csv = ''): static
     {
         $final = ($this->becoming)(new ImportClassNameCsvInput(csv: $csv));

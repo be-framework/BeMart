@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Fake\Service;
 
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use Override;
+use Ray\Csrf\CsrfTokenInterface;
 
 /**
  * Test-default CSRF adapter.
@@ -14,18 +14,24 @@ use Override;
  * tests should bind {@see FakeCsrfToken} or the production adapter
  * explicitly.
  */
-final readonly class NullCsrfToken extends CsrfToken
+final readonly class NullCsrfToken implements CsrfTokenInterface
 {
     public const TOKEN = FakeCsrfToken::TOKEN;
 
-    public function __construct()
+    #[Override]
+    public function issue(): string
     {
-        parent::__construct(self::TOKEN);
+        return self::TOKEN;
     }
 
     #[Override]
-    public function isValid(string|null $token): bool
+    public function verify(string $candidate): bool
     {
         return true;
+    }
+
+    #[Override]
+    public function clear(): void
+    {
     }
 }

@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
-use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -27,8 +26,6 @@ class ActionRedirect extends ResourceObject
     public function __construct(private readonly AdminSession $adminSession)
     {
     }
-    /** ALPS `goAdminActionRedirect` に対応する GET 操作。 */
-    #[Alps('goAdminActionRedirect')]
     #[JsonSchema(schema: 'get-admin-action-redirect.json', params: 'get-admin-action-redirect.param.json')]
 
     public function onGet(string|null $returnTo = null): static
@@ -42,10 +39,8 @@ class ActionRedirect extends ResourceObject
         return $this;
     }
 
-    /** ALPS `doAdminActionRedirect` に対応する POST 操作。 */
-    #[Alps('doAdminActionRedirect')]
     #[JsonSchema(schema: 'post-admin-action-redirect.json', params: 'post-admin-action-redirect.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string|null $returnTo = null): static
     {
         if (! $this->authorized()) {

@@ -12,6 +12,7 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminShippingCsvExported;
 use MyVendor\BeMart\Be\Input\AdminExportShippingInput;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -33,6 +34,7 @@ class ExportShipping extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -52,6 +54,7 @@ class ExportShipping extends ResourceObject
         $this->body = [
             'csv' => $final->csv,
             'rowCount' => $final->rowCount,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

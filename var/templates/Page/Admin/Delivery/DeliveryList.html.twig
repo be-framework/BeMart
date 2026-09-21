@@ -55,6 +55,7 @@
       role="form"
       method="post"
       action="/admin/delivery/delivery-list"
+      rel="doCreateDelivery"
       novalidate
     >
       <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
@@ -150,19 +151,28 @@
                   >
                     <i class="fa fa-pencil" aria-hidden="true"></i>
                   </a>
-                  <a
-                    class="idea-admin-icon-btn"
-                    href="/admin/delivery/delivery?deliveryId={{ delivery.deliveryId }}&amp;_method=delete"
+                  <form
+                    method="post"
+                    action="/admin/delivery/delivery?deliveryId={{ delivery.deliveryId }}"
                     rel="doDeleteDelivery"
                     data-delivery-id="{{ delivery.deliveryId }}"
                     data-delivery-name="{{ delivery.deliveryName }}"
                     data-delete-url="/admin/delivery/delivery?deliveryId={{ delivery.deliveryId }}&amp;_method=delete"
-                    aria-label="{{ delivery.deliveryName }} を削除"
-                    title="削除"
-                    id="delete-btn-{{ delivery.deliveryId }}"
+                    style="display:inline;"
                   >
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                  </a>
+                    <input type="hidden" name="_method" value="delete">
+                    <input type="hidden" name="deliveryId" value="{{ delivery.deliveryId }}">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                    <button
+                      type="submit"
+                      class="idea-admin-icon-btn"
+                      aria-label="{{ delivery.deliveryName }} を削除"
+                      title="削除"
+                      id="delete-btn-{{ delivery.deliveryId }}"
+                    >
+                      <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                  </form>
                 </td>
               </tr>
             {% endfor %}
@@ -208,10 +218,14 @@
   var form   = document.getElementById('idea-delivery-delete-form');
   var cancelBtn = document.getElementById('idea-delivery-delete-cancel');
 
-  document.querySelectorAll('[rel="doDeleteDelivery"]').forEach(function (link) {
-    link.addEventListener('click', function (e) {
+  document.querySelectorAll('form[rel="doDeleteDelivery"]').forEach(function (rowForm) {
+    if (rowForm === form) {
+      return;
+    }
+
+    rowForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      form.action = link.href;
+      form.action = rowForm.getAttribute('data-delete-url');
       if (dialog.showModal) {
         dialog.showModal();
       }

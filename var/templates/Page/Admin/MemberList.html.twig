@@ -73,7 +73,7 @@
     <span class="idea-admin-count">{{ count }}件</span>
   </div>
   <div class="idea-admin-list-toolbar__right">
-    <a class="idea-admin-action idea-admin-action--primary" href="/admin/member">
+    <a class="idea-admin-action idea-admin-action--primary" href="/admin/member" rel="goMember">
       <i class="fa fa-plus" aria-hidden="true"></i>
       新規登録
     </a>
@@ -175,6 +175,7 @@
       <form
         method="post"
         action="/admin/member?loginId={{ member.loginId|url_encode }}&_method=delete"
+        rel="doDeleteMember"
         style="display:contents;"
       >
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">

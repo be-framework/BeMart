@@ -23,11 +23,11 @@
         "null"
       ],
       "title": "CSRFトークン（出荷通知メール送信フォーム）",
-      "description": "管理画面の出荷通知メール送信フォーム送信元を検証するトークン。Resource引数ではなくCsrfProtected境界で消費される。",
+      "description": "管理画面の出荷通知メール送信フォーム送信元を検証するトークン。Resource引数ではなくRay.Csrf CsrfToken境界で消費される。",
       "minLength": 0,
       "maxLength": 160,
       "pattern": "^[A-Za-z0-9._:-]*$",
-      "$comment": "csrfTokenはResource引数ではなくCsrfProtectedインターセプタで検証される。"
+      "$comment": "csrfTokenはResource引数ではなくCsrfForbiddenInterceptorで検証される。"
     }
   },
   "additionalProperties": false,
