@@ -5,6 +5,15 @@
   "description": "GET /admin/product/product-class response の response body schema。ALPSの意味、be/var/fakeの観察値、Resource境界の実形状から導いたSemantic-Ex制約。",
   "type": "object",
   "properties": {
+    "csrfToken": {
+      "title": "CSRFトークン",
+      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "example": "fake-csrf-token-bemart-2026"
+    },
     "form": {
       "type": [
         "object",
@@ -341,6 +350,7 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
+    "csrfToken",
     "productCode",
     "classes"
   ]

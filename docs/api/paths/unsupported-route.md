@@ -9,10 +9,6 @@ Safe placeholder for template routes that are not backed by a resource yet.
 
 
 ## GET
-ALPS `goUnsupportedRoute` に対応する GET 操作。
-
-**ALPS**: `goUnsupportedRoute`
-
 
 
 ### Request
@@ -32,10 +28,6 @@ ALPS `goUnsupportedRoute` に対応する GET 操作。
 | routeName | string|null | ページURL - ページのURLパス（Symfonyルート名。例: homepage, product_list） | Required | {"minLength":0,"maxLength":255} |  |
 
 ## POST
-ALPS `doUnsupportedRoute` に対応する POST 操作。
-
-**ALPS**: `doUnsupportedRoute`
-
 
 
 ### Request

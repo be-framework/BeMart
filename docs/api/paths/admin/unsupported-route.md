@@ -10,10 +10,6 @@ templates but not yet backed by a dedicated Be transition.
 
 
 ## GET
-ALPS `goAdminUnsupportedRoute` に対応する GET 操作。
-
-**ALPS**: `goAdminUnsupportedRoute`
-
 
 
 ### Request
@@ -33,10 +29,6 @@ ALPS `goAdminUnsupportedRoute` に対応する GET 操作。
 | routeName | string|null | ページURL - ページのURLパス（Symfonyルート名。例: homepage, product_list） | Required | {"minLength":0,"maxLength":255} |  |
 
 ## POST
-ALPS `doAdminUnsupportedRoute` に対応する POST 操作。
-
-**ALPS**: `doAdminUnsupportedRoute`
-
 
 
 ### Request

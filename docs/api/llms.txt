@@ -28,9 +28,9 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | /admin/change-password | GET, POST | Page/Admin/ChangePassword |
 | /admin/create-customer | POST | Page/Admin/CreateCustomer |
 | /admin/csv-config | GET, POST | Page/Admin/CsvConfig |
-| /admin/customer | GET | Page/Admin/Customer |
+| /admin/customer | GET, POST | Page/Admin/Customer |
 | /admin/customer-csv | GET | Page/Admin/CustomerCsv |
-| /admin/customer-delivery-edit | GET | Page/Admin/CustomerDeliveryEdit |
+| /admin/customer-delivery-edit | GET, POST, DELETE | Page/Admin/CustomerDeliveryEdit |
 | /admin/customer-list | GET | Page/Admin/CustomerList |
 | /admin/delete-customer | POST | Page/Admin/DeleteCustomer |
 | /admin/empty-page | GET | Page/Admin/EmptyPage |
@@ -128,7 +128,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | /admin/order/create | POST | Page/Admin/Order/Create |
 | /admin/order/edit | GET | Page/Admin/Order/Edit |
 | /admin/order/export-order | GET | Page/Admin/Order/ExportOrder |
-| /admin/order/export-order-pdf | GET | Page/Admin/Order/ExportOrderPdf |
+| /admin/order/export-order-pdf | GET, POST | Page/Admin/Order/ExportOrderPdf |
 | /admin/order/export-shipping | GET | Page/Admin/Order/ExportShipping |
 | /admin/order/import-shipping | GET, POST | Page/Admin/Order/ImportShipping |
 | /admin/order/mail-confirm | GET | Page/Admin/Order/MailConfirm |
@@ -146,7 +146,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | /admin/product/csv-class-name | GET, POST | Page/Admin/Product/CsvClassName |
 | /admin/product/csv-product | GET | Page/Admin/Product/CsvProduct |
 | /admin/product/edit | GET | Page/Admin/Product/Edit |
-| /admin/product/product-class | GET | Page/Admin/Product/ProductClass |
+| /admin/product/product-class | GET, POST | Page/Admin/Product/ProductClass |
 | /admin/tag/tag | DELETE | Page/Admin/Tag/Tag |
 | /admin/tag/tag-list | GET, POST | Page/Admin/Tag/TagList |
 | /admin/tax-rule/tax-rule | DELETE | Page/Admin/TaxRule/TaxRule |
@@ -329,7 +329,8 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | email, customerId, id | href(goCustomerList) |
+| GET | email, customerId, id | href(goCustomerList), href(doUpdateCustomerProfile) |
+| POST | customerId*, email*, name01*, name02*, kana01, kana02, companyName, phoneNumber, postalCode, pref, addr01, addr02, birth, sex, job, password | href(goCustomer) |
 
 ### Page/Admin/CustomerCsv
 `/admin/customer-csv`
@@ -343,7 +344,9 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | customerId, id | href(goCustomerList) |
+| GET | customerId, id | href(goCustomerList), href(doCreateCustomerDeliveryAddress), href(doUpdateCustomerDeliveryAddress), href(doDeleteCustomerDeliveryAddress) |
+| POST | customerId*, name01*, name02*, postalCode*, pref*, addr01*, addr02*, phoneNumber*, addressId, kana01, kana02, companyName | href(goCustomer), href(goCustomerList) |
+| DELETE | customerId*, addressId* | href(goCustomer), href(goCustomerList) |
 
 ### Page/Admin/CustomerList
 `/admin/customer-list`
@@ -371,7 +374,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goMemberList), href(goContentCache), href(doAdminLogout), href(goAdminLogout) |
+| GET | - | href(goMemberList), href(goContentCache), href(doAdminLogout) |
 
 ### Page/Admin/Log
 `/admin/log`
@@ -407,7 +410,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | mailTemplateId | href(doCreateMailTemplate), href(doUpdateMailTemplate), href(goOrderMail), href(goPaymentList), href(goOrderList) |
+| GET | mailTemplateId | href(doCreateMailTemplate), href(doUpdateMailTemplate), href(doDeleteMailTemplate), href(goOrderMail), href(goPaymentList), href(goOrderList) |
 | POST | mailTemplateId*, mailSubject, mail_subject | href(goTop), href(goOrderMail), href(doDeleteMailTemplate) |
 | DELETE | mailTemplateId* | href(goMailTemplateList) |
 
@@ -861,7 +864,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | blockId | href(goBlockList) |
+| GET | blockId | href(goBlockList), href(doUpdateBlock), href(doDeleteBlock) |
 | PUT | blockId*, blockName, blockFileName | href(goBlockList) |
 | DELETE | blockId* | href(goBlockList), href(goLayoutList) |
 
@@ -870,7 +873,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreateBlock), href(doUpdateBlock), href(doDeleteBlock) |
+| GET | - | href(doCreateBlock) |
 | POST | blockName*, blockFileName* | href(goBlockList) |
 
 ### Page/Admin/Category/Category
@@ -1087,6 +1090,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | orderNos, orderNo | href(goOrderList), href(goExportOrder) |
+| POST | orderNos, orderNo | - |
 
 ### Page/Admin/Order/ExportShipping
 `/admin/order/export-shipping`
@@ -1130,8 +1134,8 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | orderNo | href(doUpdateShippingAddress), href(doUpdateOrderShippingAddress), href(doSelectShippingAddress) |
-| POST | orderNo*, addressId* | href(goOrder), href(doUpdateShippingAddress), href(doUpdateOrderShippingAddress) |
+| GET | orderNo | href(doUpdateOrderShippingAddress), href(doSelectShippingAddress) |
+| POST | orderNo*, addressId* | href(goOrder), href(doUpdateOrderShippingAddress) |
 | PUT | orderNo*, name01*, name02*, postalCode*, pref*, addr01*, addr02*, phoneNumber* | href(goOrder), href(doSelectShippingAddress), href(doUpdateTrackingNumber) |
 
 ### Page/Admin/Order/ShippingNotifyMail
@@ -1171,7 +1175,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | paymentId | href(doUpdatePayment) |
+| GET | paymentId | href(doUpdatePayment), href(doDeletePayment) |
 | PUT | paymentId*, paymentMethodName, charge, ruleMin, ruleMax, visible | href(goPaymentList) |
 | DELETE | paymentId* | href(goPaymentList), href(goDeliveryList) |
 
@@ -1180,7 +1184,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreatePayment), href(goPayment), href(doUpdatePayment), href(doDeletePayment), href(goProductList), href(goOrderList) |
+| GET | - | href(doCreatePayment), href(goPayment), href(doToggleVisible), href(goProductList), href(goOrderList) |
 | POST | paymentMethodName*, charge, ruleMin, ruleMax, visible | href(goPaymentList) |
 
 ### Page/Admin/Product/CsvCategory
@@ -1218,14 +1222,15 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | productCode | href(doCreateProduct), href(doUpdateProduct), href(goProductList) |
+| GET | productCode | href(doCreateProduct), href(doUpdateProduct), href(doDeleteProduct), href(goProductList) |
 
 ### Page/Admin/Product/ProductClass
 `/admin/product/product-class`
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | productCode | href(goProduct), href(goProductList) |
+| GET | productCode | href(goProduct), href(goProductList), href(doRegisterProductClass) |
+| POST | productCode*, price02, stock, stock_unlimited, delivery_fee, product_code | href(goProductList) |
 
 ### Page/Admin/Tag/Tag
 `/admin/tag/tag`
@@ -1270,12 +1275,12 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goTemplateAdd), href(goTemplateInstall), href(doSelectTemplate), href(doDownloadTemplate), href(doDeleteTemplate) |
+| GET | - | href(goTemplateInstall), href(doSelectTemplate), href(doDownloadTemplate), href(doDeleteTemplate) |
 | PUT | templateId* | href(doDownloadTemplate) |
 | DELETE | templateId* | href(goTemplateList) |
 | POST | templateId* | href(doDeleteTemplate) |
 
-## Responses (236)
+## Responses (240)
 
 | Response | Schema | Properties |
 |----------|--------|------------|
@@ -1305,23 +1310,26 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-admin-action-redirect | post-admin-action-redirect.json | message |
 | Get-admin-authority-role | get-admin-authority-role.json | authorityOptions, rules, csrfToken |
 | Post-admin-authority-role | post-admin-authority-role.json | message, adminId, loginId, previousAuthority, authority, changed, transitionId, count, rules |
-| Get-admin-base-info | get-admin-base-info.json | form, phoneNumber, shopKana, businessHour, addr02, postalCode, pref, addr01, shopEmail01, shopName, companyName, shopMessage, shopNameEng |
+| Get-admin-base-info | get-admin-base-info.json | form, phoneNumber, shopKana, businessHour, addr02, postalCode, pref, addr01, shopEmail01, shopName, companyName, shopMessage, shopNameEng, csrfToken |
 | Post-admin-base-info | post-admin-base-info.json | phoneNumber, shopKana, changed, businessHour, addr02, postalCode, pref, addr01, shopEmail01, shopName, companyName, shopMessage, shopNameEng |
 | Get-admin-calendar | get-admin-calendar.json | form, calendars, errors, csrfToken |
 | Post-admin-calendar | post-admin-calendar.json | title, message, transitionId, calendarId, holiday |
 | Delete-admin-calendar | delete-admin-calendar.json | message, transitionId, calendarId |
-| Get-admin-change-password | get-admin-change-password.json | form, transitionId, fields |
+| Get-admin-change-password | get-admin-change-password.json | form, transitionId, fields, csrfToken |
 | Post-admin-change-password | post-admin-change-password.json | message, transitionId, loginId, adminId |
 | Post-admin-create-customer | post-admin-create-customer.json | name01, customerId, customerStatus, email, initialPoint, name02 |
 | Get-admin-csv-config | get-admin-csv-config.json | form, notOutputColumns, outputColumns, csvType, csrfToken |
 | Post-admin-csv-config | post-admin-csv-config.json | message, csvType, columns, count |
-| Get-admin-customer | get-admin-customer.json | form, sex, kana02, phoneNumber, initialPoint, totalSpent, name02, kana01, name01, favorites, postalCode, addr01, birth, customerId, addr02, customerStatus, email, pref, favoriteCount, companyName, job, orders, orderCount |
+| Get-admin-customer | get-admin-customer.json | form, sex, kana02, phoneNumber, initialPoint, totalSpent, name02, kana01, name01, favorites, postalCode, addr01, birth, customerId, addr02, customerStatus, email, pref, favoriteCount, companyName, job, orders, orderCount, csrfToken |
+| Post-admin-update-customer | post-admin-update-customer.json | name01, customerId, email, name02 |
 | Get-admin-customer-csv | get-admin-customer-csv.json | rowCount, csv |
-| Get-admin-customer-delivery-edit | get-admin-customer-delivery-edit.json | form, customerId |
+| Get-admin-customer-delivery-edit | get-admin-customer-delivery-edit.json | form, customerId, csrfToken |
+| Post-admin-customer-delivery-edit | post-admin-customer-delivery-edit.json | addressId, customerId, name01, name02, kana01, kana02, companyName, phoneNumber, postalCode, pref, addr01, addr02 |
+| Delete-admin-customer-delivery-edit | delete-admin-customer-delivery-edit.json | addressId, customerId |
 | Get-admin-customer-list | get-admin-customer-list.json | filters, count, csrfToken, searchForm, customers |
 | Post-admin-delete-customer | post-admin-delete-customer.json | alreadyDeleted, originalEmail, message, customerId |
 | Get-admin-empty-page | get-admin-empty-page.json |  |
-| Get-admin-index | get-admin-index.json | countNonStockProducts, salesToday, recommendedPlugins, orders, salesThisMonth, orderStatuses, countCustomers, countProducts, salesYesterday |
+| Get-admin-index | get-admin-index.json | countNonStockProducts, salesToday, recommendedPlugins, orders, salesThisMonth, orderStatuses, countCustomers, countProducts, salesYesterday, csrfToken |
 | Get-admin-log | get-admin-log.json | log, form |
 | Get-admin-login | get-admin-login.json | form, fields, submitTo, transitionId, csrfToken |
 | Post-admin-login | post-admin-login.json | name, loginId, authority, adminId |
@@ -1355,20 +1363,20 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Delete-admin-product | delete-admin-product.json | alreadyDeleted, productName, productCode, message |
 | Post-admin-product-bulk-status | post-admin-product-bulk-status.json | requestedCount, changedCount, productCodes, productStatus |
 | Post-admin-product-copy | post-admin-product-copy.json | productCode, newProductCode, newProductName, price02, stock |
-| Get-admin-product-csv | get-admin-product-csv.json | count, csv |
+| Get-admin-product-csv | get-admin-product-csv.json | count, csv, csrfToken |
 | Post-admin-product-csv | post-admin-product-csv.json | message, transitionId, count, productCodes |
-| Get-admin-product-list | get-admin-product-list.json | filters, count, searchForm, products |
+| Get-admin-product-list | get-admin-product-list.json | csrfToken, filters, count, searchForm, products |
 | Get-admin-product-new | get-admin-product-new.json | productStatusOptions, csrfToken |
 | Get-admin-security | get-admin-security.json | isSecureRequest, form, csrfToken |
 | Put-admin-security | put-admin-security.json | message, transitionId, trustedHosts |
 | Put-admin-sort-no-move | put-admin-sort-no-move.json | message, masterType, rowId, sortNo |
-| Get-admin-system | get-admin-system.json | info, phpinfoEnabled |
+| Get-admin-system | get-admin-system.json | info, phpinfoEnabled, csrfToken |
 | Put-admin-toggle-visible | put-admin-toggle-visible.json | masterType, rowId, visible |
 | Get-admin-trade-law | get-admin-trade-law.json | tradeLawBody, form, csrfToken, tradeLawRows |
 | Post-admin-trade-law | post-admin-trade-law.json | tradeLawBody, changed |
 | Get-admin-two-factor-auth | get-admin-two-factor-auth.json | form, transitionId, fields, csrfToken |
 | Post-admin-two-factor-auth | post-admin-two-factor-auth.json | message, transitionId, loginId |
-| Get-admin-two-factor-auth-edit | get-admin-two-factor-auth-edit.json | form, memberName, shopName, authKey |
+| Get-admin-two-factor-auth-edit | get-admin-two-factor-auth-edit.json | form, memberName, shopName, authKey, csrfToken |
 | Get-admin-two-factor-auth-set | get-admin-two-factor-auth-set.json | form, fields, memberName, shopName, transitionId, authKey, csrfToken |
 | Put-admin-two-factor-auth-set | put-admin-two-factor-auth-set.json | message, transitionId, loginId |
 | Get-admin-unsupported-route | get-admin-unsupported-route.json | message, routeName |
@@ -1377,11 +1385,11 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Put-cart-item | put-cart-item.json | cartKey, requestedQuantity, saleTypeName, productCode, totalPrice, unitPrice, adjustedQuantity, deliveryFeeTotal |
 | Delete-cart-item | delete-cart-item.json | cartKey, productCode, totalPrice, deliveryFeeTotal |
 | Get-contact-complete | get-contact-complete.json | fields, submitTo, staticContent, transitionId, ticketId |
-| Get-contact-confirm | get-contact-confirm.json | form, fields, submitTo, staticContent, transitionId |
+| Get-contact-confirm | get-contact-confirm.json | form, fields, submitTo, staticContent, transitionId, csrfToken |
 | Get-entry-activate | get-entry-activate.json | fields, submitTo, staticContent, transitionId |
 | Post-entry-activate | post-entry-activate.json | message |
 | Get-entry-complete | get-entry-complete.json | fields, submitTo, staticContent, transitionId |
-| Get-entry-confirm | get-entry-confirm.json | form, fields, submitTo, staticContent, transitionId |
+| Get-entry-confirm | get-entry-confirm.json | form, fields, submitTo, staticContent, transitionId, csrfToken |
 | Get-help-about | get-help-about.json | fields, submitTo, staticContent, transitionId |
 | Get-help-agreement | get-help-agreement.json | fields, submitTo, staticContent, transitionId |
 | Get-help-guide | get-help-guide.json | fields, submitTo, staticContent, transitionId |
@@ -1392,13 +1400,13 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Delete-mypage-address | delete-mypage-address.json | customerId, addressId |
 | Get-mypage-address-list | get-mypage-address-list.json | count, addresses, customerId |
 | Post-mypage-address-list | post-mypage-address-list.json | kana02, phoneNumber, name02, customerId, kana01, name01, addr02, postalCode, pref, addr01, companyName, addressId |
-| Get-mypage-change | get-mypage-change.json | form, kana02, phoneNumber, name02, customerId, kana01, name01, addr02, email, postalCode, pref, addr01, submitTo, companyName |
+| Get-mypage-change | get-mypage-change.json | form, kana02, phoneNumber, name02, customerId, kana01, name01, addr02, email, postalCode, pref, addr01, submitTo, companyName, csrfToken |
 | Post-mypage-change | post-mypage-change.json | message, email, customerId, name01, name02 |
 | Get-mypage-change-complete | get-mypage-change-complete.json | fields, submitTo, staticContent, transitionId |
 | Post-mypage-favorite | post-mypage-favorite.json | alreadyExisted, productName, productCode, unitPrice, customerId |
 | Delete-mypage-favorite | delete-mypage-favorite.json | alreadyAbsent, customerId, productCode |
 | Get-mypage-favorite-list | get-mypage-favorite-list.json | favoriteCount, customerId, favorites |
-| Get-mypage-history | get-mypage-history.json | addPoint, paymentDate, message, orderNo, deliveryFeeTotal, orderStatus, usePoint, orderDate, mailHistories, charge, paymentTotal, tax, paymentMethod, subtotal, discount, shippings, total |
+| Get-mypage-history | get-mypage-history.json | addPoint, paymentDate, message, orderNo, deliveryFeeTotal, orderStatus, usePoint, orderDate, mailHistories, charge, paymentTotal, tax, paymentMethod, subtotal, discount, shippings, total, csrfToken |
 | Get-mypage-order-history | get-mypage-order-history.json | offset, limit, orders, customerId, orderCount |
 | Post-mypage-reorder | post-mypage-reorder.json | skippedCount, skippedProductCodes, addedCount, cartKeys, orderNo, customerId |
 | Get-mypage-withdraw | get-mypage-withdraw.json | name01, fields, email, name02, submitTo, transitionId, csrfToken, customerId |
@@ -1409,7 +1417,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-shopping-complete | get-shopping-complete.json | completeMessage, staticContent, transitionId, orderNo |
 | Get-shopping-confirm | get-shopping-confirm.json | addPoint, items, paymentMethodId, customer, deliveryFeeTotal, usePoint, charge, paymentMethodName, paymentTotal, preOrderId, tax, submitTo, subtotal, transitionId, discount, csrfToken, total |
 | Get-shopping-error | get-shopping-error.json | fields, submitTo, staticContent, transitionId |
-| Get-shopping-login | get-shopping-login.json | form, fields, submitTo, staticContent, transitionId |
+| Get-shopping-login | get-shopping-login.json | form, fields, submitTo, staticContent, transitionId, csrfToken |
 | Get-shopping-non-member | get-shopping-non-member.json | form, fields, submitTo, transitionId, csrfToken |
 | Post-shopping-non-member | post-shopping-non-member.json | name01, email, paymentMethodId, preOrderId, name02 |
 | Get-shopping-shipping | get-shopping-shipping.json | fields, submitTo, staticContent, transitionId, addresses, csrfToken |
@@ -1423,24 +1431,24 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-admin-block-block | get-admin-block-block.json | blockId, blockName, blockFileName, blockDeletable, form, csrfToken |
 | Put-admin-block-block | put-admin-block-block.json | blockDeletable, blockName, blockId, blockFileName |
 | Delete-admin-block-block | delete-admin-block-block.json | message, blockId |
-| Get-admin-block-block-list | get-admin-block-block-list.json | count, blocks |
+| Get-admin-block-block-list | get-admin-block-block-list.json | count, blocks, csrfToken |
 | Post-admin-block-block-list | post-admin-block-block-list.json | blockDeletable, blockName, blockId, blockFileName |
-| Get-admin-category-category | get-admin-category-category.json | parentId, categoryName, sortNo, categoryId |
+| Get-admin-category-category | get-admin-category-category.json | parentId, categoryName, sortNo, categoryId, csrfToken |
 | Put-admin-category-category | put-admin-category-category.json | parentId, categoryName, sortNo, categoryId |
 | Delete-admin-category-category | delete-admin-category-category.json | categoryId |
-| Get-admin-category-category-list | get-admin-category-category-list.json | count, categories |
+| Get-admin-category-category-list | get-admin-category-category-list.json | count, categories, csrfToken |
 | Post-admin-category-category-list | post-admin-category-category-list.json | parentId, categoryName, sortNo, categoryId |
-| Get-admin-category-csv | get-admin-category-csv.json | rowCount, csv |
+| Get-admin-category-csv | get-admin-category-csv.json | rowCount, csv, csrfToken |
 | Post-admin-category-csv | post-admin-category-csv.json | deleted, imported, message, transitionId, accepted, lineCount |
-| Get-admin-category-edit | get-admin-category-edit.json | form, categories, category, count, categoryId |
+| Get-admin-category-edit | get-admin-category-edit.json | form, categories, category, count, categoryId, csrfToken |
 | Put-admin-class-category-class-category | put-admin-class-category-class-category.json | classCategoryId, name, classNameId |
 | Delete-admin-class-category-class-category | delete-admin-class-category-class-category.json | classCategoryId |
-| Get-admin-class-category-class-category-export | get-admin-class-category-class-category-export.json | value |
+| Get-admin-class-category-class-category-export | get-admin-class-category-class-category-export.json | content, csrfToken |
 | Get-admin-class-category-class-category-list | get-admin-class-category-class-category-list.json | form, classNameId, count, classCategories |
 | Post-admin-class-category-class-category-list | post-admin-class-category-class-category-list.json | classCategoryId, name, classNameId |
 | Put-admin-class-name-class-name | put-admin-class-name-class-name.json | name, classNameId |
 | Delete-admin-class-name-class-name | delete-admin-class-name-class-name.json | classNameId |
-| Get-admin-class-name-class-name-export | get-admin-class-name-class-name-export.json | value |
+| Get-admin-class-name-class-name-export | get-admin-class-name-class-name-export.json | content, csrfToken |
 | Get-admin-class-name-class-name-list | get-admin-class-name-class-name-list.json | form, count, classNames |
 | Post-admin-class-name-class-name-list | post-admin-class-name-class-name-list.json | name, classNameId |
 | Get-admin-content-cache | get-admin-content-cache.json | csrfToken |
@@ -1453,10 +1461,10 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-admin-content-maintenance | get-admin-content-maintenance.json | isMaintenance, csrfToken |
 | Put-admin-content-maintenance | put-admin-content-maintenance.json | message, transitionId, isMaintenance |
 | Post-admin-customer-resend-activation-mail | post-admin-customer-resend-activation-mail.json | message, customerId, email |
-| Get-admin-delivery-delivery | get-admin-delivery-delivery.json | deliveryId, form, delivery |
+| Get-admin-delivery-delivery | get-admin-delivery-delivery.json | deliveryId, form, delivery, csrfToken |
 | Put-admin-delivery-delivery | put-admin-delivery-delivery.json | deliveryId, deliveryName, visible |
 | Delete-admin-delivery-delivery | delete-admin-delivery-delivery.json | deliveryId |
-| Get-admin-delivery-delivery-list | get-admin-delivery-delivery-list.json | deliveries, count |
+| Get-admin-delivery-delivery-list | get-admin-delivery-delivery-list.json | deliveries, count, csrfToken |
 | Post-admin-delivery-delivery-list | post-admin-delivery-delivery-list.json | deliveryId, deliveryName, visible |
 | Get-admin-layout-layout | get-admin-layout-layout.json | layoutId, layoutName, deviceType, csrfToken, form |
 | Put-admin-layout-layout | put-admin-layout-layout.json | deviceType, layoutId, layoutName |
@@ -1465,21 +1473,21 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-admin-news-news | get-admin-news-news.json | form, newsUrl, linkMethod, newsId, newsTitle, csrfToken, publishDate, newsDescription |
 | Put-admin-news-news | put-admin-news-news.json | newsUrl, linkMethod, newsId, newsTitle, publishDate, newsDescription |
 | Delete-admin-news-news | delete-admin-news-news.json | newsId |
-| Get-admin-news-news-list | get-admin-news-news-list.json | news, count |
+| Get-admin-news-news-list | get-admin-news-news-list.json | news, count, csrfToken |
 | Post-admin-news-news-list | post-admin-news-news-list.json | newsUrl, linkMethod, newsId, newsTitle, publishDate, newsDescription |
 | Post-admin-order-bulk-delete | post-admin-order-bulk-delete.json | requestedCount, orderNos, changedCount |
 | Post-admin-order-create | post-admin-order-create.json | message, orderNo, customerId, paymentMethodId, subtotal, deliveryFeeTotal, charge, discount, tax, total, paymentTotal, addPoint, itemCount, orderStatus, orderDate |
 | Get-admin-order-edit | get-admin-order-edit.json | form, order, items, orderNo, csrfToken |
 | Get-admin-order-export-order | get-admin-order-export-order.json | rowCount, csv |
 | Get-admin-order-export-order-pdf | get-admin-order-export-order-pdf.json | message, orderNo, orderNos, pdf, size, fileName |
-| Get-admin-order-export-shipping | get-admin-order-export-shipping.json | rowCount, csv |
-| Get-admin-order-import-shipping | get-admin-order-import-shipping.json |  |
+| Get-admin-order-export-shipping | get-admin-order-export-shipping.json | rowCount, csv, csrfToken |
+| Get-admin-order-import-shipping | get-admin-order-import-shipping.json | csrfToken |
 | Post-admin-order-import-shipping | post-admin-order-import-shipping.json | skipped, imported, message, transitionId, accepted, lineCount |
-| Get-admin-order-mail-confirm | get-admin-order-mail-confirm.json | orderNo |
+| Get-admin-order-mail-confirm | get-admin-order-mail-confirm.json | orderNo, csrfToken |
 | Get-admin-order-order-pdf | get-admin-order-order-pdf.json | form, orderNo |
-| Get-admin-order-send-mail | get-admin-order-send-mail.json | form, orderNo |
+| Get-admin-order-send-mail | get-admin-order-send-mail.json | form, orderNo, csrfToken |
 | Post-admin-order-send-mail | post-admin-order-send-mail.json | mailBody, message, sendDate, orderNo, mailSubject, customerId |
-| Get-admin-order-shipping-address | get-admin-order-shipping-address.json | form, orderNo |
+| Get-admin-order-shipping-address | get-admin-order-shipping-address.json | form, orderNo, csrfToken |
 | Post-admin-order-shipping-address | post-admin-order-shipping-address.json | message |
 | Put-admin-order-shipping-address | put-admin-order-shipping-address.json | name01, addr02, postalCode, pref, addr01, phoneNumber, orderNo, name02 |
 | Get-admin-order-shipping-notify-mail | get-admin-order-shipping-notify-mail.json | orderNo, customerId, message, csrfToken, submitTo |
@@ -1488,26 +1496,27 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-admin-page-page | get-admin-page-page.json | form, pageFileName, pageUrl, pageId, pageName, csrfToken, pageEditType |
 | Put-admin-page-page | put-admin-page-page.json | pageFileName, pageUrl, pageId, pageName, pageEditType |
 | Delete-admin-page-page | delete-admin-page-page.json | message, pageId |
-| Get-admin-page-page-list | get-admin-page-page-list.json | count, pages |
+| Get-admin-page-page-list | get-admin-page-page-list.json | count, pages, csrfToken |
 | Post-admin-page-page-list | post-admin-page-page-list.json | pageFileName, pageUrl, pageId, pageName, pageEditType |
-| Get-admin-payment-payment | get-admin-payment-payment.json | form, paymentId, payment |
+| Get-admin-payment-payment | get-admin-payment-payment.json | form, paymentId, payment, csrfToken |
 | Put-admin-payment-payment | put-admin-payment-payment.json | charge, paymentMethodName, ruleMin, ruleMax, visible, paymentId |
 | Delete-admin-payment-payment | delete-admin-payment-payment.json | paymentId |
-| Get-admin-payment-payment-list | get-admin-payment-payment-list.json | payments, count |
+| Get-admin-payment-payment-list | get-admin-payment-payment-list.json | payments, count, csrfToken |
 | Post-admin-payment-payment-list | post-admin-payment-payment-list.json | charge, paymentMethodName, ruleMin, ruleMax, visible, paymentId |
-| Get-admin-product-csv-category | get-admin-product-csv-category.json | form, csvTitle, skeletonRoute, columns |
-| Get-admin-product-csv-class-category | get-admin-product-csv-class-category.json | form, csvTitle, skeletonRoute, columns |
+| Get-admin-product-csv-category | get-admin-product-csv-category.json | form, csvTitle, skeletonRoute, columns, csrfToken |
+| Get-admin-product-csv-class-category | get-admin-product-csv-class-category.json | form, csvTitle, skeletonRoute, columns, csrfToken |
 | Post-admin-product-csv-class-category | post-admin-product-csv-class-category.json | message, accepted, transitionId |
-| Get-admin-product-csv-class-name | get-admin-product-csv-class-name.json | form, csvTitle, skeletonRoute, columns |
+| Get-admin-product-csv-class-name | get-admin-product-csv-class-name.json | form, csvTitle, skeletonRoute, columns, csrfToken |
 | Post-admin-product-csv-class-name | post-admin-product-csv-class-name.json | message, accepted, transitionId |
-| Get-admin-product-csv-product | get-admin-product-csv-product.json | form, csvTitle, skeletonRoute, columns |
-| Get-admin-product-edit | get-admin-product-edit.json | form, product, productCode |
-| Get-admin-product-product-class | get-admin-product-product-class.json | form, productCode, classes |
+| Get-admin-product-csv-product | get-admin-product-csv-product.json | form, csvTitle, skeletonRoute, columns, csrfToken |
+| Get-admin-product-edit | get-admin-product-edit.json | form, product, productCode, csrfToken |
+| Get-admin-product-product-class | get-admin-product-product-class.json | csrfToken, form, productCode, classes |
+| Post-admin-product-product-class | post-admin-product-product-class.json | productClassId, productCode |
 | Delete-admin-tag-tag | delete-admin-tag-tag.json | tagId |
-| Get-admin-tag-tag-list | get-admin-tag-tag-list.json | form, count, tags |
+| Get-admin-tag-tag-list | get-admin-tag-tag-list.json | form, count, tags, csrfToken |
 | Post-admin-tag-tag-list | post-admin-tag-tag-list.json | tagId, tagName |
 | Delete-admin-tax-rule-tax-rule | delete-admin-tax-rule-tax-rule.json | taxRuleId |
-| Get-admin-tax-rule-tax-rule-list | get-admin-tax-rule-tax-rule-list.json | form, taxRules, count |
+| Get-admin-tax-rule-tax-rule-list | get-admin-tax-rule-tax-rule-list.json | form, taxRules, count, csrfToken |
 | Post-admin-tax-rule-tax-rule-list | post-admin-tax-rule-tax-rule-list.json | roundingType, taxRate, taxRuleId, applyDate |
 | Get-admin-template-template-add | get-admin-template-template-add.json | form, csrfToken |
 | Post-admin-template-template-add | post-admin-template-template-add.json | message, templateId, archiveName, archiveSize, transitionId |
@@ -1516,7 +1525,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Delete-admin-template-template-list | delete-admin-template-template-list.json | message, transitionId, templateId |
 | Post-admin-template-template-list | post-admin-template-template-list.json | message, value |
 
-## SQL (165)
+## SQL (168)
 
 | File | Query |
 |------|-------|
@@ -1939,6 +1948,13 @@ WHERE
   dtb_plugin
 WHERE
   code = :pluginCode` |
+| productClass_next_id.sql | `SELECT
+  IFNULL(
+    MAX(id),
+    0
+  ) + 1 AS next_id
+FROM
+  dtb_product_class` |
 | product_class_get.sql | `SELECT
   pc.product_code,
   p.name AS product_name,
@@ -2359,6 +2375,12 @@ SET
   update_date = NOW()
 WHERE
   ...` |
+| tproduct_class_get.sql | `SELECT
+  CAST(id AS CHAR) AS productClassId,
+  product_code AS productCode,
+ ...` |
+| tproduct_class_put.sql | `INSERT INTO dtb_product_class (
+  id, product_id, product_code, stock, stock_...` |
 | ttax_rule_delete.sql | `DELETE FROM
   dtb_tax_rule
 WHERE

@@ -1,92 +1,39 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "get-admin-product-csv-class-name.json",
-  "title": "GET /admin/product/csv-class-name response",
-  "description": "GET /admin/product/csv-class-name response の response body schema。ALPSの意味、be/var/fakeの観察値、Resource境界の実形状から導いたSemantic-Ex制約。",
+  "$id": "delete-admin-customer-delivery-edit.json",
+  "title": "DELETE /admin/customer-delivery-edit response",
+  "description": "DELETE /admin/customer-delivery-edit response の response body schema。",
   "type": "object",
   "properties": {
-    "form": {
-      "type": [
-        "object",
-        "array",
-        "null"
-      ],
-      "title": "入力フォーム",
-      "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
-      "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
-    },
-    "csvTitle": {
+    "addressId": {
       "type": [
         "string",
         "null"
       ],
+      "title": "配送先ID",
+      "description": "dtb_customer_address.id の不透明な文字列ハンドル。サーバ採番。",
+      "example": "addr00000000000000000000000000a1",
       "minLength": 0,
-      "maxLength": 255,
-      "title": "CSVタイトル",
-      "description": "/admin/product/csv-class-name の画面表示に使うCSVタイトル。業務エンティティそのものではなくテンプレート/一覧表示の補助値。"
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:@/-]*$"
     },
-    "skeletonRoute": {
+    "customerId": {
       "type": [
         "string",
         "null"
       ],
+      "title": "会員ID",
+      "description": "dtb_customer.id の不透明な文字列ハンドル。管理画面では route param 由来。",
+      "example": "0123456789abcdef0123456789abcdef",
       "minLength": 0,
-      "maxLength": 255,
-      "title": "スケルトンルート",
-      "description": "/admin/product/csv-class-name の画面表示に使うスケルトンルート。業務エンティティそのものではなくテンプレート/一覧表示の補助値。"
-    },
-    "columns": {
-      "type": [
-        "array",
-        "null"
-      ],
-      "title": "CSV列定義",
-      "description": "/admin/product/csv-class-name のCSV列設定。各要素は出力対象フィールドと表示名を表す。",
-      "items": {
-        "type": [
-          "object",
-          "null"
-        ],
-        "title": "CSV列",
-        "description": "/admin/product/csv-class-name のレスポンスに含まれるCSV列。親コレクション `columns` の1行を表し、固定できる業務列はschema propertyで明示する。",
-        "properties": {
-          "description": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "minLength": 0,
-            "maxLength": 128,
-            "title": "詳細説明文",
-            "description": "商品詳細ページに表示する説明文 Fake観察文字長 12〜32; 観察値 'Stock-unlimited fixture', 'Wave 8 admin grid: visible row', 'Wave 8 admin grid: hidden row', 'Wave 8 admin grid: withdrawn row', '管理画面から名称変更した、彩り豊かなジェラートセットです。', '管理画面から作成した商品'; null 1/7。",
-            "example": "Stock-unlimited fixture"
-          },
-          "name": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "minLength": 0,
-            "maxLength": 255,
-            "title": "商品名",
-            "description": "/admin/product/csv-class-name で表示する商品名。検索・一覧・詳細でユーザーに見せる販売名。",
-            "example": "テスト管理者"
-          }
-        },
-        "$comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
-      },
-      "minItems": 0
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:@/-]*$"
     }
   },
+  "required": [
+    "addressId",
+    "customerId"
+  ],
   "additionalProperties": false,
   "$defs": {
     "productCode": {
@@ -304,12 +251,5 @@
         }
       }
     }
-  },
-  "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
-  "required": [
-    "csvTitle",
-    "skeletonRoute",
-    "columns",
-    "csrfToken"
-  ]
+  }
 }

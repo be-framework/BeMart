@@ -12,10 +12,6 @@ are migrated to explicit POST forms.
 
 
 ## GET
-ALPS `goActionRedirect` に対応する GET 操作。
-
-**ALPS**: `goActionRedirect`
-
 
 
 ### Request
@@ -34,10 +30,6 @@ ALPS `goActionRedirect` に対応する GET 操作。
 | message | string|null | リダイレクトメッセージ - /action-redirect のレスポンスに含まれる処理結果メッセージ。注文時お問い合わせ欄ではなく、画面遷移や完了表示のための通知文。 | Optional | {"minLength":0,"maxLength":32} | 配送は平日希望です。 |
 
 ## POST
-ALPS `doActionRedirect` に対応する POST 操作。
-
-**ALPS**: `doActionRedirect`
-
 
 
 ### Request

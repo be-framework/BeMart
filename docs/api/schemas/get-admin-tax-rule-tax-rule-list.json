@@ -88,6 +88,17 @@
       "maximum": 2147483647,
       "title": "件数",
       "description": "/admin/tax-rule/tax-rule-list のレスポンスで返す件数。一覧・集計・処理結果の規模を表す非負整数。"
+    },
+    "csrfToken": {
+      "title": "CSRFトークン",
+      "description": "一覧画面から送信する作成・削除フォーム用のCSRFトークン。",
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]*$"
     }
   },
   "additionalProperties": false,
@@ -311,6 +322,7 @@
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
     "taxRules",
-    "count"
+    "count",
+    "csrfToken"
   ]
 }
