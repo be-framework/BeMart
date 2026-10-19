@@ -45,9 +45,10 @@ use Twig\TwigFunction;
  *                        attributes itself.
  *  - `csrf_token` function — the bare token value, for the admin scripts that
  *                        submit with fetch() instead of a form.
- *                        Both read the token lazily from the BEAR.Csrf port, so
- *                        a page without a form never touches the session and
- *                        Resources carry no CSRF knowledge at all.
+ *
+ * Both CSRF functions read the token lazily from the BEAR.Csrf port, so a page
+ * without a form never touches the session and Resources carry no CSRF
+ * knowledge at all.
  *
  * Every value produced here is deterministic, so the rendered HTML is
  * diffable against EC-CUBE's output (residual-diff verification).

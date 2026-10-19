@@ -74,7 +74,7 @@
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goContactForm — show the contact form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
 state). The HTML port fills the form&#039;s hidden `csrfToken` input
-via `csrf_token()`; the body carries no token.</div><div class="method-alps"><a href="../alps.json.html#goContactForm" class="alps-link">goContactForm</a></div></td>
+via `csrf_field()`; the body carries no token.</div><div class="method-alps"><a href="../alps.json.html#goContactForm" class="alps-link">goContactForm</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -153,7 +153,7 @@ form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be F
 logic. Anonymous-accessible (returns 200 regardless of session
 state). Fields mirror RegisterCustomerInput: 4 required + 11
 optional. The HTML port fills the form&#039;s hidden `csrfToken` input
-via `csrf_token()`; the body carries no token.</div><div class="method-alps"><a href="../alps.json.html#goCustomerRegistration" class="alps-link">goCustomerRegistration</a></div></td>
+via `csrf_field()`; the body carries no token.</div><div class="method-alps"><a href="../alps.json.html#goCustomerRegistration" class="alps-link">goCustomerRegistration</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -499,7 +499,7 @@ Anonymous-accessible (returns 200 regardless of session state).</div><div class=
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goLogin — show the login form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
 state). The HTML port fills the form&#039;s hidden `csrfToken` input
-via `csrf_token()`; the body carries no token.</div><div class="method-alps"><a href="../alps.json.html#goLogin" class="alps-link">goLogin</a></div></td>
+via `csrf_field()`; the body carries no token.</div><div class="method-alps"><a href="../alps.json.html#goLogin" class="alps-link">goLogin</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -2052,7 +2052,7 @@ Final to raise `UnauthorizedAdminAccessException`.</div><div class="method-alps"
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Show the admin login form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
 state) — the admin firewall guard is on the POST. The HTML port
-fills the form&#039;s hidden `csrfToken` input via `csrf_token()`.</div><div class="method-alps"><a href="../alps.json.html#doAdminLogin" class="alps-link">doAdminLogin</a></div></td>
+fills the form&#039;s hidden `csrfToken` input via `csrf_field()`.</div><div class="method-alps"><a href="../alps.json.html#doAdminLogin" class="alps-link">doAdminLogin</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -4636,7 +4636,7 @@ the BEAR.Csrf CsrfToken attribute.</div><div class="method-alps"><a href="../alp
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goShoppingNonMember — show the guest-info entry form.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
 state). Fields mirror SubmitNonMemberInput; the HTML port fills
-the hidden `csrfToken` input via `csrf_token()`.</div><div class="method-alps"><a href="../alps.json.html#goShoppingNonMember" class="alps-link">goShoppingNonMember</a></div></td>
+the hidden `csrfToken` input via `csrf_field()`.</div><div class="method-alps"><a href="../alps.json.html#goShoppingNonMember" class="alps-link">goShoppingNonMember</a></div></td>
   <td></td>
   <td></td>
   <td></td>
