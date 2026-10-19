@@ -46,7 +46,7 @@
           novalidate>
       <input type="hidden" name="_target_path" value="/shopping">
       <input type="hidden" name="_failure_path" value="/shopping/login">
-      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+      {{ csrf_field() }}
 
       <label class="idea-field">メールアドレス
         {% if form is defined %}

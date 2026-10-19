@@ -101,7 +101,7 @@
   rel="doUpdateBaseInfo"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
 
   {# ── Page-level notices ──────────────────────────────────────── #}
   {% if changed is defined and changed == false %}

@@ -220,7 +220,7 @@
       >キャンセル</button>
       <form method="post" action="/admin/delete-customer" rel="doDeleteCustomer" style="display:contents;">
         <input type="hidden" name="customerId" value="{{ customer.customerId }}">
-        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+        {{ csrf_field() }}
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">
           削除
         </button>

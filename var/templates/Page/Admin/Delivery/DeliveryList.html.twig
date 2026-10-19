@@ -18,7 +18,7 @@
     deliveryName  text      required (isNotBlank)
     visible       checkbox  optional, value "1"
 
-  CSRF: hidden input name="csrfToken" filled by csrf_token().
+  CSRF: hidden input name="csrfToken" rendered by csrf_field().
 
   IdeaStore admin design vocabulary (idea-admin-*):
     idea-admin-shell          app shell (from admin-base)
@@ -58,7 +58,7 @@
       rel="doCreateDelivery"
       novalidate
     >
-      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+      {{ csrf_field() }}
 
       <div class="idea-admin-field">
         <div class="idea-admin-field__label">
@@ -162,7 +162,7 @@
                   >
                     <input type="hidden" name="_method" value="delete">
                     <input type="hidden" name="deliveryId" value="{{ delivery.deliveryId }}">
-                    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+                    {{ csrf_field() }}
                     <button
                       type="submit"
                       class="idea-admin-icon-btn"
@@ -197,7 +197,7 @@
     action=""
     rel="doDeleteDelivery"
   >
-    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+    {{ csrf_field() }}
     <h4 id="delete-dialog-title" style="margin: 0 0 .75rem; font-size: 1rem;">配送方法を削除しますか？</h4>
     <p id="delete-dialog-desc" style="margin: 0 0 1.25rem; font-size: .88rem; color: var(--idea-muted);">
       この操作は取り消せません。

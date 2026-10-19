@@ -129,7 +129,7 @@
   novalidate
 >
   <input type="hidden" name="_method" value="put">
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
 
   <div class="idea-admin-layout">
@@ -296,7 +296,7 @@
       rel="doSelectShippingAddress"
       novalidate
     >
-      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+      {{ csrf_field() }}
       <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
 
       <div class="idea-admin-dialog__body">

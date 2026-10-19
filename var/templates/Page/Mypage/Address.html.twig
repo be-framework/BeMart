@@ -58,7 +58,7 @@
         class="h-adr idea-address-form"
       >
         <span class="p-country-name" aria-hidden="true">Japan</span>
-        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+        {{ csrf_field() }}
         {% if addressId is not null %}
           <input type="hidden" name="addressId" value="{{ addressId }}">
           <input type="hidden" name="_method" value="PUT">

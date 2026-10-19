@@ -55,7 +55,7 @@
       action="/admin/content/js?_method=put"
       rel="doUpdateContentJs">
 
-    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+    {{ csrf_field() }}
     <input type="hidden" name="mode"      value="content_operation_form">
 
     {# ── info notice ────────────────────────────────────────────────────── #}

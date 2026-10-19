@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function () {
       action="/admin/mail-template"
       rel="doUpdateMailTemplate"
     >
-      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+      {{ csrf_field() }}
       <div class="idea-admin-field">
         <div class="idea-admin-field__label">
           <label for="mail_template">テンプレート</label>
@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
   action="/admin/mail-template"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   {{ form.input('mailTemplateId')|raw }}
 
   <div class="idea-admin-layout">
@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', function () {
           style="display:inline;">
       <input type="hidden" name="_method" value="delete">
       <input type="hidden" name="mailTemplateId" value="{{ Mail.id }}">
-      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+      {{ csrf_field() }}
       <button class="idea-admin-action idea-admin-action--destructive" type="submit">
         <i class="fa fa-trash" aria-hidden="true"></i>
         削除する

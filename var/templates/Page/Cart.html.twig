@@ -90,7 +90,7 @@
                 <div class="idea-cart-item__controls" aria-label="{{ item.productName|default(item.productCode) }} の数量操作">
                   <div class="idea-quantity-actions">
                     <form method="post" action="/cart/item">
-                      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+                      {{ csrf_field() }}
                       <input type="hidden" name="productCode" value="{{ item.productCode }}">
                       <input type="hidden" name="operation" value="down">
                       <input type="hidden" name="quantity" value="{{ qty - 1 }}">
@@ -98,7 +98,7 @@
                     </form>
                     <span>{{ qty|number_format }}</span>
                     <form method="post" action="/cart/item" rel="doAddCartItem">
-                      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+                      {{ csrf_field() }}
                       <input type="hidden" name="productCode" value="{{ item.productCode }}">
                       <input type="hidden" name="operation" value="up">
                       <input type="hidden" name="quantity" value="{{ qty + 1 }}">
@@ -107,7 +107,7 @@
                   </div>
                   <strong>¥{{ (unitPrice * qty)|number_format }}</strong>
                   <form method="post" action="/cart/item">
-                    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+                    {{ csrf_field() }}
                     <input type="hidden" name="productCode" value="{{ item.productCode }}">
                     <input type="hidden" name="operation" value="remove">
                     <button class="idea-text-button" type="submit">削除</button>

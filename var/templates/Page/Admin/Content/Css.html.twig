@@ -89,7 +89,7 @@
   rel="doUpdateContentCss"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   <input type="hidden" name="mode" value="content_operation_form">
 
   {# ── Info strip ───────────────────────────────────────────────────────── #}

@@ -155,7 +155,7 @@
             aria-label="タグ新規登録フォーム"
             rel="doCreateTag"
         >
-            <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+            {{ csrf_field() }}
             <div class="idea-admin-field">
                 <div class="idea-admin-field__label">
                     <label for="admin_tag_name">タグ名</label>
@@ -225,7 +225,7 @@
                         >
                             <input type="hidden" name="_method" value="delete">
                             <input type="hidden" name="tagId" value="{{ Tag.tagId }}">
-                            <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+                            {{ csrf_field() }}
                             <button
                                 type="submit"
                                 class="idea-admin-icon-btn idea-admin-text-btn--danger"
@@ -279,7 +279,7 @@
             <form id="js-dialog-confirm-form" method="post" action="" style="display:inline;">
                 <input type="hidden" name="_method" value="delete">
                 <input type="hidden" name="tagId" value="">
-                <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+                {{ csrf_field() }}
                 <button type="submit" class="idea-admin-action idea-admin-action--destructive">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                     削除する

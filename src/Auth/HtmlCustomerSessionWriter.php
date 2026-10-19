@@ -44,7 +44,7 @@ final readonly class HtmlCustomerSessionWriter implements CustomerSessionWriterI
      * Retires the id and the CSRF reference the client held under the previous
      * authentication state.
      *
-     * Discarding the reference *is* the rotation: the next `csrf_token()` render
+     * Discarding the reference *is* the rotation: the next `csrf_field()` render
      * mints a fresh one, so a token captured while anonymous stops validating here.
      *
      * Session data survives `session_regenerate_id()`, so the cart prefix

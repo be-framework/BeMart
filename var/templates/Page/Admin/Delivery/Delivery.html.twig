@@ -17,7 +17,7 @@
     DELETE /admin/delivery/delivery?deliveryId=…&_method=delete — doDeleteDelivery (edit)
     POST   /admin/delivery/delivery-list                        — doCreateDelivery (new)
 
-  CSRF: hidden input name="csrfToken" filled by csrf_token().
+  CSRF: hidden input name="csrfToken" rendered by csrf_field().
 
   idea-admin vocabulary used:
     idea-admin-layout        two-column editor shell
@@ -57,7 +57,7 @@
     : '/admin/delivery/delivery-list' }}"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   {% if isEdit %}
   <input type="hidden" name="deliveryId" value="{{ deliveryId }}">
   <input type="hidden" name="_method" value="put">
@@ -222,7 +222,7 @@
         rel="doDeleteDelivery"
         style="display:inline;"
       >
-        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+        {{ csrf_field() }}
         <input type="hidden" name="_method" value="delete">
         <input type="hidden" name="deliveryId" value="{{ deliveryId }}">
         <button type="submit" class="idea-admin-action idea-admin-action--destructive">

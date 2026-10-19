@@ -86,7 +86,7 @@ class Entry extends ResourceObject
      * logic. Anonymous-accessible (returns 200 regardless of session
      * state). Fields mirror RegisterCustomerInput: 4 required + 11
      * optional. The HTML port fills the form's hidden `csrfToken` input
-     * via `csrf_token()`; the body carries no token.
+     * via `csrf_field()`; the body carries no token.
      */
     #[Alps('goCustomerRegistration')]
     #[JsonSchema(schema: 'get-entry.json')]

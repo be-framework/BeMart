@@ -209,7 +209,7 @@ details.idea-admin-collapsible > .idea-admin-panel__body {
   novalidate
   aria-label="商品登録フォーム"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
 
   <div class="idea-admin-layout">
 

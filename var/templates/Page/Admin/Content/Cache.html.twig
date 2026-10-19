@@ -173,7 +173,7 @@
       method="post"
       action="/admin/content/cache?_method=put"
       rel="doClearCache">
-    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+    {{ csrf_field() }}
     <input type="hidden" name="mode" value="content_operation_form">
 </form>
 

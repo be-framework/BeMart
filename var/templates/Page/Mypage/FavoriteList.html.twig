@@ -36,7 +36,7 @@
                 <a class="idea-link" href="/product?productCode={{ item.productCode }}">詳細を見る</a>
                 <form method="post" action="/mypage/favorite">
                   <input type="hidden" name="_method" value="delete">
-                  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+                  {{ csrf_field() }}
                   <input type="hidden" name="productCode" value="{{ item.productCode }}">
                   <button class="idea-text-button" type="submit" aria-label="{{ item.productName }} をお気に入りから削除">削除</button>
                 </form>

@@ -108,7 +108,7 @@
   novalidate
 >
   <input type="hidden" name="_method"   value="put">
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   <input type="hidden" name="productCode" value="{{ productCode }}">
 
   <div class="idea-admin-layout">
@@ -410,7 +410,7 @@
       >キャンセル</button>
       <form method="post" action="/admin/product-copy" rel="doCopyProduct" style="display:inline;">
         <input type="hidden" name="productCode" value="{{ productCode }}">
-        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+        {{ csrf_field() }}
         <button type="submit" class="idea-admin-action idea-admin-action--primary" rel="doCopyProduct">
           <i class="fa fa-copy" aria-hidden="true"></i>
           複製する
@@ -445,7 +445,7 @@
       >キャンセル</button>
       <form method="post" action="/admin/product?productCode={{ productCode }}" rel="doDeleteProduct" style="display:inline;">
         <input type="hidden" name="_method"   value="delete">
-        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+        {{ csrf_field() }}
         <button type="submit" class="idea-admin-action idea-admin-action--destructive" rel="doDeleteProduct">
           <i class="fa fa-trash" aria-hidden="true"></i>
           削除する

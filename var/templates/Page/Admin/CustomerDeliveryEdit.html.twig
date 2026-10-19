@@ -110,7 +110,7 @@
   novalidate
   aria-label="お届け先編集フォーム"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   <input type="hidden" name="customerId" value="{{ customerId|default('') }}">
 
   {# Single-column form — this page has one task and one task only #}

@@ -47,7 +47,7 @@
    consolidating into a shared form is possible (see #131). ────────────────────────────────────── #}
 <div style="text-align:right; margin-bottom:1rem;">
     <form method="post" action="/admin/logout" rel="doAdminLogout" style="display:inline;">
-        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+        {{ csrf_field() }}
         <button type="submit" class="idea-admin-action">
             <i class="fa fa-sign-out" aria-hidden="true"></i>
             ログアウト
