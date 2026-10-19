@@ -118,7 +118,7 @@
             "get": {
                 "operationId": "goContactForm",
                 "summary": "EC-CUBE goContactForm \u2014 show the contact form scaffolding.",
-                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate). The HTML port fills the form's hidden `csrfToken` input\nvia `csrf_token()`; the body carries no token.",
+                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate). The HTML port fills the form's hidden `csrfToken` input\nvia `csrf_field()`; the body carries no token.",
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -223,7 +223,7 @@
             "get": {
                 "operationId": "goCustomerRegistration",
                 "summary": "EC-CUBE goCustomerRegistration \u2014 show the customer registration\nform scaffolding.",
-                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate). Fields mirror RegisterCustomerInput: 4 required + 11\noptional. The HTML port fills the form's hidden `csrfToken` input\nvia `csrf_token()`; the body carries no token.",
+                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate). Fields mirror RegisterCustomerInput: 4 required + 11\noptional. The HTML port fills the form's hidden `csrfToken` input\nvia `csrf_field()`; the body carries no token.",
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -623,7 +623,7 @@
             "get": {
                 "operationId": "goLogin",
                 "summary": "EC-CUBE goLogin \u2014 show the login form scaffolding.",
-                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate). The HTML port fills the form's hidden `csrfToken` input\nvia `csrf_token()`; the body carries no token.",
+                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate). The HTML port fills the form's hidden `csrfToken` input\nvia `csrf_field()`; the body carries no token.",
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -2804,7 +2804,7 @@
             "get": {
                 "operationId": "doAdminLogin",
                 "summary": "Show the admin login form scaffolding.",
-                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate) \u2014 the admin firewall guard is on the POST. The HTML port\nfills the form's hidden `csrfToken` input via `csrf_token()`.",
+                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate) \u2014 the admin firewall guard is on the POST. The HTML port\nfills the form's hidden `csrfToken` input via `csrf_field()`.",
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -6878,7 +6878,7 @@
             "get": {
                 "operationId": "goShoppingNonMember",
                 "summary": "EC-CUBE goShoppingNonMember \u2014 show the guest-info entry form.",
-                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate). Fields mirror SubmitNonMemberInput; the HTML port fills\nthe hidden `csrfToken` input via `csrf_token()`.",
+                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate). Fields mirror SubmitNonMemberInput; the HTML port fills\nthe hidden `csrfToken` input via `csrf_field()`.",
                 "responses": {
                     "200": {
                         "description": "Successful response",
