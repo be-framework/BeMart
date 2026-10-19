@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -33,7 +32,6 @@ final class ActivateResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/entry/activate', [
             'secretKey' => self::PROVISIONAL_KEY,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -49,7 +47,6 @@ final class ActivateResourceTest extends TestCase
 
         $this->resource->post('page://self/entry/activate', [
             'secretKey' => 'unknown-key-not-in-fixture-2026',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -59,7 +56,6 @@ final class ActivateResourceTest extends TestCase
 
         $this->resource->post('page://self/entry/activate', [
             'secretKey' => 'short',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

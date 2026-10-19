@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Shopping;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -24,7 +25,6 @@ use MyVendor\BeMart\Be\Exception\PostalCodeFormatException;
 use MyVendor\BeMart\Be\Exception\PrefFormatException;
 use MyVendor\BeMart\Be\Final\NonMemberSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitNonMemberInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\NonMemberForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -84,7 +84,6 @@ class NonMember extends ResourceObject
 
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly CartSessionPrefixInterface $cartSessionPrefix,
     ) {
@@ -95,9 +94,8 @@ class NonMember extends ResourceObject
      *
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
-     * state). Fields mirror SubmitNonMemberInput. `csrfToken` carries
-     * the trusted reference token so the HTML form can pass the
-     * subsequent POST's CSRF boundary.
+     * state). Fields mirror SubmitNonMemberInput; the HTML port fills
+     * the hidden `csrfToken` input via `csrf_token()`.
      */
     #[Alps('goShoppingNonMember')]
     #[JsonSchema(schema: 'get-shopping-non-member.json')]
@@ -141,6 +139,7 @@ class NonMember extends ResourceObject
     #[Link(rel: 'doConfirmOrder', href: 'page://self/shopping/confirm', method: 'post')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string|null $name01 = null,
         string|null $name02 = null,
@@ -239,7 +238,6 @@ class NonMember extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/shopping/non-member',
             ],
-            'csrfToken' => $this->csrf->issue(),
             // Phase 3: NonMemberForm renders the guest-info inputs. JSON
             // contexts ignore it, while the HTML transfer uses it.
             'form' => $form,

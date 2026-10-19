@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -20,7 +21,6 @@ use MyVendor\BeMart\Be\Input\GetMailTemplateListInput;
 use MyVendor\BeMart\Be\Input\UpdateMailTemplateInput;
 use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminMailTemplateForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -51,7 +51,6 @@ class MailTemplate extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly MailTemplateStorageInterface $mailTemplates,
         private readonly MutationResponseInterface $mutationResponse,
@@ -107,7 +106,6 @@ class MailTemplate extends ResourceObject
             ],
             'mailTemplates' => $final->mailTemplates,
             'count' => $final->count,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -124,6 +122,7 @@ class MailTemplate extends ResourceObject
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
     #[Link(rel: 'doDeleteMailTemplate', href: 'page://self/admin/mail-template', method: 'delete')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         int $mailTemplateId,
         string $mailSubject = '',
@@ -163,6 +162,7 @@ class MailTemplate extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-mail-template.json', params: 'delete-admin-mail-template.param.json')]
     #[Link(rel: 'goMailTemplateList', href: 'page://self/admin/mail-template', method: 'get')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onDelete(int $mailTemplateId): static
     {
         if ($this->adminSession->adminId === null) {

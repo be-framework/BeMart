@@ -104,11 +104,12 @@ final class HttpSqlAdminTemplateFormTest extends TestCase
     {
         $jar = escapeshellarg($this->cookieJar);
         $curl = sprintf(
-            'curl -s -i -b %s -c %s -H %s -H %s -X %s %s',
+            'curl -s -i -b %s -c %s -H %s -H %s -H %s -X %s %s',
             $jar,
             $jar,
             escapeshellarg('X-BeMart-Test-Admin-Id: ' . self::ADMIN_ID),
             escapeshellarg('X-BeMart-Test-Csrf-Token: ' . self::CSRF_TOKEN),
+            escapeshellarg('Sec-Fetch-Site: same-origin'),
             escapeshellarg($method),
             escapeshellarg('http://' . self::HOST . $path),
         );
@@ -126,11 +127,12 @@ final class HttpSqlAdminTemplateFormTest extends TestCase
 
         $jar = escapeshellarg($this->cookieJar);
         $curl = sprintf(
-            'curl -s -i -b %s -c %s -H %s -H %s -F %s -F %s -F %s -F %s %s',
+            'curl -s -i -b %s -c %s -H %s -H %s -H %s -F %s -F %s -F %s -F %s %s',
             $jar,
             $jar,
             escapeshellarg('X-BeMart-Test-Admin-Id: ' . self::ADMIN_ID),
             escapeshellarg('X-BeMart-Test-Csrf-Token: ' . self::CSRF_TOKEN),
+            escapeshellarg('Sec-Fetch-Site: same-origin'),
             escapeshellarg('csrfToken=' . self::CSRF_TOKEN),
             escapeshellarg('templateCode=' . $templateCode),
             escapeshellarg('templateName=' . $templateName),
@@ -157,11 +159,12 @@ final class HttpSqlAdminTemplateFormTest extends TestCase
         }
 
         $curl = sprintf(
-            'curl -s -i -b %s -c %s -H %s -H %s %s %s',
+            'curl -s -i -b %s -c %s -H %s -H %s -H %s %s %s',
             $jar,
             $jar,
             escapeshellarg('X-BeMart-Test-Admin-Id: ' . self::ADMIN_ID),
             escapeshellarg('X-BeMart-Test-Csrf-Token: ' . self::CSRF_TOKEN),
+            escapeshellarg('Sec-Fetch-Site: same-origin'),
             implode(' ', array_map(static fn (string $field): string => '-F ' . $field, $fieldArgs)),
             escapeshellarg('http://' . self::HOST . $path),
         );

@@ -7,11 +7,8 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
-use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
@@ -22,16 +19,8 @@ final class LoginResourceTest extends TestCase
 
     protected function setUp(): void
     {
-        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
-        $base->override(new class extends AbstractModule {
-            protected function configure(): void
-            {
-                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
-            }
-        });
-
         $injector = new Injector(
-            $base,
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
         $this->resource = $injector->getInstance(ResourceInterface::class);
@@ -43,12 +32,9 @@ final class LoginResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('goLogin', $ro->body['transitionId']);
-        $this->assertSame(['email', 'password', 'csrfToken'], $ro->body['fields']);
+        $this->assertSame(['email', 'password'], $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/login', $ro->body['submitTo']['href']);
-        // csrfToken carries the trusted reference the HTML form must
-        // echo back so the doLogin POST passes CSRF validation.
-        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnPostAuthenticatesAndReturns200(): void
@@ -56,7 +42,6 @@ final class LoginResourceTest extends TestCase
         $ro = $this->resource->post('page://self/login', [
             'email' => 'login-test@example.com',
             'password' => 'local-dev-member-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -65,7 +50,6 @@ final class LoginResourceTest extends TestCase
         $this->assertSame('鈴木', $ro->body['name01']);
         $this->assertSame(2, $ro->body['customerStatus']);
         $this->assertArrayHasKey('Location', $ro->headers);
-        $this->assertSame(FakeCsrfToken::TOKEN, $ro->uri->query['csrfToken']);
     }
 
     public function testOnPostWrongPasswordReturns401(): void
@@ -75,7 +59,6 @@ final class LoginResourceTest extends TestCase
         $this->resource->post('page://self/login', [
             'email' => 'login-test@example.com',
             'password' => 'not-the-right-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -86,7 +69,6 @@ final class LoginResourceTest extends TestCase
         $this->resource->post('page://self/login', [
             'email' => 'nobody@example.com',
             'password' => 'local-dev-member-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -97,7 +79,6 @@ final class LoginResourceTest extends TestCase
         $this->resource->post('page://self/login', [
             'email' => 'not-an-email',
             'password' => 'local-dev-member-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -108,18 +89,6 @@ final class LoginResourceTest extends TestCase
         $this->resource->post('page://self/login', [
             'email' => 'login-test@example.com',
             'password' => 'short',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-    }
-
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/login', [
-            'email' => 'login-test@example.com',
-            'password' => 'local-dev-member-password',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 }

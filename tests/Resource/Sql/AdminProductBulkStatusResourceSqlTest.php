@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -68,7 +67,6 @@ final class AdminProductBulkStatusResourceSqlTest extends AbstractResourceSqlTes
         $ro = $this->resource->post('page://self/admin/product-bulk-status', [
             'productCodes' => ['admin-active-001', 'admin-hidden-001'],
             'productStatus' => 3,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -81,7 +79,6 @@ final class AdminProductBulkStatusResourceSqlTest extends AbstractResourceSqlTes
         $ro = $this->resource->post('page://self/admin/product-bulk-status', [
             'productCodes' => ['admin-active-001', 'does-not-exist'],
             'productStatus' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -94,7 +91,6 @@ final class AdminProductBulkStatusResourceSqlTest extends AbstractResourceSqlTes
         $ro = $this->resource->post('page://self/admin/product-bulk-status', [
             'productCodes' => ['admin-active-001'],
             'productStatus' => 99,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -107,7 +103,6 @@ final class AdminProductBulkStatusResourceSqlTest extends AbstractResourceSqlTes
         $ro = $this->resource->post('page://self/admin/product-bulk-status', [
             'productCodes' => ['admin-active-001'],
             'productStatus' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

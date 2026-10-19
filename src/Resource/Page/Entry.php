@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -29,7 +30,6 @@ use MyVendor\BeMart\Be\Exception\PrefFormatException;
 use MyVendor\BeMart\Be\Exception\SexFormatException;
 use MyVendor\BeMart\Be\Final\CustomerRegistered;
 use MyVendor\BeMart\Be\Input\RegisterCustomerInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\EntryForm;
 use SensitiveParameter;
 use Ray\WebFormModule\FormFactory;
@@ -74,7 +74,6 @@ class Entry extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -121,7 +120,6 @@ class Entry extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/entry',
             ],
-            'csrfToken' => $this->csrfTokenForForm(),
             // Phase 3: an empty EntryForm for the HTML port to render via
             // `{{ form.input(...) }}`. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(EntryForm::class),
@@ -156,6 +154,7 @@ class Entry extends ResourceObject
     #[JsonSchema(schema: 'post-entry.json', params: 'post-entry.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string|null $email = null,
         #[SensitiveParameter] string|null $password = null,
@@ -424,7 +423,6 @@ class Entry extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/entry',
             ],
-            'csrfToken' => $this->csrfTokenForForm(),
             'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
             'errors' => $errors,
             'form' => $this->failedForm($values, $errors),
@@ -530,10 +528,5 @@ class Entry extends ResourceObject
         };
 
         return [$field, $message];
-    }
-
-    private function csrfTokenForForm(): string
-    {
-        return $this->csrf->issue();
     }
 }

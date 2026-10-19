@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 
 /**
  * SQL-backed hypermedia coverage for doAddCartItem (Phase 2b).
@@ -45,7 +44,6 @@ final class CartItemResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sql-pc-001',
             'quantity' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -66,7 +64,6 @@ final class CartItemResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sql-missing-xyz',
             'quantity' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -85,7 +82,6 @@ final class CartItemResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sql-pc-oos',
             'quantity' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(409, $ro->code);
@@ -112,7 +108,6 @@ final class CartItemResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sql-pc-rare',
             'quantity' => 3,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -136,7 +131,6 @@ final class CartItemResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sql-pc-scarce',
             'quantity' => 5,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -160,7 +154,6 @@ final class CartItemResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sql-pc-unlimited',
             'quantity' => 7,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -183,7 +176,6 @@ final class CartItemResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sql-pc-variation',
             'quantity' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -200,7 +192,6 @@ final class CartItemResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sql-pc-badqty',
             'quantity' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);

@@ -8,7 +8,6 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -64,7 +63,6 @@ final class AdminOrderStatusSettingsResourceTest extends TestCase
                 ['id' => 3, 'name' => '注文取消し'],
             ],
             'orderStatusRows' => '1:新規受付,3:注文取消し',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -79,7 +77,6 @@ final class AdminOrderStatusSettingsResourceTest extends TestCase
 
         $ro = $this->resource->put('page://self/admin/order-status', [
             'orderStatuses' => [['id' => 1, 'name' => '新規受付']],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

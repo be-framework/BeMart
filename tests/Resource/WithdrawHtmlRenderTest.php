@@ -8,6 +8,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -336,7 +337,7 @@ final class WithdrawHtmlRenderTest extends TestCase
 
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []): Markup {
             if ($field === '_csrfToken__') {
-                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
+                return new Markup('<input type="hidden" name="csrfToken" value="' . FakeCsrfToken::DEFAULT_TOKEN . '">', 'UTF-8');
             }
 
             return new Markup('', 'UTF-8');

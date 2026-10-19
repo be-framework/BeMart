@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +20,6 @@ use MyVendor\BeMart\Be\Final\AdminProductCsvExported;
 use MyVendor\BeMart\Be\Input\AdminCreateProductInput;
 use MyVendor\BeMart\Be\Input\AdminExportProductInput;
 use BEAR\Resource\Annotation\JsonSchema;
-use BEAR\Csrf\CsrfTokenInterface;
 
 use function array_flip;
 use function assert;
@@ -57,7 +57,6 @@ class ProductCsv extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -79,7 +78,6 @@ class ProductCsv extends ResourceObject
         $this->body = [
             'csv' => $final->csv,
             'count' => $final->count,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -93,6 +91,7 @@ class ProductCsv extends ResourceObject
     #[JsonSchema(schema: 'post-admin-product-csv.json', params: 'post-admin-product-csv.param.json')]
     #[Link(rel: 'goExportCategory', href: 'page://self/admin/category/csv')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string $csv): static
     {
         $handle = fopen('php://memory', 'w+');

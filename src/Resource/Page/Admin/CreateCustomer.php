@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -78,6 +79,7 @@ class CreateCustomer extends ResourceObject
     #[JsonSchema(schema: 'post-admin-create-customer.json', params: 'post-admin-create-customer.param.json')]
     #[Link(rel: 'goCustomer', href: 'page://self/admin/customer', method: 'get')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $email,
         #[SensitiveParameter] string $password,

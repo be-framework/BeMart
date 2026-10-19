@@ -90,6 +90,11 @@ sql/setup-db.sh "$DATABASE_URL"
 本番 DB の再現可能なセットアップ手順・seed は `sql/README.md` と `sql/setup-db.sh` を参照。
 開発用 DB 接続の基本は host `127.0.0.1` / port `3306` / user `root` / pass なし。
 
+prod context（`bin/prod.php`、`public/index.php` の prod、prod をコンパイルするスクリプト）は
+`BEMART_ALLOWED_ORIGIN`（例 `https://shop.example`）も必要とする。未設定だと `ProdModule` が
+起動を拒む。PHPUnit は `phpunit.xml` の `<env>` で立てるので手動設定は不要。
+詳細は `docs/methodology/csrf-protection.md`。
+
 ### 1.4 動作確認
 
 ```bash

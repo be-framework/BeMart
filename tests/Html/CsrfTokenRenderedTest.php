@@ -9,11 +9,10 @@ use BEAR\Resource\ResourceInterface;
 use Madapaja\TwigModule\Exception\TemplateNotFound;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\NullCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
-use MyVendor\BeMart\Module\BeMartTwigExtension;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
+use MyVendor\BeMart\Module\BeMartTwigExtension;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 use MyVendor\BeMart\Tests\Smoke\ResourceSmokeTest;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use Override;
@@ -23,109 +22,55 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 
-use function array_diff_key;
 use function array_keys;
 use function file_get_contents;
 use function implode;
-use function json_decode;
 use function ksort;
+use function preg_match;
 use function preg_match_all;
-use function str_contains;
 use function str_starts_with;
 
-use const JSON_THROW_ON_ERROR;
-
 /**
- * A rendered CSRF field must carry a token.
+ * Every rendered CSRF field carries the session token.
  *
- * `EccubeSharedCsrfTokenAdapter::isValid()` rejects an empty string, so a form
- * whose hidden `csrfToken` renders empty answers 403 on submit. Templates write
- * `{{ csrfToken|default('') }}`, which degrades to `value=""` when the resource
- * never published the field — that is how the admin ブロック and 税率 inline
- * create forms stayed dead while per-page tests asserted only the field name.
- *
- * The bound adapter returns a fixed non-empty token, so an empty value can only
- * mean the resource body lacks `csrfToken`. #139 closed the ledger: every page
- * publishes the field from the `CsrfTokenInterface` port now, including the
- * three pages (`admin/category/category-list`, `admin/product/csv-category`,
- * `admin/product/csv-class-name`) that used to fill the field from the
- * `csrf_token()` Twig function instead — a helper that reads `$_SESSION`
- * directly and so rendered non-empty while the resource published nothing,
- * invisible to this sweep. The ledger stays as a regression guard: a page
- * whose resource stops publishing the field, or a template that reaches for
- * `csrf_token()` again, fails here instead of at submit time in production.
- *
- * `reason` values a re-opened entry may use:
- *
- *   nullByDesign  the resource sets `csrfToken => null` on purpose, waiting for
- *                 the EC-CUBE EventListener that mirrors the Symfony token into
- *                 the session (see EccubeSharedCsrfTokenAdapter's docblock).
- *   notPublished  the resource simply never publishes the field.
- *
- * @psalm-type Entry = array{fields: int, reason: string}
+ * Templates fill the hidden `csrfToken` input from the Twig `csrf_token()` function, which
+ * reads the bound {@see \BEAR\Csrf\CsrfTokenInterface}. The HTML test context binds
+ * {@see FakeCsrfToken}, so any other value means a template still expects the resource to
+ * publish the token — the pre-BEAR.Csrf shape, which rendered `value=""` and made the form
+ * dead on submit.
  */
 final class CsrfTokenRenderedTest extends TestCase
 {
-    private const LEDGER = __DIR__ . '/csrf-empty-token-ledger.json';
-    private const REASONS = ['nullByDesign', 'notPublished'];
     public const ADMIN_ID = 'ad000000000000000000000000000001';
     public const CUSTOMER_ID = 'customer-001';
 
-    public function testEveryPageWithAnEmptyCsrfFieldIsRecorded(): void
+    public function testEveryRenderedCsrfFieldCarriesTheToken(): void
     {
-        $observed = $this->observe();
-        $ledger = $this->ledger();
+        $fields = 0;
+        $wrong = [];
+        foreach ($this->renderedCsrfValues() as $identity => $values) {
+            foreach ($values as $value) {
+                $fields++;
+                if ($value !== FakeCsrfToken::DEFAULT_TOKEN) {
+                    $wrong[$identity] = $value;
+                }
+            }
+        }
 
-        $unrecorded = array_diff_key($observed, $ledger);
+        $this->assertGreaterThan(0, $fields, 'No page rendered a csrfToken field; the sweep is vacuous.');
         $this->assertSame(
             [],
-            array_keys($unrecorded),
-            "Pages newly rendering an empty csrfToken field; publish csrfToken from the resource:\n"
-            . implode("\n", array_keys($unrecorded)),
-        );
-
-        $stale = array_diff_key($ledger, $observed);
-        $this->assertSame(
-            [],
-            array_keys($stale),
-            "Ledger entries no longer observed; remove them:\n" . implode("\n", array_keys($stale)),
+            $wrong,
+            "Pages rendering a csrfToken field without the session token:\n" . implode("\n", array_keys($wrong)),
         );
     }
 
-    /**
-     * The regex sweep in {@see testEveryPageWithAnEmptyCsrfFieldIsRecorded} only catches an
-     * *empty* rendered field; a template that fills it via the `csrf_token()` (or
-     * `csrf_token_for_anchor()`) Twig function instead of the resource-published value renders
-     * non-empty and slips past that sweep entirely (that was the #139 blindspot for
-     * `admin/category/category-list`, `admin/product/csv-category`,
-     * `admin/product/csv-class-name`). Guard the closed ledger directly, two ways:
-     *
-     *  1. Structurally: {@see \MyVendor\BeMart\Module\BeMartTwigExtension} must not register a
-     *     Twig function whose name starts with `csrf_token` at all — this catches any future
-     *     $_SESSION-reading variant by shape, not by name list.
-     *  2. Textually: a regex sweep over every template source, as a second line of defence in
-     *     case a call site is ever wired through a differently-named Twig registration.
-     */
-    public function testNoTemplateFallsBackToTheSessionReadingCsrfHelper(): void
+    public function testTemplatesDoNotReadCsrfTokenFromTheResourceBody(): void
     {
-        $extension = new BeMartTwigExtension();
-        $functionNames = [];
-        foreach ($extension->getFunctions() as $function) {
-            $functionNames[] = $function->getName();
-        }
-
-        foreach ($functionNames as $name) {
-            $this->assertFalse(
-                str_starts_with($name, 'csrf_token'),
-                "BeMartTwigExtension exposes a \$_SESSION-reading csrf_token* Twig function ('{$name}'); " .
-                'templates must use the resource-published csrfToken value instead.',
-            );
-        }
-
         $offenders = [];
         foreach ($this->twigFiles() as $file) {
             $contents = (string) file_get_contents($file->getPathname());
-            if (preg_match('/\bcsrf_token\w*\s*\(/', $contents) === 1) {
+            if (preg_match('/\{\{-?\s*csrfToken\b/', $contents) === 1) {
                 $offenders[] = $file->getPathname();
             }
         }
@@ -133,42 +78,26 @@ final class CsrfTokenRenderedTest extends TestCase
         $this->assertSame(
             [],
             $offenders,
-            "Template(s) fill csrfToken via the \$_SESSION-reading Twig helper instead of the resource-published value:\n"
-            . implode("\n", $offenders),
+            "Templates must fill csrfToken via csrf_token(), not from the resource body:\n" . implode("\n", $offenders),
         );
     }
 
-    public function testLedgerEntriesAreWellFormed(): void
+    public function testTheTwigExtensionExposesCsrfToken(): void
     {
-        $ledger = $this->ledger();
-
-        // Validate first, assert closed-state last: if a failing assertSame([], $ledger) ran
-        // *before* this loop, a reopened entry would never get its reason checked - exactly the
-        // silent-masking bug this ordering avoids. The final assertSame always fires (0 or more
-        // loop iterations don't affect it), so this PR's closed-ledger claim stays a real,
-        // non-vacuous assertion instead of "no entries, so no assertions ran".
-        foreach ($ledger as $key => $entry) {
-            $this->assertContains($entry['reason'], self::REASONS, $key);
+        $names = [];
+        foreach ((new BeMartTwigExtension(new FakeCsrfToken()))->getFunctions() as $function) {
+            $names[] = $function->getName();
         }
 
-        $this->assertSame([], $ledger, 'The csrf-empty-token ledger reopened; entries above were still checked for a valid reason.');
+        $this->assertContains('csrf_token', $names);
     }
 
-    /** @return array<string, Entry> */
-    private function ledger(): array
-    {
-        /** @var array<string, Entry> $ledger */
-        $ledger = json_decode((string) file_get_contents(self::LEDGER), true, 512, JSON_THROW_ON_ERROR);
-
-        return $ledger;
-    }
-
-    /** @return array<string, int> page identity => empty field count */
-    private function observe(): array
+    /** @return array<string, list<string>> page identity => rendered csrfToken values */
+    private function renderedCsrfValues(): array
     {
         /** @var array<string, ResourceInterface> $resources one per session shape */
         $resources = [];
-        $observed = [];
+        $rendered = [];
 
         foreach (ResourceSmokeTest::resourceProvider() as $identity => [$method, $uri, $params, $code, $customerId]) {
             if ($method !== 'GET' || $code !== Code::OK || ! str_starts_with($uri, 'page://self/')) {
@@ -185,17 +114,15 @@ final class CsrfTokenRenderedTest extends TestCase
                 continue;
             }
 
-            $empty = preg_match_all('/name="csrfToken"\s+value=""/', $html);
-            if ($empty === 0 || $empty === false) {
-                continue;
+            preg_match_all('/<input\b[^>]*\bname="csrfToken"[^>]*>/', $html, $inputs);
+            foreach ($inputs[0] as $input) {
+                $rendered[$identity][] = preg_match('/\bvalue="([^"]*)"/', $input, $value) === 1 ? $value[1] : '';
             }
-
-            $observed[$identity] = $empty;
         }
 
-        ksort($observed);
+        ksort($rendered);
 
-        return $observed;
+        return $rendered;
     }
 
     private function resource(bool $admin, string|null $customerId): ResourceInterface
@@ -211,7 +138,6 @@ final class CsrfTokenRenderedTest extends TestCase
             #[Override]
             protected function configure(): void
             {
-                $this->bind(CsrfTokenInterface::class)->toInstance(new NullCsrfToken());
                 $this->bind(AdminSession::class)->toInstance(new FakeAdminSession($this->admin ? CsrfTokenRenderedTest::ADMIN_ID : null));
                 $this->bind(CustomerSession::class)->toInstance(new FakeSession($this->customerId ?? CsrfTokenRenderedTest::CUSTOMER_ID));
             }

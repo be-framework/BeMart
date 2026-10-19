@@ -14,7 +14,6 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ProductListFetched;
 use MyVendor\BeMart\Be\Input\GetProductListInput;
 use MyVendor\BeMart\Form\AdminProductSearchForm;
-use BEAR\Csrf\CsrfTokenInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -24,9 +23,8 @@ use function assert;
  * EC-CUBE goProductList — 商品一覧（管理画面） (Wave 8, admin filter
  * search + pagination).
  *
- * Safe read for the resource's own GET (no CSRF on this transition). The rendered page still
- * carries a csrfToken for the bulk status / delete / copy anchors embedded per row - those are
- * mutations on other resources, not this one. Admin-only — the Be Final raises
+ * Safe read for the resource's own GET (no CSRF on this transition). The bulk status / delete /
+ * copy anchors embedded per row are mutations on other resources, not this one. Admin-only — the Be Final raises
  * UnauthorizedAdminAccessException when AdminSession reports
  * no admin session, which we map to 403. The customer-facing product
  * list (when it lands) will be a sibling resource at a different URL.
@@ -44,7 +42,6 @@ class ProductList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -78,7 +75,6 @@ class ProductList extends ResourceObject
             'products' => $final->products,
             'count' => $final->count,
             'filters' => $final->filters,
-            'csrfToken' => $this->csrf->issue(),
         ];
         // Phase 3: an AdminProductSearchForm for the HTML list page to
         // render the keyword box via `{{ searchForm.input(...) }}`,

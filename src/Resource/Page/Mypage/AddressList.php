@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Mypage;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -88,6 +89,7 @@ class AddressList extends ResourceObject
     #[JsonSchema(schema: 'post-mypage-address-list.json', params: 'post-mypage-address-list.param.json')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $name01,
         string $name02,

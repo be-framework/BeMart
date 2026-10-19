@@ -13,7 +13,6 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderListFetched;
 use MyVendor\BeMart\Be\Input\GetAdminOrderListInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminOrderSearchForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -48,7 +47,6 @@ class OrderList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -78,7 +76,6 @@ class OrderList extends ResourceObject
             'count' => $final->count,
             'limit' => $final->limit,
             'offset' => $final->offset,
-            'csrfToken' => $this->csrf->issue(),
         ];
         // Phase 3: an AdminOrderSearchForm for the HTML list page to
         // render the `multi` keyword box via `{{ searchForm.input(...) }}`.

@@ -8,7 +8,6 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -86,7 +85,6 @@ final class AdminClassCsvResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/product/csv-class-name', [
             'csv' => "規格名ID,規格名\r\ncn-x,新\r\n",
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -98,7 +96,6 @@ final class AdminClassCsvResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/product/csv-class-category', [
             'csv' => "規格分類ID,規格名ID,規格分類名\r\ncc-x,cn-color,新\r\n",
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);

@@ -6,7 +6,6 @@
   tradeLawRows   list<{id, name, description, displayOrderScreen,
                         nameKey, descriptionKey, displayOrderScreenKey}>
   tradeLawBody   string         raw blob (read-only reference)
-  csrfToken      string         required
   form           AdminTradeLawForm  (form.input / form.error)
   changed        bool|null      present after POST redirect; null on GET
   message        string|null    error message (403 / 400)
@@ -200,7 +199,7 @@
   rel="doUpdateTradeLaw"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="mode" value="trade_law_form">
 
   {# ── Page-level notices ──────────────────────────────────────── #}

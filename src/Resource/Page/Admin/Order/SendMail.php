@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +20,6 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderMailForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
-use BEAR\Csrf\CsrfTokenInterface;
 
 use function assert;
 
@@ -47,7 +47,6 @@ class SendMail extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -87,7 +86,6 @@ class SendMail extends ResourceObject
         $this->body = [
             'form' => $form,
             'orderNo' => $orderNo,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -103,6 +101,7 @@ class SendMail extends ResourceObject
     #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf', method: 'get')]
     #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order', method: 'get')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $orderNo,
     ): static {

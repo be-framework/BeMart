@@ -145,7 +145,7 @@ final class HttpSqlNonMemberCheckoutFormTest extends TestCase
     private function form(string $method, string $path, array $fields = []): array
     {
         $jar = escapeshellarg($this->cookieJar);
-        $curl = sprintf('curl -s -i -b %s -c %s', $jar, $jar);
+        $curl = sprintf('curl -s -i -b %s -c %s -H %s', $jar, $jar, escapeshellarg('Sec-Fetch-Site: same-origin'));
         if ($method !== 'GET') {
             $curl .= ' -X ' . escapeshellarg($method);
             $curl .= ' -d ' . escapeshellarg(http_build_query($fields));

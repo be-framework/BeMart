@@ -29,7 +29,6 @@ _No parameters required_
 
 | Name | Type | Description | Required | Constraints | Example |
 |------|------|-------------|----------|-------------|---------|
-| csrfToken | string|null | CSRFトークン - /admin/content/cache のHTMLフォーム送信用CSRFトークン。 | Optional | {"minLength":0,"maxLength":160} |  |
 
 #### Links
 

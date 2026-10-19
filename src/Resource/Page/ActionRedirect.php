@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Resource\Page;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function preg_match;
@@ -31,6 +32,7 @@ class ActionRedirect extends ResourceObject
 
     #[JsonSchema(schema: 'post-action-redirect.json', params: 'post-action-redirect.param.json')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string|null $returnTo = null): static
     {
         $this->redirect($returnTo);

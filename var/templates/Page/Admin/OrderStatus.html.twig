@@ -6,7 +6,6 @@
     GET /admin/order-status
       form           AdminOrderStatusForm   — per-row fields keyed by {prefix}
       orderStatuses  list<{id, nameKey, customerNameKey, colorKey, displayOrderCountKey}>
-      csrfToken      string
 
   FORM FIELDS per row (src/Form/AdminOrderStatusForm.php):
     {prefix}_customer_order_status_name  text    — label shown in Mypage / customer-facing
@@ -174,7 +173,7 @@
   aria-label="受注対応状況設定"
 >
   <input type="hidden" name="_method" value="PUT">
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
   {# ── Status label editor ─────────────────────────────────────── #}
   <section class="idea-admin-panel" aria-labelledby="section-statuses">

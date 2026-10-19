@@ -6,7 +6,6 @@
   layoutId    string|null   既存レイアウトID (新規作成時は null)
   layoutName  string        編集可能な表示名
   deviceType  int|null      10 = PC, 2 = モバイル (null = 新規)
-  csrfToken   string        CSRF トークン
   form        AdminLayoutForm (form.input('name') / form.error('name'))
 
   ACTION  src/Resource/Page/Admin/Layout/Layout.php  onPut
@@ -14,7 +13,6 @@
   PUT /admin/layout/layout
     layoutId    — hidden
     name        — テキスト入力 (admin_layout_name)
-    csrfToken   — hidden
 
   LINKS  #[Link] annotations on onGet
   ──────────────────────────────────────────────────────────────────────────
@@ -176,7 +174,7 @@
   rel="doUpdateLayout"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   {% if layoutId is defined and layoutId %}
   <input type="hidden" name="layoutId" value="{{ layoutId }}">
   {% endif %}

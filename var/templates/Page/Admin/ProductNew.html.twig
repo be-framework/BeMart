@@ -6,7 +6,6 @@
 
 {#
   DATA CONTRACT (src/Resource/Page/Admin/ProductNew.php onGet):
-    csrfToken           string|null
     productStatusOptions object { 1: '公開', 2: '非公開', 3: '廃止' }
 
   FORM CONTRACT (src/Form/AdminProductEditForm.php):
@@ -210,7 +209,7 @@ details.idea-admin-collapsible > .idea-admin-panel__body {
   novalidate
   aria-label="商品登録フォーム"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
   <div class="idea-admin-layout">
 

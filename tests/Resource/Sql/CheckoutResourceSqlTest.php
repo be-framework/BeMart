@@ -6,7 +6,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\AbstractModule;
@@ -119,7 +118,6 @@ final class CheckoutResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => self::PRE_ORDER_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -158,7 +156,6 @@ final class CheckoutResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => self::PRE_ORDER_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -185,7 +182,6 @@ final class CheckoutResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => $missing,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -201,7 +197,6 @@ final class CheckoutResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => self::PRE_ORDER_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -253,7 +248,6 @@ final class CheckoutResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => self::PRE_ORDER_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);

@@ -11,7 +11,7 @@ use BEAR\Resource\Code;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use BEAR\Csrf\Attribute\CsrfToken;
-use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ClassCategoryCsvImported;
 use MyVendor\BeMart\Be\Input\ImportClassCategoryCsvInput;
@@ -40,11 +40,10 @@ class CsvClassCategory extends AbstractCsvUpload
     public function __construct(
         AdminSession $adminSession,
         FormFactory $formFactory,
-        CsrfTokenInterface $csrf,
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
-        parent::__construct($adminSession, $formFactory, $csrf);
+        parent::__construct($adminSession, $formFactory);
     }
 
     /** ALPS `goExportClassCategory` に対応する GET 操作。 */
@@ -67,6 +66,7 @@ class CsvClassCategory extends AbstractCsvUpload
     #[Alps('doImportClassCategoryCsv')]
     #[JsonSchema(schema: 'post-admin-product-csv-class-category.json', params: 'post-admin-product-csv-class-category.param.json')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string $csv = ''): static
     {
         $final = ($this->becoming)(new ImportClassCategoryCsvInput(csv: $csv));

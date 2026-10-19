@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 
 use function ctype_digit;
 
@@ -66,7 +65,6 @@ final class EntryResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertContains('csrfToken', $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/entry', $ro->body['submitTo']['href']);
-        $this->assertNull($ro->body['csrfToken']);
     }
 
     public function testOnPostRegistersAndReturns201(): void
@@ -76,7 +74,6 @@ final class EntryResourceSqlTest extends AbstractResourceSqlTestCase
             'password' => 'first-passphrase-2026',
             'name01' => '一郎',
             'name02' => '田中',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -100,7 +97,6 @@ final class EntryResourceSqlTest extends AbstractResourceSqlTestCase
             'password' => 'persisted-passphrase-2026',
             'name01' => '保存',
             'name02' => '太郎',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $ro->code);
 
@@ -127,7 +123,6 @@ final class EntryResourceSqlTest extends AbstractResourceSqlTestCase
             'pref' => 13,
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-2-3',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -143,7 +138,6 @@ final class EntryResourceSqlTest extends AbstractResourceSqlTestCase
             'password' => 'try-to-overwrite-2026',
             'name01' => '別人',
             'name02' => 'A',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(409, $ro->code);
@@ -157,7 +151,6 @@ final class EntryResourceSqlTest extends AbstractResourceSqlTestCase
             'password' => 'whatever-2026',
             'name01' => '佐藤',
             'name02' => '五郎',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);

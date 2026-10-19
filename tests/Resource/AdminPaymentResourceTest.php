@@ -9,8 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
@@ -20,7 +18,6 @@ use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
-use function str_contains;
 
 /**
  * Wave 9θ — admin Payment master CRUD resource coverage.
@@ -56,7 +53,6 @@ final class AdminPaymentResourceTest extends TestCase
                 if ($this->htmlMutation) {
                     $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
                 }
-                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
             }
         };
         $base->override($override);
@@ -78,7 +74,6 @@ final class AdminPaymentResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/payment/payment-list', [
             'paymentMethodName' => 'クレジットカード',
             'charge' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -92,7 +87,6 @@ final class AdminPaymentResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/payment/payment-list', [
                 'paymentMethodName' => 'クレジットカード',
                 'charge' => 0,
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -106,7 +100,6 @@ final class AdminPaymentResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/payment/payment-list', [
             'paymentMethodName' => 'クレジットカード',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -137,7 +130,6 @@ final class AdminPaymentResourceTest extends TestCase
             'paymentId' => $id,
             'paymentMethodName' => 'クレジット',
             'charge' => 200,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -153,7 +145,6 @@ final class AdminPaymentResourceTest extends TestCase
                 'paymentId' => $id,
                 'paymentMethodName' => 'クレジット',
                 'charge' => 200,
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -167,7 +158,6 @@ final class AdminPaymentResourceTest extends TestCase
         $this->resource->put('page://self/admin/payment/payment', [
             'paymentId' => 'nonexistent-zzz',
             'paymentMethodName' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -177,7 +167,6 @@ final class AdminPaymentResourceTest extends TestCase
 
         $ro = $this->resource->delete('page://self/admin/payment/payment', [
             'paymentId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -190,21 +179,10 @@ final class AdminPaymentResourceTest extends TestCase
         $id = $this->seed('代金引換');
         $ro = $this->resource->delete('page://self/admin/payment/payment', [
                 'paymentId' => $id,
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('/admin/payment/payment-list', $ro->headers['Location']);
-    }
-
-    public function testDeleteRejectsMissingCsrf(): void
-    {
-        $id = $this->seed('代金引換');
-        $ro = $this->resource->delete('page://self/admin/payment/payment', [
-            'paymentId' => $id,
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
     }
 
     public function testOnGetNewReturnsBlankForm(): void

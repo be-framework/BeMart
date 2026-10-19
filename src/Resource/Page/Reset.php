@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -16,7 +17,6 @@ use MyVendor\BeMart\Be\Final\PasswordResetCompleted;
 use MyVendor\BeMart\Be\Input\ResetPasswordInput;
 use MyVendor\BeMart\Form\ResetForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 use SensitiveParameter;
 
@@ -44,7 +44,6 @@ class Reset extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -74,7 +73,6 @@ class Reset extends ResourceObject
                 'href' => 'page://self/reset',
             ],
             'resetKey' => $resetKey,
-            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty ResetForm for the HTML port to render
             // via `{{ form.input(...) }}`. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ResetForm::class),
@@ -92,6 +90,7 @@ class Reset extends ResourceObject
     #[JsonSchema(schema: 'post-reset.json', params: 'post-reset.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(#[SensitiveParameter] string $resetKey, #[SensitiveParameter] string $password): static
     {
         $final = ($this->becoming)(new ResetPasswordInput(

@@ -8,9 +8,12 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
+
+use function preg_quote;
 
 /**
  * BeMart admin Product-list HTML render test — idea-admin design language.
@@ -204,7 +207,7 @@ final class AdminProductListHtmlRenderTest extends TestCase
         // data-delete-url carries productCode and _method=delete
         $this->assertStringContainsString('data-delete-url="/admin/product?productCode=', $html);
         $this->assertMatchesRegularExpression(
-            '/data-delete-url="[^"]+_method=delete"[^>]+token-for-anchor="[a-f0-9]{64}"/',
+            '/data-delete-url="[^"]+_method=delete"[^>]+token-for-anchor="' . preg_quote(FakeCsrfToken::DEFAULT_TOKEN, '/') . '"/',
             $html,
         );
     }
@@ -215,7 +218,7 @@ final class AdminProductListHtmlRenderTest extends TestCase
 
         // Copy link: POST /admin/product-copy?productCode=... with CSRF token
         $this->assertMatchesRegularExpression(
-            '#href="/admin/product-copy\?productCode=[^"]+"[^>]+data-method="post"[^>]+token-for-anchor="[a-f0-9]{64}"#',
+            '#href="/admin/product-copy\?productCode=[^"]+"[^>]+data-method="post"[^>]+token-for-anchor="' . preg_quote(FakeCsrfToken::DEFAULT_TOKEN, '#') . '"#',
             $html,
         );
     }
@@ -235,15 +238,15 @@ final class AdminProductListHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/admin/product-list')->toString();
 
-        // At least one action-submit button must carry a 64-char hex CSRF token.
+        // At least one action-submit button must carry the CSRF token.
         // Attributes may be rendered on separate lines (s-flag for dotall).
         $this->assertMatchesRegularExpression(
             '/<button[^>]*class="[^"]*action-submit[^"]*"[^>]*>/s',
             $html,
             'action-submit button is missing',
         );
-        $this->assertMatchesRegularExpression(
-            '/token-for-anchor="[a-f0-9]{64}"/',
+        $this->assertStringContainsString(
+            'token-for-anchor="' . FakeCsrfToken::DEFAULT_TOKEN . '"',
             $html,
             'CSRF token (token-for-anchor) is missing on bulk-action button',
         );

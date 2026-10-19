@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Http;
 
+use BEAR\Csrf\CsrfSessionKey;
 use BEAR\Resource\AbstractUri;
 use BEAR\Resource\Method;
 use BEAR\Resource\RequestInterface;
@@ -13,7 +14,6 @@ use BEAR\Resource\Uri as ResourceUri;
 use FilesystemIterator;
 use Koriym\FileUpload\AbstractFileUpload;
 use Koriym\PhpServer\PhpServer;
-use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Tests\Http\Exception\HalLinkNotFoundException;
@@ -461,7 +461,7 @@ final class HttpResource implements ResourceInterface
     /** @return array<string, string> */
     private function testHeaders(): array
     {
-        $headers = [];
+        $headers = ['Sec-Fetch-Site' => 'same-origin'];
         /** @var mixed $adminId */
         $adminId = $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] ?? null;
         if (is_string($adminId) && $adminId !== '') {
@@ -475,7 +475,7 @@ final class HttpResource implements ResourceInterface
         }
 
         /** @var mixed $csrfToken */
-        $csrfToken = $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] ?? null;
+        $csrfToken = $_SESSION[CsrfSessionKey::DEFAULT_NAME] ?? null;
         if (is_string($csrfToken) && $csrfToken !== '') {
             $headers['X-BeMart-Test-Csrf-Token'] = $csrfToken;
 

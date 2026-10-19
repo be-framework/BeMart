@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Auth;
 
+use BEAR\Csrf\CsrfTokenInterface;
 use Override;
 
 use function session_regenerate_id;
@@ -11,8 +12,12 @@ use function session_status;
 
 use const PHP_SESSION_ACTIVE;
 
-final class HtmlCustomerSessionWriter implements CustomerSessionWriterInterface
+final readonly class HtmlCustomerSessionWriter implements CustomerSessionWriterInterface
 {
+    public function __construct(private CsrfTokenInterface $csrf)
+    {
+    }
+
     #[Override]
     public function authenticate(string $customerId): void
     {
@@ -39,9 +44,8 @@ final class HtmlCustomerSessionWriter implements CustomerSessionWriterInterface
      * Retires the id and the CSRF reference the client held under the previous
      * authentication state.
      *
-     * Discarding the reference *is* the rotation: {@see EccubeSharedCsrfTokenAdapter}
-     * and the Twig widget mint a fresh one on the next read, so a token captured
-     * while anonymous stops validating here.
+     * Discarding the reference *is* the rotation: the next `csrf_token()` render
+     * mints a fresh one, so a token captured while anonymous stops validating here.
      *
      * Session data survives `session_regenerate_id()`, so the cart prefix
      * {@see HtmlCartSessionPrefix} pinned under the old id still partitions the
@@ -49,7 +53,10 @@ final class HtmlCustomerSessionWriter implements CustomerSessionWriterInterface
      */
     private function rotateSessionCredentials(): void
     {
-        session_regenerate_id(true);
-        unset($_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY]);
+        if (! session_regenerate_id(true)) {
+            throw new SessionRotationException('Customer login/logout could not rotate the session id.');
+        }
+
+        $this->csrf->clear();
     }
 }

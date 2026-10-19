@@ -4,18 +4,25 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Auth;
 
+use BEAR\Csrf\CsrfSessionKey;
+use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\Http\RequestTokenInterface;
+use BEAR\Csrf\StoredCsrfToken;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
-use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Auth\NullSessionStarter;
+use MyVendor\BeMart\Auth\SessionStarterCsrfStore;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeRequestToken;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
+use Override;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
 
 use function session_cache_limiter;
 use function session_destroy;
@@ -37,7 +44,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
             $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY],
             $_SESSION[HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY],
             $_SESSION[HtmlAdminLoginChallengeAdapter::SETUP_CHALLENGE_KEY],
-            $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY],
+            $_SESSION[CsrfSessionKey::DEFAULT_NAME],
         );
     }
 
@@ -47,7 +54,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
             $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY],
             $_SESSION[HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY],
             $_SESSION[HtmlAdminLoginChallengeAdapter::SETUP_CHALLENGE_KEY],
-            $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY],
+            $_SESSION[CsrfSessionKey::DEFAULT_NAME],
         );
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION = [];
@@ -101,7 +108,6 @@ final class HtmlAdminSessionAdapterTest extends TestCase
         $ro = $this->htmlResource()->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => 'local-dev-admin-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         // HTML context: the formSubmission port treats every mutation POST as
@@ -147,9 +153,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
         $this->startActiveSession();
         $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = 'ad000000000000000000000000000001';
 
-        $ro = $this->htmlResource()->post('page://self/admin/logout', [
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
+        $ro = $this->htmlResource()->post('page://self/admin/logout');
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertArrayNotHasKey(HtmlAdminSessionAdapter::ADMIN_ID_KEY, $_SESSION);
@@ -168,10 +172,9 @@ final class HtmlAdminSessionAdapterTest extends TestCase
         // challenge too: it elevates admin_id again with no password check.
         $resource->get('page://self/admin/two-factor-auth');
 
-        $resource->post('page://self/admin/logout', ['csrfToken' => FakeCsrfToken::TOKEN]);
+        $resource->post('page://self/admin/logout');
         $reElevation = $resource->post('page://self/admin/two-factor-auth', [
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $reElevation->code);
@@ -180,17 +183,18 @@ final class HtmlAdminSessionAdapterTest extends TestCase
 
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
-    public function testAdminLogoutRetiresSessionIdAndCsrfReference(): void
+    public function testAdminLogoutRetiresSessionIdAndCsrfToken(): void
     {
         $this->startActiveSession();
         $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = 'ad000000000000000000000000000001';
         $sessionIdBeforeLogout = session_id();
-        $tokenBeforeLogout = (new EccubeSharedCsrfTokenAdapter())->issue();
+        $csrf = $this->sessionCsrfToken();
+        $tokenBeforeLogout = $csrf->issue();
 
-        $this->htmlResource()->post('page://self/admin/logout', ['csrfToken' => FakeCsrfToken::TOKEN]);
+        $this->htmlResourceSubmitting($csrf, $tokenBeforeLogout)->post('page://self/admin/logout');
 
         $this->assertNotSame($sessionIdBeforeLogout, session_id());
-        $this->assertFalse((new EccubeSharedCsrfTokenAdapter())->verify($tokenBeforeLogout));
+        $this->assertFalse($csrf->verify($tokenBeforeLogout));
     }
 
     #[RunInSeparateProcess]
@@ -198,7 +202,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     public function testCompletingTwoFactorChallengeRetiresTheAnonymousSessionId(): void
     {
         // The planted-cookie defence: elevation must not keep the session id
-        // the client held while unauthenticated. The CSRF reference is retired
+        // the client held while unauthenticated. The CSRF token is retired
         // by the writer at login and logout, not here.
         $this->startActiveSession();
         $anonymousSessionId = session_id();
@@ -217,9 +221,34 @@ final class HtmlAdminSessionAdapterTest extends TestCase
 
     private function htmlResource(): ResourceInterface
     {
-        $injector = HtmlTestInjector::getInstance();
+        return HtmlTestInjector::getInstance()->getInstance(ResourceInterface::class);
+    }
 
-        return $injector->getInstance(ResourceInterface::class);
+    /** The production token over the session this test opened, in place of FakeModule's fixed one. */
+    private function sessionCsrfToken(): CsrfTokenInterface
+    {
+        return new StoredCsrfToken(new SessionStarterCsrfStore(new NullSessionStarter()));
+    }
+
+    private function htmlResourceSubmitting(CsrfTokenInterface $csrf, string $submitted): ResourceInterface
+    {
+        $module = new class ($csrf, $submitted) extends AbstractModule {
+            public function __construct(
+                private readonly CsrfTokenInterface $csrf,
+                private readonly string $submitted,
+            ) {
+                parent::__construct();
+            }
+
+            #[Override]
+            protected function configure(): void
+            {
+                $this->bind(CsrfTokenInterface::class)->toInstance($this->csrf);
+                $this->bind(RequestTokenInterface::class)->toInstance(new FakeRequestToken($this->submitted));
+            }
+        };
+
+        return HtmlTestInjector::getOverrideInstance($module)->getInstance(ResourceInterface::class);
     }
 
     private function startActiveSession(): void

@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
@@ -86,7 +85,6 @@ final class AdminTagResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/tag/tag-list', [
             'tagName' => '限定',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $ro->code);
         $this->assertSame('限定', $ro->body['tagName']);
@@ -97,7 +95,6 @@ final class AdminTagResourceTest extends TestCase
         $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
         $ro = $this->resource->post('page://self/admin/tag/tag-list', [
                 'tagName' => '限定',
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -111,7 +108,6 @@ final class AdminTagResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/tag/tag-list', [
             'tagName' => '限定',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -120,7 +116,6 @@ final class AdminTagResourceTest extends TestCase
         $id = $this->seed('Tmp');
         $ro = $this->resource->delete('page://self/admin/tag/tag', [
             'tagId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
     }
@@ -131,7 +126,6 @@ final class AdminTagResourceTest extends TestCase
         $id = $this->seed('Tmp');
         $ro = $this->resource->delete('page://self/admin/tag/tag', [
                 'tagId' => $id,
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -144,7 +138,6 @@ final class AdminTagResourceTest extends TestCase
 
         $this->resource->delete('page://self/admin/tag/tag', [
             'tagId' => 'nonexistent',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

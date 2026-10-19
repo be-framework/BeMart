@@ -38,9 +38,6 @@
         "maxLength": 255,
         "description": "/admin/two-factor-auth のレスポンスに含まれる二要素認証行。親コレクション `fields` の1行を表し、固定できる業務列はschema propertyで明示する。"
       }
-    },
-    "csrfToken": {
-      "$ref": "#/$defs/csrfToken"
     }
   },
   "additionalProperties": false,
@@ -178,15 +175,6 @@
       "maxLength": 128,
       "pattern": "^.+_[0-9]+$",
       "example": "session-prefix-1_1"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     },
     "uriReference": {
       "title": "URI参照",

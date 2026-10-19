@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use Koriym\FileUpload\FileUpload;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -59,7 +58,6 @@ final class AdminTemplateManageResourceTest extends TestCase
         $templateId = 'tp-default-pc';
         $ro = $this->resource->put('page://self/admin/template/template-list', [
             'templateId' => $templateId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -84,7 +82,6 @@ final class AdminTemplateManageResourceTest extends TestCase
 
         $this->resource->put('page://self/admin/template/template-list', [
             'templateId' => 'no-such',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -92,7 +89,6 @@ final class AdminTemplateManageResourceTest extends TestCase
     {
         $ro = $this->resource->delete('page://self/admin/template/template-list', [
             'templateId' => 'default',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -103,7 +99,6 @@ final class AdminTemplateManageResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/template/template-list', [
             'templateId' => 'default',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -116,7 +111,6 @@ final class AdminTemplateManageResourceTest extends TestCase
             'templateCode' => 'mytheme',
             'templateName' => 'My Theme',
             'file' => FileUpload::fromFile(__DIR__ . '/../fixtures/template-upload.zip'),
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -134,7 +128,6 @@ final class AdminTemplateManageResourceTest extends TestCase
             'templateCode' => 'x',
             'templateName' => 'y',
             'file' => FileUpload::fromFile(__DIR__ . '/../fixtures/template-upload.zip'),
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

@@ -16,7 +16,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminProductClassForm;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use BEAR\Csrf\Attribute\CsrfToken;
-use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\Attribute\SameOrigin;
 use Ray\WebFormModule\FormFactory;
 
 use function assert;
@@ -60,7 +60,6 @@ class ProductClass extends ResourceObject
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -93,7 +92,6 @@ class ProductClass extends ResourceObject
             'form' => $form,
             'productCode' => $productCode,
             'classes' => [],
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -120,6 +118,7 @@ class ProductClass extends ResourceObject
     #[JsonSchema(schema: 'post-admin-product-product-class.json', params: 'post-admin-product-product-class.param.json')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $productCode,
         int|string|null $price02 = 0,

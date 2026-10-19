@@ -171,7 +171,7 @@
   aria-label="マスタ種別選択"
 >
   <input type="hidden" name="_method" value="PUT">
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
   <div class="idea-admin-layout">
 
@@ -304,7 +304,7 @@
   aria-label="マスタデータ編集"
 >
   <input type="hidden" name="_method" value="PUT">
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="masterType" value="{{ selectedMaster|default('') }}">
 
   <div class="idea-admin-layout" style="margin-top:1.25rem">

@@ -8,7 +8,6 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -56,7 +55,6 @@ final class AdminMasterDataEditResourceTest extends TestCase
     {
         $ro = $this->resource->put('page://self/admin/master-data', [
             'masterType' => 'tag',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -70,7 +68,6 @@ final class AdminMasterDataEditResourceTest extends TestCase
 
         $this->resource->put('page://self/admin/master-data', [
             'masterType' => 'no-such-master',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -79,7 +76,6 @@ final class AdminMasterDataEditResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/master-data-edit', [
             'masterType' => 'tag',
             'rows' => [['id' => 't1', 'name' => '新タグ', 'sortNo' => 1]],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -96,7 +92,6 @@ final class AdminMasterDataEditResourceTest extends TestCase
         $this->resource->put('page://self/admin/master-data-edit', [
             'masterType' => 'tag',
             'rows' => [],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

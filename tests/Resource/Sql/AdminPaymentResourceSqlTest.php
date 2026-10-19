@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -104,7 +103,6 @@ final class AdminPaymentResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/payment/payment-list', [
             'paymentMethodName' => $name,
             'charge' => $charge,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $id = $ro->body['paymentId'];
         assert(is_string($id));
@@ -117,7 +115,6 @@ final class AdminPaymentResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/payment/payment-list', [
             'paymentMethodName' => 'クレジットカード',
             'charge' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -130,7 +127,6 @@ final class AdminPaymentResourceSqlTest extends AbstractResourceSqlTestCase
         $this->rebindAdminSession(null);
         $ro = $this->resource->post('page://self/admin/payment/payment-list', [
             'paymentMethodName' => 'クレジットカード',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -161,7 +157,6 @@ final class AdminPaymentResourceSqlTest extends AbstractResourceSqlTestCase
             'paymentId' => $id,
             'paymentMethodName' => 'クレジット',
             'charge' => 200,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -174,7 +169,6 @@ final class AdminPaymentResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/payment/payment', [
             'paymentId' => 'nonexistent-zzz',
             'paymentMethodName' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -185,7 +179,6 @@ final class AdminPaymentResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->delete('page://self/admin/payment/payment', [
             'paymentId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);

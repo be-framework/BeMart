@@ -10,7 +10,6 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -60,7 +59,6 @@ final class AdminTradeLawResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/trade-law', [
             'tradeLawBody' => "販売業者: 新会社\n所在地: 東京都\n連絡先: 03-1234-5678",
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -76,7 +74,6 @@ final class AdminTradeLawResourceTest extends TestCase
         $current = $this->storage->item();
         $ro = $this->resource->post('page://self/admin/trade-law', [
             'tradeLawBody' => $current->body,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -89,7 +86,6 @@ final class AdminTradeLawResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/trade-law', [
             'tradeLawBody' => '   ',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -101,7 +97,6 @@ final class AdminTradeLawResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/trade-law', [
             'tradeLawBody' => 'whatever non-empty',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

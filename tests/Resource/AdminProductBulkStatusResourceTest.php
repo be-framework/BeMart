@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
@@ -62,7 +61,6 @@ final class AdminProductBulkStatusResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/product-bulk-status', [
             'productCodes' => ['admin-active-001', 'admin-hidden-001'],
             'productStatus' => 3,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -76,7 +74,6 @@ final class AdminProductBulkStatusResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/product-bulk-status', [
                 'productCodes' => ['admin-active-001', 'admin-hidden-001'],
                 'productStatus' => 3,
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -89,7 +86,6 @@ final class AdminProductBulkStatusResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/product-bulk-status', [
             'productCodes' => ['admin-active-001', 'does-not-exist'],
             'productStatus' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -104,7 +100,6 @@ final class AdminProductBulkStatusResourceTest extends TestCase
         $this->resource->post('page://self/admin/product-bulk-status', [
             'productCodes' => ['admin-active-001'],
             'productStatus' => 99,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -117,7 +112,6 @@ final class AdminProductBulkStatusResourceTest extends TestCase
         $this->resource->post('page://self/admin/product-bulk-status', [
             'productCodes' => ['admin-active-001'],
             'productStatus' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

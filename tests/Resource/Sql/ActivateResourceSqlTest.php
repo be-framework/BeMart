@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 
 /**
  * SQL-backed hypermedia coverage for the customer-activation endpoint
@@ -64,7 +63,6 @@ final class ActivateResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/entry/activate', [
             'secretKey' => self::PROVISIONAL_KEY,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -85,7 +83,6 @@ final class ActivateResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/entry/activate', [
             'secretKey' => 'unknown-key-not-in-fixture-2026',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -96,7 +93,6 @@ final class ActivateResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/entry/activate', [
             'secretKey' => 'short',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);

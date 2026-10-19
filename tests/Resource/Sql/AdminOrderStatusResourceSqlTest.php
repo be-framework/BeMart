@@ -8,7 +8,6 @@ use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -77,7 +76,6 @@ final class AdminOrderStatusResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/order-status', [
             'orderNo' => $order['orderNo'],
             'orderStatus' => FinalizedOrderEntity::STATUS_DELIVERED,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -108,14 +106,12 @@ final class AdminOrderStatusResourceSqlTest extends AbstractResourceSqlTestCase
         $this->resource->post('page://self/admin/order-status', [
             'orderNo' => $order['orderNo'],
             'orderStatus' => FinalizedOrderEntity::STATUS_DELIVERED,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         // Replay with the same status — no second write.
         $ro = $this->resource->post('page://self/admin/order-status', [
             'orderNo' => $order['orderNo'],
             'orderStatus' => FinalizedOrderEntity::STATUS_DELIVERED,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -128,7 +124,6 @@ final class AdminOrderStatusResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/order-status', [
             'orderNo' => 'nonexistentordernononononononono',
             'orderStatus' => FinalizedOrderEntity::STATUS_CANCEL,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -146,7 +141,6 @@ final class AdminOrderStatusResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/order-status', [
             'orderNo' => $order['orderNo'],
             'orderStatus' => FinalizedOrderEntity::STATUS_CANCEL,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

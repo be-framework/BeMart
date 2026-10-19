@@ -6,10 +6,10 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Payment;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
@@ -39,7 +39,6 @@ class PaymentList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -61,7 +60,6 @@ class PaymentList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'payments' => $final->payments,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -79,6 +77,7 @@ class PaymentList extends ResourceObject
     #[JsonSchema(schema: 'post-admin-payment-payment-list.json', params: 'post-admin-payment-payment-list.param.json')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $paymentMethodName,
         int $charge = 0,

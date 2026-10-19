@@ -9,7 +9,6 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -34,7 +33,6 @@ class MailConfirm extends ResourceObject
 {
     public function __construct(
         private readonly AdminSession $adminSession,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -58,7 +56,6 @@ class MailConfirm extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'orderNo' => $orderNo,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

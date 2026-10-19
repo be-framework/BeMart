@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -100,7 +99,6 @@ final class AdminBlockResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/block/block-list', [
             'blockName' => $name,
             'blockFileName' => $file,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $id = $ro->body['blockId'];
         assert(is_string($id));
@@ -133,7 +131,6 @@ final class AdminBlockResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/block/block-list', [
             'blockName' => 'バナー',
             'blockFileName' => 'banner',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $ro->code);
         $this->assertSame('バナー', $ro->body['blockName']);
@@ -146,7 +143,6 @@ final class AdminBlockResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/block/block-list', [
             'blockName' => 'バナー',
             'blockFileName' => 'banner',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -157,7 +153,6 @@ final class AdminBlockResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/block/block', [
             'blockId' => $id,
             'blockName' => 'New',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('New', $ro->body['blockName']);
@@ -168,7 +163,6 @@ final class AdminBlockResourceSqlTest extends AbstractResourceSqlTestCase
         $id = $this->seed('Tmp', 'tmp');
         $ro = $this->resource->delete('page://self/admin/block/block', [
             'blockId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
     }
@@ -190,7 +184,6 @@ final class AdminBlockResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->delete('page://self/admin/block/block', [
             'blockId' => $systemId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }

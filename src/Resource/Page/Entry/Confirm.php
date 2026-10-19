@@ -10,7 +10,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Form\EntryConfirmForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -52,7 +51,6 @@ class Confirm extends ResourceObject
 {
     public function __construct(
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -81,7 +79,6 @@ class Confirm extends ResourceObject
                 'page' => 'entry-confirm',
                 'title' => '新規会員登録(確認)',
             ],
-            'csrfToken' => $this->csrf->issue(),
             // Phase 3: the confirm screen carries the registration payload
             // as hidden inputs — an EntryConfirmForm (every field `hidden`).
             // JSON contexts ignore `body['form']`.

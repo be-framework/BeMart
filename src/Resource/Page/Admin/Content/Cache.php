@@ -10,11 +10,11 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\CacheCleared;
 use MyVendor\BeMart\Be\Input\ClearCacheInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -33,7 +33,6 @@ class Cache extends ResourceObject
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -51,7 +50,7 @@ class Cache extends ResourceObject
         }
 
         $this->code = Code::OK;
-        $this->body = ['csrfToken' => $this->csrf->issue()];
+        $this->body = [];
 
         return $this;
     }
@@ -61,6 +60,7 @@ class Cache extends ResourceObject
     #[JsonSchema(schema: 'put-admin-content-cache.json', params: 'put-admin-content-cache.param.json')]
     #[Link(rel: 'goMaintenance', href: 'page://self/admin/content/maintenance')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(string|null $mode = null): static
     {
         $final = ($this->becoming)(new ClearCacheInput());

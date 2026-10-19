@@ -5,7 +5,6 @@
 
   DATA CONTRACT (src/Resource/Page/Admin/Content/Maintenance.php onGet):
     isMaintenance  bool|null  — current maintenance-mode state (schema: get-admin-content-maintenance.json)
-    csrfToken      string|null
 
   ACTION (doToggleMaintenance — ALPS idempotent):
     PUT  /admin/content/maintenance?_method=put
@@ -152,7 +151,7 @@
       aria-label="メンテナンスモード切替"
       rel="doToggleMaintenance"
     >
-      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
       <input type="hidden" name="mode"      value="content_operation_form">
 
       <div class="idea-admin-maintenance-action">

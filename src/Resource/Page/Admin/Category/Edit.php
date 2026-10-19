@@ -18,7 +18,6 @@ use MyVendor\BeMart\Be\Input\GetAdminCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryListInput;
 use MyVendor\BeMart\Form\AdminCategoryForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -49,7 +48,6 @@ class Edit extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -81,7 +79,6 @@ class Edit extends ResourceObject
                 'category' => null,
                 'categories' => $listFinal->categories,
                 'count' => $listFinal->count,
-                'csrfToken' => $this->csrf->issue(),
             ];
 
             return $this;
@@ -109,7 +106,6 @@ class Edit extends ResourceObject
             ],
             'categories' => $listFinal->categories,
             'count' => $listFinal->count,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

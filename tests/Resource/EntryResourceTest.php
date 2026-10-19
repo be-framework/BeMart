@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -42,7 +41,6 @@ final class EntryResourceTest extends TestCase
         $this->assertContains('csrfToken', $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/entry', $ro->body['submitTo']['href']);
-        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnPostRegistersAndReturns201(): void
@@ -52,7 +50,6 @@ final class EntryResourceTest extends TestCase
             'password' => 'first-passphrase-2026',
             'name01' => '一郎',
             'name02' => '田中',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -76,7 +73,6 @@ final class EntryResourceTest extends TestCase
             'pref' => 13,
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-2-3',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -91,7 +87,6 @@ final class EntryResourceTest extends TestCase
             'password' => 'try-to-overwrite-2026',
             'name01' => '別人',
             'name02' => 'A',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -104,7 +99,6 @@ final class EntryResourceTest extends TestCase
             'password' => 'whatever-2026',
             'name01' => '佐藤',
             'name02' => '五郎',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -117,7 +111,6 @@ final class EntryResourceTest extends TestCase
             'password' => '',
             'name01' => '佐藤',
             'name02' => '六郎',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

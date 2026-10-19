@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -79,7 +78,6 @@ final class AdminTwoFactorAuthSetResourceTest extends TestCase
     {
         $ro = $this->resource->put('page://self/admin/two-factor-auth-set', [
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -91,7 +89,6 @@ final class AdminTwoFactorAuthSetResourceTest extends TestCase
 
         $ro = $this->resource->put('page://self/admin/two-factor-auth-set', [
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -110,7 +107,6 @@ final class AdminTwoFactorAuthSetResourceTest extends TestCase
             'loginId' => 'test-admin',
             'authKey' => 'ATTACKER-CONTROLLED-SECRET',
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -126,7 +122,6 @@ final class AdminTwoFactorAuthSetResourceTest extends TestCase
 
         $this->resource->put('page://self/admin/two-factor-auth-set', [
             'deviceToken' => '000000',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

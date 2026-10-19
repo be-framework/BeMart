@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
@@ -98,7 +97,6 @@ final class AdminProductResourceTest extends TestCase
             'productName' => 'Wave 8 Resource',
             'price02' => 2500,
             'stock' => 30,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -115,7 +113,6 @@ final class AdminProductResourceTest extends TestCase
             'productCode' => 'admin-active-001',
             'productName' => 'duplicate',
             'price02' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -129,7 +126,6 @@ final class AdminProductResourceTest extends TestCase
             'productCode' => 'wave8-noadm-001',
             'productName' => 'No admin',
             'price02' => 100,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -140,7 +136,6 @@ final class AdminProductResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/product', [
             'productCode' => 'admin-active-001',
             'productName' => '更新後',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -156,7 +151,6 @@ final class AdminProductResourceTest extends TestCase
         $this->resource->put('page://self/admin/product', [
             'productCode' => 'does-not-exist',
             'productName' => 'whatever',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -169,7 +163,6 @@ final class AdminProductResourceTest extends TestCase
         $this->resource->put('page://self/admin/product', [
             'productCode' => 'admin-active-001',
             'productName' => 'no admin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -179,7 +172,6 @@ final class AdminProductResourceTest extends TestCase
     {
         $ro = $this->resource->delete('page://self/admin/product', [
             'productCode' => 'admin-active-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -192,7 +184,6 @@ final class AdminProductResourceTest extends TestCase
         $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
         $ro = $this->resource->delete('page://self/admin/product', [
                 'productCode' => 'admin-active-001',
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -207,7 +198,6 @@ final class AdminProductResourceTest extends TestCase
         // exercises the idempotent already-deleted branch.
         $ro = $this->resource->delete('page://self/admin/product', [
             'productCode' => 'admin-withdrawn-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -220,7 +210,6 @@ final class AdminProductResourceTest extends TestCase
 
         $this->resource->delete('page://self/admin/product', [
             'productCode' => 'does-not-exist',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

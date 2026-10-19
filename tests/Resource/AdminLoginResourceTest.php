@@ -11,14 +11,11 @@ use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
 use MyVendor\BeMart\Be\Reason\Query\LoginAttemptGateInterface;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Provide\Error\ExceptionStatusMapper;
 use PHPUnit\Framework\TestCase;
-use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
@@ -31,12 +28,6 @@ final class AdminLoginResourceTest extends TestCase
     protected function setUp(): void
     {
         $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
-        $base->override(new class extends AbstractModule {
-            protected function configure(): void
-            {
-                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
-            }
-        });
 
         $injector = new Injector(
             $base,
@@ -65,7 +56,6 @@ final class AdminLoginResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => 'local-dev-admin-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -85,7 +75,6 @@ final class AdminLoginResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => 'local-dev-admin-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -101,19 +90,7 @@ final class AdminLoginResourceTest extends TestCase
         $this->resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => 'not-the-right-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-    }
-
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/login', [
-            'loginId' => 'test-admin',
-            'password' => 'local-dev-admin-password',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 
     public function testOnPostShortPasswordReturns400(): void
@@ -123,7 +100,6 @@ final class AdminLoginResourceTest extends TestCase
         $this->resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => 'short',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -168,7 +144,6 @@ final class AdminLoginResourceTest extends TestCase
             $this->resource->post('page://self/admin/login', [
                 'loginId' => 'test-admin',
                 'password' => 'local-dev-admin-password',
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
             $this->fail('Expected LoginAttemptsExceededException');
         } catch (LoginAttemptsExceededException $e) {
@@ -185,7 +160,6 @@ final class AdminLoginResourceTest extends TestCase
             'loginId' => $loginId,
             'password' => $password,
             'mode' => 'login',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

@@ -222,7 +222,6 @@ final class AdminMemberListHtmlRenderTest extends TestCase
             ],
             'count' => 1,
             'filters' => ['nameKeyword' => null, 'limit' => 50, 'offset' => 0],
-            'csrfToken' => 'render-test-token',
         ]);
     }
 

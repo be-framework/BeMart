@@ -74,12 +74,20 @@ and the resulting DB-backed state was read back with screenshot and JSON
 evidence. When the browser finds a gap, first express it as a Hypermedia
 or HTTP workflow regression, then fix the implementation.
 
-CSRF is not a null boundary in the current test contexts. The Fake context
-uses a fixed `FakeCsrfToken`, the SQL HTML context mirrors the rendered
-hidden `csrfToken` through the test header/session bridge, and only smoke
-tests use an always-valid token. Keep form token rendering and same-context
-submission visible in HTTP/browser evidence even if a future test module
-chooses to disable CSRF validation itself.
+CSRF is a browser boundary, and the tiers treat it as one. In the Fake and
+SQL in-process contexts `FakeModule` stands both BEAR.Csrf gates down
+(`FakeRequestToken` supplies `FakeCsrfToken`'s token, `AllowedOrigin` is
+null), so resource tests never mention `csrfToken`; the gates themselves are
+proved once in `tests/Resource/CsrfGateWiringTest.php`. The `hypermedia` and
+`http` tiers run the real token gate over a real session: the test puts a
+token into the session slot (`CsrfSessionKey::DEFAULT_NAME`), the HTTP client
+mirrors it through the `X-BeMart-Test-Csrf-Token` header, and the workflow
+submits it as `csrfToken`. The same-origin gate is armed by
+`BEMART_ALLOWED_ORIGIN` in `phpunit.xml`; the HTTP client sends
+`Sec-Fetch-Site: same-origin` as a browser would, and the in-process
+projection binds `FakeRequestOrigin` to say the same. Rendered forms take
+their hidden `csrfToken` from the Twig `csrf_token()` function;
+`tests/Html/CsrfTokenRenderedTest.php` checks every page renders it filled.
 
 ## Write once, run at two transports
 

@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -16,7 +17,6 @@ use MyVendor\BeMart\Be\Final\CategoryCsvExported;
 use MyVendor\BeMart\Be\Final\CategoryCsvImported;
 use MyVendor\BeMart\Be\Input\ExportCategoryInput;
 use MyVendor\BeMart\Be\Input\ImportCategoryCsvInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -40,7 +40,6 @@ class Csv extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -60,7 +59,6 @@ class Csv extends ResourceObject
         $this->body = [
             'csv' => $final->csv,
             'rowCount' => $final->rowCount,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -75,6 +73,7 @@ class Csv extends ResourceObject
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string $csv): static
     {
         $final = ($this->becoming)(new ImportCategoryCsvInput(csv: $csv));

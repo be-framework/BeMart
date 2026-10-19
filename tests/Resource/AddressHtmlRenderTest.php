@@ -109,7 +109,7 @@ final class AddressHtmlRenderTest extends TestCase
     }
 
     /**
-     * L1: the CSRF token hidden field is present (value may be empty in test context).
+     * L1: the CSRF token hidden field is present.
      */
     public function testAddressCsrfHiddenFieldPresent(): void
     {

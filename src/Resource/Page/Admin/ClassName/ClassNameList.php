@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\ClassName;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -77,6 +78,7 @@ class ClassNameList extends ResourceObject
     #[JsonSchema(schema: 'post-admin-class-name-class-name-list.json', params: 'post-admin-class-name-class-name-list.param.json')]
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string $classNameLabel): static
     {
         $final = ($this->becoming)(new CreateClassNameInput(classNameLabel: $classNameLabel));

@@ -290,7 +290,7 @@
           rel="doRegisterProductClass"
           novalidate
         >
-          <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
+          <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
           <input type="hidden" name="productCode" value="{{ productCode|default('') }}">
 
           <div class="idea-admin-variant-form-col">

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Http;
 
+use BEAR\Csrf\CsrfSessionKey;
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use PHPUnit\Framework\TestCase;
 
@@ -28,7 +28,7 @@ final class HttpAdminCustomerDeleteHtmlTest extends TestCase
     public function testDeleteCustomerPostUsesHtmlRedirectInsteadOfTemplateRendering(): void
     {
         $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = self::ADMIN_ID;
-        $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = self::CSRF_TOKEN;
+        $_SESSION[CsrfSessionKey::DEFAULT_NAME] = self::CSRF_TOKEN;
 
         $resource = new HttpResource(
             self::HOST,

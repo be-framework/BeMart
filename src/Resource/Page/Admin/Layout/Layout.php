@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Layout;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +20,6 @@ use MyVendor\BeMart\Be\Final\LayoutUpdated;
 use MyVendor\BeMart\Be\Input\GetAdminLayoutInput;
 use MyVendor\BeMart\Be\Input\UpdateLayoutInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminLayoutForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -46,7 +46,6 @@ class Layout extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
         private readonly AdminSession $adminSession,
-        private readonly CsrfTokenInterface $csrf,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
@@ -68,7 +67,6 @@ class Layout extends ResourceObject
             'layoutId' => $layoutId,
             'layoutName' => '',
             'deviceType' => null,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         if ($layoutId === null || $layoutId === '') {
@@ -82,7 +80,6 @@ class Layout extends ResourceObject
                 'layoutId' => $final->layoutId,
                 'layoutName' => $final->layoutName,
                 'deviceType' => $final->deviceType,
-                'csrfToken' => $this->csrf->issue(),
             ];
         }
 
@@ -104,6 +101,7 @@ class Layout extends ResourceObject
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
     #[Link(rel: 'goTradeLawList', href: 'page://self/admin/trade-law')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(
         string $layoutId,
         string|null $layoutName = null,

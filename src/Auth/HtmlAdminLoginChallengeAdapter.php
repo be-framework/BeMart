@@ -101,7 +101,9 @@ final class HtmlAdminLoginChallengeAdapter implements AdminLoginChallengeInterfa
             return;
         }
 
-        session_regenerate_id(true);
+        if (! session_regenerate_id(true)) {
+            throw new SessionRotationException('Admin login could not rotate the session id.');
+        }
     }
 
     /** @return array<string, mixed> */

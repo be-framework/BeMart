@@ -11,7 +11,6 @@ use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
 use MyVendor\BeMart\Be\Reason\Query\LoginAttemptGateInterface;
 use MyVendor\BeMart\Module\TestModule;
@@ -65,7 +64,6 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/two-factor-auth', [
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -77,7 +75,6 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
 
         $ro = $this->resource->post('page://self/admin/two-factor-auth', [
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -90,7 +87,6 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
 
         $ro = $this->resource->post('page://self/admin/two-factor-auth', [
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -108,7 +104,6 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/two-factor-auth', [
             'loginId' => 'unknown-user',
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -122,7 +117,6 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/two-factor-auth', [
             'deviceToken' => '000000',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -159,7 +153,6 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
     {
         return $this->resource->post('page://self/admin/two-factor-auth', [
             'deviceToken' => $deviceToken,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

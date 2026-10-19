@@ -15,7 +15,6 @@ use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedOrderAccessException;
 use MyVendor\BeMart\Be\Final\MypageHistoryFetched;
 use MyVendor\BeMart\Be\Input\GetMypageHistoryInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -38,7 +37,6 @@ class History extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -75,7 +73,6 @@ class History extends ResourceObject
             'paymentDate' => $final->paymentDate,
             'shippings' => $final->shippings,
             'mailHistories' => $final->mailHistories,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

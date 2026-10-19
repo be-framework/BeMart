@@ -14,7 +14,6 @@ use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use MyVendor\BeMart\Be\Final\ShoppingFetched;
 use MyVendor\BeMart\Be\Input\GetShoppingInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\ShoppingOrderForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -59,7 +58,6 @@ class Shopping extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
         private readonly CartSessionPrefixInterface $cartSessionPrefix,
     ) {
     }
@@ -106,7 +104,6 @@ class Shopping extends ResourceObject
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
             'paymentMethods' => $final->paymentMethods,
             'canCheckout' => $final->canCheckout,
-            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty ShoppingOrderForm for the HTML port to
             // render the message textarea + delivery / payment controls.
             // JSON contexts ignore it.

@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Shopping;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -65,6 +66,7 @@ class Checkout extends ResourceObject
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string $preOrderId): static
     {
         $final = ($this->becoming)(new CheckoutInput(

@@ -54,6 +54,9 @@
     </groups>
     <php>
         <env name="DATABASE_URL" value="mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&amp;serverVersion=8.0.0"/>
+        <!-- Arms BEAR.Csrf's same-origin gate in the html-sql / prod contexts the suite compiles. The value is never
+             compared: every test request declares itself same-origin (Sec-Fetch-Site header, FakeRequestOrigin). -->
+        <env name="BEMART_ALLOWED_ORIGIN" value="http://127.0.0.1"/>
     </php>
     <source>
         <include>

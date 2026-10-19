@@ -68,7 +68,6 @@ ALPS `goShopping` に対応する GET 操作。
 | subtotal | int|null | 商品小計 - 商品合計金額（税込）。送料・手数料・値引き適用前の商品明細（orderItemType=1）のみの合計。PurchaseFlow.calculateSubTotal()で計算。送料無料条件の判定基準にも使用（お届け先ごとに判定） Fake観察数値 11000〜11000; 観察値 '11000'。 | Required | {"minimum":0,"maximum":999999999} | 11000 |
 | transitionId | string | ALPS遷移ID - このレスポンス/操作が対応するALPS遷移ID。クライアントの状態遷移追跡に使う。 | Required | {"minLength":2,"maxLength":96,"pattern":"^(go|do)[A-Z][A-Za-z0-9]*$"} | doAddCartItem |
 | discount | int|null | 値引き額 - 受注全体の値引き合計額。クーポン等による値引き Fake観察数値 0〜0; 観察値 '0'。 | Required | {"minimum":0,"maximum":999999999} | 0 |
-| csrfToken | string|null | 処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。 | Optional | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 | total | int|null | 受注合計 - 受注合計金額。計算式: subtotal(商品税込合計) + deliveryFeeTotal(送料) + charge(手数料) - discount(値引き)。カートのtotalPriceとは別プロパティ Fake観察数値 12700〜12700; 観察値 '12700'。 | Required | {"minimum":0,"maximum":999999999} | 12700 |
 
 #### Links
@@ -115,7 +114,6 @@ Keep GET query compatibility while accepting the real browser form.
 | subtotal | int|null | 商品小計 - 商品合計金額（税込）。送料・手数料・値引き適用前の商品明細（orderItemType=1）のみの合計。PurchaseFlow.calculateSubTotal()で計算。送料無料条件の判定基準にも使用（お届け先ごとに判定） Fake観察数値 11000〜11000; 観察値 '11000'。 | Required | {"minimum":0,"maximum":999999999} | 11000 |
 | transitionId | string | ALPS遷移ID - このレスポンス/操作が対応するALPS遷移ID。クライアントの状態遷移追跡に使う。 | Required | {"minLength":2,"maxLength":96,"pattern":"^(go|do)[A-Z][A-Za-z0-9]*$"} | doAddCartItem |
 | discount | int|null | 値引き額 - 受注全体の値引き合計額。クーポン等による値引き Fake観察数値 0〜0; 観察値 '0'。 | Required | {"minimum":0,"maximum":999999999} | 0 |
-| csrfToken | string|null | 処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。 | Optional | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 | total | int|null | 受注合計 - 受注合計金額。計算式: subtotal(商品税込合計) + deliveryFeeTotal(送料) + charge(手数料) - discount(値引き)。カートのtotalPriceとは別プロパティ Fake観察数値 12700〜12700; 観察値 '12700'。 | Required | {"minimum":0,"maximum":999999999} | 12700 |
 
 #### Links

@@ -125,7 +125,7 @@
     {% endif %}
 
     <form method="post" action="/shopping/checkout?mode=complete" rel="doCheckout">
-      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
       <input type="hidden" name="preOrderId" value="{{ preOrderId|default('') }}">
       <input type="hidden" name="paymentMethodId" value="{{ paymentMethodId|default('') }}">
       <button class="idea-button idea-button--wide" type="submit">注文を確定する</button>

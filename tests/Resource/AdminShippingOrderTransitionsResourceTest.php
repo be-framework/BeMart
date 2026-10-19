@@ -10,7 +10,6 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use MyVendor\BeMart\Module\TestModule;
@@ -98,7 +97,6 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/order/tracking-number', [
             'orderNo' => self::ORDER_NO,
             'trackingNumber' => 'TRK-12345',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -114,7 +112,6 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/order/tracking-number', [
             'orderNo' => self::ORDER_NO,
             'trackingNumber' => 'TRK-1',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -125,7 +122,6 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/order/tracking-number', [
             'orderNo' => 'nonexistentordernononononononono',
             'trackingNumber' => 'TRK-1',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -136,7 +132,6 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/order/tracking-number', [
             'orderNo' => self::ORDER_NO,
             'trackingNumber' => '',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -148,7 +143,6 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/order/shipping-notify-mail', [
             'orderNo' => self::ORDER_NO,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -162,12 +156,10 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
         $this->resource->put('page://self/admin/order/tracking-number', [
             'orderNo' => self::ORDER_NO,
             'trackingNumber' => 'TRK-SHIPPED',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $ro = $this->resource->post('page://self/admin/order/shipping-notify-mail', [
             'orderNo' => self::ORDER_NO,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -185,7 +177,6 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
 
         $ro = $this->resource->post('page://self/admin/order/shipping-notify-mail', [
             'orderNo' => self::ORDER_NO,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -195,7 +186,6 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/order/shipping-notify-mail', [
             'orderNo' => 'nonexistentordernononononononono',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);

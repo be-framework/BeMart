@@ -1286,70 +1286,70 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 |----------|--------|------------|
 | Get-action-redirect | get-action-redirect.json | message |
 | Post-action-redirect | post-action-redirect.json | message |
-| Get-cart | get-cart.json | carts, cartCount, totalPrice, csrfToken, deliveryFeeTotal |
-| Get-contact | get-contact.json | form, fields, submitTo, transitionId, csrfToken |
+| Get-cart | get-cart.json | carts, cartCount, totalPrice, deliveryFeeTotal |
+| Get-contact | get-contact.json | form, fields, submitTo, transitionId |
 | Post-contact | post-contact.json | contactEmail, contactName02, contactName01, ticketId |
-| Get-entry | get-entry.json | form, fields, submitTo, transitionId, csrfToken |
+| Get-entry | get-entry.json | form, fields, submitTo, transitionId |
 | Post-entry | post-entry.json | name01, customerId, customerStatus, email, initialPoint, name02 |
 | Get-forgot-complete | get-forgot-complete.json | fields, submitTo, transitionId |
-| Get-forgot-password | get-forgot-password.json | form, fields, submitTo, transitionId, csrfToken |
+| Get-forgot-password | get-forgot-password.json | form, fields, submitTo, transitionId |
 | Post-forgot-password | post-forgot-password.json | message |
 | Get-index | get-index.json | fields, submitTo, staticContent, transitionId |
-| Get-login | get-login.json | form, fields, submitTo, transitionId, csrfToken |
+| Get-login | get-login.json | form, fields, submitTo, transitionId |
 | Post-login | post-login.json | name01, customerId, customerStatus, email, name02 |
 | Post-logout | post-logout.json | message, wasLoggedIn, customerId |
 | Get-mypage | get-mypage.json | name01, customerId, recentOrders, email, favoriteCount, recentOrderCount, name02 |
-| Get-product | get-product.json | form, stock, productName, description, classNames, price02, mainImage, tagNames, categoryNames, productCode, stockFind, csrfToken |
-| Get-products | get-products.json | filters, pager, transitionId, csrfToken, totalItemCount, products |
-| Get-reset | get-reset.json | form, fields, resetKey, submitTo, transitionId, csrfToken |
+| Get-product | get-product.json | form, stock, productName, description, classNames, price02, mainImage, tagNames, categoryNames, productCode, stockFind |
+| Get-products | get-products.json | filters, pager, transitionId, totalItemCount, products |
+| Get-reset | get-reset.json | form, fields, resetKey, submitTo, transitionId |
 | Post-reset | post-reset.json | customerId |
-| Get-shopping | get-shopping.json | form, cartCount, totalPrice, canCheckout, name02, customerId, deliveryFeeTotal, name01, carts, email, paymentMethods, defaultShippingAddress, preOrderId, csrfToken |
+| Get-shopping | get-shopping.json | form, cartCount, totalPrice, canCheckout, name02, customerId, deliveryFeeTotal, name01, carts, email, paymentMethods, defaultShippingAddress, preOrderId |
 | Get-unsupported-route | get-unsupported-route.json | message, routeName |
 | Post-unsupported-route | post-unsupported-route.json | message, routeName |
 | Get-admin-action-redirect | get-admin-action-redirect.json | message |
 | Post-admin-action-redirect | post-admin-action-redirect.json | message |
-| Get-admin-authority-role | get-admin-authority-role.json | authorityOptions, rules, csrfToken |
+| Get-admin-authority-role | get-admin-authority-role.json | authorityOptions, rules |
 | Post-admin-authority-role | post-admin-authority-role.json | message, adminId, loginId, previousAuthority, authority, changed, transitionId, count, rules |
-| Get-admin-base-info | get-admin-base-info.json | form, phoneNumber, shopKana, businessHour, addr02, postalCode, pref, addr01, shopEmail01, shopName, companyName, shopMessage, shopNameEng, csrfToken |
+| Get-admin-base-info | get-admin-base-info.json | form, phoneNumber, shopKana, businessHour, addr02, postalCode, pref, addr01, shopEmail01, shopName, companyName, shopMessage, shopNameEng |
 | Post-admin-base-info | post-admin-base-info.json | phoneNumber, shopKana, changed, businessHour, addr02, postalCode, pref, addr01, shopEmail01, shopName, companyName, shopMessage, shopNameEng |
-| Get-admin-calendar | get-admin-calendar.json | form, calendars, errors, csrfToken |
+| Get-admin-calendar | get-admin-calendar.json | form, calendars, errors |
 | Post-admin-calendar | post-admin-calendar.json | title, message, transitionId, calendarId, holiday |
 | Delete-admin-calendar | delete-admin-calendar.json | message, transitionId, calendarId |
-| Get-admin-change-password | get-admin-change-password.json | form, transitionId, fields, csrfToken |
+| Get-admin-change-password | get-admin-change-password.json | form, transitionId, fields |
 | Post-admin-change-password | post-admin-change-password.json | message, transitionId, loginId, adminId |
 | Post-admin-create-customer | post-admin-create-customer.json | name01, customerId, customerStatus, email, initialPoint, name02 |
-| Get-admin-csv-config | get-admin-csv-config.json | form, notOutputColumns, outputColumns, csvType, csrfToken |
+| Get-admin-csv-config | get-admin-csv-config.json | form, notOutputColumns, outputColumns, csvType |
 | Post-admin-csv-config | post-admin-csv-config.json | message, csvType, columns, count |
-| Get-admin-customer | get-admin-customer.json | form, sex, kana02, phoneNumber, initialPoint, totalSpent, name02, kana01, name01, favorites, postalCode, addr01, birth, customerId, addr02, customerStatus, email, pref, favoriteCount, companyName, job, orders, orderCount, csrfToken |
+| Get-admin-customer | get-admin-customer.json | form, sex, kana02, phoneNumber, initialPoint, totalSpent, name02, kana01, name01, favorites, postalCode, addr01, birth, customerId, addr02, customerStatus, email, pref, favoriteCount, companyName, job, orders, orderCount |
 | Post-admin-update-customer | post-admin-update-customer.json | name01, customerId, email, name02 |
 | Get-admin-customer-csv | get-admin-customer-csv.json | rowCount, csv |
-| Get-admin-customer-delivery-edit | get-admin-customer-delivery-edit.json | form, customerId, csrfToken |
+| Get-admin-customer-delivery-edit | get-admin-customer-delivery-edit.json | form, customerId |
 | Post-admin-customer-delivery-edit | post-admin-customer-delivery-edit.json | addressId, customerId, name01, name02, kana01, kana02, companyName, phoneNumber, postalCode, pref, addr01, addr02 |
 | Delete-admin-customer-delivery-edit | delete-admin-customer-delivery-edit.json | addressId, customerId |
-| Get-admin-customer-list | get-admin-customer-list.json | filters, count, csrfToken, searchForm, customers |
+| Get-admin-customer-list | get-admin-customer-list.json | filters, count, searchForm, customers |
 | Post-admin-delete-customer | post-admin-delete-customer.json | alreadyDeleted, originalEmail, message, customerId |
 | Get-admin-empty-page | get-admin-empty-page.json |  |
-| Get-admin-index | get-admin-index.json | countNonStockProducts, salesToday, recommendedPlugins, orders, salesThisMonth, orderStatuses, countCustomers, countProducts, salesYesterday, csrfToken |
+| Get-admin-index | get-admin-index.json | countNonStockProducts, salesToday, recommendedPlugins, orders, salesThisMonth, orderStatuses, countCustomers, countProducts, salesYesterday |
 | Get-admin-log | get-admin-log.json | log, form |
-| Get-admin-login | get-admin-login.json | form, fields, submitTo, transitionId, csrfToken |
+| Get-admin-login | get-admin-login.json | form, fields, submitTo, transitionId |
 | Post-admin-login | post-admin-login.json | name, loginId, authority, adminId |
 | Get-admin-login-history | get-admin-login-history.json | entries, count |
 | Post-admin-logout | post-admin-logout.json | message, wasLoggedIn, adminId |
-| Get-admin-mail-template | get-admin-mail-template.json | form, mailTemplates, id, count, csrfToken, Mail |
+| Get-admin-mail-template | get-admin-mail-template.json | form, mailTemplates, id, count, Mail |
 | Post-admin-mail-template | post-admin-mail-template.json | mailTemplateId, mailTemplateName, fileName, changed, mailSubject |
 | Delete-admin-mail-template | delete-admin-mail-template.json | mailTemplateId, mailTemplateName, fileName, message, transitionId |
-| Get-admin-master-data | get-admin-master-data.json | form, csrfToken, submitTo, masterTypes, selectedMaster, rows |
-| Put-admin-master-data | put-admin-master-data.json | message, form, csrfToken, submitTo, masterTypes, transitionId, selectedMaster, rows |
+| Get-admin-master-data | get-admin-master-data.json | form, submitTo, masterTypes, selectedMaster, rows |
+| Put-admin-master-data | put-admin-master-data.json | message, form, submitTo, masterTypes, transitionId, selectedMaster, rows |
 | Put-admin-master-data-edit | put-admin-master-data-edit.json | message, transitionId, masterType, count |
-| Get-admin-member | get-admin-member.json | form, name, loginId, csrfToken, sortNo, authority, work, adminId |
+| Get-admin-member | get-admin-member.json | form, name, loginId, sortNo, authority, work, adminId |
 | Post-admin-member | post-admin-member.json | name, sortNo, loginId, authority, work, adminId |
 | Put-admin-member | put-admin-member.json | name, sortNo, loginId, authority, work, adminId |
 | Delete-admin-member | delete-admin-member.json | message, adminId, loginId, alreadyDeleted |
-| Get-admin-member-list | get-admin-member-list.json | filters, count, csrfToken, members |
-| Get-admin-order | get-admin-order.json | paymentDate, paymentMethodId, orderNo, orderStatus, orderDate, preOrderId, itemCount, discount, addPoint, items, customer, customerId, deliveryFeeTotal, usePoint, charge, paymentTotal, tax, orderStatusOptions, subtotal, csrfToken, total |
+| Get-admin-member-list | get-admin-member-list.json | filters, count, members |
+| Get-admin-order | get-admin-order.json | paymentDate, paymentMethodId, orderNo, orderStatus, orderDate, preOrderId, itemCount, discount, addPoint, items, customer, customerId, deliveryFeeTotal, usePoint, charge, paymentTotal, tax, orderStatusOptions, subtotal, total |
 | Put-admin-order | put-admin-order.json | orderNo, customerId, orderStatus, deliveryFeeTotal, usePoint, charge, paymentTotal, tax, subtotal, discount, total |
-| Get-admin-order-list | get-admin-order-list.json | offset, limit, orders, count, searchForm, csrfToken |
-| Get-admin-order-status | get-admin-order-status.json | form, orderStatuses, csrfToken |
+| Get-admin-order-list | get-admin-order-list.json | offset, limit, orders, count, searchForm |
+| Get-admin-order-status | get-admin-order-status.json | form, orderStatuses |
 | Put-admin-order-status | put-admin-order-status.json | orderStatusRows, message, count, transitionId |
 | Post-admin-order-status | post-admin-order-status.json | changed, previousStatus, orderNo, orderStatus |
 | Delete-admin-plugin | delete-admin-plugin.json | pluginCode, wasInstalled |
@@ -1357,27 +1357,27 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-admin-plugin-enable | post-admin-plugin-enable.json | changed, pluginCode, enabled |
 | Get-admin-plugin-list | get-admin-plugin-list.json | plugins, count |
 | Post-admin-plugin-list | post-admin-plugin-list.json | pluginCode, alreadyInstalled, installed, pluginName, enabled, pluginVersion |
-| Get-admin-product | get-admin-product.json | stock, productName, description, classNames, price02, mainImage, tagNames, categoryNames, productCode, note, productStatusOptions, productStatus, csrfToken, searchWord |
+| Get-admin-product | get-admin-product.json | stock, productName, description, classNames, price02, mainImage, tagNames, categoryNames, productCode, note, productStatusOptions, productStatus, searchWord |
 | Post-admin-product | post-admin-product.json | stock, productName, productCode, description, productStatus, price02 |
 | Put-admin-product | put-admin-product.json | stock, productName, productCode, description, productStatus, price02 |
 | Delete-admin-product | delete-admin-product.json | alreadyDeleted, productName, productCode, message |
 | Post-admin-product-bulk-status | post-admin-product-bulk-status.json | requestedCount, changedCount, productCodes, productStatus |
 | Post-admin-product-copy | post-admin-product-copy.json | productCode, newProductCode, newProductName, price02, stock |
-| Get-admin-product-csv | get-admin-product-csv.json | count, csv, csrfToken |
+| Get-admin-product-csv | get-admin-product-csv.json | count, csv |
 | Post-admin-product-csv | post-admin-product-csv.json | message, transitionId, count, productCodes |
-| Get-admin-product-list | get-admin-product-list.json | csrfToken, filters, count, searchForm, products |
-| Get-admin-product-new | get-admin-product-new.json | productStatusOptions, csrfToken |
-| Get-admin-security | get-admin-security.json | isSecureRequest, form, csrfToken |
+| Get-admin-product-list | get-admin-product-list.json | filters, count, searchForm, products |
+| Get-admin-product-new | get-admin-product-new.json | productStatusOptions |
+| Get-admin-security | get-admin-security.json | isSecureRequest, form |
 | Put-admin-security | put-admin-security.json | message, transitionId, trustedHosts |
 | Put-admin-sort-no-move | put-admin-sort-no-move.json | message, masterType, rowId, sortNo |
-| Get-admin-system | get-admin-system.json | info, phpinfoEnabled, csrfToken |
+| Get-admin-system | get-admin-system.json | info, phpinfoEnabled |
 | Put-admin-toggle-visible | put-admin-toggle-visible.json | masterType, rowId, visible |
-| Get-admin-trade-law | get-admin-trade-law.json | tradeLawBody, form, csrfToken, tradeLawRows |
+| Get-admin-trade-law | get-admin-trade-law.json | tradeLawBody, form, tradeLawRows |
 | Post-admin-trade-law | post-admin-trade-law.json | tradeLawBody, changed |
-| Get-admin-two-factor-auth | get-admin-two-factor-auth.json | form, transitionId, fields, csrfToken |
+| Get-admin-two-factor-auth | get-admin-two-factor-auth.json | form, transitionId, fields |
 | Post-admin-two-factor-auth | post-admin-two-factor-auth.json | message, transitionId, loginId |
-| Get-admin-two-factor-auth-edit | get-admin-two-factor-auth-edit.json | form, memberName, shopName, authKey, csrfToken |
-| Get-admin-two-factor-auth-set | get-admin-two-factor-auth-set.json | form, fields, memberName, shopName, transitionId, authKey, csrfToken |
+| Get-admin-two-factor-auth-edit | get-admin-two-factor-auth-edit.json | form, memberName, shopName, authKey |
+| Get-admin-two-factor-auth-set | get-admin-two-factor-auth-set.json | form, fields, memberName, shopName, transitionId, authKey |
 | Put-admin-two-factor-auth-set | put-admin-two-factor-auth-set.json | message, transitionId, loginId |
 | Get-admin-unsupported-route | get-admin-unsupported-route.json | message, routeName |
 | Post-admin-unsupported-route | post-admin-unsupported-route.json | message, routeName |
@@ -1385,142 +1385,142 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Put-cart-item | put-cart-item.json | cartKey, requestedQuantity, saleTypeName, productCode, totalPrice, unitPrice, adjustedQuantity, deliveryFeeTotal |
 | Delete-cart-item | delete-cart-item.json | cartKey, productCode, totalPrice, deliveryFeeTotal |
 | Get-contact-complete | get-contact-complete.json | fields, submitTo, staticContent, transitionId, ticketId |
-| Get-contact-confirm | get-contact-confirm.json | form, fields, submitTo, staticContent, transitionId, csrfToken |
+| Get-contact-confirm | get-contact-confirm.json | form, fields, submitTo, staticContent, transitionId |
 | Get-entry-activate | get-entry-activate.json | fields, submitTo, staticContent, transitionId |
 | Post-entry-activate | post-entry-activate.json | message |
 | Get-entry-complete | get-entry-complete.json | fields, submitTo, staticContent, transitionId |
-| Get-entry-confirm | get-entry-confirm.json | form, fields, submitTo, staticContent, transitionId, csrfToken |
+| Get-entry-confirm | get-entry-confirm.json | form, fields, submitTo, staticContent, transitionId |
 | Get-help-about | get-help-about.json | fields, submitTo, staticContent, transitionId |
 | Get-help-agreement | get-help-agreement.json | fields, submitTo, staticContent, transitionId |
 | Get-help-guide | get-help-guide.json | fields, submitTo, staticContent, transitionId |
 | Get-help-privacy | get-help-privacy.json | fields, submitTo, staticContent, transitionId |
 | Get-help-trade-law | get-help-trade-law.json | fields, submitTo, staticContent, transitionId |
-| Get-mypage-address | get-mypage-address.json | form, submitTo, transitionId, csrfToken, addressId |
+| Get-mypage-address | get-mypage-address.json | form, submitTo, transitionId, addressId |
 | Put-mypage-address | put-mypage-address.json | kana02, phoneNumber, name02, customerId, kana01, name01, addr02, postalCode, pref, addr01, companyName, addressId |
 | Delete-mypage-address | delete-mypage-address.json | customerId, addressId |
 | Get-mypage-address-list | get-mypage-address-list.json | count, addresses, customerId |
 | Post-mypage-address-list | post-mypage-address-list.json | kana02, phoneNumber, name02, customerId, kana01, name01, addr02, postalCode, pref, addr01, companyName, addressId |
-| Get-mypage-change | get-mypage-change.json | form, kana02, phoneNumber, name02, customerId, kana01, name01, addr02, email, postalCode, pref, addr01, submitTo, companyName, csrfToken |
+| Get-mypage-change | get-mypage-change.json | form, kana02, phoneNumber, name02, customerId, kana01, name01, addr02, email, postalCode, pref, addr01, submitTo, companyName |
 | Post-mypage-change | post-mypage-change.json | message, email, customerId, name01, name02 |
 | Get-mypage-change-complete | get-mypage-change-complete.json | fields, submitTo, staticContent, transitionId |
 | Post-mypage-favorite | post-mypage-favorite.json | alreadyExisted, productName, productCode, unitPrice, customerId |
 | Delete-mypage-favorite | delete-mypage-favorite.json | alreadyAbsent, customerId, productCode |
 | Get-mypage-favorite-list | get-mypage-favorite-list.json | favoriteCount, customerId, favorites |
-| Get-mypage-history | get-mypage-history.json | addPoint, paymentDate, message, orderNo, deliveryFeeTotal, orderStatus, usePoint, orderDate, mailHistories, charge, paymentTotal, tax, paymentMethod, subtotal, discount, shippings, total, csrfToken |
+| Get-mypage-history | get-mypage-history.json | addPoint, paymentDate, message, orderNo, deliveryFeeTotal, orderStatus, usePoint, orderDate, mailHistories, charge, paymentTotal, tax, paymentMethod, subtotal, discount, shippings, total |
 | Get-mypage-order-history | get-mypage-order-history.json | offset, limit, orders, customerId, orderCount |
 | Post-mypage-reorder | post-mypage-reorder.json | skippedCount, skippedProductCodes, addedCount, cartKeys, orderNo, customerId |
-| Get-mypage-withdraw | get-mypage-withdraw.json | name01, fields, email, name02, submitTo, transitionId, csrfToken, customerId |
+| Get-mypage-withdraw | get-mypage-withdraw.json | name01, fields, email, name02, submitTo, transitionId, customerId |
 | Post-mypage-withdraw | post-mypage-withdraw.json | message, cleared, customerId |
 | Get-mypage-withdraw-complete | get-mypage-withdraw-complete.json | fields, submitTo, staticContent, transitionId |
-| Get-mypage-withdraw-confirm | get-mypage-withdraw-confirm.json | fields, submitTo, transitionId, csrfToken |
+| Get-mypage-withdraw-confirm | get-mypage-withdraw-confirm.json | fields, submitTo, transitionId |
 | Post-shopping-checkout | post-shopping-checkout.json | addPoint, orderDate, paymentTotal, completeMessage, paymentDate, orderNo, customerId, total, orderStatus |
 | Get-shopping-complete | get-shopping-complete.json | completeMessage, staticContent, transitionId, orderNo |
-| Get-shopping-confirm | get-shopping-confirm.json | addPoint, items, paymentMethodId, customer, deliveryFeeTotal, usePoint, charge, paymentMethodName, paymentTotal, preOrderId, tax, submitTo, subtotal, transitionId, discount, csrfToken, total |
+| Get-shopping-confirm | get-shopping-confirm.json | addPoint, items, paymentMethodId, customer, deliveryFeeTotal, usePoint, charge, paymentMethodName, paymentTotal, preOrderId, tax, submitTo, subtotal, transitionId, discount, total |
 | Get-shopping-error | get-shopping-error.json | fields, submitTo, staticContent, transitionId |
-| Get-shopping-login | get-shopping-login.json | form, fields, submitTo, staticContent, transitionId, csrfToken |
-| Get-shopping-non-member | get-shopping-non-member.json | form, fields, submitTo, transitionId, csrfToken |
+| Get-shopping-login | get-shopping-login.json | form, fields, submitTo, staticContent, transitionId |
+| Get-shopping-non-member | get-shopping-non-member.json | form, fields, submitTo, transitionId |
 | Post-shopping-non-member | post-shopping-non-member.json | name01, email, paymentMethodId, preOrderId, name02 |
-| Get-shopping-shipping | get-shopping-shipping.json | fields, submitTo, staticContent, transitionId, addresses, csrfToken |
+| Get-shopping-shipping | get-shopping-shipping.json | fields, submitTo, staticContent, transitionId, addresses |
 | Post-shopping-shipping | post-shopping-shipping.json | message, transitionId, shippingAddressId |
-| Get-shopping-shipping-edit | get-shopping-shipping-edit.json | form, fields, submitTo, staticContent, transitionId, csrfToken |
+| Get-shopping-shipping-edit | get-shopping-shipping-edit.json | form, fields, submitTo, staticContent, transitionId |
 | Post-shopping-shipping-edit | post-shopping-shipping-edit.json | kana02, phoneNumber, message, name02, kana01, name01, addr02, postalCode, pref, addr01, companyName, transitionId |
 | Get-shopping-shipping-multiple | get-shopping-shipping-multiple.json | fields, submitTo, staticContent, transitionId, addresses, cartItems |
 | Post-shopping-shipping-multiple | post-shopping-shipping-multiple.json | message, transitionId, allocationCount |
-| Get-shopping-shipping-multiple-edit | get-shopping-shipping-multiple-edit.json | form, fields, submitTo, staticContent, transitionId, csrfToken |
+| Get-shopping-shipping-multiple-edit | get-shopping-shipping-multiple-edit.json | form, fields, submitTo, staticContent, transitionId |
 | Post-shopping-shipping-multiple-edit | post-shopping-shipping-multiple-edit.json | kana02, phoneNumber, message, name02, kana01, name01, addr02, postalCode, pref, addr01, companyName, transitionId |
-| Get-admin-block-block | get-admin-block-block.json | blockId, blockName, blockFileName, blockDeletable, form, csrfToken |
+| Get-admin-block-block | get-admin-block-block.json | blockId, blockName, blockFileName, blockDeletable, form |
 | Put-admin-block-block | put-admin-block-block.json | blockDeletable, blockName, blockId, blockFileName |
 | Delete-admin-block-block | delete-admin-block-block.json | message, blockId |
-| Get-admin-block-block-list | get-admin-block-block-list.json | count, blocks, csrfToken |
+| Get-admin-block-block-list | get-admin-block-block-list.json | count, blocks |
 | Post-admin-block-block-list | post-admin-block-block-list.json | blockDeletable, blockName, blockId, blockFileName |
-| Get-admin-category-category | get-admin-category-category.json | parentId, categoryName, sortNo, categoryId, csrfToken |
+| Get-admin-category-category | get-admin-category-category.json | parentId, categoryName, sortNo, categoryId |
 | Put-admin-category-category | put-admin-category-category.json | parentId, categoryName, sortNo, categoryId |
 | Delete-admin-category-category | delete-admin-category-category.json | categoryId |
-| Get-admin-category-category-list | get-admin-category-category-list.json | count, categories, csrfToken |
+| Get-admin-category-category-list | get-admin-category-category-list.json | count, categories |
 | Post-admin-category-category-list | post-admin-category-category-list.json | parentId, categoryName, sortNo, categoryId |
-| Get-admin-category-csv | get-admin-category-csv.json | rowCount, csv, csrfToken |
+| Get-admin-category-csv | get-admin-category-csv.json | rowCount, csv |
 | Post-admin-category-csv | post-admin-category-csv.json | deleted, imported, message, transitionId, accepted, lineCount |
-| Get-admin-category-edit | get-admin-category-edit.json | form, categories, category, count, categoryId, csrfToken |
+| Get-admin-category-edit | get-admin-category-edit.json | form, categories, category, count, categoryId |
 | Put-admin-class-category-class-category | put-admin-class-category-class-category.json | classCategoryId, name, classNameId |
 | Delete-admin-class-category-class-category | delete-admin-class-category-class-category.json | classCategoryId |
-| Get-admin-class-category-class-category-export | get-admin-class-category-class-category-export.json | content, csrfToken |
+| Get-admin-class-category-class-category-export | get-admin-class-category-class-category-export.json | content |
 | Get-admin-class-category-class-category-list | get-admin-class-category-class-category-list.json | form, classNameId, count, classCategories |
 | Post-admin-class-category-class-category-list | post-admin-class-category-class-category-list.json | classCategoryId, name, classNameId |
 | Put-admin-class-name-class-name | put-admin-class-name-class-name.json | name, classNameId |
 | Delete-admin-class-name-class-name | delete-admin-class-name-class-name.json | classNameId |
-| Get-admin-class-name-class-name-export | get-admin-class-name-class-name-export.json | content, csrfToken |
+| Get-admin-class-name-class-name-export | get-admin-class-name-class-name-export.json | content |
 | Get-admin-class-name-class-name-list | get-admin-class-name-class-name-list.json | form, count, classNames |
 | Post-admin-class-name-class-name-list | post-admin-class-name-class-name-list.json | name, classNameId |
-| Get-admin-content-cache | get-admin-content-cache.json | csrfToken |
+| Get-admin-content-cache | get-admin-content-cache.json |  |
 | Put-admin-content-cache | put-admin-content-cache.json | message, transitionId |
-| Get-admin-content-css | get-admin-content-css.json | form, csrfToken |
+| Get-admin-content-css | get-admin-content-css.json | form |
 | Put-admin-content-css | put-admin-content-css.json | length, message, transitionId |
 | Get-admin-content-file-manager | get-admin-content-file-manager.json | form, tplIsTopDir, arrFileList, errors, tplNowDir, tplParentDir |
-| Get-admin-content-js | get-admin-content-js.json | form, csrfToken |
+| Get-admin-content-js | get-admin-content-js.json | form |
 | Put-admin-content-js | put-admin-content-js.json | length, message, transitionId |
-| Get-admin-content-maintenance | get-admin-content-maintenance.json | isMaintenance, csrfToken |
+| Get-admin-content-maintenance | get-admin-content-maintenance.json | isMaintenance |
 | Put-admin-content-maintenance | put-admin-content-maintenance.json | message, transitionId, isMaintenance |
 | Post-admin-customer-resend-activation-mail | post-admin-customer-resend-activation-mail.json | message, customerId, email |
-| Get-admin-delivery-delivery | get-admin-delivery-delivery.json | deliveryId, form, delivery, csrfToken |
+| Get-admin-delivery-delivery | get-admin-delivery-delivery.json | deliveryId, form, delivery |
 | Put-admin-delivery-delivery | put-admin-delivery-delivery.json | deliveryId, deliveryName, visible |
 | Delete-admin-delivery-delivery | delete-admin-delivery-delivery.json | deliveryId |
-| Get-admin-delivery-delivery-list | get-admin-delivery-delivery-list.json | deliveries, count, csrfToken |
+| Get-admin-delivery-delivery-list | get-admin-delivery-delivery-list.json | deliveries, count |
 | Post-admin-delivery-delivery-list | post-admin-delivery-delivery-list.json | deliveryId, deliveryName, visible |
-| Get-admin-layout-layout | get-admin-layout-layout.json | layoutId, layoutName, deviceType, csrfToken, form |
+| Get-admin-layout-layout | get-admin-layout-layout.json | layoutId, layoutName, deviceType, form |
 | Put-admin-layout-layout | put-admin-layout-layout.json | deviceType, layoutId, layoutName |
 | Get-admin-layout-layout-list | get-admin-layout-layout-list.json | count, layouts |
 | Post-admin-mail-template-create | post-admin-mail-template-create.json | mailTemplateId, mailTemplateName, fileName, mailSubject |
-| Get-admin-news-news | get-admin-news-news.json | form, newsUrl, linkMethod, newsId, newsTitle, csrfToken, publishDate, newsDescription |
+| Get-admin-news-news | get-admin-news-news.json | form, newsUrl, linkMethod, newsId, newsTitle, publishDate, newsDescription |
 | Put-admin-news-news | put-admin-news-news.json | newsUrl, linkMethod, newsId, newsTitle, publishDate, newsDescription |
 | Delete-admin-news-news | delete-admin-news-news.json | newsId |
-| Get-admin-news-news-list | get-admin-news-news-list.json | news, count, csrfToken |
+| Get-admin-news-news-list | get-admin-news-news-list.json | news, count |
 | Post-admin-news-news-list | post-admin-news-news-list.json | newsUrl, linkMethod, newsId, newsTitle, publishDate, newsDescription |
 | Post-admin-order-bulk-delete | post-admin-order-bulk-delete.json | requestedCount, orderNos, changedCount |
 | Post-admin-order-create | post-admin-order-create.json | message, orderNo, customerId, paymentMethodId, subtotal, deliveryFeeTotal, charge, discount, tax, total, paymentTotal, addPoint, itemCount, orderStatus, orderDate |
-| Get-admin-order-edit | get-admin-order-edit.json | form, order, items, orderNo, csrfToken |
+| Get-admin-order-edit | get-admin-order-edit.json | form, order, items, orderNo |
 | Get-admin-order-export-order | get-admin-order-export-order.json | rowCount, csv |
 | Get-admin-order-export-order-pdf | get-admin-order-export-order-pdf.json | message, orderNo, orderNos, pdf, size, fileName |
-| Get-admin-order-export-shipping | get-admin-order-export-shipping.json | rowCount, csv, csrfToken |
-| Get-admin-order-import-shipping | get-admin-order-import-shipping.json | csrfToken |
+| Get-admin-order-export-shipping | get-admin-order-export-shipping.json | rowCount, csv |
+| Get-admin-order-import-shipping | get-admin-order-import-shipping.json |  |
 | Post-admin-order-import-shipping | post-admin-order-import-shipping.json | skipped, imported, message, transitionId, accepted, lineCount |
-| Get-admin-order-mail-confirm | get-admin-order-mail-confirm.json | orderNo, csrfToken |
+| Get-admin-order-mail-confirm | get-admin-order-mail-confirm.json | orderNo |
 | Get-admin-order-order-pdf | get-admin-order-order-pdf.json | form, orderNo |
-| Get-admin-order-send-mail | get-admin-order-send-mail.json | form, orderNo, csrfToken |
+| Get-admin-order-send-mail | get-admin-order-send-mail.json | form, orderNo |
 | Post-admin-order-send-mail | post-admin-order-send-mail.json | mailBody, message, sendDate, orderNo, mailSubject, customerId |
-| Get-admin-order-shipping-address | get-admin-order-shipping-address.json | form, orderNo, csrfToken |
+| Get-admin-order-shipping-address | get-admin-order-shipping-address.json | form, orderNo |
 | Post-admin-order-shipping-address | post-admin-order-shipping-address.json | message |
 | Put-admin-order-shipping-address | put-admin-order-shipping-address.json | name01, addr02, postalCode, pref, addr01, phoneNumber, orderNo, name02 |
-| Get-admin-order-shipping-notify-mail | get-admin-order-shipping-notify-mail.json | orderNo, customerId, message, csrfToken, submitTo |
+| Get-admin-order-shipping-notify-mail | get-admin-order-shipping-notify-mail.json | orderNo, customerId, message, submitTo |
 | Post-admin-order-shipping-notify-mail | post-admin-order-shipping-notify-mail.json | trackingNumber, message, orderNo, customerId |
 | Put-admin-order-tracking-number | put-admin-order-tracking-number.json | status, message, trackingNumber, orderNo |
-| Get-admin-page-page | get-admin-page-page.json | form, pageFileName, pageUrl, pageId, pageName, csrfToken, pageEditType |
+| Get-admin-page-page | get-admin-page-page.json | form, pageFileName, pageUrl, pageId, pageName, pageEditType |
 | Put-admin-page-page | put-admin-page-page.json | pageFileName, pageUrl, pageId, pageName, pageEditType |
 | Delete-admin-page-page | delete-admin-page-page.json | message, pageId |
-| Get-admin-page-page-list | get-admin-page-page-list.json | count, pages, csrfToken |
+| Get-admin-page-page-list | get-admin-page-page-list.json | count, pages |
 | Post-admin-page-page-list | post-admin-page-page-list.json | pageFileName, pageUrl, pageId, pageName, pageEditType |
-| Get-admin-payment-payment | get-admin-payment-payment.json | form, paymentId, payment, csrfToken |
+| Get-admin-payment-payment | get-admin-payment-payment.json | form, paymentId, payment |
 | Put-admin-payment-payment | put-admin-payment-payment.json | charge, paymentMethodName, ruleMin, ruleMax, visible, paymentId |
 | Delete-admin-payment-payment | delete-admin-payment-payment.json | paymentId |
-| Get-admin-payment-payment-list | get-admin-payment-payment-list.json | payments, count, csrfToken |
+| Get-admin-payment-payment-list | get-admin-payment-payment-list.json | payments, count |
 | Post-admin-payment-payment-list | post-admin-payment-payment-list.json | charge, paymentMethodName, ruleMin, ruleMax, visible, paymentId |
-| Get-admin-product-csv-category | get-admin-product-csv-category.json | form, csvTitle, skeletonRoute, columns, csrfToken |
-| Get-admin-product-csv-class-category | get-admin-product-csv-class-category.json | form, csvTitle, skeletonRoute, columns, csrfToken |
+| Get-admin-product-csv-category | get-admin-product-csv-category.json | form, csvTitle, skeletonRoute, columns |
+| Get-admin-product-csv-class-category | get-admin-product-csv-class-category.json | form, csvTitle, skeletonRoute, columns |
 | Post-admin-product-csv-class-category | post-admin-product-csv-class-category.json | message, accepted, transitionId |
-| Get-admin-product-csv-class-name | get-admin-product-csv-class-name.json | form, csvTitle, skeletonRoute, columns, csrfToken |
+| Get-admin-product-csv-class-name | get-admin-product-csv-class-name.json | form, csvTitle, skeletonRoute, columns |
 | Post-admin-product-csv-class-name | post-admin-product-csv-class-name.json | message, accepted, transitionId |
-| Get-admin-product-csv-product | get-admin-product-csv-product.json | form, csvTitle, skeletonRoute, columns, csrfToken |
-| Get-admin-product-edit | get-admin-product-edit.json | form, product, productCode, csrfToken |
-| Get-admin-product-product-class | get-admin-product-product-class.json | csrfToken, form, productCode, classes |
+| Get-admin-product-csv-product | get-admin-product-csv-product.json | form, csvTitle, skeletonRoute, columns |
+| Get-admin-product-edit | get-admin-product-edit.json | form, product, productCode |
+| Get-admin-product-product-class | get-admin-product-product-class.json | form, productCode, classes |
 | Post-admin-product-product-class | post-admin-product-product-class.json | productClassId, productCode |
 | Delete-admin-tag-tag | delete-admin-tag-tag.json | tagId |
-| Get-admin-tag-tag-list | get-admin-tag-tag-list.json | form, count, tags, csrfToken |
+| Get-admin-tag-tag-list | get-admin-tag-tag-list.json | form, count, tags |
 | Post-admin-tag-tag-list | post-admin-tag-tag-list.json | tagId, tagName |
 | Delete-admin-tax-rule-tax-rule | delete-admin-tax-rule-tax-rule.json | taxRuleId |
-| Get-admin-tax-rule-tax-rule-list | get-admin-tax-rule-tax-rule-list.json | form, taxRules, count, csrfToken |
+| Get-admin-tax-rule-tax-rule-list | get-admin-tax-rule-tax-rule-list.json | form, taxRules, count |
 | Post-admin-tax-rule-tax-rule-list | post-admin-tax-rule-tax-rule-list.json | roundingType, taxRate, taxRuleId, applyDate |
-| Get-admin-template-template-add | get-admin-template-template-add.json | form, csrfToken |
+| Get-admin-template-template-add | get-admin-template-template-add.json | form |
 | Post-admin-template-template-add | post-admin-template-template-add.json | message, templateId, archiveName, archiveSize, transitionId |
-| Get-admin-template-template-list | get-admin-template-template-list.json | count, templates, csrfToken |
+| Get-admin-template-template-list | get-admin-template-template-list.json | count, templates |
 | Put-admin-template-template-list | put-admin-template-template-list.json | message, transitionId, templateId |
 | Delete-admin-template-template-list | delete-admin-template-template-list.json | message, transitionId, templateId |
 | Post-admin-template-template-list | post-admin-template-template-list.json | message, value |

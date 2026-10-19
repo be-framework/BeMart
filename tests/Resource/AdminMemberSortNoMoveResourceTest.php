@@ -8,7 +8,6 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -57,7 +56,6 @@ final class AdminMemberSortNoMoveResourceTest extends TestCase
             'masterType' => 'member',
             'rowId' => self::SHOP_OWNER_ID,
             'sortNo' => 8,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -74,7 +72,6 @@ final class AdminMemberSortNoMoveResourceTest extends TestCase
             'masterType' => 'member',
             'rowId' => 'ad000000000000000000000000999999',
             'sortNo' => 8,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

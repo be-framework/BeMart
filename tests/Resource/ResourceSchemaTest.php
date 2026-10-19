@@ -10,7 +10,6 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Support\Resource\ResourceSchemas;
@@ -47,7 +46,6 @@ final class ResourceSchemaTest extends TestCase
         $loginInput = [
             'email' => 'login-test@example.com',
             'password' => 'local-dev-member-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ];
         ResourceSchemas::loginPostInput()->assertMatches($loginInput);
         $login = $resource->post('page://self/login', $loginInput);

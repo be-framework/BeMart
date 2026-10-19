@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -34,7 +33,6 @@ final class ForgotPasswordResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/forgot-password', [
             'email' => 'alice@example.com',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -50,7 +48,6 @@ final class ForgotPasswordResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/forgot-password', [
             'email' => 'nobody@example.com',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         // Status and body are IDENTICAL to the registered-email case.
@@ -67,7 +64,6 @@ final class ForgotPasswordResourceTest extends TestCase
 
         $this->resource->post('page://self/forgot-password', [
             'email' => 'not-an-email',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\AbstractModule;
@@ -98,7 +97,6 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(['csrfToken'], $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/mypage/withdraw', $ro->body['submitTo']['href']);
-        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnGetShowsCurrentCustomer(): void
@@ -127,7 +125,6 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
         $dummyEmail = 'withdrawn-' . $this->aliceId . '@example.test';
 
         $ro = $this->resource->post('page://self/mypage/withdraw', [
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -153,7 +150,6 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
         $this->rebindSession(null);
 
         $ro = $this->resource->post('page://self/mypage/withdraw', [
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);

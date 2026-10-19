@@ -8,6 +8,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -145,12 +146,12 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/admin/tax-rule/tax-rule-list')->toString();
 
-        // Asserting the field name alone let an empty token through, which
-        // EccubeSharedCsrfTokenAdapter::isValid() rejects on submit.
-        $this->assertMatchesRegularExpression(
-            '/<input type="hidden" name="csrfToken" value="[^"]+">/',
+        // Asserting the field name alone let an empty token through, which the
+        // CSRF gate rejects on submit.
+        $this->assertStringContainsString(
+            '<input type="hidden" name="csrfToken" value="' . FakeCsrfToken::DEFAULT_TOKEN . '">',
             $html,
-            'csrfToken must render a non-empty value',
+            'csrfToken must render the session token',
         );
     }
 

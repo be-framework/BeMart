@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
@@ -81,7 +80,6 @@ final class ChangeResourceTest extends TestCase
         $ro = $this->resource->post('page://self/mypage/change', [
             'email' => 'alice@example.com',
             'phoneNumber' => '0309998888',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -95,7 +93,6 @@ final class ChangeResourceTest extends TestCase
 
         $this->resource->post('page://self/mypage/change', [
             'email' => 'bob@example.com',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -107,7 +104,6 @@ final class ChangeResourceTest extends TestCase
 
         $this->resource->post('page://self/mypage/change', [
             'email' => 'alice@example.com',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -117,7 +113,6 @@ final class ChangeResourceTest extends TestCase
 
         $this->resource->post('page://self/mypage/change', [
             'email' => 'not-an-email',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

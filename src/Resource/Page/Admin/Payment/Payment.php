@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Payment;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -23,7 +24,6 @@ use MyVendor\BeMart\Be\Input\UpdatePaymentMethodAdminInput;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
-use BEAR\Csrf\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -43,7 +43,6 @@ class Payment extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -100,7 +99,6 @@ class Payment extends ResourceObject
             'form' => $form,
             'paymentId' => $paymentId,
             'payment' => $payment,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -119,6 +117,7 @@ class Payment extends ResourceObject
     #[JsonSchema(schema: 'put-admin-payment-payment.json', params: 'put-admin-payment-payment.param.json')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(
         string $paymentId,
         string|null $paymentMethodName = null,
@@ -160,6 +159,7 @@ class Payment extends ResourceObject
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onDelete(string $paymentId): static
     {
         $final = ($this->becoming)(new DeletePaymentMethodAdminInput(paymentId: $paymentId));

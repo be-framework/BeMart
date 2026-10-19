@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
@@ -53,7 +52,6 @@ final class LogoutResourceTest extends TestCase
     public function testOnPostLogsOutLoggedInUser(): void
     {
         $ro = $this->resource->post('page://self/logout', [
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -69,7 +67,6 @@ final class LogoutResourceTest extends TestCase
         $this->rebindSession(null);
 
         $ro = $this->resource->post('page://self/logout', [
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);

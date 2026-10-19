@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Form\ResetForm;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\WebFormModule\FormFactory;
@@ -66,10 +67,6 @@ final class ResetHtmlRenderTest extends TestCase
         '<title>EC-CUBE / パスワード再発行(再設定)</title>',
         '<meta name="author" content="">',
 
-        // --- reset form: CSRF hidden input ------------------------------
-        // EC-CUBE's hidden csrfToken carries a live form CSRF token; BeMart's
-        // html context has no CSRF widget, so the value is empty.
-        '<input type="hidden" name="csrfToken" value="">',
 
         // --- reset form: resetKey hidden input (BeMart-only) ------------
         // EC-CUBE carries the reset key in the URL path / session; BeMart's
@@ -298,7 +295,7 @@ final class ResetHtmlRenderTest extends TestCase
         $resetForm = (new FormFactory())->newInstance(ResetForm::class);
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($resetForm): Markup {
             if ($field === '_csrfToken__') {
-                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
+                return new Markup('<input type="hidden" name="csrfToken" value="' . FakeCsrfToken::DEFAULT_TOKEN . '">', 'UTF-8');
             }
 
             if ($resetForm instanceof ResetForm && is_string($field) && $field !== '') {

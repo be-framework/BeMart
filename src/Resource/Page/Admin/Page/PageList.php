@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,7 +18,6 @@ use MyVendor\BeMart\Be\Final\AdminPageListFetched;
 use MyVendor\BeMart\Be\Final\PageCreated;
 use MyVendor\BeMart\Be\Input\CreatePageInput;
 use MyVendor\BeMart\Be\Input\GetAdminPageListInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -35,7 +35,6 @@ class PageList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -56,7 +55,6 @@ class PageList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'pages' => $final->pages,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -72,6 +70,7 @@ class PageList extends ResourceObject
     #[JsonSchema(schema: 'post-admin-page-page-list.json', params: 'post-admin-page-page-list.param.json')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $pageName,
         string $pageUrl,

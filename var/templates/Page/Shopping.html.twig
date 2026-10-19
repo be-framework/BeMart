@@ -49,7 +49,7 @@
 {% else %}
 
 <form id="shopping-form" method="post" action="/shopping/confirm" rel="doConfirmOrder" novalidate>
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="preOrderId" value="{{ preOrderId|default('') }}">
 
   <section class="idea-container idea-section idea-checkout-layout">

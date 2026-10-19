@@ -76,18 +76,6 @@
       },
       "minItems": 0,
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
-    },
-    "csrfToken": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "title": "CSRFトークン（マスタデータ管理フォーム）",
-      "description": "管理画面マスタデータ選択/更新フォーム送信元を検証するトークン。Resource引数ではなくRay.Csrf CsrfToken境界で消費される。",
-      "minLength": 0,
-      "maxLength": 128,
-      "pattern": "^[A-Za-z0-9._:-]*$",
-      "$comment": "_method overrideはRouter境界で消費され、csrfTokenはCsrfForbiddenInterceptorで検証される。"
     }
   },
   "additionalProperties": false,
@@ -225,15 +213,6 @@
       "maxLength": 128,
       "pattern": "^.+_[0-9]+$",
       "example": "session-prefix-1_1"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     },
     "uriReference": {
       "title": "URI参照",

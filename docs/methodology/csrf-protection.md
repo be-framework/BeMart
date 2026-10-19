@@ -5,54 +5,51 @@ title: "CSRF protection"
 
 # CSRF protection
 
-BeMart の CSRF 対応は、Resource の業務入力へ token を混ぜず、HTML/HTTP boundary の検証として扱う。この境界原則は BEAR.Csrf 移行後も変わらない。
+BeMart の CSRF 対応は [BEAR.Csrf](https://github.com/bearsunday/BEAR.Csrf)（`bear/csrf`）に全面的に委ね、BEAR.Kata の `csrf-same-origin-protection` と同じ形に揃えている。Resource の業務入力へ token を混ぜず、HTML/HTTP boundary の検証として扱うという境界原則は変わらない。
 
-## 現状（BEAR.Csrf 移行後）
+## 構成
 
-mutating Resource method には `BEAR\Csrf\Attribute\CsrfToken` を付け、手書き guard ではなく属性で CSRF 必須を宣言している（旧 `#[CsrfProtected]` から 1:1 で置き換え済み）。
+**ゲートは属性で宣言する。** `page://` の unsafe verb（`onPost` / `onPut` / `onPatch` / `onDelete`）には `#[CsrfToken]` と `#[SameOrigin]` の両方を付ける。`app://` にはどちらも付けない（ブラウザが直接叩く面ではない）。この規則は `tests/Resource/CsrfProtectionCoverageTest.php` が全 Resource を走査して強制する。
 
-token の発行・検証は `BEAR\Csrf\CsrfTokenInterface`（`issue()` / `verify(string)` / `clear()`）が境界になる。旧 `MyVendor\BeMart\Be\Reason\Service\CsrfToken`（`$token` プロパティ + `isValid()`）port は削除済みで、Resource は `BEAR\Csrf\CsrfTokenInterface` を直接注入され、`$this->csrf->issue()` で token を form affordance に載せる。
+**配線は `AppModule` の `CsrfModule` 1 行。** wire field 名は BEAR.Csrf の既定値 `_csrf_token` ではなく、テンプレートと admin JS が送る `csrfToken` を `tokenField` で指定する。token の抽出は同梱の `CompositeRequestToken`（header → resource query → post body）、検証は同梱の `StoredCsrfToken`（`issue()` / `verify()` / `clear()`）、拒否は同梱の `CsrfTokenInterceptor` / `SameOriginInterceptor` が投げる `ForbiddenException` 系例外で、`ExceptionStatusMapper` がそのまま 403 に写す。BeMart 側の interceptor や adapter は無い。
 
-**セッションは `EccubeSharedCsrfTokenAdapter` が扱う。** 当初の理由は「BEAR.Csrf 標準の store がセッションキーを private const で固定していて変更できない」ことだったが、これは [BEAR.Csrf#5](https://github.com/bearsunday/BEAR.Csrf/issues/5) として報告し解消済み — キーは `CsrfSessionKey` として注入でき、`CsrfSessionKey('_csrf_token')` で EC-CUBE の slot をそのまま読める（実測確認済み）。
+**BeMart が持つのは store だけ。** 同梱の `SessionCsrfStore` は `session_start()` を直接呼ぶため、EC-CUBE の cookie 名と開始方針を決めている `SessionStarterInterface` を迂回する。`src/Auth/SessionStarterCsrfStore.php` は同じ `CsrfStoreInterface` を `SessionStarterInterface` 経由で実装し、`EccubeModule` が bind する。セッションの slot は BEAR.Csrf の既定 `CsrfSessionKey::DEFAULT_NAME`（`bear_csrf_token`）。
 
-残る理由は session の開き方である。adapter は `SessionStarterInterface`（EC-CUBE の cookie 名スコープ）経由で session を開始するが、同梱の `SessionCsrfStore` は `session_start()` を直接呼ぶ。AGENTS.md の「session は port 経由」に反するため、adapter は維持する。`EccubeModule` は `CsrfTokenInterface` を `EccubeSharedCsrfTokenAdapter` へ直接 bind し、同梱 store は本番/開発いずれの実行コンテキストにも登場しない。Fake context（`FakeModule`）は `Fake\Service\NullCsrfToken` / `FakeCsrfToken` を bind する。
+**同一オリジンの基準は環境変数 `BEMART_ALLOWED_ORIGIN`。** 値があれば `CsrfModule::withSameOriginCheck()`、無ければ `withoutSameOriginCheck()` を `AppModule` が選ぶ（`src/Module/AllowedOriginEnv.php`）。未設定は CLI とローカル開発では正しい状態だが、本番で同じ沈黙が起きると same-origin gate が全リクエストで降りたままになるので、`ProdModule` は未設定・空のとき `MissingAllowedOriginException` で起動を拒む。`bin/prod.php`、`public/index.php` の prod context、prod context をコンパイルするスクリプトはこの変数を必要とする。
 
-token の wire field 名は BEAR.Csrf の既定値 `_csrf_token` ではなく、既存テンプレート/JS が送る `csrfToken` を `AppModule` で `CsrfTokenField` に明示的に設定して維持している。個別の Resource が別名を使う場合は `#[CsrfToken(field: '...')]` で上書きできる（BEAR.Csrf の機能そのまま）。
+**token の受け渡しは Twig の `csrf_token()`。** `BeMartTwigExtension` が `CsrfTokenInterface::issue()` を Twig 関数として公開し、POST するフォームはすべて `<input type="hidden" name="csrfToken" value="{{ csrf_token() }}">` を描画する。Resource の representation body に `csrfToken` は載せない（JSON 表現からも消えている）。ログイン・ログアウトの session writer は `CsrfTokenInterface::clear()` で token を廃棄し、次の描画で新しい token が発行される。
 
-missing / invalid token の扱いは、`MyVendor\BeMart\Interceptor\CsrfForbiddenInterceptor` が `403 Forbidden` と `['message' => 'Invalid or missing CSRF token.']` に変換する。BEAR.Csrf 標準の `Interceptor\CsrfTokenInterceptor` は例外を投げる設計だが、採用していない。理由は二つ:
+## テスト
 
-1. mutating Resource の既存テストは一貫して `$ro->code` / `$ro->body['message']` を直接検証しており、`expectException()` を使う設計ではない。例外化すると呼び出し側の契約が二種類に分裂する。
-2. BEAR.Csrf の `CsrfTokenInterceptor` は token が **欠落している** 場合、`CsrfTokenInterface::verify()` を一切呼ばずに常に拒否する。これは `Fake\Service\NullCsrfToken`（CSRF が主題でないテスト用に「何を送っても通す」ことを契約とするフェイク）の前提と衝突する。`CsrfForbiddenInterceptor` は token 抽出には BEAR.Csrf の `Http\RequestTokenInterface`（header → resource query → post の順で検索する `CompositeRequestToken`）と `Http\CsrfTokenField` をそのまま再利用しつつ、欠落時も空文字列として必ず `verify()` へ渡し、最終判断を bound された `CsrfTokenInterface` に委ねる — この「port が最終判断者」という構造は移行前の `CsrfProtectedInterceptor` と同じである。
-
-`BEAR\Csrf\Attribute\SameOrigin` / `Interceptor\SameOriginInterceptor`（Origin/Referer/`Sec-Fetch-Site` ベースの二重防御）はライブラリに同梱されているが、このリリースでは配線していない。導入は新機能の追加であり、本移行のスコープ外。
-
-`RequestQueryCapturingInvoker` / `RequestQueryContext` は削除済みである。Resource invocation 境界を横取りして request query を singleton stack に積む独自実装は再導入しない。
+- **Fake / SQL の in-process context** — `FakeModule` が両ゲートを降ろす。`FakeRequestToken` が `FakeCsrfToken` の token を返し、`AllowedOrigin` は null。Resource テストは `csrfToken` に触れない。ゲート自体は `tests/Resource/CsrfGateWiringTest.php` が override module で武装させて 1 か所で検証する。
+- **`http` tier** — 本物のゲート。テストは `X-BeMart-Test-Csrf-Token` ヘッダで session slot に token を鏡写しし、`csrfToken` として送信し、ブラウザと同じ `Sec-Fetch-Site: same-origin` を付ける。
+- **`hypermedia` tier** — token gate は本物、same-origin gate には `FakeRequestOrigin(fetchSite: 'same-origin')` で「HTTP 層が送るのと同じ申告」を与える（in-process にはリクエストヘッダが無い）。
+- `phpunit.xml` の `<env>` が `BEMART_ALLOWED_ORIGIN` を立てる。値は比較されない（全リクエストが same-origin を申告する）が、無いと prod context がコンパイルできない。
+- `tests/Html/CsrfTokenRenderedTest.php` が描画される全フォームの hidden field に token が入ることを確認する。
 
 ## 境界原則
 
 CSRF は Web / HTTP boundary concern であり、Resource の意味的契約ではない。
 
-Resource は業務操作の意味を表す。CSRF token はブラウザフォームや HTTP request の安全性を検証するための境界情報であり、商品、注文、会員といったドメイン意味を持たない。そのため、mutating Resource method の引数や request params schema に `csrfToken` を漏らしてはいけない。
-
-一方で、HTML form affordance として Resource representation body に `csrfToken` を載せることは許容する。これは「次の form submit に使う境界 token」を表現するためであり、業務入力の Semantic ではない。
+Resource は業務操作の意味を表す。CSRF token はブラウザフォームや HTTP request の安全性を検証するための境界情報であり、商品、注文、会員といったドメイン意味を持たない。そのため、mutating Resource method の引数や request params schema に `csrfToken` を漏らしてはいけない。token を Resource body に載せる以前の許容も廃止した。token はテンプレート層が `csrf_token()` で取る。
 
 ## 不採用案
 
 #61 の変更案のように、Resource 引数へ `csrfToken` を追加して CSRF を通す案は不採用とする。
-
-不採用理由は次の通り。
 
 - Resource method の意味的契約に Web boundary の token が混入する。
 - params JsonSchema / ApiDoc に `csrfToken` が現れ、API の意味を誤って記述する。
 - Resource を HTML form 由来の呼び出しに過度に結びつける。
 - BEAR.Sunday の標準的な Resource 境界より、独自都合の引数設計を優先してしまう。
 
+独自の interceptor（旧 `CsrfForbiddenInterceptor`）と独自の token adapter（旧 `EccubeSharedCsrfTokenAdapter`）も廃止した。BEAR.Csrf 側に足りなかった点（session key の注入、store の分離、欠落 token の扱い）は上流で解消済みで、BeMart が差分を持つ理由が無くなった。
+
 ## 禁止事項
 
 - Resource method 引数に `csrfToken` / `_token` / `_csrf_token` を追加する。
-- request params JsonSchema に CSRF token 用プロパティを追加する。
-- ApiDoc / OpenAPI に CSRF token を Resource 契約として記載する。
-- CSRF のために Resource の業務入力名を変更する。
+- request params JsonSchema / ApiDoc / OpenAPI に CSRF token を Resource 契約として記載する。
+- Resource の representation body に `csrfToken` を載せる。
+- `page://` の unsafe verb から `#[CsrfToken]` / `#[SameOrigin]` を外す、または `app://` に付ける。
+- BEAR.Csrf の interceptor を置き換える独自 interceptor、`CsrfTokenInterface` を置き換える独自 adapter を再導入する。
+- 本番/開発コンテキストで `BEAR\Csrf\SessionCsrfStore` を bind する（`session_start()` を直接呼び、`SessionStarterInterface` の境界を壊す）。
 - `RequestQueryCapturingInvoker` / `RequestQueryContext` または同等の request capture stack を再導入する。
-- #61 と同じ方向、つまり Resource 契約へ CSRF token を漏らす修正を再導入する。
-- 本番/開発コンテキストで `BEAR\Csrf\SessionCsrfStore` を bind する。キー固定の問題は解消したが、この store は `session_start()` を直接呼ぶため EC-CUBE の cookie 名スコープを尊重しない。session は `SessionStarterInterface` 経由で開くという境界を壊す。

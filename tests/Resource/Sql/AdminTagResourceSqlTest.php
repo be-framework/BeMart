@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -95,7 +94,6 @@ final class AdminTagResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/admin/tag/tag-list', [
             'tagName' => $name,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $id = $ro->body['tagId'];
         assert(is_string($id));
@@ -128,7 +126,6 @@ final class AdminTagResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/admin/tag/tag-list', [
             'tagName' => '限定',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $ro->code);
         $this->assertSame('限定', $ro->body['tagName']);
@@ -140,7 +137,6 @@ final class AdminTagResourceSqlTest extends AbstractResourceSqlTestCase
         $this->rebindAdminSession(null);
         $ro = $this->resource->post('page://self/admin/tag/tag-list', [
             'tagName' => '限定',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -150,7 +146,6 @@ final class AdminTagResourceSqlTest extends AbstractResourceSqlTestCase
         $id = $this->seed('Tmp');
         $ro = $this->resource->delete('page://self/admin/tag/tag', [
             'tagId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
     }
@@ -159,7 +154,6 @@ final class AdminTagResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->delete('page://self/admin/tag/tag', [
             'tagId' => 'nonexistent',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }

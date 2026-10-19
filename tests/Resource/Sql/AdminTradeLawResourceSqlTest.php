@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -85,7 +84,6 @@ final class AdminTradeLawResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/admin/trade-law', [
             'tradeLawBody' => "販売業者: 新会社\n所在地: 東京都\n連絡先: 03-1234-5678",
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -111,7 +109,6 @@ final class AdminTradeLawResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/admin/trade-law', [
             'tradeLawBody' => $seed->body['tradeLawBody'],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -122,7 +119,6 @@ final class AdminTradeLawResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/admin/trade-law', [
             'tradeLawBody' => '   ',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -134,7 +130,6 @@ final class AdminTradeLawResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/admin/trade-law', [
             'tradeLawBody' => 'whatever non-empty',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

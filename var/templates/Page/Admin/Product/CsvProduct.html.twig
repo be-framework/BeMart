@@ -116,7 +116,7 @@
   novalidate
   aria-label="{{ csvTitle }}"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
   <div class="idea-admin-layout">
 

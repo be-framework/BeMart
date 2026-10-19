@@ -12,15 +12,6 @@
       "title": "CSVエクスポート本文",
       "description": "/admin/class-category/class-category-export が返すCSV本文。列意味はCSV互換サービス側、JSON境界では文字列として契約する。",
       "$comment": "CSV列の意味検査はCSV互換サービスで扱い、ここではレスポンス本文としての文字列サイズを検査する。"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     }
   },
   "additionalProperties": false,
@@ -159,15 +150,6 @@
       "pattern": "^.+_[0-9]+$",
       "example": "session-prefix-1_1"
     },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
-    },
     "uriReference": {
       "title": "URI参照",
       "description": "画面遷移・リダイレクト・リンク先を表す相対または絶対URI。",
@@ -243,7 +225,6 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
-    "content",
-    "csrfToken"
+    "content"
   ]
 }

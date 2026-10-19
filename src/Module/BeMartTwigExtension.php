@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use BEAR\Csrf\CsrfTokenInterface;
 use NumberFormatter;
 use Override;
 use Twig\Extension\AbstractExtension;
@@ -37,14 +38,20 @@ use Twig\TwigFunction;
  *                        URLs (`/assets`, `/template/admin/assets`,
  *                        `/bundle`), so every package resolves to a real,
  *                        byte-identical EC-CUBE file.
- *  - CSRF is a Resource-published `csrfToken` body value, not a Twig helper - a template that
- *    reads $_SESSION directly bypasses the CsrfTokenInterface port. See #139.
+ *  - `csrf_token` function — the hidden-field value for every form that POSTs
+ *                        to a Page. Read lazily from the BEAR.Csrf port, so a
+ *                        page without a form never touches the session and
+ *                        Resources carry no CSRF knowledge at all.
  *
  * Every value produced here is deterministic, so the rendered HTML is
  * diffable against EC-CUBE's output (residual-diff verification).
  */
 final class BeMartTwigExtension extends AbstractExtension
 {
+    public function __construct(private readonly CsrfTokenInterface $csrf)
+    {
+    }
+
     /** @return list<TwigFilter> */
     #[Override]
     public function getFilters(): array
@@ -60,6 +67,7 @@ final class BeMartTwigExtension extends AbstractExtension
     {
         return [
             new TwigFunction('asset', [$this, 'asset']),
+            new TwigFunction('csrf_token', $this->csrf->issue(...)),
         ];
     }
 

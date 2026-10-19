@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\AbstractModule;
@@ -135,7 +134,6 @@ final class ChangeResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/mypage/change', [
             'email' => 'alice@example.com',
             'phoneNumber' => '0309998888',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -157,7 +155,6 @@ final class ChangeResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/mypage/change', [
             'email' => 'bob@example.com',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(409, $ro->code);
@@ -170,7 +167,6 @@ final class ChangeResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/mypage/change', [
             'email' => 'alice@example.com',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);
@@ -181,7 +177,6 @@ final class ChangeResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/mypage/change', [
             'email' => 'not-an-email',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);

@@ -9,9 +9,9 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Form\ShoppingShippingEditForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -36,7 +36,6 @@ class ShippingEdit extends ResourceObject
 {
     public function __construct(
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -73,7 +72,6 @@ class ShippingEdit extends ResourceObject
                 'href' => 'page://self/shopping/shipping-edit',
             ],
             'staticContent' => null,
-            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty ShoppingShippingEditForm for the HTML
             // port to render the address inputs. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ShoppingShippingEditForm::class),
@@ -105,6 +103,7 @@ class ShippingEdit extends ResourceObject
     #[JsonSchema(schema: 'post-shopping-shipping-edit.json', params: 'post-shopping-shipping-edit.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $name01 = '',
         string $name02 = '',

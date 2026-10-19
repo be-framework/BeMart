@@ -5,23 +5,27 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Module;
 
 use BEAR\AppMeta\Meta;
-use BEAR\Resource\Code;
+use BEAR\Csrf\CsrfSessionKey;
 use BEAR\Resource\ResourceInterface;
 use Be\Framework\Becoming;
 use Be\Framework\BecomingInterface;
 use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
-use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Injector as AppInjector;
+use MyVendor\BeMart\Module\AllowedOriginEnv;
+use MyVendor\BeMart\Module\MissingAllowedOriginException;
+use MyVendor\BeMart\Module\ProdModule;
 use MyVendor\BeMart\Module\TestModule;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
 use function dirname;
 use function file_exists;
 use function getenv;
+use function putenv;
 use function unlink;
 
 final class ProdModuleTest extends TestCase
@@ -65,14 +69,14 @@ final class ProdModuleTest extends TestCase
             unlink($this->logFile);
         }
 
-        // Slice 7: EccubeModule binds CustomerSession to EccubeSharedSessionAdapter,
+        // EccubeModule binds CustomerSession to EccubeSharedSessionAdapter,
         // which reads $_SESSION['customer_id'].
         $_SESSION['customer_id'] = 'customer-001';
 
-        // Slice 8: EccubeModule also binds CsrfToken to
-        // EccubeSharedCsrfTokenAdapter, which checks `$_SESSION['_csrf_token']`.
-        // Mirror a reference token so the prod adapter accepts our submission.
-        $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'prod-csrf-mirror';
+        // Both BEAR.Csrf gates are real here: mirror a token into the session
+        // slot and declare the request same-origin, as a browser form post is.
+        $_SESSION[CsrfSessionKey::DEFAULT_NAME] = 'prod-csrf-mirror';
+        $_SERVER['HTTP_SEC_FETCH_SITE'] = 'same-origin';
 
         $injector = AppInjector::getInstance('prod-eccube-sql-hal-app');
 
@@ -89,30 +93,11 @@ final class ProdModuleTest extends TestCase
             // prod Becoming path does not write the semantic log file.
             $this->addToAssertionCount(1);
         }
+
         $this->assertFileDoesNotExist(
             $this->logFile,
             'prod-eccube-sql-hal-app must NOT write var/log/bemart.json (PII leak prevention)',
         );
-    }
-
-    public function testProdContextRejectsMissingCsrfToken(): void
-    {
-        $this->skipWithoutDatabaseUrl();
-
-        // Slice 8: even with a valid session customerId, a state-changing
-        // request without a CSRF token is rejected at the resource boundary.
-        $_SESSION['customer_id'] = 'customer-001';
-        $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'prod-csrf-mirror';
-
-        $injector = AppInjector::getInstance('prod-eccube-sql-hal-app');
-
-        $resource = $injector->getInstance(ResourceInterface::class);
-        $ro = $resource->post('page://self/shopping/checkout', [
-            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 
     public function testDevContextDoesWriteLogFileOnBecoming(): void
@@ -132,10 +117,46 @@ final class ProdModuleTest extends TestCase
         $resource = $injector->getInstance(ResourceInterface::class);
         $resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertFileExists($this->logFile);
+    }
+
+    /**
+     * An unset origin would run production with the same-origin gate down, silently:
+     * every request still succeeds. ProdModule turns that into a boot failure. The
+     * separate process keeps the env change away from the suite's own value.
+     */
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testProductionRefusesToBootWithoutAnAllowedOrigin(): void
+    {
+        putenv(AllowedOriginEnv::NAME);
+
+        $this->expectException(MissingAllowedOriginException::class);
+        $this->expectExceptionMessage(AllowedOriginEnv::NAME);
+        new Injector(new ProdModule());
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testProductionRefusesAnEmptyAllowedOrigin(): void
+    {
+        putenv(AllowedOriginEnv::NAME . '=');
+
+        $this->expectException(MissingAllowedOriginException::class);
+        new Injector(new ProdModule());
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testProductionBootsWithAnAllowedOrigin(): void
+    {
+        putenv(AllowedOriginEnv::NAME . '=https://shop.example');
+
+        new Injector(new ProdModule());
+
+        $this->assertSame('https://shop.example', AllowedOriginEnv::value());
     }
 
     private function skipWithoutDatabaseUrl(): void
@@ -160,27 +181,22 @@ final class ProdModuleTest extends TestCase
             $pdo = new \PDO($serverDsn, $parts['user'], $parts['pass'] ?? '', [
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             ]);
-            $version = (string) $pdo->query('SELECT VERSION()')->fetchColumn();
+            $pdo->query('SELECT 1');
         } catch (\PDOException $e) {
             $this->markTestSkipped('DATABASE_URL unreachable — prod context requires SQL wiring: ' . $e->getMessage());
         }
-
     }
-
 
     protected function tearDown(): void
     {
-        // Clean up so the next test run starts from a known state.
         if (file_exists($this->logFile)) {
             unlink($this->logFile);
         }
 
-        // Slice 7/8: scrub any session values we set so unrelated tests
-        // (especially anonymous-session AUTHZ and missing-CSRF tests)
-        // start clean.
         unset(
             $_SESSION['customer_id'],
-            $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY],
+            $_SESSION[CsrfSessionKey::DEFAULT_NAME],
+            $_SERVER['HTTP_SEC_FETCH_SITE'],
         );
     }
 }

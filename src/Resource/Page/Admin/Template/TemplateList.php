@@ -11,6 +11,7 @@ use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Exception\TemplateNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminTemplateListFetched;
@@ -21,7 +22,6 @@ use MyVendor\BeMart\Be\Input\DeleteTemplateInput;
 use MyVendor\BeMart\Be\Input\DownloadTemplateInput;
 use MyVendor\BeMart\Be\Input\GetAdminTemplateListInput;
 use MyVendor\BeMart\Be\Input\SelectTemplateInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -34,7 +34,6 @@ class TemplateList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrfToken,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
@@ -56,7 +55,6 @@ class TemplateList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'templates' => $final->templates,
-            'csrfToken' => $this->csrfToken->issue(),
         ];
 
         return $this;
@@ -71,6 +69,7 @@ class TemplateList extends ResourceObject
     #[JsonSchema(schema: 'put-admin-template-template-list.json', params: 'put-admin-template-template-list.param.json')]
     #[Link(rel: 'doDownloadTemplate', href: 'page://self/admin/template/template-list', method: 'post')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(string $templateId): static
     {
         return $this->run('doSelectTemplate', static fn (BecomingInterface $b) => $b(new SelectTemplateInput(templateId: $templateId)), 'テンプレートを適用しました。');
@@ -85,6 +84,7 @@ class TemplateList extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-template-template-list.json', params: 'delete-admin-template-template-list.param.json')]
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list', method: 'get')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onDelete(string $templateId): static
     {
         return $this->run('doDeleteTemplate', static fn (BecomingInterface $b) => $b(new DeleteTemplateInput(templateId: $templateId)), 'テンプレートを削除しました。');
@@ -99,6 +99,7 @@ class TemplateList extends ResourceObject
     #[JsonSchema(schema: 'post-admin-template-template-list.json', params: 'post-admin-template-template-list.param.json')]
     #[Link(rel: 'doDeleteTemplate', href: 'page://self/admin/template/template-list', method: 'delete')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string $templateId): static
     {
         $final = ($this->becoming)(new DownloadTemplateInput(templateId: $templateId));

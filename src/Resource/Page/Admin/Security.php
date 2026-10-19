@@ -11,11 +11,11 @@ use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\SecuritySettingsUpdated;
 use MyVendor\BeMart\Be\Input\UpdateSecurityInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
 use MyVendor\BeMart\Form\AdminSecurityForm;
 use Ray\WebFormModule\FormFactory;
@@ -40,7 +40,6 @@ class Security extends ResourceObject
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
         private readonly SecurityConfigWriterInterface $securityConfig,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -73,7 +72,6 @@ class Security extends ResourceObject
         $this->body = [
             'form' => $form,
             'isSecureRequest' => false,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -98,6 +96,7 @@ class Security extends ResourceObject
     #[JsonSchema(schema: 'put-admin-security.json', params: 'put-admin-security.param.json')]
     #[Link(rel: 'goTwoFactorAuthSet', href: 'page://self/admin/two-factor-auth-set')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(
         string $adminAllowHosts = '',
         string $adminDenyHosts = '',

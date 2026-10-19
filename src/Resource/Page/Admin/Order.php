@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,7 +18,6 @@ use MyVendor\BeMart\Be\Final\AdminOrderFetched;
 use MyVendor\BeMart\Be\Final\AdminOrderUpdated;
 use MyVendor\BeMart\Be\Input\AdminUpdateOrderInput;
 use MyVendor\BeMart\Be\Input\GetAdminOrderInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -57,7 +57,6 @@ class Order extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -100,7 +99,6 @@ class Order extends ResourceObject
             'items' => $final->items,
             'itemCount' => $final->itemCount,
             'customer' => $final->customer,
-            'csrfToken' => $this->csrf->issue(),
             'orderStatusOptions' => [
                 1 => '新規受付',
                 3 => '注文取消',
@@ -129,6 +127,7 @@ class Order extends ResourceObject
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'doUpdateOrderStatus', href: 'page://self/admin/order-status', method: 'post')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(
         string $orderNo,
         int|null $discount = null,

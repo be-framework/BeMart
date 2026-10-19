@@ -78,7 +78,6 @@ final class AddCartForm extends AbstractForm
     public function init(): void
     {
         $this->setField('productCode', 'hidden');
-        $this->setField('csrfToken', 'hidden');
 
         $this->setField('quantity', 'number')->setAttribs([
             'id' => 'quantity',

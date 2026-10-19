@@ -14,6 +14,7 @@ use Twig\Environment;
 use Twig\Markup;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 
 use function array_diff;
@@ -402,10 +403,10 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
         $twig->addFunction(new TwigFunction('is_reduced_tax_rate', static fn ($x = null): bool => false));
         // EC-CUBE's `form_widget(form.csrfToken)` — the CSRF hidden. Stubbed
-        // to the same empty-value `csrfToken` hidden BeMart's port emits.
+        // to the same `csrfToken` hidden BeMart's port emits.
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []): Markup {
             if ($field === '_csrfToken__') {
-                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
+                return new Markup('<input type="hidden" name="csrfToken" value="' . FakeCsrfToken::DEFAULT_TOKEN . '">', 'UTF-8');
             }
 
             return new Markup('', 'UTF-8');

@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -102,7 +101,6 @@ final class AdminBaseInfoResourceSqlTest extends AbstractResourceSqlTestCase
             'pref' => 13,
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-1-1',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -143,7 +141,6 @@ final class AdminBaseInfoResourceSqlTest extends AbstractResourceSqlTestCase
             'businessHour' => $seed->body['businessHour'],
             'shopEmail01' => $seed->body['shopEmail01'],
             'shopMessage' => $seed->body['shopMessage'],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -154,7 +151,6 @@ final class AdminBaseInfoResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/admin/base-info', [
             'shopName' => '   ',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -165,7 +161,6 @@ final class AdminBaseInfoResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/base-info', [
             'shopName' => '新ショップ',
             'phoneNumber' => 'not-digits',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -177,7 +172,6 @@ final class AdminBaseInfoResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/admin/base-info', [
             'shopName' => '新ショップ',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

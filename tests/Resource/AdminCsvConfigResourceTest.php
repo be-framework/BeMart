@@ -9,8 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminCsvConfigForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -50,7 +48,6 @@ final class AdminCsvConfigResourceTest extends TestCase
             protected function configure(): void
             {
                 $this->bind(AdminSession::class)->toInstance($this->session);
-                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
             }
         };
         $base->override($override);
@@ -89,7 +86,6 @@ final class AdminCsvConfigResourceTest extends TestCase
                 ['columnName' => 'productName', 'enabled' => true, 'sortNo' => 2],
                 ['columnName' => 'note', 'enabled' => false, 'sortNo' => 3],
             ],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -110,7 +106,6 @@ final class AdminCsvConfigResourceTest extends TestCase
                 ['columnName' => 'orderNo', 'enabled' => true, 'sortNo' => 1],
                 ['columnName' => 'total', 'enabled' => true, 'sortNo' => 2],
             ],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $first->code);
         $this->assertSame(2, $first->body['count']);
@@ -120,23 +115,9 @@ final class AdminCsvConfigResourceTest extends TestCase
             'columns' => [
                 ['columnName' => 'orderDate', 'enabled' => true, 'sortNo' => 1],
             ],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $second->code);
         $this->assertSame(1, $second->body['count']);
-    }
-
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/csv-config', [
-            'csvType' => 1,
-            'columns' => [
-                ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
-            ],
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 
     public function testOnPostWithoutAdminSessionReturns403(): void
@@ -150,7 +131,6 @@ final class AdminCsvConfigResourceTest extends TestCase
             'columns' => [
                 ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
             ],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Support\Hypermedia;
 
-use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use BEAR\Csrf\CsrfSessionKey;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 
@@ -44,7 +44,7 @@ final class WorkflowTestSession
     public function setCsrfToken(string $csrfToken): void
     {
         $this->ensureSession();
-        $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = $csrfToken;
+        $_SESSION[CsrfSessionKey::DEFAULT_NAME] = $csrfToken;
     }
 
     public function restore(): void

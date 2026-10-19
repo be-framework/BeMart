@@ -42,7 +42,6 @@ The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
 | layoutId | string|null | レイアウトID - dtb_layout.id の不透明な文字列ハンドル。新規作成フォームでは null、編集フォームでは既存レイアウトID。 | Optional | {"minLength":0,"maxLength":128} | 1 |
 | layoutName | string | レイアウト名 - レイアウトの表示名。新規作成フォームでは空文字、編集フォームでは保存済み値。 | Optional | {"minLength":0,"maxLength":255} |  |
 | deviceType | int|null | デバイス種別 - デバイス種別マスタ。新規作成フォームでは null、編集フォームでは保存済み値。 | Optional | {"minimum":0} | 10 |
-| csrfToken | string|null | 処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。 | Optional | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 | form | object|array|null | 入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。 | Optional | {"$comment":"Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"} |  |
 
 #### Links

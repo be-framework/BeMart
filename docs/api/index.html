@@ -73,10 +73,8 @@
   <td rowspan="6" class="path-cell" id="path-contact">/contact</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goContactForm — show the contact form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
-state). `csrfToken` carries the trusted reference
-{@see \CsrfToken::$token} issues — the HTML port
-renders it into the form&#039;s hidden `_token` input so the
-subsequent POST passes CSRF validation.</div><div class="method-alps"><a href="../alps.json.html#goContactForm" class="alps-link">goContactForm</a></div></td>
+state). The HTML port fills the form&#039;s hidden `csrfToken` input
+via `csrf_token()`; the body carries no token.</div><div class="method-alps"><a href="../alps.json.html#goContactForm" class="alps-link">goContactForm</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -501,10 +499,8 @@ Anonymous-accessible (returns 200 regardless of session state).</div><div class=
   <td rowspan="4" class="path-cell" id="path-login">/login</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goLogin — show the login form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
-state). The `csrfToken` body field carries the trusted reference
-{@see \CsrfToken::$token} issues, which the HTML port
-renders into the form&#039;s hidden `_csrf_token` input so the
-subsequent POST passes CSRF validation.</div><div class="method-alps"><a href="../alps.json.html#goLogin" class="alps-link">goLogin</a></div></td>
+state). The HTML port fills the form&#039;s hidden `csrfToken` input
+via `csrf_token()`; the body carries no token.</div><div class="method-alps"><a href="../alps.json.html#goLogin" class="alps-link">goLogin</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -2056,10 +2052,8 @@ Final to raise `UnauthorizedAdminAccessException`.</div><div class="method-alps"
   <td rowspan="4" class="path-cell" id="path-admin/login">/admin/login</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Show the admin login form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
-state) — the admin firewall guard is on the POST. The `csrfToken`
-body field carries the trusted reference {@see \CsrfToken::$token}
-issues, which the HTML port renders into the form&#039;s hidden
-`_csrf_token` input so the subsequent POST passes CSRF validation.</div><div class="method-alps"><a href="../alps.json.html#doAdminLogin" class="alps-link">doAdminLogin</a></div></td>
+state) — the admin firewall guard is on the POST. The HTML port
+fills the form&#039;s hidden `csrfToken` input via `csrf_token()`.</div><div class="method-alps"><a href="../alps.json.html#doAdminLogin" class="alps-link">doAdminLogin</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -4642,9 +4636,8 @@ the BEAR.Csrf CsrfToken attribute.</div><div class="method-alps"><a href="../alp
   <td rowspan="12" class="path-cell" id="path-shopping/non-member">/shopping/non-member</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goShoppingNonMember — show the guest-info entry form.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
-state). Fields mirror SubmitNonMemberInput. `csrfToken` carries
-the trusted reference token so the HTML form can pass the
-subsequent POST&#039;s CSRF boundary.</div><div class="method-alps"><a href="../alps.json.html#goShoppingNonMember" class="alps-link">goShoppingNonMember</a></div></td>
+state). Fields mirror SubmitNonMemberInput; the HTML port fills
+the hidden `csrfToken` input via `csrf_token()`.</div><div class="method-alps"><a href="../alps.json.html#goShoppingNonMember" class="alps-link">goShoppingNonMember</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -7389,17 +7382,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
   <td><span class="prop-name">deliveryFeeTotal</span></td>
   <td><span class="badge type-intnull">int|null</span></td>
   <td class="param-desc">送料合計 - 全配送先の送料合計（スナップショット）。deliveryFeeAmount（地域別送料）+ deliveryFee（商品別送料）×数量 の合計。DeliveryFeePreprocessorで計算。カートと受注の両方で使用 Fake観察数値 0〜800; 観察値 &#039;600&#039;, &#039;0&#039;, &#039;500&#039;, &#039;800&#039;, &#039;700&#039;。</td>
@@ -7474,17 +7456,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -7603,17 +7574,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -7823,17 +7783,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -8090,17 +8039,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -8549,17 +8487,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goProductList</td>
   <td><span class="badge link">link</span></td>
@@ -8638,17 +8565,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr>
@@ -8765,17 +8681,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -8967,18 +8872,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: deadbeefcafe1234567890abcdef01234567890a</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">購入確認CSRFトークン - /shopping で表示する購入確認フォームの送信元検証トークン。/shopping/confirm へ進むPOSTで hidden input として送信され、Ray.Csrf CsrfToken属性によりセッション上の信頼済みトークンと照合される。実HTTPでは64桁hex、test/fake文脈では deterministic token を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge constraint">$comment: 実HTTPではEccubeSharedCsrfTokenAdapter/BeMartTwigExtensionがPHPセッションに保存した64桁hexを返す。test/fake contextではFakeCsrfToken::TOKENを返すため、schemaはCSRF値の文字種・最小長のみ契約し、真正性はCsrfForbiddenInterceptorで検証する。</span>
-      <span class="badge example">example: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doConfirmOrder</td>
   <td><span class="badge link">link</span></td>
@@ -9126,14 +9019,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">権限ルール一覧 - /admin/authority-role のレスポンスで扱う権限ルール一覧。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc"></td>
-  <td><div class="extra-info">
-
     </div></td>
 </tr>
 <tr class="link-row">
@@ -9421,17 +9306,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: EC-CUBE SHOP</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doUpdateBaseInfo</td>
   <td><span class="badge link">link</span></td>
@@ -9667,14 +9541,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc"></td>
-  <td><div class="extra-info">
-
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doCreateCalendarHoliday</td>
   <td><span class="badge link">link</span></td>
@@ -9865,17 +9731,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">静的表示フィールド - /admin/change-password でテンプレートへ渡す表示用フィールド集合。フォーム入力値ではなく画面文脈データ。</td>
   <td><div class="extra-info">
 
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -10081,14 +9936,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td><div class="extra-info">
       <span class="badge constraint">enum: [1,2,3,4]</span>
       <span class="badge example">example: 1</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc"></td>
-  <td><div class="extra-info">
-
     </div></td>
 </tr>
 <tr class="link-row">
@@ -10401,17 +10248,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maximum: 2147483647</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goCustomerList</td>
   <td><span class="badge link">link</span></td>
@@ -10575,17 +10411,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">pattern: ^[A-Za-z0-9._:@/-]*$</span>
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。</span>
       <span class="badge example">example: customer-001</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -10864,15 +10689,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。管理者向け一覧ページでの絞り込みフォームに使用。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 1</span>
-      <span class="badge constraint">maxLength: 160</span>
-    </div></td>
-</tr>
-<tr>
   <td><span class="prop-name">searchForm</span></td>
   <td><span class="badge type-objectarraynull">object|array|null</span></td>
   <td class="param-desc">検索フォーム - /admin/customer-list のレスポンスで保持するフォーム文脈。Aura/WebForm由来の内部構造は別境界の責務で、ここではResource上の役割を示す。</td>
@@ -11093,17 +10909,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: 1200</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goMemberList</td>
   <td><span class="badge link">link</span></td>
@@ -11206,17 +11011,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -11438,14 +11232,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td><div class="extra-info">
       <span class="badge constraint">minimum: 0</span>
       <span class="badge constraint">maximum: 2147483647</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc"></td>
-  <td><div class="extra-info">
-
     </div></td>
 </tr>
 <tr>
@@ -11700,15 +11486,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。管理者向けマスタデータ選択フォームに使用。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 1</span>
-      <span class="badge constraint">maxLength: 160</span>
-    </div></td>
-</tr>
-<tr>
   <td><span class="prop-name">submitTo</span></td>
   <td><span class="badge type-objectnull">object|null</span></td>
   <td class="param-desc">送信先 - /admin/master-data のフォーム送信先。unsafe 操作はこの action から辿る。</td>
@@ -11779,15 +11556,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。管理者向けマスタデータ編集フォームに使用。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 1</span>
-      <span class="badge constraint">maxLength: 160</span>
     </div></td>
 </tr>
 <tr>
@@ -11944,17 +11712,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">pattern: ^[A-Za-z0-9._:@/-]*$</span>
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。</span>
       <span class="badge example">example: test-admin</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr>
@@ -12286,16 +12043,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">CSRFトークン - 一覧画面から送信する削除フォーム用のCSRFトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
-    </div></td>
-</tr>
-<tr>
   <td><span class="prop-name">members</span></td>
   <td><span class="badge type-arraynull">array|null</span></td>
   <td class="param-desc">管理メンバー一覧 - /admin/member-list のレスポンスで扱う管理メンバー一覧。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。</td>
@@ -12553,17 +12300,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
   <td><span class="prop-name">total</span></td>
   <td><span class="badge type-intnull">int|null</span></td>
   <td class="param-desc">受注合計 - 受注合計金額。計算式: subtotal(商品税込合計) + deliveryFeeTotal(送料) + charge(手数料) - discount(値引き)。カートのtotalPriceとは別プロパティ Fake観察数値 12700〜12700; 観察値 &#039;12700&#039;。</td>
@@ -12810,15 +12546,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - 一括削除フォームの送信元を検証するトークン。管理者向け受注一覧の一括操作フォームに使用。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 1</span>
-      <span class="badge constraint">maxLength: 160</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goOrder</td>
   <td><span class="badge link">link</span></td>
@@ -12864,16 +12591,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">注文ステータス一覧 - /admin/order-status のレスポンスで扱う注文ステータス一覧。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">CSRFトークン - POST /admin/order-status のhidden inputで送るCSRFトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
     </div></td>
 </tr>
 
@@ -13398,17 +13115,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
   <td><span class="prop-name">searchWord</span></td>
   <td><span class="badge type-stringnull">string|null</span></td>
   <td class="param-desc">検索ワード - フロント検索でヒットさせるためのキーワード。画面には表示されない検索補助データ Fake観察文字長 9〜15; 観察値 &#039;管理 active&#039;, &#039;管理 withdrawn&#039;, &#039;管理 hidden&#039;, &#039;ジェラート ギフト 彩 api&#039;, &#039;ui create&#039;; null 10/42。</td>
@@ -13823,17 +13529,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: CSV列の業務妥当性はCSV互換サービスで検査する。ここではJSON境界上の文字列サイズを契約する。</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goProductList</td>
   <td><span class="badge link">link</span></td>
@@ -13935,17 +13630,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 </thead>
 <tbody>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
   <td><span class="prop-name">filters</span></td>
   <td><span class="badge type-objectnull">object|null</span></td>
   <td class="param-desc">検索条件 - /admin/product-list の一覧表示を制御するページング/検索条件。件数、開始位置、並び順、前後リンクをクライアントが再現するための値。</td>
@@ -14038,17 +13722,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: フレームワーク由来または動的mapのため、JSON境界ではobjectであることと意味を契約し、内部キーは別境界で扱う。追加キーは不透明構造として許容する。</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doCreateProduct</td>
   <td><span class="badge link">link</span></td>
@@ -14094,14 +13767,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc"></td>
-  <td><div class="extra-info">
-
     </div></td>
 </tr>
 <tr class="link-row">
@@ -14242,17 +13907,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doAdminLogout</td>
   <td><span class="badge link">link</span></td>
@@ -14330,17 +13984,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr>
@@ -14443,14 +14086,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td><span class="prop-name">fields</span></td>
   <td><span class="badge type-arraynull">array|null</span></td>
   <td class="param-desc">静的表示フィールド - /admin/two-factor-auth でテンプレートへ渡す表示用フィールド集合。フォーム入力値ではなく画面文脈データ。</td>
-  <td><div class="extra-info">
-
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc"></td>
   <td><div class="extra-info">
 
     </div></td>
@@ -14587,17 +14222,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: キー/追跡番号は照合用の不透明文字列で、数値演算対象ではない。</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 
 </tbody>
 </table>
@@ -14663,14 +14287,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 128</span>
       <span class="badge constraint">$comment: キー/追跡番号は照合用の不透明文字列で、数値演算対象ではない。</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc"></td>
-  <td><div class="extra-info">
-
     </div></td>
 </tr>
 <tr class="link-row">
@@ -15228,17 +14844,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: doAddCartItem</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doSubmitContact</td>
   <td><span class="badge link">link</span></td>
@@ -15460,17 +15065,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -15820,17 +15414,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr>
@@ -16457,17 +16040,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: Acme Corp.</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doUpdateCustomer</td>
   <td><span class="badge link">link</span></td>
@@ -17038,17 +16610,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: 12700</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doReorder</td>
   <td><span class="badge link">link</span></td>
@@ -17295,17 +16856,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
   <td><span class="prop-name">customerId</span></td>
   <td><span class="badge type-stringnull">string|null</span></td>
   <td class="param-desc">会員ID - dtb_customer.id の不透明な文字列ハンドル。BeMart の Entity 層は数値ではなく文字列として保持する（マスアサインメント防止のため、Session/AuthZ 経由で読み出し、リクエスト本文からは受け取らない）。Favorite / Cart / Order の所有者キーとして横断使用 Fake観察文字長 12〜32; 観察値 &#039;customer-001&#039;, &#039;0123456789abcdef0123456789abcdef&#039;, &#039;customer-002&#039;, &#039;favorite-list-customer&#039;, &#039;favorite-html-customer&#039;, &#039;fedcba9876543210fedcba9876543210&#039;, &#039;aaaaaaaa00000000bbbbbbbb11111111&#039;, &#039;10000000aaaa1111bbbb2222cccc3333&#039;。</td>
@@ -17483,17 +17033,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -17888,17 +17427,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
   <td><span class="prop-name">total</span></td>
   <td><span class="badge type-intnull">int|null</span></td>
   <td class="param-desc">受注合計 - 受注合計金額。計算式: subtotal(商品税込合計) + deliveryFeeTotal(送料) + charge(手数料) - discount(値引き)。カートのtotalPriceとは別プロパティ Fake観察数値 12700〜12700; 観察値 &#039;12700&#039;。</td>
@@ -18062,17 +17590,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: doAddCartItem</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doLogin</td>
   <td><span class="badge link">link</span></td>
@@ -18148,17 +17665,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -18319,17 +17825,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minItems: 0</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doSelectShippingAddress</td>
   <td><span class="badge link">link</span></td>
@@ -18466,17 +17961,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -18834,17 +18318,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: doAddCartItem</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doAddMultipleShippingAddress</td>
   <td><span class="badge link">link</span></td>
@@ -19064,17 +18537,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goBlockList</td>
   <td><span class="badge link">link</span></td>
@@ -19247,16 +18709,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minItems: 0</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">CSRFトークン - 一覧画面から送信する作成・削除フォーム用のCSRFトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doCreateBlock</td>
   <td><span class="badge link">link</span></td>
@@ -19380,17 +18832,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">pattern: ^[A-Za-z0-9._:@/-]*$</span>
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。</span>
       <span class="badge example">example: cat-food</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -19548,17 +18989,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minItems: 0</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doCreateCategory</td>
   <td><span class="badge link">link</span></td>
@@ -19711,17 +19141,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 5000000</span>
       <span class="badge constraint">$comment: CSV列の業務妥当性はCSV互換サービスで検査する。ここではJSON境界上の文字列サイズを契約する。</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -19886,17 +19305,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: cat-food</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doCreateCategory</td>
   <td><span class="badge link">link</span></td>
@@ -20034,17 +19442,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 5000000</span>
       <span class="badge constraint">$comment: CSV列の意味検査はCSV互換サービスで扱い、ここではレスポンス本文としての文字列サイズを検査する。</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -20297,17 +19694,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: CSV列の意味検査はCSV互換サービスで扱い、ここではレスポンス本文としての文字列サイズを検査する。</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doImportClassNameCsv</td>
   <td><span class="badge link">link</span></td>
@@ -20448,15 +19834,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 <tr><th>Name</th><th>Type</th><th>Description</th><th>Meta</th></tr>
 </thead>
 <tbody>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">CSRFトークン - /admin/content/cache のHTMLフォーム送信用CSRFトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 160</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doClearCache</td>
   <td><span class="badge link">link</span></td>
@@ -20526,15 +19903,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">CSRFトークン - /admin/content/css のHTMLフォーム送信用CSRFトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 160</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -20678,15 +20046,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">CSRFトークン - /admin/content/js のHTMLフォーム送信用CSRFトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 160</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doUpdateContentJs</td>
   <td><span class="badge link">link</span></td>
@@ -20755,15 +20114,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">メンテナンス中フラグ - /admin/content/maintenance の処理状態を示すメンテナンス中フラグ。画面表示や冪等処理結果の分岐に使う真偽値。</td>
   <td><div class="extra-info">
 
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">CSRFトークン - /admin/content/maintenance のHTMLフォーム送信用CSRFトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 160</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -20920,17 +20270,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: 単一詳細画面では未選択/初期表示に空配列、取得済み状態にobjectが現れる。不透明な詳細構造は既知propertyを優先し、追加キーは互換境界として許容する。</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doUpdateDelivery</td>
   <td><span class="badge link">link</span></td>
@@ -21063,17 +20402,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maximum: 2147483647</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doCreateDelivery</td>
   <td><span class="badge link">link</span></td>
@@ -21202,17 +20530,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td><div class="extra-info">
       <span class="badge constraint">minimum: 0</span>
       <span class="badge example">example: 10</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr>
@@ -21491,17 +20808,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
   <td><span class="prop-name">publishDate</span></td>
   <td><span class="badge type-stringnull">string|null</span></td>
   <td class="param-desc">公開日 - ニュースの公開日時。フロントの表示順を制御 Fake観察文字長 25〜25; 観察値 &#039;2026-01-01T00:00:00+09:00&#039;。</td>
@@ -21682,17 +20988,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td><div class="extra-info">
       <span class="badge constraint">minimum: 0</span>
       <span class="badge constraint">maximum: 2147483647</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -22092,17 +21387,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: past0000000000000000000000000001</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">CSRFトークン - 受注登録/編集フォーム送信用のCSRFトークン。Resource bodyからTwig hidden inputへ渡される。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
-      <span class="badge constraint">$comment: CSRF値はRay.Csrf CsrfToken境界の責務。GET bodyではフォーム文脈を示すためにnullを許容する。</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doUpdateOrder</td>
   <td><span class="badge link">link</span></td>
@@ -22290,17 +21574,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: CSV列の業務妥当性はCSV互換サービスで検査する。ここではJSON境界上の文字列サイズを契約する。</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goOrderList</td>
   <td><span class="badge link">link</span></td>
@@ -22332,17 +21605,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 <tr><th>Name</th><th>Type</th><th>Description</th><th>Meta</th></tr>
 </thead>
 <tbody>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doImportShippingCsv</td>
   <td><span class="badge link">link</span></td>
@@ -22481,17 +21743,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: past0000000000000000000000000001</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doSendOrderMail</td>
   <td><span class="badge link">link</span></td>
@@ -22588,17 +21839,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 64</span>
       <span class="badge example">example: past0000000000000000000000000001</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -22762,17 +22002,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 64</span>
       <span class="badge example">example: past0000000000000000000000000001</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -23029,17 +22258,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">出荷通知メール送信フォームCSRFトークン - POST /admin/order/shipping-notify-mail のhidden inputで送るCSRFトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
   <td><a href="#GET/admin/order/shipping-notify-mailresponse.SubmitTo" class="prop-name">submitTo</a></td>
   <td><span class="badge type-object">object</span></td>
   <td class="param-desc">出荷通知メール送信リンク - 確認画面から出荷通知メール送信Resourceへ遷移するALPS unsafe遷移。</td>
@@ -23263,17 +22481,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
   <td><span class="prop-name">pageEditType</span></td>
   <td><span class="badge type-intnull">int|null</span></td>
   <td class="param-desc">ページ編集区分 - ページ編集レベル。0=EDIT_TYPE_USER（ユーザー作成、完全編集/削除可）, 1=EDIT_TYPE_PREVIEW（プレビュー）, 2=EDIT_TYPE_DEFAULT（システムページ、構造ロック・削除不可）, 3=EDIT_TYPE_DEFAULT_CONFIRM（内容編集可能なシステムページ、利用規約等）。editType&gt;=2は削除不可 Fake観察数値 0〜2; 観察値 &#039;0&#039;, &#039;2&#039;。</td>
@@ -23446,16 +22653,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minItems: 0</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">CSRFトークン - 一覧画面から送信する作成・削除フォーム用のCSRFトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doCreatePage</td>
   <td><span class="badge link">link</span></td>
@@ -23606,17 +22803,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
       <span class="badge constraint">$comment: 単一詳細画面では未選択/初期表示に空配列、取得済み状態にobjectが現れる。不透明な詳細構造は既知propertyを優先し、追加キーは互換境界として許容する。</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -23785,16 +22971,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td><div class="extra-info">
       <span class="badge constraint">minimum: 0</span>
       <span class="badge constraint">maximum: 2147483647</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">CSRFトークン - 一覧画面から送信する削除・表示切替フォーム用のCSRFトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -23970,17 +23146,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minItems: 0</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goProductList</td>
   <td><span class="badge link">link</span></td>
@@ -24034,17 +23199,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">CSV列定義 - /admin/product/csv-class-category のCSV列設定。各要素は出力対象フィールドと表示名を表す。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -24140,17 +23294,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">CSV列定義 - /admin/product/csv-class-name のCSV列設定。各要素は出力対象フィールドと表示名を表す。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -24258,17 +23401,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minItems: 0</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goProductList</td>
   <td><span class="badge link">link</span></td>
@@ -24315,17 +23447,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 64</span>
       <span class="badge example">example: sample-001</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -24379,17 +23500,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 <tr><th>Name</th><th>Type</th><th>Description</th><th>Meta</th></tr>
 </thead>
 <tbody>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr>
   <td><span class="prop-name">form</span></td>
   <td><span class="badge type-objectarraynull">object|array|null</span></td>
@@ -24557,17 +23667,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minItems: 0</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 8</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
-      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doCreateTag</td>
   <td><span class="badge link">link</span></td>
@@ -24710,16 +23809,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maximum: 2147483647</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">CSRFトークン - 一覧画面から送信する作成・削除フォーム用のCSRFトークン。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 160</span>
-      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doCreateTaxRule</td>
   <td><span class="badge link">link</span></td>
@@ -24820,14 +23909,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc"></td>
-  <td><div class="extra-info">
-
     </div></td>
 </tr>
 <tr class="link-row">
@@ -24958,14 +24039,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">テンプレート一覧 - /admin/template/template-list のレスポンスで扱うテンプレート一覧。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc"></td>
-  <td><div class="extra-info">
-
     </div></td>
 </tr>
 <tr class="link-row">

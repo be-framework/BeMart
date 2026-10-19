@@ -30,6 +30,7 @@ use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Override;
 use Ray\Di\AbstractModule;
+use Ray\Di\Scope;
 use Ray\WebFormModule\WebFormModule;
 use Twig\Environment;
 
@@ -63,6 +64,9 @@ final class HtmlModule extends AbstractModule
         $this->bind(DownloadContentTypePolicyInterface::class)->to(HtmlDownloadContentTypePolicy::class);
         $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
         $this->bind(AdminLoginFormSubmissionInterface::class)->to(HtmlAdminLoginFormSubmission::class);
+        // Explicit so the compiled contexts can build it: the Ray compiler does not
+        // JIT-bind a concrete class once it has constructor dependencies.
+        $this->bind(BeMartTwigExtension::class)->in(Scope::SINGLETON);
         $this->bind(Environment::class)->toProvider(HtmlTwigEnvironmentProvider::class);
         // Browser users get an HTML error page; the JSON AppThrowableHandler
         // (AppErrorModule) stays the default for API/HAL contexts.

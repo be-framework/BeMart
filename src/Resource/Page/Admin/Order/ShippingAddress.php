@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -22,7 +23,6 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderShippingForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
-use BEAR\Csrf\CsrfTokenInterface;
 
 use function assert;
 
@@ -60,7 +60,6 @@ class ShippingAddress extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -102,7 +101,6 @@ class ShippingAddress extends ResourceObject
         $this->body = [
             'form' => $form,
             'orderNo' => $orderNo,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -119,6 +117,7 @@ class ShippingAddress extends ResourceObject
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'doUpdateOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $orderNo,
         string $addressId,
@@ -151,6 +150,7 @@ class ShippingAddress extends ResourceObject
     #[Link(rel: 'doSelectShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'post')]
     #[Link(rel: 'doUpdateTrackingNumber', href: 'page://self/admin/order/tracking-number', method: 'put')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(
         string $orderNo,
         string $name01,

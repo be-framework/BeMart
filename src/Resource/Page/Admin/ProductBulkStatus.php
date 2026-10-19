@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -46,6 +47,7 @@ class ProductBulkStatus extends ResourceObject
     #[JsonSchema(schema: 'post-admin-product-bulk-status.json', params: 'post-admin-product-bulk-status.param.json')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         array $productCodes,
         int $productStatus,

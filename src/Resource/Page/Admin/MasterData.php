@@ -11,13 +11,13 @@ use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Exception\MasterTypeFormatException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MasterDataSelected;
 use MyVendor\BeMart\Be\Input\SelectMasterDataInput;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminMasterDataForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -39,7 +39,6 @@ class MasterData extends ResourceObject
         private readonly AdminMasterRegistryInterface $masters,
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -72,7 +71,6 @@ class MasterData extends ResourceObject
             'masterTypes' => $masterTypes,
             'selectedMaster' => $masterType,
             'rows' => $rows,
-            'csrfToken' => $this->csrf->issue(),
             'submitTo' => [
                 'rel' => 'doSelectMasterData',
                 'method' => 'PUT',
@@ -93,6 +91,7 @@ class MasterData extends ResourceObject
     #[JsonSchema(schema: 'put-admin-master-data.json', params: 'put-admin-master-data.param.json')]
     #[Link(rel: 'doUpdateMasterData', href: 'page://self/admin/master-data-edit', method: 'put')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(string $masterType = 'tag'): static
     {
         $final = ($this->becoming)(new SelectMasterDataInput(masterType: $masterType));
@@ -111,7 +110,6 @@ class MasterData extends ResourceObject
             'transitionId' => 'doSelectMasterData',
             'selectedMaster' => $final->masterType,
             'rows' => $final->rows,
-            'csrfToken' => $this->csrf->issue(),
             'submitTo' => [
                 'rel' => 'doUpdateMasterData',
                 'method' => 'PUT',

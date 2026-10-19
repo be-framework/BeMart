@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -85,7 +84,6 @@ final class AdminTaxRuleResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/tax-rule/tax-rule-list', [
             'taxRate' => $rate,
             'applyDate' => $applyDate,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $id = $ro->body['taxRuleId'];
         assert(is_string($id));
@@ -99,7 +97,6 @@ final class AdminTaxRuleResourceSqlTest extends AbstractResourceSqlTestCase
             'taxRate' => 10.0,
             'applyDate' => '2024-04-01T00:00:00+09:00',
             'roundingType' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -114,7 +111,6 @@ final class AdminTaxRuleResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/tax-rule/tax-rule-list', [
             'taxRate' => 10.0,
             'applyDate' => '2024-04-01T00:00:00+09:00',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -143,7 +139,6 @@ final class AdminTaxRuleResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->delete('page://self/admin/tax-rule/tax-rule', [
             'taxRuleId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -154,7 +149,6 @@ final class AdminTaxRuleResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->delete('page://self/admin/tax-rule/tax-rule', [
             'taxRuleId' => 'nonexistent-zzz',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }

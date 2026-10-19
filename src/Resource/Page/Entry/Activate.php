@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Entry;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -88,6 +89,7 @@ class Activate extends ResourceObject
     #[JsonSchema(schema: 'post-entry-activate.json', params: 'post-entry-activate.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(#[SensitiveParameter] string $secretKey): static
     {
         $final = ($this->becoming)(new ActivateCustomerInput(secretKey: $secretKey));

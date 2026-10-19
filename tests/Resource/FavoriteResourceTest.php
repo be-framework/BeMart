@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
@@ -53,7 +52,6 @@ final class FavoriteResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/mypage/favorite', [
             'productCode' => 'sample-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -70,7 +68,6 @@ final class FavoriteResourceTest extends TestCase
 
         $ro = $this->resource->post('page://self/mypage/favorite', [
             'productCode' => 'sample-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -83,7 +80,6 @@ final class FavoriteResourceTest extends TestCase
 
         $this->resource->post('page://self/mypage/favorite', [
             'productCode' => 'missing-zzz',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -95,7 +91,6 @@ final class FavoriteResourceTest extends TestCase
 
         $this->resource->post('page://self/mypage/favorite', [
             'productCode' => 'sample-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -107,7 +102,6 @@ final class FavoriteResourceTest extends TestCase
 
         $ro = $this->resource->delete('page://self/mypage/favorite', [
             'productCode' => 'sample-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -121,7 +115,6 @@ final class FavoriteResourceTest extends TestCase
         // Delete without prior add — still 200, alreadyAbsent=true.
         $ro = $this->resource->delete('page://self/mypage/favorite', [
             'productCode' => 'sample-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -138,7 +131,6 @@ final class FavoriteResourceTest extends TestCase
 
         $this->resource->delete('page://self/mypage/favorite', [
             'productCode' => 'sample-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

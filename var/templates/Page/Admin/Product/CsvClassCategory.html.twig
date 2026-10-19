@@ -110,7 +110,7 @@
     novalidate
     aria-label="規格分類CSV登録"
 >
-    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
     <div class="idea-admin-primary" style="max-width:860px;">
 

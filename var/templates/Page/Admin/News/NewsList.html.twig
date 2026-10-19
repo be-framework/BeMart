@@ -167,7 +167,7 @@
                 onsubmit="event.preventDefault(); newsListOpenDelete(this);">
             <input type="hidden" name="_method" value="delete">
             <input type="hidden" name="newsId" value="{{ item.newsId }}">
-            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+            <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
             <button type="submit" class="idea-admin-icon-btn" title="削除"
                     style="color: #a9472e; border-color: rgba(169,71,46,.3);">
               <i class="fa fa-trash" aria-hidden="true"></i>
@@ -221,7 +221,7 @@
       <button class="idea-admin-action" type="button" onclick="newsListCloseDelete()">キャンセル</button>
       <form id="news-delete-form" method="post" action="" style="display:inline;">
         <input type="hidden" name="_method" value="delete">
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">
           <i class="fa fa-trash" aria-hidden="true"></i>
           削除する

@@ -8,13 +8,11 @@
   DATA CONTRACT (src/Resource/Page/Admin/CsvConfig.php onGet):
     form             object — AdminCsvConfigForm (csvType select, csvOutput/csvNotOutput multiselect)
     csvType          int    — 1=商品 2=会員 3=受注 4=配送
-    csrfToken        string
     outputColumns    array<string,string>  — {columnKey: label}  currently enabled
     notOutputColumns array<string,string>  — {columnKey: label}  currently disabled
 
   POST CONTRACT (onPost):
     csvType                       int
-    csrfToken                     string
     columns[N][columnName]        string  — field key
     columns[N][enabled]           0|1     — 1=output
     columns[N][sortNo]            int     — 1-based position
@@ -309,7 +307,7 @@
 
 {# ── Main form ──────────────────────────────────────────────────────────── #}
 <form id="csv-config-form" method="post" action="/admin/csv-config" rel="doUpdateCsv" novalidate>
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="csvType"   value="{{ csvType|default(3) }}">
 
   {# Hidden fields are written by JS on submit (or on each drag/toggle) #}

@@ -220,9 +220,9 @@ final class ExcludedResponseBodyStoreTest extends TestCase
             'the nested app:// response must still record a body_ref',
         );
         $this->assertStringNotContainsString(
-            'csrfToken',
+            'goProductList',
             self::allWrittenBytes($bodyDir),
-            'the page-level csrfToken must not be among the bytes actually written to disk',
+            'the page-level transitionId (a value only the page body carries) must not be among the bytes actually written to disk',
         );
     }
 }

@@ -8,7 +8,6 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
@@ -21,7 +20,7 @@ use function dirname;
 /**
  * Resource-layer coverage for Pilot 12 (doReorder).
  *
- * Mirrors CheckoutResourceTest's rebindSession + CSRF pattern.
+ * Mirrors CheckoutResourceTest's rebindSession pattern.
  */
 final class ReorderResourceTest extends TestCase
 {
@@ -58,7 +57,6 @@ final class ReorderResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/mypage/reorder', [
             'orderNo' => 'past0000000000000000000000000001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -80,7 +78,6 @@ final class ReorderResourceTest extends TestCase
 
         $this->resource->post('page://self/mypage/reorder', [
             'orderNo' => 'past0000000000000000000000000001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -90,7 +87,6 @@ final class ReorderResourceTest extends TestCase
 
         $this->resource->post('page://self/mypage/reorder', [
             'orderNo' => 'never00000000000000000000000000z',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -102,7 +98,6 @@ final class ReorderResourceTest extends TestCase
 
         $this->resource->post('page://self/mypage/reorder', [
             'orderNo' => 'past0000000000000000000000000001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -116,12 +111,10 @@ final class ReorderResourceTest extends TestCase
         $first = $this->resourceWithCartPrefix('reorder-sess-a')
             ->post('page://self/mypage/reorder', [
                 'orderNo' => 'past0000000000000000000000000001',
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
         $second = $this->resourceWithCartPrefix('reorder-sess-b')
             ->post('page://self/mypage/reorder', [
                 'orderNo' => 'past0000000000000000000000000001',
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
 
         $this->assertSame(['reorder-sess-a_1'], $first->body['cartKeys']);

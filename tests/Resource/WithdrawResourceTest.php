@@ -12,7 +12,6 @@ use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\Result\SavedCart;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
@@ -69,7 +68,6 @@ final class WithdrawResourceTest extends TestCase
         $this->assertSame(['csrfToken'], $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/mypage/withdraw', $ro->body['submitTo']['href']);
-        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnGetShowsCurrentCustomer(): void
@@ -96,7 +94,6 @@ final class WithdrawResourceTest extends TestCase
     public function testOnPostHappyPathReturns200(): void
     {
         $ro = $this->resource->post('page://self/mypage/withdraw', [
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -111,7 +108,6 @@ final class WithdrawResourceTest extends TestCase
         // The account the session names is gone; leaving the session
         // live would keep every /mypage transition authenticated.
         $ro = $this->resource->post('page://self/mypage/withdraw', [
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -125,7 +121,6 @@ final class WithdrawResourceTest extends TestCase
         $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
 
         $this->resource->post('page://self/mypage/withdraw', [
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -183,7 +178,6 @@ final class WithdrawResourceTest extends TestCase
 
         $ro = $resource->post('page://self/mypage/withdraw', [
             'sessionPrefix' => 'victim-session',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);

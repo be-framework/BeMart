@@ -4,7 +4,6 @@
 
   DATA CONTRACT (src/Resource/Page/Admin/Content/Css.php onGet):
     form         AdminCssForm  — pre-filled renderer; field: css (textarea, id=form_css)
-    csrfToken    string        — CSRF token from CsrfToken service
 
   ACTION CONTRACT (onPut → doUpdateContentCss):
     method: POST  action: /admin/content/css?_method=put
@@ -90,7 +89,7 @@
   rel="doUpdateContentCss"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="mode" value="content_operation_form">
 
   {# ── Info strip ───────────────────────────────────────────────────────── #}

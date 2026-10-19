@@ -27,7 +27,7 @@
 <section class="idea-container idea-section">
   <form class="idea-checkout-panel idea-entry-form h-adr" method="post" action="/entry" rel="doRegisterCustomer" novalidate>
     <span class="p-country-name" aria-hidden="true">Japan</span>
-    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
     <div class="idea-panel-head">
       <div>

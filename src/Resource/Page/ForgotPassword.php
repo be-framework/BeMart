@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,7 +16,6 @@ use MyVendor\BeMart\Be\Final\PasswordResetRequested;
 use MyVendor\BeMart\Be\Input\RequestPasswordResetInput;
 use MyVendor\BeMart\Form\ForgotForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -44,7 +44,6 @@ class ForgotPassword extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -69,7 +68,6 @@ class ForgotPassword extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/forgot-password',
             ],
-            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty ForgotForm for the HTML port to render
             // via `{{ form.input(...) }}`. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ForgotForm::class),
@@ -86,6 +84,7 @@ class ForgotPassword extends ResourceObject
     #[JsonSchema(schema: 'post-forgot-password.json', params: 'post-forgot-password.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string $email): static
     {
         $final = ($this->becoming)(new RequestPasswordResetInput(email: $email));

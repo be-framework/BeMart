@@ -8,7 +8,6 @@ use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function str_contains;
@@ -140,7 +139,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/order/shipping-address', [
             'orderNo' => $orderNo,
             'addressId' => (string) $addressId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -167,7 +165,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/order/shipping-address', [
             'orderNo' => 'nonexistentordernononononononono',
             'addressId' => (string) $addressId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -180,7 +177,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/order/shipping-address', [
             'orderNo' => $orderNo,
             'addressId' => '999999',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -200,7 +196,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/order/shipping-address', [
             'orderNo' => $orderNo,
             'addressId' => (string) $bobAddressId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -216,7 +211,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/order/shipping-address', [
             'orderNo' => $orderNo,
             'addressId' => (string) $addressId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -240,7 +234,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前2-2',
             'phoneNumber' => '0900000000',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -267,7 +260,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
             'addr01' => 'A',
             'addr02' => 'B',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $ro = $this->resource->put('page://self/admin/order/shipping-address', [
             'orderNo' => $orderNo,
@@ -278,7 +270,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
             'addr01' => 'A',
             'addr02' => 'B',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -299,7 +290,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
             'addr01' => 'A',
             'addr02' => 'B',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -320,7 +310,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
             'addr01' => 'A',
             'addr02' => 'B',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -354,7 +343,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
                 'addr01' => '渋谷区',
                 'addr02' => '神宮前1-1',
                 'phoneNumber' => '0312345678',
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
         }
 

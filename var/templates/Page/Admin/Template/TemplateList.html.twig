@@ -8,7 +8,6 @@
   DATA CONTRACT (src/Resource/Page/Admin/Template/TemplateList.php onGet):
     count       int  — total templates returned
     templates   list<{templateId: string, templateName: string, deviceType: int, active: bool}>
-    csrfToken   string — CSRF token (select PUT + delete DELETE forms)
 
   ACTIONS (derived from #[Link] annotations on TemplateList):
     GET  /admin/template/template-list                                  — goTemplateList (this page)
@@ -82,7 +81,7 @@
   action="/admin/template/template-list?_method=put"
   rel="doSelectTemplate"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" id="template-id-hidden" name="templateId" value="">
 
   <div class="idea-admin-table-wrap">
@@ -142,7 +141,7 @@
               rel="doDownloadTemplate"
               style="display:contents;"
             >
-              <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+              <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
               <input type="hidden" name="templateId" value="{{ template.templateId }}">
               <button
                 class="idea-admin-icon-btn"
@@ -226,7 +225,7 @@
         rel="doDeleteTemplate"
         style="display:contents;"
       >
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
         <input type="hidden" name="templateId" value="{{ template.templateId }}">
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">
           削除

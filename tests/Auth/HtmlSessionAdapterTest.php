@@ -4,16 +4,23 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Auth;
 
+use BEAR\Csrf\CsrfSessionKey;
+use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\Http\RequestTokenInterface;
+use BEAR\Csrf\StoredCsrfToken;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Auth\HtmlCartSessionPrefix;
 use MyVendor\BeMart\Auth\HtmlSessionAdapter;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Auth\NullSessionStarter;
+use MyVendor\BeMart\Auth\SessionStarterCsrfStore;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeRequestToken;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
+use Override;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
 
 use function session_cache_limiter;
 use function session_destroy;
@@ -33,7 +40,7 @@ final class HtmlSessionAdapterTest extends TestCase
     {
         unset(
             $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY],
-            $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY],
+            $_SESSION[CsrfSessionKey::DEFAULT_NAME],
         );
     }
 
@@ -41,7 +48,7 @@ final class HtmlSessionAdapterTest extends TestCase
     {
         unset(
             $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY],
-            $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY],
+            $_SESSION[CsrfSessionKey::DEFAULT_NAME],
         );
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION = [];
@@ -94,7 +101,6 @@ final class HtmlSessionAdapterTest extends TestCase
         $ro = $this->htmlResource()->post('page://self/login', [
             'email' => 'login-test@example.com',
             'password' => 'local-dev-member-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -108,9 +114,7 @@ final class HtmlSessionAdapterTest extends TestCase
         $this->startActiveSession();
         $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = '10000000aaaa1111bbbb2222cccc3333';
 
-        $ro = $this->htmlResource()->post('page://self/logout', [
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
+        $ro = $this->htmlResource()->post('page://self/logout');
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertArrayNotHasKey(HtmlSessionAdapter::CUSTOMER_ID_KEY, $_SESSION);
@@ -119,50 +123,75 @@ final class HtmlSessionAdapterTest extends TestCase
 
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
-    public function testHtmlContextLoginRegeneratesSessionIdAndRotatesCsrfReference(): void
+    public function testHtmlContextLoginRegeneratesSessionIdAndRetiresTheAnonymousCsrfToken(): void
     {
         $this->startActiveSession();
         $sessionIdBeforeLogin = session_id();
         // Pinned while anonymous: the cart rows keyed by this prefix must stay
         // reachable after the id rotates.
         $cartPrefix = (new HtmlCartSessionPrefix())->prefix();
-        $anonymousToken = (new EccubeSharedCsrfTokenAdapter())->issue();
+        $csrf = $this->sessionCsrfToken();
+        $anonymousToken = $csrf->issue();
 
-        $ro = $this->htmlResource()->post('page://self/login', [
+        $ro = $this->htmlResourceSubmitting($csrf, $anonymousToken)->post('page://self/login', [
             'email' => 'login-test@example.com',
             'password' => 'local-dev-member-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($sessionIdBeforeLogin, $cartPrefix);
         $this->assertNotSame($sessionIdBeforeLogin, session_id());
-        $this->assertFalse((new EccubeSharedCsrfTokenAdapter())->verify($anonymousToken));
+        $this->assertFalse($csrf->verify($anonymousToken));
+        $this->assertNotSame($anonymousToken, $csrf->issue());
         $this->assertSame($cartPrefix, (new HtmlCartSessionPrefix())->prefix());
     }
 
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
-    public function testHtmlContextLogoutRetiresSessionIdAndCsrfReference(): void
+    public function testHtmlContextLogoutRetiresSessionIdAndCsrfToken(): void
     {
         $this->startActiveSession();
         $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = '10000000aaaa1111bbbb2222cccc3333';
         $sessionIdBeforeLogout = session_id();
-        $tokenBeforeLogout = (new EccubeSharedCsrfTokenAdapter())->issue();
+        $csrf = $this->sessionCsrfToken();
+        $tokenBeforeLogout = $csrf->issue();
 
-        $this->htmlResource()->post('page://self/logout', [
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
+        $this->htmlResourceSubmitting($csrf, $tokenBeforeLogout)->post('page://self/logout');
 
         $this->assertNotSame($sessionIdBeforeLogout, session_id());
-        $this->assertFalse((new EccubeSharedCsrfTokenAdapter())->verify($tokenBeforeLogout));
+        $this->assertFalse($csrf->verify($tokenBeforeLogout));
     }
 
     private function htmlResource(): ResourceInterface
     {
-        $injector = HtmlTestInjector::getInstance();
+        return HtmlTestInjector::getInstance()->getInstance(ResourceInterface::class);
+    }
 
-        return $injector->getInstance(ResourceInterface::class);
+    /** The production token over the session this test opened, in place of FakeModule's fixed one. */
+    private function sessionCsrfToken(): CsrfTokenInterface
+    {
+        return new StoredCsrfToken(new SessionStarterCsrfStore(new NullSessionStarter()));
+    }
+
+    private function htmlResourceSubmitting(CsrfTokenInterface $csrf, string $submitted): ResourceInterface
+    {
+        $module = new class ($csrf, $submitted) extends AbstractModule {
+            public function __construct(
+                private readonly CsrfTokenInterface $csrf,
+                private readonly string $submitted,
+            ) {
+                parent::__construct();
+            }
+
+            #[Override]
+            protected function configure(): void
+            {
+                $this->bind(CsrfTokenInterface::class)->toInstance($this->csrf);
+                $this->bind(RequestTokenInterface::class)->toInstance(new FakeRequestToken($this->submitted));
+            }
+        };
+
+        return HtmlTestInjector::getOverrideInstance($module)->getInstance(ResourceInterface::class);
     }
 
     private function startActiveSession(): void

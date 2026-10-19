@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Mypage;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
@@ -18,7 +19,6 @@ use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
 use MyVendor\BeMart\Be\Input\WithdrawCustomerInput;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -35,7 +35,6 @@ use function assert;
  *
  * Failure mapping:
  *   - UnauthenticatedException  → 401 (no session)
- *   - missing/invalid csrfToken → 403
  */
 class Withdraw extends ResourceObject
 {
@@ -48,7 +47,6 @@ class Withdraw extends ResourceObject
         private readonly CartSessionPrefixInterface $cartSessionPrefix,
         private readonly MutationResponseInterface $mutationResponse,
         private readonly CustomerSessionWriterInterface $sessionWriter,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -97,7 +95,6 @@ class Withdraw extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/mypage/withdraw',
             ],
-            'csrfToken' => $this->csrf->issue(),
             'customerId' => (string) $profile->body['customerId'],
             'email' => (string) $profile->body['email'],
             'name01' => (string) $profile->body['name01'],
@@ -113,6 +110,7 @@ class Withdraw extends ResourceObject
     #[Link(rel: 'goMypageWithdrawComplete', href: 'page://self/mypage/withdraw-complete')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(): static
     {
         $final = ($this->becoming)(new WithdrawCustomerInput(

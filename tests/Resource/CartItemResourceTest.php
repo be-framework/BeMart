@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -32,7 +31,6 @@ final class CartItemResourceTest extends TestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -50,7 +48,6 @@ final class CartItemResourceTest extends TestCase
             'productCode' => 'sample-001',
             'operation' => 'add',
             'quantity' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -66,7 +63,6 @@ final class CartItemResourceTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'missing-xyz',
             'quantity' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -76,13 +72,11 @@ final class CartItemResourceTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $ro = $this->resource->put('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 5,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -97,14 +91,12 @@ final class CartItemResourceTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'operation' => 'up',
             'quantity' => 4,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -118,14 +110,12 @@ final class CartItemResourceTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 3,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'operation' => 'down',
             'quantity' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -139,13 +129,11 @@ final class CartItemResourceTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'operation' => 'remove',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -160,7 +148,6 @@ final class CartItemResourceTest extends TestCase
         $this->resource->put('page://self/cart/item', [
             'productCode' => 'sample-002',
             'quantity' => 3,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -170,11 +157,9 @@ final class CartItemResourceTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $ro = $this->resource->delete('page://self/cart/item', [
             'productCode' => 'sample-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -188,7 +173,6 @@ final class CartItemResourceTest extends TestCase
 
         $this->resource->delete('page://self/cart/item', [
             'productCode' => 'sample-002',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -199,7 +183,6 @@ final class CartItemResourceTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'out-of-stock-test-001',
             'quantity' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -210,7 +193,6 @@ final class CartItemResourceTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

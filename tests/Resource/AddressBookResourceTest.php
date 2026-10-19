@@ -8,7 +8,6 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
@@ -97,7 +96,6 @@ final class AddressBookResourceTest extends TestCase
             'phoneNumber' => '0312345678',
             'kana01' => 'ヤマダ',
             'kana02' => 'アリス',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         assert($ro->code === Code::CREATED);
         assert(is_array($ro->body));
@@ -165,7 +163,6 @@ final class AddressBookResourceTest extends TestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-1-1',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -189,7 +186,6 @@ final class AddressBookResourceTest extends TestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-1-1',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);
@@ -205,7 +201,6 @@ final class AddressBookResourceTest extends TestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-1-1',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -220,7 +215,6 @@ final class AddressBookResourceTest extends TestCase
         $ro = $this->resource->put('page://self/mypage/address', [
             'addressId' => $addressId,
             'phoneNumber' => '0399998888',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -237,7 +231,6 @@ final class AddressBookResourceTest extends TestCase
         $ro = $this->resource->put('page://self/mypage/address', [
             'addressId' => 'deadbeefdeadbeefdeadbeefdeadbeef',
             'phoneNumber' => '0399998888',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -253,7 +246,6 @@ final class AddressBookResourceTest extends TestCase
         $ro = $this->resource->put('page://self/mypage/address', [
             'addressId' => $aliceAddressId,
             'phoneNumber' => '0399998888',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -267,7 +259,6 @@ final class AddressBookResourceTest extends TestCase
 
         $ro = $this->resource->delete('page://self/mypage/address', [
             'addressId' => $addressId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -283,7 +274,6 @@ final class AddressBookResourceTest extends TestCase
     {
         $ro = $this->resource->delete('page://self/mypage/address', [
             'addressId' => 'deadbeefdeadbeefdeadbeefdeadbeef',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -298,7 +288,6 @@ final class AddressBookResourceTest extends TestCase
         $this->rebindSession(self::BOB_ID);
         $ro = $this->resource->delete('page://self/mypage/address', [
             'addressId' => $aliceAddressId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -315,7 +304,6 @@ final class AddressBookResourceTest extends TestCase
 
         $ro = $this->resource->delete('page://self/mypage/address', [
             'addressId' => 'deadbeefdeadbeefdeadbeefdeadbeef',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);

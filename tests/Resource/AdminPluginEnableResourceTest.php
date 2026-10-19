@@ -11,7 +11,6 @@ use MyVendor\BeMart\Be\Reason\Entity\PluginEntity;
 use MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -22,7 +21,7 @@ use function dirname;
 /**
  * Wave 8 — doEnablePlugin resource coverage.
  *
- * Failure ladder: 400 / 403 (CSRF) / 403 (AUTHZ) / 404 (unknown) /
+ * Failure ladder: 400 / 403 (AUTHZ) / 404 (unknown) /
  * 409 (uninstalled). Plus happy-path + idempotent-replay coverage.
  */
 #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
@@ -66,7 +65,6 @@ final class AdminPluginEnableResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/plugin-enable', [
             'pluginCode' => 'Sample/DisabledPlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -83,7 +81,6 @@ final class AdminPluginEnableResourceTest extends TestCase
         // Seed-enabled plugin is already enabled — replay is a no-op.
         $ro = $this->resource->post('page://self/admin/plugin-enable', [
             'pluginCode' => 'Sample/SamplePlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -95,7 +92,6 @@ final class AdminPluginEnableResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/plugin-enable', [
             'pluginCode' => 'NoSuch/Plugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -120,7 +116,6 @@ final class AdminPluginEnableResourceTest extends TestCase
 
         $ro = $this->resource->post('page://self/admin/plugin-enable', [
             'pluginCode' => 'Partial/Plugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(409, $ro->code);
@@ -133,7 +128,6 @@ final class AdminPluginEnableResourceTest extends TestCase
 
         $ro = $this->resource->post('page://self/admin/plugin-enable', [
             'pluginCode' => 'Sample/DisabledPlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
