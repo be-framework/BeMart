@@ -232,7 +232,6 @@ class NonMember extends ResourceObject
                 'pref',
                 'addr01',
                 'addr02',
-                'csrfToken',
             ],
             'submitTo' => [
                 'method' => 'POST',

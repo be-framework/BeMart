@@ -28,40 +28,43 @@ use function implode;
 use function ksort;
 use function preg_match;
 use function preg_match_all;
+use function sprintf;
 use function str_starts_with;
 
+use const PREG_SET_ORDER;
+
 /**
- * Every rendered CSRF field carries the session token.
+ * Every rendered POST form carries the session token.
  *
  * Templates fill the hidden `csrfToken` input from the Twig `csrf_token()` function, which
  * reads the bound {@see \BEAR\Csrf\CsrfTokenInterface}. The HTML test context binds
- * {@see FakeCsrfToken}, so any other value means a template still expects the resource to
- * publish the token — the pre-BEAR.Csrf shape, which rendered `value=""` and made the form
- * dead on submit.
+ * {@see FakeCsrfToken}. A POST form without the input is dead on submit in every armed
+ * context, and any other value means a template still expects the resource to publish the
+ * token — the pre-BEAR.Csrf shape, which rendered `value=""`.
  */
 final class CsrfTokenRenderedTest extends TestCase
 {
     public const ADMIN_ID = 'ad000000000000000000000000000001';
     public const CUSTOMER_ID = 'customer-001';
 
-    public function testEveryRenderedCsrfFieldCarriesTheToken(): void
+    public function testEveryRenderedPostFormCarriesTheSessionToken(): void
     {
-        $fields = 0;
-        $wrong = [];
-        foreach ($this->renderedCsrfValues() as $identity => $values) {
-            foreach ($values as $value) {
-                $fields++;
-                if ($value !== FakeCsrfToken::DEFAULT_TOKEN) {
-                    $wrong[$identity] = $value;
+        $forms = 0;
+        $broken = [];
+        foreach ($this->renderedPostForms() as $identity => $tokens) {
+            foreach ($tokens as $index => $token) {
+                $forms++;
+                if ($token !== FakeCsrfToken::DEFAULT_TOKEN) {
+                    $broken[] = sprintf('%s form#%d: %s', $identity, $index + 1, $token ?? '(no csrfToken input)');
                 }
             }
         }
 
-        $this->assertGreaterThan(0, $fields, 'No page rendered a csrfToken field; the sweep is vacuous.');
+        $this->assertGreaterThan(0, $forms, 'No page rendered a POST form; the sweep is vacuous.');
         $this->assertSame(
             [],
-            $wrong,
-            "Pages rendering a csrfToken field without the session token:\n" . implode("\n", array_keys($wrong)),
+            $broken,
+            "POST forms rendered without the session token:\n" . implode("\n", $broken),
         );
     }
 
@@ -92,8 +95,11 @@ final class CsrfTokenRenderedTest extends TestCase
         $this->assertContains('csrf_token', $names);
     }
 
-    /** @return array<string, list<string>> page identity => rendered csrfToken values */
-    private function renderedCsrfValues(): array
+    /**
+     * @return array<string, list<string|null>> page identity => csrfToken value of each POST form,
+     *                                          null when the form has no csrfToken input
+     */
+    private function renderedPostForms(): array
     {
         /** @var array<string, ResourceInterface> $resources one per session shape */
         $resources = [];
@@ -114,9 +120,15 @@ final class CsrfTokenRenderedTest extends TestCase
                 continue;
             }
 
-            preg_match_all('/<input\b[^>]*\bname="csrfToken"[^>]*>/', $html, $inputs);
-            foreach ($inputs[0] as $input) {
-                $rendered[$identity][] = preg_match('/\bvalue="([^"]*)"/', $input, $value) === 1 ? $value[1] : '';
+            preg_match_all('/<form\b([^>]*)>(.*?)<\/form>/is', $html, $forms, PREG_SET_ORDER);
+            foreach ($forms as [, $attributes, $inner]) {
+                if (preg_match('/\bmethod="post"/i', $attributes) !== 1) {
+                    continue;
+                }
+
+                $rendered[$identity][] = preg_match('/<input\b[^>]*\bname="csrfToken"[^>]*\bvalue="([^"]*)"/', $inner, $value) === 1
+                    ? $value[1]
+                    : null;
             }
         }
 

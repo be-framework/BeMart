@@ -28,7 +28,7 @@ use function assert;
  * (Input → Final) — see LogoutInput.
  *
  * Failure mapping (intentionally narrow):
- *   - missing/invalid CSRF token       → 403 (Slice 8 uniform CSRF guard)
+ *   - missing/invalid CSRF token       → 403 (BEAR.Csrf gates)
  *   - SemanticVariableException        → 400 (defensive; LogoutInput has
  *                                              no semantically-validated
  *                                              fields, so this is unreachable
@@ -52,10 +52,6 @@ class Logout extends ResourceObject
     ) {
     }
 
-    /**
-     * Phase B Slice 9: the CSRF token is user-controlled input.
-     *
-     */
     #[Alps('doLogout')]
     #[JsonSchema(schema: 'post-logout.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]

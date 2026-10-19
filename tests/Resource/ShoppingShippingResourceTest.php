@@ -32,7 +32,7 @@ final class ShoppingShippingResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('goShoppingShipping', $ro->body['transitionId']);
-        $this->assertSame(['shippingAddressId', 'csrfToken'], $ro->body['fields']);
+        $this->assertSame(['shippingAddressId'], $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/shopping/shipping', $ro->body['submitTo']['href']);
         // Address data lookup is a Wave-future TODO — empty list for now.
@@ -48,7 +48,6 @@ final class ShoppingShippingResourceTest extends TestCase
         $this->assertContains('name01', $ro->body['fields']);
         $this->assertContains('postalCode', $ro->body['fields']);
         $this->assertContains('addr01', $ro->body['fields']);
-        $this->assertContains('csrfToken', $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/shopping/shipping-edit', $ro->body['submitTo']['href']);
     }

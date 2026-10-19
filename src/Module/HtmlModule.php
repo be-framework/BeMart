@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use BEAR\Csrf\CsrfStoreInterface;
 use BEAR\Package\Provide\Representation\RouterReverseLinker;
 use BEAR\Resource\ReverseLinkerInterface;
 use BEAR\Sunday\Extension\Error\ThrowableHandlerInterface;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Auth\HtmlAdminSessionWriter;
 use MyVendor\BeMart\Auth\HtmlCartSessionPrefix;
 use MyVendor\BeMart\Auth\HtmlCustomerSessionWriter;
 use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
+use MyVendor\BeMart\Auth\SessionStarterCsrfStore;
 use MyVendor\BeMart\Auth\SessionStarterInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Provide\Error\HtmlThrowableHandler;
@@ -57,6 +59,9 @@ final class HtmlModule extends AbstractModule
         // so a plain HTML context (no EC-CUBE bridge) still gets a session without HtmlAdminSessionAdapter
         // hardcoding a cross-reference to it.
         $this->bind(SessionStarterInterface::class)->toInstance(new CookieSessionStarter(EccubeSharedSessionAdapter::COOKIE_NAME));
+        // The CSRF store opens the session through the starter above, so a plain HTML
+        // context (sql-html-app) shares the cookie instead of falling back to session_start().
+        $this->bind(CsrfStoreInterface::class)->to(SessionStarterCsrfStore::class)->in(Scope::SINGLETON);
         $this->bind(AdminSession::class)->to(HtmlAdminSessionAdapter::class);
         $this->bind(CustomerSessionWriterInterface::class)->to(HtmlCustomerSessionWriter::class);
         $this->bind(AdminSessionWriterInterface::class)->to(HtmlAdminSessionWriter::class);

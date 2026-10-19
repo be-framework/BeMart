@@ -67,7 +67,7 @@ class Reset extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goResetPassword',
-            'fields' => ['resetKey', 'password', 'csrfToken'],
+            'fields' => ['resetKey', 'password'],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/reset',

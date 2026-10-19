@@ -94,7 +94,7 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('goMypageWithdraw', $ro->body['transitionId']);
-        $this->assertSame(['csrfToken'], $ro->body['fields']);
+        $this->assertSame([], $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/mypage/withdraw', $ro->body['submitTo']['href']);
     }

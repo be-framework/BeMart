@@ -46,7 +46,7 @@ class Shipping extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goShoppingShipping',
-            'fields' => ['shippingAddressId', 'csrfToken'],
+            'fields' => ['shippingAddressId'],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/shopping/shipping',

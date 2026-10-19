@@ -22,7 +22,7 @@ BeMart の CSRF 対応は [BEAR.Csrf](https://github.com/bearsunday/BEAR.Csrf)�
 ## テスト
 
 - **Fake / SQL の in-process context** — `FakeModule` が両ゲートを降ろす。`FakeRequestToken` が `FakeCsrfToken` の token を返し、`AllowedOrigin` は null。Resource テストは `csrfToken` に触れない。ゲート自体は `tests/Resource/CsrfGateWiringTest.php` が override module で武装させて 1 か所で検証する。
-- **`http` tier** — 本物のゲート。テストは `X-BeMart-Test-Csrf-Token` ヘッダで session slot に token を鏡写しし、`csrfToken` として送信し、ブラウザと同じ `Sec-Fetch-Site: same-origin` を付ける。
+- **`http` tier** — `tests/Http/html-sql-index.php` と `prod-json-index.php` から立てるサーバだけが両ゲートを本物で動かす。テストは `X-BeMart-Test-Csrf-Token` ヘッダで session slot に token を鏡写しし、`csrfToken` として送信し、ブラウザと同じ `Sec-Fetch-Site: same-origin` を付ける。token 無しと cross-site 送信が 403 になることは `tests/Http/HttpSqlCsrfGateTest.php` が確かめる。他の front controller（`index.php` など）は `FakeModule` 付きの context で起動するので、ゲートは降りている。
 - **`hypermedia` tier** — token gate は本物、same-origin gate には `FakeRequestOrigin(fetchSite: 'same-origin')` で「HTTP 層が送るのと同じ申告」を与える（in-process にはリクエストヘッダが無い）。
 - `phpunit.xml` の `<env>` が `BEMART_ALLOWED_ORIGIN` を立てる。値は比較されない（全リクエストが same-origin を申告する）が、無いと prod context がコンパイルできない。
 - `tests/Html/CsrfTokenRenderedTest.php` が描画される全フォームの hidden field に token が入ることを確認する。

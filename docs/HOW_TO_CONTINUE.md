@@ -92,7 +92,8 @@ sql/setup-db.sh "$DATABASE_URL"
 
 prod context（`bin/prod.php`、`public/index.php` の prod、prod をコンパイルするスクリプト）は
 `BEMART_ALLOWED_ORIGIN`（例 `https://shop.example`）も必要とする。未設定だと `ProdModule` が
-起動を拒む。PHPUnit は `phpunit.xml` の `<env>` で立てるので手動設定は不要。
+起動を拒む。PHPUnit は `phpunit.xml` の `<env>` で、`docker compose` は `docker-compose.yml` の
+`environment` で立てるので手動設定は不要。公開ポートを変えたら compose 側の値も揃える。
 詳細は `docs/methodology/csrf-protection.md`。
 
 ### 1.4 動作確認

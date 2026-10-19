@@ -90,7 +90,7 @@ class Withdraw extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goMypageWithdraw',
-            'fields' => ['csrfToken'],
+            'fields' => [],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/mypage/withdraw',

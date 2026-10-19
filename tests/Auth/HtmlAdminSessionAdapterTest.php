@@ -132,7 +132,9 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     {
         $this->startActiveSession();
         $sessionIdBeforeChallenge = session_id();
-        $adapter = new HtmlAdminLoginChallengeAdapter();
+        $csrf = $this->sessionCsrfToken();
+        $tokenBeforeChallenge = $csrf->issue();
+        $adapter = new HtmlAdminLoginChallengeAdapter($csrf);
         $challenge = new AdminTwoFactorChallenge(
             adminId: 'ad000000000000000000000000000001',
             loginId: 'test-admin',
@@ -142,6 +144,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
         $adapter->completeVerification($challenge);
 
         $this->assertNotSame($sessionIdBeforeChallenge, session_id());
+        $this->assertFalse($csrf->verify($tokenBeforeChallenge), 'the anonymous session token must not survive elevation');
         $this->assertSame($challenge->adminId, $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] ?? null);
         $this->assertArrayNotHasKey(HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY, $_SESSION);
     }
@@ -202,11 +205,10 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     public function testCompletingTwoFactorChallengeRetiresTheAnonymousSessionId(): void
     {
         // The planted-cookie defence: elevation must not keep the session id
-        // the client held while unauthenticated. The CSRF token is retired
-        // by the writer at login and logout, not here.
+        // the client held while unauthenticated.
         $this->startActiveSession();
         $anonymousSessionId = session_id();
-        $adapter = new HtmlAdminLoginChallengeAdapter();
+        $adapter = new HtmlAdminLoginChallengeAdapter($this->sessionCsrfToken());
         $challenge = new AdminTwoFactorChallenge(
             adminId: 'ad000000000000000000000000000001',
             loginId: 'test-admin',

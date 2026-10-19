@@ -223,7 +223,7 @@
             "get": {
                 "operationId": "goCustomerRegistration",
                 "summary": "EC-CUBE goCustomerRegistration \u2014 show the customer registration\nform scaffolding.",
-                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate). Fields mirror RegisterCustomerInput: 4 required + 11\noptional. In the dev/html fake-CSRF environment we expose the fake\ntoken into the hidden `_token` input so a real browser form submit\ncan exercise the POST path instead of failing at the boundary.",
+                "description": "Pure form-info endpoint: no Be Framework involved, no domain\nlogic. Anonymous-accessible (returns 200 regardless of session\nstate). Fields mirror RegisterCustomerInput: 4 required + 11\noptional. The HTML port fills the form's hidden `csrfToken` input\nvia `csrf_token()`; the body carries no token.",
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -706,7 +706,8 @@
         "/logout": {
             "post": {
                 "operationId": "doLogout",
-                "summary": "Phase B Slice 9: the CSRF token is user-controlled input.",
+                "summary": "EC-CUBE doLogout \u2014 \u4f1a\u54e1\u30ed\u30b0\u30a2\u30a6\u30c8 (Pilot \u2014 Direct, idempotent).",
+                "description": "Resource is the HTTP entry point: builds LogoutInput, hands it to\nBecoming, and on success returns whether there was anyone to log out\nalong with their customerId. The Be layer pattern is Direct\n(Input \u2192 Final) \u2014 see LogoutInput.\n\nFailure mapping (intentionally narrow):\n  - missing/invalid CSRF token       \u2192 403 (BEAR.Csrf gates)\n  - SemanticVariableException        \u2192 400 (defensive; LogoutInput has\n                                             no semantically-validated\n                                             fields, so this is unreachable\n                                             today but kept uniform with\n                                             the rest of Slice 8/9)\n\nNotably absent: 401. Per ALPS `type=idempotent`, logging out an\nanonymous client is a no-op success \u2014 the response body simply\ncarries `wasLoggedIn=false`. The resource MUST NOT treat the absence\nof a session as an error.\n\nIn the html context the session-writer port ends the browser session behind\nthis resource. Non-html contexts bind a no-op writer, so Resource code does\nnot branch on environment or touch PHP session storage.",
                 "responses": {
                     "200": {
                         "description": "Successful response",

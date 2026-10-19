@@ -9,7 +9,7 @@ along with their customerId. The Be layer pattern is Direct
 (Input → Final) — see LogoutInput.
 
 Failure mapping (intentionally narrow):
-  - missing/invalid CSRF token       → 403 (Slice 8 uniform CSRF guard)
+  - missing/invalid CSRF token       → 403 (BEAR.Csrf gates)
   - SemanticVariableException        → 400 (defensive; LogoutInput has
                                              no semantically-validated
                                              fields, so this is unreachable
@@ -29,8 +29,6 @@ not branch on environment or touch PHP session storage.
 
 
 ## POST
-Phase B Slice 9: the CSRF token is user-controlled input.
-
 **ALPS**: `doLogout`
 
 

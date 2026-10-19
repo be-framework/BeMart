@@ -33,9 +33,8 @@ form scaffolding.
 Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
 state). Fields mirror RegisterCustomerInput: 4 required + 11
-optional. In the dev/html fake-CSRF environment we expose the fake
-token into the hidden `_token` input so a real browser form submit
-can exercise the POST path instead of failing at the boundary.
+optional. The HTML port fills the form's hidden `csrfToken` input
+via `csrf_token()`; the body carries no token.
 
 **ALPS**: `goCustomerRegistration`
 

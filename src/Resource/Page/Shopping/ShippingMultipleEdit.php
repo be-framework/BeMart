@@ -77,7 +77,6 @@ class ShippingMultipleEdit extends ResourceObject
                 'addr01',
                 'addr02',
                 'phoneNumber',
-                'csrfToken',
             ],
             'submitTo' => [
                 'method' => 'POST',

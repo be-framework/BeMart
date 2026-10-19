@@ -44,7 +44,6 @@ final class ShoppingNonMemberResourceTest extends TestCase
                 'pref',
                 'addr01',
                 'addr02',
-                'csrfToken',
             ],
             $ro->body['fields'],
         );

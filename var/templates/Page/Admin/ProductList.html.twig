@@ -196,6 +196,7 @@
 
 {# ── Bulk-action form ── #}
 <form id="form_bulk" method="POST" action="">
+    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
     {# Bulk bar — hidden until a checkbox is checked #}
     <div id="bulk-bar" class="idea-admin-list-toolbar" hidden>

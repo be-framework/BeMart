@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Auth;
 
+use BEAR\Csrf\CsrfTokenInterface;
 use Override;
 
 use function is_string;
@@ -21,14 +22,17 @@ use const PHP_SESSION_ACTIVE;
  *
  * Elevation retires the session id the client held while unauthenticated, so a
  * planted session cookie stops being usable the moment the admin is logged in.
- * The shared CSRF reference is retired by the session writer at login and
- * logout ({@see HtmlAdminSessionWriter}); elevation happens inside an
- * already-authenticated session, so it does not rotate it again.
+ * The CSRF token is retired with it: a token read from the anonymous session
+ * must not keep working once that session is an admin session.
  */
 final class HtmlAdminLoginChallengeAdapter implements AdminLoginChallengeInterface
 {
     public const VERIFY_CHALLENGE_KEY = 'admin_2fa_verify_challenge';
     public const SETUP_CHALLENGE_KEY = 'admin_2fa_setup_challenge';
+
+    public function __construct(private readonly CsrfTokenInterface $csrf)
+    {
+    }
 
     #[Override]
     public function startVerification(string $adminId, string $loginId): void
@@ -79,7 +83,7 @@ final class HtmlAdminLoginChallengeAdapter implements AdminLoginChallengeInterfa
     #[Override]
     public function completeVerification(AdminTwoFactorChallenge $challenge): void
     {
-        $this->regenerateActiveSessionId();
+        $this->retireAnonymousSession();
         $session = &$this->session();
         unset($session[self::VERIFY_CHALLENGE_KEY]);
         $session[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = $challenge->adminId;
@@ -88,7 +92,7 @@ final class HtmlAdminLoginChallengeAdapter implements AdminLoginChallengeInterfa
     #[Override]
     public function completeSetup(AdminTwoFactorChallenge $challenge): void
     {
-        $this->regenerateActiveSessionId();
+        $this->retireAnonymousSession();
         $session = &$this->session();
         unset($session[self::SETUP_CHALLENGE_KEY]);
         $session[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = $challenge->adminId;
@@ -104,6 +108,17 @@ final class HtmlAdminLoginChallengeAdapter implements AdminLoginChallengeInterfa
         if (! session_regenerate_id(true)) {
             throw new SessionRotationException('Admin login could not rotate the session id.');
         }
+    }
+
+    /** Same guard as {@see HtmlAdminSessionWriter::clear()}: without a PHP session there is nothing to retire. */
+    private function retireAnonymousSession(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        $this->regenerateActiveSessionId();
+        $this->csrf->clear();
     }
 
     /** @return array<string, mixed> */

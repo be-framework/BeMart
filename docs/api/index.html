@@ -152,9 +152,8 @@ via `csrf_token()`; the body carries no token.</div><div class="method-alps"><a 
 form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
 state). Fields mirror RegisterCustomerInput: 4 required + 11
-optional. In the dev/html fake-CSRF environment we expose the fake
-token into the hidden `_token` input so a real browser form submit
-can exercise the POST path instead of failing at the boundary.</div><div class="method-alps"><a href="../alps.json.html#goCustomerRegistration" class="alps-link">goCustomerRegistration</a></div></td>
+optional. The HTML port fills the form&#039;s hidden `csrfToken` input
+via `csrf_token()`; the body carries no token.</div><div class="method-alps"><a href="../alps.json.html#goCustomerRegistration" class="alps-link">goCustomerRegistration</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -549,7 +548,7 @@ via `csrf_token()`; the body carries no token.</div><div class="method-alps"><a 
 </tr>
 <tr>
   <td rowspan="1" class="path-cell" id="path-logout">/logout</td>
-  <td class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: the CSRF token is user-controlled input.</div><div class="method-alps"><a href="../alps.json.html#doLogout" class="alps-link">doLogout</a></div></td>
+  <td class="method-cell"><span class="ti unsafe"></span>POST<div class="method-alps"><a href="../alps.json.html#doLogout" class="alps-link">doLogout</a></div></td>
   <td></td>
   <td></td>
   <td></td>

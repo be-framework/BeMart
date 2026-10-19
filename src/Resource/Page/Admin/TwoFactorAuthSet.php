@@ -90,7 +90,7 @@ class TwoFactorAuthSet extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuthSet',
-            'fields' => ['deviceToken', 'authKey', 'csrfToken'],
+            'fields' => ['deviceToken', 'authKey'],
             // The QR-code JS reads authKey. It is present only when a
             // password-verified setup challenge exists; otherwise the empty
             // placeholder keeps anonymous GET render fidelity.

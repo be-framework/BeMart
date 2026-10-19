@@ -63,7 +63,7 @@ class ForgotPassword extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goRequestPasswordReset',
-            'fields' => ['email', 'csrfToken'],
+            'fields' => ['email'],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/forgot-password',

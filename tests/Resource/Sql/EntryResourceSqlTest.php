@@ -62,7 +62,6 @@ final class EntryResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertContains('email', $ro->body['fields']);
         $this->assertContains('password', $ro->body['fields']);
         $this->assertContains('name01', $ro->body['fields']);
-        $this->assertContains('csrfToken', $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/entry', $ro->body['submitTo']['href']);
     }
