@@ -81,7 +81,7 @@
   action="/admin/template/template-list?_method=put"
   rel="doSelectTemplate"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   <input type="hidden" id="template-id-hidden" name="templateId" value="">
 
   <div class="idea-admin-table-wrap">
@@ -141,7 +141,7 @@
               rel="doDownloadTemplate"
               style="display:contents;"
             >
-              <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+              {{ csrf_field() }}
               <input type="hidden" name="templateId" value="{{ template.templateId }}">
               <button
                 class="idea-admin-icon-btn"
@@ -225,7 +225,7 @@
         rel="doDeleteTemplate"
         style="display:contents;"
       >
-        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+        {{ csrf_field() }}
         <input type="hidden" name="templateId" value="{{ template.templateId }}">
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">
           削除

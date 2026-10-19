@@ -97,8 +97,7 @@
       enctype="multipart/form-data"
       novalidate
       aria-label="{{ csvTitle }}">
-  <input type="hidden" name="csrfToken"
-         value="{{ csrf_token() }}">
+  {{ csrf_field() }}
 
   {# ── Upload panel ──────────────────────────────────────────────────────── #}
   <div class="idea-admin-panel" style="max-width: 640px; margin-bottom: 1.25rem;">

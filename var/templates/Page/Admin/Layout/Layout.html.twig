@@ -174,7 +174,7 @@
   rel="doUpdateLayout"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   {% if layoutId is defined and layoutId %}
   <input type="hidden" name="layoutId" value="{{ layoutId }}">
   {% endif %}

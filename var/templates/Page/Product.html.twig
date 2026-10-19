@@ -24,7 +24,7 @@
 
   Form fields (src/Form/AddCartForm.php):
     productCode  hidden   商品コード（Resource 側で seeded）
-    csrfToken    hidden   CSRF トークン（csrf_token() が供給）
+    csrfToken    hidden   CSRF トークン（csrf_field() が描画）
     quantity     number   購入数量（min=1）
 
   Design language: IdeaStore idea-* CSS vocabulary
@@ -94,7 +94,7 @@
       フィールド: productCode（hidden）, csrfToken（hidden）, quantity（number）
     #}
     <form class="idea-cart-form" action="/cart/item" method="post" rel="doAddCartItem">
-      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+      {{ csrf_field() }}
       {{ form.input('productCode')|raw }}
 
       {% if stockFind %}

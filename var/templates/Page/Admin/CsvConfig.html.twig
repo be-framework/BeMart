@@ -307,7 +307,7 @@
 
 {# ── Main form ──────────────────────────────────────────────────────────── #}
 <form id="csv-config-form" method="post" action="/admin/csv-config" rel="doUpdateCsv" novalidate>
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   <input type="hidden" name="csvType"   value="{{ csvType|default(3) }}">
 
   {# Hidden fields are written by JS on submit (or on each drag/toggle) #}

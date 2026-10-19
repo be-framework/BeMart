@@ -77,7 +77,7 @@
   novalidate
 >
   <input type="hidden" name="_method" value="put">
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
 
   <div class="idea-admin-panel" style="max-width: 640px;">
     <div class="idea-admin-panel__head">
@@ -202,7 +202,7 @@
         style="display:inline;"
       >
         <input type="hidden" name="_method" value="delete">
-        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+        {{ csrf_field() }}
         <button type="submit" class="idea-admin-action idea-admin-action--destructive" id="delete_confirm_btn">
           <i class="fa fa-trash" aria-hidden="true"></i>
           削除する

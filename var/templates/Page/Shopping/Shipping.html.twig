@@ -41,7 +41,7 @@
 
       {# rel=doSelectShippingAddress → page://self/shopping/shipping POST #}
       <form method="post" action="/shopping/shipping" rel="doSelectShippingAddress" aria-label="お届け先選択フォーム">
-        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+        {{ csrf_field() }}
 
         {% if addresses is defined and addresses|length > 0 %}
           <div class="idea-option-list" role="radiogroup" aria-label="お届け先">

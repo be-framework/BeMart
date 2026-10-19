@@ -151,7 +151,7 @@
       aria-label="メンテナンスモード切替"
       rel="doToggleMaintenance"
     >
-      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+      {{ csrf_field() }}
       <input type="hidden" name="mode"      value="content_operation_form">
 
       <div class="idea-admin-maintenance-action">

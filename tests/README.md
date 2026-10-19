@@ -91,9 +91,10 @@ through the `X-BeMart-Test-Csrf-Token` header and sends
 `tests/Http/HttpSqlCsrfGateTest.php` proves a missing token or a cross-site
 submit is refused with 403. The other HTTP front controllers boot a
 `FakeModule` context, so their requests pass the gates without a token.
-Rendered forms take their hidden `csrfToken` from the Twig `csrf_token()`
-function; `tests/Html/CsrfTokenRenderedTest.php` checks every rendered POST
-form carries it filled.
+Rendered forms get their hidden `csrfToken` input from the Twig `csrf_field()`
+function, which wraps BEAR.Csrf's `CsrfHiddenInput`;
+`tests/Html/CsrfTokenRenderedTest.php` checks every rendered POST form carries
+it filled and that no template spells the input by hand.
 
 ## Write once, run at two transports
 

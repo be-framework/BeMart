@@ -107,7 +107,7 @@
   rel="doSendOrderMail"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   <input type="hidden" name="orderNo"   value="{{ orderNo|default('') }}">
 
   {# ── Zone 2: template picker ────────────────────────────────────────── #}

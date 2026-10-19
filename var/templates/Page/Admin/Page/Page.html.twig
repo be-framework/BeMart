@@ -118,7 +118,7 @@
   action="{{ isEdit ? '/admin/page/page?pageId=' ~ pageId|url_encode ~ '&_method=put' : '/admin/page/page-list' }}"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
 
   <div class="idea-admin-layout">
 
@@ -367,7 +367,7 @@
         action="/admin/page/page?pageId={{ pageId|url_encode }}&_method=delete"
         style="display:contents;"
       >
-        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+        {{ csrf_field() }}
         <button type="submit" class="idea-admin-action idea-admin-action--destructive">
           <i class="fa fa-trash" aria-hidden="true"></i>
           削除する
