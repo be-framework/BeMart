@@ -35,7 +35,8 @@ if (is_string($csrfToken) && $csrfToken !== '') {
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-// The prod context refuses to boot without an allowed origin; this also arms the same-origin gate for the test server.
+// Read only while the compiled prod injector is cold; a warm cache keeps the origin it was compiled with
+// (phpunit.xml's). The tests send Sec-Fetch-Site: same-origin, so the exact value does not matter here.
 putenv('BEMART_ALLOWED_ORIGIN=http://' . $_SERVER['HTTP_HOST']);
 
 exit((new Bootstrap())('prod-eccube-sql-hal-app', $GLOBALS, $_SERVER));

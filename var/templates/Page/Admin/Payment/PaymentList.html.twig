@@ -71,6 +71,7 @@ tr.is-hidden-payment { opacity: .55; }
 
     function pushSortOrder () {
         var data = collectNewOrder();
+        data.csrfToken = '{{ csrf_token()|e('js') }}';
         var body = Object.keys(data).map(function (k) {
             return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]);
         }).join('&');

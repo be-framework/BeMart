@@ -18,6 +18,9 @@ use MyVendor\BeMart\Auth\AdminSessionWriterInterface;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
+use MyVendor\BeMart\Auth\SessionStarterInterface;
+use MyVendor\BeMart\Auth\SessionStarterCsrfStore;
+use MyVendor\BeMart\Auth\NullSessionStarter;
 use MyVendor\BeMart\Auth\NoopAdminSessionWriter;
 use MyVendor\BeMart\Auth\NoopCartSessionPrefix;
 use MyVendor\BeMart\Auth\NoopCustomerSessionWriter;
@@ -87,6 +90,7 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeTemplateCompatibility;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
 use BEAR\Csrf\CsrfModule;
+use BEAR\Csrf\CsrfStoreInterface;
 use MyVendor\BeMart\Provide\Transfer\ApiDownloadContentTypePolicy;
 use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\DownloadResponder;
@@ -186,6 +190,10 @@ final class AppModule extends AbstractAppModule
         $this->install($allowedOrigin === null
             ? CsrfModule::withoutSameOriginCheck(tokenField: 'csrfToken')
             : CsrfModule::withSameOriginCheck($allowedOrigin, tokenField: 'csrfToken'));
+        // One store for every context: the bundled SessionCsrfStore calls session_start() itself.
+        // HtmlModule and EccubeModule swap the starter for the cookie one; CLI keeps the null starter.
+        $this->bind(SessionStarterInterface::class)->to(NullSessionStarter::class);
+        $this->bind(CsrfStoreInterface::class)->to(SessionStarterCsrfStore::class)->in(Scope::SINGLETON);
 
         // Be Framework: BecomingInterface, SemanticLogger, semantic validator,
         // Been provider. Dev/Test contexts override logging with DevLoggingModule;

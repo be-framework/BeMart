@@ -85,6 +85,27 @@ final class CsrfTokenRenderedTest extends TestCase
         );
     }
 
+    public function testTemplatesSubmittingViaFetchReferenceTheToken(): void
+    {
+        $offenders = [];
+        foreach ($this->twigFiles() as $file) {
+            $contents = (string) file_get_contents($file->getPathname());
+            if (preg_match('/\bfetch\(/', $contents) !== 1 || preg_match('/\bmethod:\s*[\'"](POST|PUT|PATCH|DELETE)[\'"]/i', $contents) !== 1) {
+                continue;
+            }
+
+            if (preg_match('/csrf_token\(\)|csrfToken/', $contents) !== 1) {
+                $offenders[] = $file->getPathname();
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $offenders,
+            "Scripts that submit with fetch() must send csrfToken like the forms do:\n" . implode("\n", $offenders),
+        );
+    }
+
     public function testTheTwigExtensionExposesCsrfToken(): void
     {
         $names = [];

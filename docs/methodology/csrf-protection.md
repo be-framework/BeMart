@@ -13,9 +13,11 @@ BeMart の CSRF 対応は [BEAR.Csrf](https://github.com/bearsunday/BEAR.Csrf)�
 
 **配線は `AppModule` の `CsrfModule` 1 行。** wire field 名は BEAR.Csrf の既定値 `_csrf_token` ではなく、テンプレートと admin JS が送る `csrfToken` を `tokenField` で指定する。token の抽出は同梱の `CompositeRequestToken`（header → resource query → post body）、検証は同梱の `StoredCsrfToken`（`issue()` / `verify()` / `clear()`）、拒否は同梱の `CsrfTokenInterceptor` / `SameOriginInterceptor` が投げる `ForbiddenException` 系例外で、`ExceptionStatusMapper` がそのまま 403 に写す。BeMart 側の interceptor や adapter は無い。
 
-**BeMart が持つのは store だけ。** 同梱の `SessionCsrfStore` は `session_start()` を直接呼ぶため、EC-CUBE の cookie 名と開始方針を決めている `SessionStarterInterface` を迂回する。`src/Auth/SessionStarterCsrfStore.php` は同じ `CsrfStoreInterface` を `SessionStarterInterface` 経由で実装し、`EccubeModule` が bind する。セッションの slot は BEAR.Csrf の既定 `CsrfSessionKey::DEFAULT_NAME`（`bear_csrf_token`）。
+**BeMart が持つのは store だけ。** 同梱の `SessionCsrfStore` は `session_start()` を直接呼ぶため、EC-CUBE の cookie 名と開始方針を決めている `SessionStarterInterface` を迂回する。`src/Auth/SessionStarterCsrfStore.php` は同じ `CsrfStoreInterface` を `SessionStarterInterface` 経由で実装し、`AppModule` が全 context に bind する。starter は既定が `NullSessionStarter`（CLI）、`HtmlModule` / `EccubeModule` が EC-CUBE の cookie を開く `CookieSessionStarter` に差し替える。セッションの slot は BEAR.Csrf の既定 `CsrfSessionKey::DEFAULT_NAME`（`bear_csrf_token`）。
 
 **同一オリジンの基準は環境変数 `BEMART_ALLOWED_ORIGIN`。** 値があれば `CsrfModule::withSameOriginCheck()`、無ければ `withoutSameOriginCheck()` を `AppModule` が選ぶ（`src/Module/AllowedOriginEnv.php`）。未設定は CLI とローカル開発では正しい状態だが、本番で同じ沈黙が起きると same-origin gate が全リクエストで降りたままになるので、`ProdModule` は未設定・空のとき `MissingAllowedOriginException` で起動を拒む。`bin/prod.php`、`public/index.php` の prod context、prod context をコンパイルするスクリプトはこの変数を必要とする。
+
+**prod の値はコンパイル時に焼き込まれる。** prod context は `PackageInjector` が injector を直列化して `var/tmp/<context>/` にキャッシュするため、`ProdModule` の起動拒否も `AllowedOrigin` の値も、キャッシュが空のときの環境で決まる。`BEMART_ALLOWED_ORIGIN` を変えたら `var/tmp/<context>/` を消して再コンパイルする。古い値のまま動いても fail-open にはならない（新しいオリジンからの正規リクエストが 403 になる）。
 
 **token の受け渡しは Twig の `csrf_token()`。** `BeMartTwigExtension` が `CsrfTokenInterface::issue()` を Twig 関数として公開し、POST するフォームはすべて `<input type="hidden" name="csrfToken" value="{{ csrf_token() }}">` を描画する。Resource の representation body に `csrfToken` は載せない（JSON 表現からも消えている）。ログイン・ログアウトの session writer は `CsrfTokenInterface::clear()` で token を廃棄し、次の描画で新しい token が発行される。
 

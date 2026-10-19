@@ -56,6 +56,16 @@ final class HttpSqlCsrfGateTest extends TestCase
         $this->assertStringContainsString('入力してください。', $submitted['body']);
     }
 
+    public function testMatchingOriginWithoutFetchMetadataReachesTheForm(): void
+    {
+        $token = $this->csrfToken($this->request('GET', '/entry')['body']);
+
+        $submitted = $this->request('POST', '/entry', $this->entryFields($token), ['Origin: http://' . self::HOST]);
+
+        $this->assertSame(400, $submitted['status'], $submitted['body']);
+        $this->assertStringContainsString('入力してください。', $submitted['body']);
+    }
+
     public function testPostWithoutTheTokenIsRefused(): void
     {
         $this->request('GET', '/entry');

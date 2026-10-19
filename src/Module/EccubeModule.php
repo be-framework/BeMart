@@ -7,14 +7,11 @@ namespace MyVendor\BeMart\Module;
 use MyVendor\BeMart\Auth\CookieSessionStarter;
 use MyVendor\BeMart\Auth\EccubeSharedSessionAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
-use MyVendor\BeMart\Auth\SessionStarterCsrfStore;
 use MyVendor\BeMart\Auth\SessionStarterInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Override;
-use BEAR\Csrf\CsrfStoreInterface;
 use Ray\Di\AbstractModule;
-use Ray\Di\Scope;
 
 /**
  * EC-CUBE bridge bindings for production-like contexts.
@@ -33,8 +30,5 @@ final class EccubeModule extends AbstractModule
         $this->bind(SessionStarterInterface::class)->toInstance(new CookieSessionStarter(EccubeSharedSessionAdapter::COOKIE_NAME));
         $this->bind(CustomerSession::class)->to(EccubeSharedSessionAdapter::class);
         $this->bind(AdminSession::class)->to(HtmlAdminSessionAdapter::class);
-        // BEAR.Csrf keeps issue/verify/clear; only the session slot is opened through
-        // SessionStarterInterface so the token lives in the EC-CUBE cookie's session.
-        $this->bind(CsrfStoreInterface::class)->to(SessionStarterCsrfStore::class)->in(Scope::SINGLETON);
     }
 }

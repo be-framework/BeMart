@@ -55,6 +55,7 @@
             payload[row.dataset.tagId] = oldSortNos[i];
             i++;
         });
+        payload.csrfToken = '{{ csrf_token()|e('js') }}';
         fetch('/admin/sort-no-move?masterType=tag&_method=put', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

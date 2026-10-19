@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Tests\Module;
 
 use BEAR\AppMeta\Meta;
 use BEAR\Csrf\CsrfSessionKey;
+use BEAR\Csrf\Http\AllowedOrigin;
 use BEAR\Resource\ResourceInterface;
 use Be\Framework\Becoming;
 use Be\Framework\BecomingInterface;
@@ -14,6 +15,7 @@ use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Injector as AppInjector;
 use MyVendor\BeMart\Module\AllowedOriginEnv;
+use MyVendor\BeMart\Module\AppModule;
 use MyVendor\BeMart\Module\MissingAllowedOriginException;
 use MyVendor\BeMart\Module\ProdModule;
 use MyVendor\BeMart\Module\TestModule;
@@ -154,9 +156,13 @@ final class ProdModuleTest extends TestCase
     {
         putenv(AllowedOriginEnv::NAME . '=https://shop.example');
 
-        new Injector(new ProdModule());
+        // ProdModule wraps AppModule as the context string does, so the origin the
+        // same-origin gate will compare against is the one read from the env here.
+        $injector = new Injector(new ProdModule(new AppModule(new Meta('MyVendor\\BeMart', 'prod-app'))));
 
-        $this->assertSame('https://shop.example', AllowedOriginEnv::value());
+        $allowedOrigin = $injector->getInstance(AllowedOrigin::class);
+        $this->assertInstanceOf(AllowedOrigin::class, $allowedOrigin);
+        $this->assertSame('https://shop.example', $allowedOrigin->value);
     }
 
     private function skipWithoutDatabaseUrl(): void

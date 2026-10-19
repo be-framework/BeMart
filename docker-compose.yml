@@ -32,8 +32,9 @@ services:
       # traces in responses), OPTIONS introspection disabled, compiled DI.
       APP_CONTEXT: "prod-html-eccube-sql-hal-app"
       DATABASE_URL: "mysql://root@db:3306/eccubedb?charset=utf8mb4"
-      # The browser origin BEAR.Csrf's same-origin gate accepts. prod refuses
-      # to boot without it; change it together with the published port.
+      # The browser origin BEAR.Csrf's same-origin gate accepts. prod refuses to
+      # boot without it and compiles the value into var/tmp/<context>/; change it
+      # together with the published port and clear that directory.
       BEMART_ALLOWED_ORIGIN: "http://localhost:8080"
       # The built-in server is single-process by default, so one slow request
       # blocks every visitor. Workers do not make it a production server —
