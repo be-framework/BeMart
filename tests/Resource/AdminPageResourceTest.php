@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -85,7 +84,6 @@ final class AdminPageResourceTest extends TestCase
             'pageName' => '会社案内',
             'pageUrl' => 'company',
             'pageFileName' => 'company',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -103,7 +101,6 @@ final class AdminPageResourceTest extends TestCase
             'pageName' => '会社案内',
             'pageUrl' => 'company',
             'pageFileName' => 'company',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -128,7 +125,6 @@ final class AdminPageResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/page/page', [
             'pageId' => $id,
             'pageName' => 'Foo!',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('Foo!', $ro->body['pageName']);
@@ -140,7 +136,6 @@ final class AdminPageResourceTest extends TestCase
         $id = $this->seed('Foo', 'foo', 'foo');
         $ro = $this->resource->delete('page://self/admin/page/page', [
             'pageId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($id, $ro->body['pageId']);
@@ -152,7 +147,6 @@ final class AdminPageResourceTest extends TestCase
 
         $this->resource->delete('page://self/admin/page/page', [
             'pageId' => 'pg-homepage',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

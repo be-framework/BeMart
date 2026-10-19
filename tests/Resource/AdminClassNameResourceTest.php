@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -65,7 +64,6 @@ final class AdminClassNameResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/class-name/class-name-list', [
             'classNameLabel' => 'Color',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -79,7 +77,6 @@ final class AdminClassNameResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/class-name/class-name-list', [
             'classNameLabel' => 'Color',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -109,7 +106,6 @@ final class AdminClassNameResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/class-name/class-name', [
             'classNameId' => $id,
             'classNameLabel' => 'Colour',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -123,7 +119,6 @@ final class AdminClassNameResourceTest extends TestCase
         $this->resource->put('page://self/admin/class-name/class-name', [
             'classNameId' => 'nonexistent-zzz',
             'classNameLabel' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -133,7 +128,6 @@ final class AdminClassNameResourceTest extends TestCase
 
         $ro = $this->resource->delete('page://self/admin/class-name/class-name', [
             'classNameId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);

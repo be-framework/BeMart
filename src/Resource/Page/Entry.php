@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -29,7 +30,6 @@ use MyVendor\BeMart\Be\Exception\PrefFormatException;
 use MyVendor\BeMart\Be\Exception\SexFormatException;
 use MyVendor\BeMart\Be\Final\CustomerRegistered;
 use MyVendor\BeMart\Be\Input\RegisterCustomerInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\EntryForm;
 use SensitiveParameter;
 use Ray\WebFormModule\FormFactory;
@@ -74,7 +74,6 @@ class Entry extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -86,9 +85,8 @@ class Entry extends ResourceObject
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
      * state). Fields mirror RegisterCustomerInput: 4 required + 11
-     * optional. In the dev/html fake-CSRF environment we expose the fake
-     * token into the hidden `_token` input so a real browser form submit
-     * can exercise the POST path instead of failing at the boundary.
+     * optional. The HTML port fills the form's hidden `csrfToken` input
+     * via `csrf_token()`; the body carries no token.
      */
     #[Alps('goCustomerRegistration')]
     #[JsonSchema(schema: 'get-entry.json')]
@@ -115,13 +113,11 @@ class Entry extends ResourceObject
                 'birth',
                 'sex',
                 'job',
-                'csrfToken',
             ],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/entry',
             ],
-            'csrfToken' => $this->csrfTokenForForm(),
             // Phase 3: an empty EntryForm for the HTML port to render via
             // `{{ form.input(...) }}`. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(EntryForm::class),
@@ -156,6 +152,7 @@ class Entry extends ResourceObject
     #[JsonSchema(schema: 'post-entry.json', params: 'post-entry.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string|null $email = null,
         #[SensitiveParameter] string|null $password = null,
@@ -418,13 +415,11 @@ class Entry extends ResourceObject
                 'birth',
                 'sex',
                 'job',
-                'csrfToken',
             ],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/entry',
             ],
-            'csrfToken' => $this->csrfTokenForForm(),
             'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
             'errors' => $errors,
             'form' => $this->failedForm($values, $errors),
@@ -530,10 +525,5 @@ class Entry extends ResourceObject
         };
 
         return [$field, $message];
-    }
-
-    private function csrfTokenForForm(): string
-    {
-        return $this->csrf->issue();
     }
 }

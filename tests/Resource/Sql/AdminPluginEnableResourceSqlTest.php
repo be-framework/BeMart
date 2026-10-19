@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -70,7 +69,6 @@ final class AdminPluginEnableResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/admin/plugin-enable', [
             'pluginCode' => 'Sample/DisabledPlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -90,7 +88,6 @@ final class AdminPluginEnableResourceSqlTest extends AbstractResourceSqlTestCase
         // Seed-enabled plugin is already enabled — replay is a no-op.
         $ro = $this->resource->post('page://self/admin/plugin-enable', [
             'pluginCode' => 'Sample/SamplePlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -104,7 +101,6 @@ final class AdminPluginEnableResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/admin/plugin-enable', [
             'pluginCode' => 'NoSuch/Plugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -131,7 +127,6 @@ final class AdminPluginEnableResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/admin/plugin-enable', [
             'pluginCode' => 'Partial/Plugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(409, $ro->code);
@@ -145,7 +140,6 @@ final class AdminPluginEnableResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->post('page://self/admin/plugin-enable', [
             'pluginCode' => 'Sample/DisabledPlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

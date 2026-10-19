@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -18,7 +19,6 @@ use MyVendor\BeMart\Be\Input\SendShippingNotifyMailInput;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use BEAR\Resource\Annotation\JsonSchema;
-use BEAR\Csrf\CsrfTokenInterface;
 
 use function assert;
 
@@ -45,7 +45,6 @@ class ShippingNotifyMail extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly OrderQueryInterface $orders,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -80,7 +79,6 @@ class ShippingNotifyMail extends ResourceObject
             'orderNo' => $order->orderNo,
             'customerId' => $order->customerId,
             'message' => '出荷通知メールを送信します。よろしいですか？',
-            'csrfToken' => $this->csrf->issue(),
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/admin/order/shipping-notify-mail',
@@ -98,6 +96,7 @@ class ShippingNotifyMail extends ResourceObject
     #[JsonSchema(schema: 'post-admin-order-shipping-notify-mail.json', params: 'post-admin-order-shipping-notify-mail.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $orderNo,
     ): static {

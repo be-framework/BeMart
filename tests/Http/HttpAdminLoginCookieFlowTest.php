@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Http;
 
+use BEAR\Csrf\CsrfSessionKey;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Query\TwoFactorAuthStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
@@ -18,6 +19,17 @@ final class HttpAdminLoginCookieFlowTest extends TestCase
     private const HOST = '127.0.0.1:8101';
     private const ADMIN_LOGIN_ID = 'test-admin';
     private const ADMIN_PASSWORD = 'local-dev-admin-password';
+    private const CSRF_TOKEN = 'http-admin-login-cookie-flow-csrf-token';
+
+    protected function setUp(): void
+    {
+        $_SESSION[CsrfSessionKey::DEFAULT_NAME] = self::CSRF_TOKEN;
+    }
+
+    protected function tearDown(): void
+    {
+        unset($_SESSION[CsrfSessionKey::DEFAULT_NAME]);
+    }
 
     public function testTwoFactorCompletionElevatesCookieSessionForAdminPages(): void
     {
@@ -33,7 +45,7 @@ final class HttpAdminLoginCookieFlowTest extends TestCase
         $login = $resource->post('page://self/admin/login', [
             'loginId' => self::ADMIN_LOGIN_ID,
             'password' => self::ADMIN_PASSWORD,
-            'csrfToken' => $this->bodyString($loginForm, 'csrfToken'),
+            'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $login->code, $login->toString());
@@ -59,7 +71,7 @@ final class HttpAdminLoginCookieFlowTest extends TestCase
 
         return $resource->put($location, [
             'deviceToken' => $this->deviceToken($authKey),
-            'csrfToken' => $this->bodyString($setupForm, 'csrfToken'),
+            'csrfToken' => self::CSRF_TOKEN,
         ]);
     }
 
@@ -70,7 +82,7 @@ final class HttpAdminLoginCookieFlowTest extends TestCase
 
         return $resource->post($location, [
             'deviceToken' => $this->deviceToken($this->storedSecret()),
-            'csrfToken' => $this->bodyString($challengeForm, 'csrfToken'),
+            'csrfToken' => self::CSRF_TOKEN,
         ]);
     }
 

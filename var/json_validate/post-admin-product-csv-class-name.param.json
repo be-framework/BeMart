@@ -16,18 +16,6 @@
       "title": "輸送ペイロード（入力）",
       "description": "CSVインポート/エクスポート本文。列構造の詳細はCSV互換サービス境界で検査する。",
       "default": ""
-    },
-    "csrfToken": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "title": "CSRFトークン（CSV取込フォーム）",
-      "description": "管理画面CSV取込フォーム送信元を検証するトークン。multipart/form-dataのhidden inputから送信され、CSRFインターセプタが検証する。",
-      "minLength": 0,
-      "maxLength": 128,
-      "pattern": "^[A-Za-z0-9._:-]*$",
-      "$comment": "CSV本文そのものはimport_fileアップロードからBootstrap境界でcsvへ展開される。csrfTokenはResource引数ではなくRay.Csrf CsrfToken境界で消費される。"
     }
   },
   "additionalProperties": false,
@@ -165,15 +153,6 @@
       "maxLength": 128,
       "pattern": "^.+_[0-9]+$",
       "example": "session-prefix-1_1"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     },
     "uriReference": {
       "title": "URI参照",

@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\TaxRule;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -45,6 +46,7 @@ class TaxRule extends ResourceObject
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
     #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onDelete(string $taxRuleId): static
     {
         $final = ($this->becoming)(new DeleteTaxRuleInput(taxRuleId: $taxRuleId));

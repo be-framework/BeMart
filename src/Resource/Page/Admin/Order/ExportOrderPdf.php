@@ -11,6 +11,7 @@ use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\OrderPdfNotSupportedException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
@@ -75,6 +76,7 @@ class ExportOrderPdf extends ResourceObject
     #[Alps('goExportOrderPdf')]
     #[JsonSchema(schema: 'get-admin-order-export-order-pdf.json')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(array|string $orderNos = [], string $orderNo = ''): static
     {
         return $this->export($orderNos, $orderNo);

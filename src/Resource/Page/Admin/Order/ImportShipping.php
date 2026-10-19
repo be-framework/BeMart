@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,7 +15,6 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminShippingCsvImported;
 use MyVendor\BeMart\Be\Input\AdminImportShippingCsvInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -36,7 +36,6 @@ class ImportShipping extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -63,7 +62,7 @@ class ImportShipping extends ResourceObject
         }
 
         $this->code = Code::OK;
-        $this->body = ['csrfToken' => $this->csrf->issue()];
+        $this->body = [];
 
         return $this;
     }
@@ -78,6 +77,7 @@ class ImportShipping extends ResourceObject
     #[Link(rel: 'goExportShipping', href: 'page://self/admin/order/export-shipping', method: 'get')]
     #[Link(rel: 'goExportCustomer', href: 'page://self/admin/customer-csv')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string $csv): static
     {
         $final = ($this->becoming)(new AdminImportShippingCsvInput(csv: $csv));

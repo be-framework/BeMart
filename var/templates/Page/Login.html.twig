@@ -29,7 +29,7 @@
 
     <form class="idea-auth-form" name="login_mypage" id="login_mypage" method="post" action="/login" rel="doLogin" novalidate>
       <input type="hidden" name="mode" value="login">
-      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
       <label class="idea-field">メールアドレス
         {% if form is defined %}

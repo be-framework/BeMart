@@ -10,18 +10,6 @@
       "title": "商品ステータス",
       "description": "1=公開（フロント表示）, 2=非公開（フロント非表示）, 3=廃止（論理削除、管理画面でもデフォルト非表示）",
       "$comment": "フレームワーク由来または動的mapのため、JSON境界ではobjectであることと意味を契約し、内部キーは別境界で扱う。追加キーは不透明構造として許容する。"
-    },
-    "csrfToken": {
-      "title": "処理識別子",
-      "description": "フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。",
-      "type": [
-        "string",
-        "null"
-      ],
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     }
   },
   "additionalProperties": false,
@@ -159,15 +147,6 @@
       "maxLength": 128,
       "pattern": "^.+_[0-9]+$",
       "example": "session-prefix-1_1"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     },
     "uriReference": {
       "title": "URI参照",

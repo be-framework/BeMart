@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -55,6 +56,7 @@ class BulkDelete extends ResourceObject
     #[JsonSchema(schema: 'post-admin-order-bulk-delete.json', params: 'post-admin-order-bulk-delete.param.json')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         array $orderNos = [],
         array $ids = [],

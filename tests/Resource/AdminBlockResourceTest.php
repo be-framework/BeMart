@@ -10,7 +10,6 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -76,7 +75,6 @@ final class AdminBlockResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/block/block-list', [
             'blockName' => 'バナー',
             'blockFileName' => 'banner',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $ro->code);
         $this->assertSame('バナー', $ro->body['blockName']);
@@ -91,7 +89,6 @@ final class AdminBlockResourceTest extends TestCase
         $this->resource->post('page://self/admin/block/block-list', [
             'blockName' => 'バナー',
             'blockFileName' => 'banner',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -101,7 +98,6 @@ final class AdminBlockResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/block/block', [
             'blockId' => $id,
             'blockName' => 'New',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('New', $ro->body['blockName']);
@@ -112,7 +108,6 @@ final class AdminBlockResourceTest extends TestCase
         $id = self::USER_BLOCK_ID;
         $ro = $this->resource->delete('page://self/admin/block/block', [
             'blockId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
     }
@@ -123,7 +118,6 @@ final class AdminBlockResourceTest extends TestCase
 
         $this->resource->delete('page://self/admin/block/block', [
             'blockId' => 'bk-header',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

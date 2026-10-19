@@ -168,11 +168,12 @@ final class HttpSqlAdminOrderBulkDeleteFormTest extends TestCase
     {
         $jar = escapeshellarg($this->cookieJar);
         $curl = sprintf(
-            'curl -s -i -b %s -c %s -H %s -H %s -X %s -d %s %s',
+            'curl -s -i -b %s -c %s -H %s -H %s -H %s -X %s -d %s %s',
             $jar,
             $jar,
             escapeshellarg('X-BeMart-Test-Admin-Id: ' . self::ADMIN_ID),
             escapeshellarg('X-BeMart-Test-Csrf-Token: ' . self::CSRF_TOKEN),
+            escapeshellarg('Sec-Fetch-Site: same-origin'),
             escapeshellarg($method),
             escapeshellarg(http_build_query($fields)),
             escapeshellarg('http://' . self::HOST . $path),
@@ -188,11 +189,12 @@ final class HttpSqlAdminOrderBulkDeleteFormTest extends TestCase
     {
         $jar = escapeshellarg($this->cookieJar);
         $curl = sprintf(
-            'curl -s -i -b %s -c %s -H %s -H %s -X %s %s',
+            'curl -s -i -b %s -c %s -H %s -H %s -H %s -X %s %s',
             $jar,
             $jar,
             escapeshellarg('X-BeMart-Test-Admin-Id: ' . self::ADMIN_ID),
             escapeshellarg('X-BeMart-Test-Csrf-Token: ' . self::CSRF_TOKEN),
+            escapeshellarg('Sec-Fetch-Site: same-origin'),
             escapeshellarg($method),
             escapeshellarg('http://' . self::HOST . $path),
         );

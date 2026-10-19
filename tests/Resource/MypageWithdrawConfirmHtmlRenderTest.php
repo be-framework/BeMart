@@ -22,7 +22,7 @@ use function str_contains;
  *   - Valid HTML document shell (doctype, lang=ja, body close)
  *   - IdeaStore layout landmarks present
  *   - Title block contains the Japanese page title
- *   - csrfToken hidden input rendered (value may be empty in test context)
+ *   - csrfToken hidden input rendered
  *
  * L2 — form action/method and link href/rel:
  *   - POST form action targets /mypage/withdraw  (doWithdrawCustomer)

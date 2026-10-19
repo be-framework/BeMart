@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -18,7 +19,6 @@ use MyVendor\BeMart\Be\Exception\LoginFailedException;
 use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\CustomerAuthenticated;
 use MyVendor\BeMart\Be\Input\LoginInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\LoginForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -63,7 +63,6 @@ class Login extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly CustomerSessionWriterInterface $sessionWriter,
     ) {
@@ -74,10 +73,8 @@ class Login extends ResourceObject
      *
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
-     * state). The `csrfToken` body field carries the trusted reference
-     * {@see CsrfToken::$token} issues, which the HTML port
-     * renders into the form's hidden `_csrf_token` input so the
-     * subsequent POST passes CSRF validation.
+     * state). The HTML port fills the form's hidden `csrfToken` input
+     * via `csrf_token()`; the body carries no token.
      */
     #[Alps('goLogin')]
     #[JsonSchema(schema: 'get-login.json')]
@@ -89,12 +86,11 @@ class Login extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goLogin',
-            'fields' => ['email', 'password', 'csrfToken'],
+            'fields' => ['email', 'password'],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/login',
             ],
-            'csrfToken' => $this->csrf->issue(),
             'form' => $this->emptyLoginForm(),
         ];
 
@@ -111,6 +107,7 @@ class Login extends ResourceObject
     #[JsonSchema(schema: 'post-login.json', params: 'post-login.param.json')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string|null $email = null, #[SensitiveParameter] string|null $password = null, string|null $mode = null): static
     {
         $values = [
@@ -221,12 +218,11 @@ class Login extends ResourceObject
         $this->code = $code;
         $this->body = [
             'transitionId' => 'goLogin',
-            'fields' => ['email', 'password', 'csrfToken'],
+            'fields' => ['email', 'password'],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/login',
             ],
-            'csrfToken' => $this->csrf->issue(),
             'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
             'errors' => $errors,
             'form' => $this->failedForm($values, $errors),

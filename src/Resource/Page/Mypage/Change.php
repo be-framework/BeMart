@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Mypage;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +20,6 @@ use MyVendor\BeMart\Be\Input\GetMypageChangeInput;
 use MyVendor\BeMart\Be\Input\UpdateCustomerInput;
 use MyVendor\BeMart\Form\ChangeForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
@@ -43,7 +43,6 @@ class Change extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -103,7 +102,6 @@ class Change extends ResourceObject
             'addr01' => $final->addr01,
             'addr02' => $final->addr02,
             'submitTo' => $final->submitTo,
-            'csrfToken' => $this->csrf->issue(),
             // Phase 3: a ChangeForm pre-populated with the current
             // profile for the HTML port. JSON contexts ignore it.
             'form' => $form,
@@ -131,6 +129,7 @@ class Change extends ResourceObject
     #[Link(rel: 'goMypageChangeComplete', href: 'page://self/mypage/change-complete')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $email,
         string|null $name01 = null,

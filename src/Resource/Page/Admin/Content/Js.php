@@ -11,11 +11,11 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ContentJsUpdated;
 use MyVendor\BeMart\Be\Input\UpdateContentJsInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Form\AdminJsForm;
 use Ray\WebFormModule\FormFactory;
@@ -43,7 +43,6 @@ class Js extends ResourceObject
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
         private readonly CustomizeAssetWriterInterface $assetWriter,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -67,7 +66,6 @@ class Js extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'form' => $form,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -81,6 +79,7 @@ class Js extends ResourceObject
     #[Alps('doUpdateContentJs')]
     #[JsonSchema(schema: 'put-admin-content-js.json', params: 'put-admin-content-js.param.json')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(string $js = '', string|null $mode = null): static
     {
         $final = ($this->becoming)(new UpdateContentJsInput(js: $js));

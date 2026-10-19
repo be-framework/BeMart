@@ -10,7 +10,6 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -61,7 +60,6 @@ final class AdminMailTemplateResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => 1,
             'mailSubject' => '【更新】ご注文ありがとうございます',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -83,7 +81,6 @@ final class AdminMailTemplateResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => $seed->mailTemplateId,
             'mailSubject' => $seed->subject,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -97,7 +94,6 @@ final class AdminMailTemplateResourceTest extends TestCase
         $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => 999,
             'mailSubject' => 'whatever',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -108,7 +104,6 @@ final class AdminMailTemplateResourceTest extends TestCase
         $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => 1,
             'mailSubject' => '   ',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -121,7 +116,6 @@ final class AdminMailTemplateResourceTest extends TestCase
         $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => 1,
             'mailSubject' => 'whatever',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -129,7 +123,6 @@ final class AdminMailTemplateResourceTest extends TestCase
     {
         $ro = $this->resource->delete('page://self/admin/mail-template', [
             'mailTemplateId' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -142,7 +135,6 @@ final class AdminMailTemplateResourceTest extends TestCase
     {
         $ro = $this->resource->delete('page://self/admin/mail-template', [
             'mailTemplateId' => 999,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);

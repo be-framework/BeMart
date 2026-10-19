@@ -8,7 +8,6 @@
   DATA CONTRACT (src/Resource/Page/Admin/Template/TemplateAdd.php onGet):
     form        object — AdminTemplateAddForm (Ray.WebFormModule)
                   fields: templateCode (text), templateName (text), file (file)
-    csrfToken   string — CSRF token
 
   ACTIONS (derived from #[Link] annotations on TemplateAdd):
     POST /admin/template/template-add  enctype=multipart/form-data  — doInstallTemplate
@@ -139,7 +138,7 @@
   enctype="multipart/form-data"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
   <div class="idea-admin-panel" style="max-width:680px;">
     <div class="idea-admin-panel__head">

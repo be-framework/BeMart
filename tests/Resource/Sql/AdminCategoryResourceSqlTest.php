@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -102,7 +101,6 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/category/category-list', [
             'categoryName' => $name,
             'sortNo' => $sortNo,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $id = $ro->body['categoryId'];
         assert(is_string($id));
@@ -115,7 +113,6 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/category/category-list', [
             'categoryName' => 'Food',
             'sortNo' => 10,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -130,7 +127,6 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/category/category-list', [
             'categoryName' => 'Food',
             'sortNo' => 10,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -147,7 +143,6 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
             'categoryName' => 'Cookies',
             'sortNo' => 20,
             'parentId' => 'nonexistent-zzz',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -167,7 +162,6 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
             'categoryName' => 'Cookies',
             'sortNo' => 20,
             'parentId' => $parentId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -219,7 +213,6 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/category/category', [
             'categoryId' => $id,
             'categoryName' => 'Foods',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -233,7 +226,6 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->delete('page://self/admin/category/category', [
             'categoryId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -244,7 +236,6 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->delete('page://self/admin/category/category', [
             'categoryId' => 'nonexistent-zzz',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -265,7 +256,6 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/admin/category/csv', [
             'csv' => "categoryName,sortNo\nFood,10\n",
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::ACCEPTED, $ro->code);
@@ -278,7 +268,6 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
         $this->rebindAdminSession(null);
         $ro = $this->resource->post('page://self/admin/category/csv', [
             'csv' => "foo\nbar",
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }

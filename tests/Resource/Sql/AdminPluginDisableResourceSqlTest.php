@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -60,7 +59,6 @@ final class AdminPluginDisableResourceSqlTest extends AbstractResourceSqlTestCas
 
         $ro = $this->resource->post('page://self/admin/plugin-disable', [
             'pluginCode' => 'Sample/SamplePlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -80,7 +78,6 @@ final class AdminPluginDisableResourceSqlTest extends AbstractResourceSqlTestCas
         // Seed-disabled plugin is already disabled — replay is a no-op.
         $ro = $this->resource->post('page://self/admin/plugin-disable', [
             'pluginCode' => 'Sample/DisabledPlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -94,7 +91,6 @@ final class AdminPluginDisableResourceSqlTest extends AbstractResourceSqlTestCas
 
         $ro = $this->resource->post('page://self/admin/plugin-disable', [
             'pluginCode' => 'NoSuch/Plugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -107,7 +103,6 @@ final class AdminPluginDisableResourceSqlTest extends AbstractResourceSqlTestCas
 
         $ro = $this->resource->post('page://self/admin/plugin-disable', [
             'pluginCode' => 'Sample/SamplePlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -27,7 +28,7 @@ use function assert;
  * (Input → Final) — see LogoutInput.
  *
  * Failure mapping (intentionally narrow):
- *   - missing/invalid CSRF token       → 403 (Slice 8 uniform CSRF guard)
+ *   - missing/invalid CSRF token       → 403 (BEAR.Csrf gates)
  *   - SemanticVariableException        → 400 (defensive; LogoutInput has
  *                                              no semantically-validated
  *                                              fields, so this is unreachable
@@ -51,14 +52,11 @@ class Logout extends ResourceObject
     ) {
     }
 
-    /**
-     * Phase B Slice 9: the CSRF token is user-controlled input.
-     *
-     */
     #[Alps('doLogout')]
     #[JsonSchema(schema: 'post-logout.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(): static
     {
         $final = ($this->becoming)(new LogoutInput());

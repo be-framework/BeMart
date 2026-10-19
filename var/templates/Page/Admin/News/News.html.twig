@@ -10,7 +10,6 @@
     newsUrl         string|null — optional link target (maxLength 2048)
     publishDate     string      — ISO-8601 publication datetime
     linkMethod      bool        — false=same window, true=target="_blank"
-    csrfToken       string      — per-request CSRF token
     form            AdminNewsForm — pre-filled renderer (HTML context only)
 
   FORM CONTRACT (src/Form/AdminNewsForm.php):
@@ -67,7 +66,7 @@
   action="{{ isEdit ? '/admin/news/news?newsId=' ~ newsId|url_encode ~ '&_method=put' : '/admin/news/news-list' }}"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
   <div class="idea-admin-layout">
 
@@ -197,7 +196,7 @@
   action="/admin/news/news?newsId={{ newsId|url_encode }}&_method=delete"
   aria-hidden="true"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 </form>
 {% endif %}
 

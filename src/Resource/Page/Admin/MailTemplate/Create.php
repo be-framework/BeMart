@@ -10,6 +10,7 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
 use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
@@ -40,6 +41,7 @@ class Create extends ResourceObject
     #[Link(rel: 'doUpdateMailTemplate', href: 'page://self/admin/mail-template', method: 'post')]
     #[Link(rel: 'doDeleteMailTemplate', href: 'page://self/admin/mail-template', method: 'delete')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $mailTemplateName,
         string $fileName,

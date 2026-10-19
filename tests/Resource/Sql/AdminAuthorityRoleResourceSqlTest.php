@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -106,7 +105,6 @@ final class AdminAuthorityRoleResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'shop-owner',
             'authority' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -127,7 +125,6 @@ final class AdminAuthorityRoleResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'shop-owner',
             'authority' => 1, // already this value
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -142,7 +139,6 @@ final class AdminAuthorityRoleResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'shop-owner',
             'authority' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -156,7 +152,6 @@ final class AdminAuthorityRoleResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'deputy',
             'authority' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -169,7 +164,6 @@ final class AdminAuthorityRoleResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'no-such-admin',
             'authority' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -182,7 +176,6 @@ final class AdminAuthorityRoleResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'shop-owner',
             'authority' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

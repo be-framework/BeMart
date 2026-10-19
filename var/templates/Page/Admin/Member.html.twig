@@ -8,7 +8,6 @@
     authority   int      — 0=システム管理者 / 1=店舗オーナー
     work        int      — 0=非稼働 / 1=稼働
     sortNo      int      — display order
-    csrfToken   string   — CSRF token
     form        AdminMemberForm — pre-filled renderer (HTML context only)
     message     string?  — top-level error message on rejection
     errors      object?  — field errors map on rejection
@@ -29,7 +28,7 @@
     DELETE /admin/member?loginId=…&_method=delete  — doDeleteMember (edit)
   Back: goMemberList → /admin/member-list
 
-  CSRF: csrfToken from resource body; field name "csrfToken".
+  CSRF: hidden field "csrfToken" filled by csrf_token().
   _method tunnel: hidden input in form action query.
   mode: name="mode" value="member_form" — signals browser-form path in resource.
 
@@ -118,7 +117,7 @@
   action="/admin/member"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="mode" value="member_form">
 
   <div class="idea-admin-create-wrap">
@@ -271,7 +270,7 @@
   action="/admin/member?_method=put"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="mode" value="member_form">
   <input type="hidden" name="loginId" value="{{ loginId }}">
 
@@ -386,7 +385,7 @@
   action="/admin/member?loginId={{ loginId|url_encode }}&_method=delete"
   aria-hidden="true"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="loginId" value="{{ loginId }}">
   <input type="hidden" name="mode" value="member_form">
 </form>

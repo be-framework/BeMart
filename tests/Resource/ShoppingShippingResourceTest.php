@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -33,12 +32,11 @@ final class ShoppingShippingResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('goShoppingShipping', $ro->body['transitionId']);
-        $this->assertSame(['shippingAddressId', 'csrfToken'], $ro->body['fields']);
+        $this->assertSame(['shippingAddressId'], $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/shopping/shipping', $ro->body['submitTo']['href']);
         // Address data lookup is a Wave-future TODO — empty list for now.
         $this->assertSame([], $ro->body['addresses']);
-        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnGetShippingEditReturnsExpectedShape(): void
@@ -50,10 +48,8 @@ final class ShoppingShippingResourceTest extends TestCase
         $this->assertContains('name01', $ro->body['fields']);
         $this->assertContains('postalCode', $ro->body['fields']);
         $this->assertContains('addr01', $ro->body['fields']);
-        $this->assertContains('csrfToken', $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/shopping/shipping-edit', $ro->body['submitTo']['href']);
-        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnGetShippingMultipleReturnsExpectedShape(): void
@@ -74,7 +70,6 @@ final class ShoppingShippingResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/shopping/shipping', [
             'shippingAddressId' => '1',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -96,7 +91,6 @@ final class ShoppingShippingResourceTest extends TestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-2-3',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -109,7 +103,6 @@ final class ShoppingShippingResourceTest extends TestCase
     public function testOnPostShippingMultipleAcceptsEmptyAllocation(): void
     {
         $ro = $this->resource->post('page://self/shopping/shipping-multiple', [
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -131,7 +124,6 @@ final class ShoppingShippingResourceTest extends TestCase
             'addr01' => '新宿区',
             'addr02' => '新宿4-5-6',
             'phoneNumber' => '0311112222',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);

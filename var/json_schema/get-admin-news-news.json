@@ -60,18 +60,6 @@
       "description": "ニュース記事の見出し Fake観察文字長 4〜4; 観察値 'ようこそ'。",
       "example": "ようこそ"
     },
-    "csrfToken": {
-      "title": "処理識別子",
-      "description": "フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。",
-      "type": [
-        "string",
-        "null"
-      ],
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
-    },
     "publishDate": {
       "title": "公開日",
       "description": "ニュースの公開日時。フロントの表示順を制御 Fake観察文字長 25〜25; 観察値 '2026-01-01T00:00:00+09:00'。",
@@ -230,15 +218,6 @@
       "maxLength": 128,
       "pattern": "^.+_[0-9]+$",
       "example": "session-prefix-1_1"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     },
     "uriReference": {
       "title": "URI参照",

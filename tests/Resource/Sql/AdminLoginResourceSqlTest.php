@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 
 /**
  * SQL-backed hypermedia coverage for the admin login POST endpoint —
@@ -67,7 +66,6 @@ final class AdminLoginResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => self::ADMIN_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -86,7 +84,6 @@ final class AdminLoginResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => 'not-the-right-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);
@@ -103,7 +100,6 @@ final class AdminLoginResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/login', [
             'loginId' => 'no-such-admin',
             'password' => self::ADMIN_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);
@@ -114,7 +110,6 @@ final class AdminLoginResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => 'short',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);

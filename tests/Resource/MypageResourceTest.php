@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
@@ -73,7 +72,6 @@ final class MypageResourceTest extends TestCase
     {
         $this->resource->post('page://self/mypage/favorite', [
             'productCode' => 'sample-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $ro = $this->resource->get('page://self/mypage');

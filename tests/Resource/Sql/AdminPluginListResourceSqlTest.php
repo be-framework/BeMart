@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -108,7 +107,6 @@ final class AdminPluginListResourceSqlTest extends AbstractResourceSqlTestCase
             'pluginCode' => 'NewVendor/Plugin',
             'pluginName' => '新規プラグイン',
             'pluginVersion' => '1.0.0',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -134,7 +132,6 @@ final class AdminPluginListResourceSqlTest extends AbstractResourceSqlTestCase
             'pluginCode' => 'Sample/SamplePlugin',
             'pluginName' => 'Whatever',
             'pluginVersion' => '9.9.9',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -153,7 +150,6 @@ final class AdminPluginListResourceSqlTest extends AbstractResourceSqlTestCase
             'pluginCode' => 'has spaces',
             'pluginName' => '新規プラグイン',
             'pluginVersion' => '1.0.0',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -168,7 +164,6 @@ final class AdminPluginListResourceSqlTest extends AbstractResourceSqlTestCase
             'pluginCode' => 'NewVendor/Plugin',
             'pluginName' => '新規プラグイン',
             'pluginVersion' => '1.0.0',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

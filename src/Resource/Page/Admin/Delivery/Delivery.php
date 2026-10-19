@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Delivery;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -22,7 +23,6 @@ use MyVendor\BeMart\Be\Input\GetAdminDeliveryListInput;
 use MyVendor\BeMart\Be\Input\UpdateDeliveryInput;
 use MyVendor\BeMart\Form\AdminDeliveryForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -43,7 +43,6 @@ class Delivery extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -96,7 +95,6 @@ class Delivery extends ResourceObject
             'form' => $form,
             'deliveryId' => $deliveryId,
             'delivery' => $delivery,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -112,6 +110,7 @@ class Delivery extends ResourceObject
     #[JsonSchema(schema: 'put-admin-delivery-delivery.json', params: 'put-admin-delivery-delivery.param.json')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(
         string $deliveryId,
         string|null $deliveryName = null,
@@ -144,6 +143,7 @@ class Delivery extends ResourceObject
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onDelete(string $deliveryId): static
     {
         $final = ($this->becoming)(new DeleteDeliveryInput(deliveryId: $deliveryId));

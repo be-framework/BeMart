@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -108,7 +107,6 @@ final class AdminClassCategoryResourceSqlTest extends AbstractResourceSqlTestCas
     {
         $ro = $this->resource->post('page://self/admin/class-name/class-name-list', [
             'classNameLabel' => $label,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $id = $ro->body['classNameId'];
         assert(is_string($id));
@@ -126,7 +124,6 @@ final class AdminClassCategoryResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->post('page://self/admin/class-category/class-category-list', [
             'classNameId' => $classNameId,
             'classCategoryName' => $name,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $id = $ro->body['classCategoryId'];
         assert(is_string($id));
@@ -141,7 +138,6 @@ final class AdminClassCategoryResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->post('page://self/admin/class-category/class-category-list', [
             'classNameId' => $classNameId,
             'classCategoryName' => 'Red',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -156,7 +152,6 @@ final class AdminClassCategoryResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->post('page://self/admin/class-category/class-category-list', [
             'classNameId' => 'nonexistent-zzz',
             'classCategoryName' => 'Red',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -169,7 +164,6 @@ final class AdminClassCategoryResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->post('page://self/admin/class-category/class-category-list', [
             'classNameId' => $classNameId,
             'classCategoryName' => 'Red',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -206,7 +200,6 @@ final class AdminClassCategoryResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->put('page://self/admin/class-category/class-category', [
             'classCategoryId' => $id,
             'classCategoryName' => 'Crimson',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -221,7 +214,6 @@ final class AdminClassCategoryResourceSqlTest extends AbstractResourceSqlTestCas
         $ro = $this->resource->put('page://self/admin/class-category/class-category', [
             'classCategoryId' => 'nonexistent-zzz',
             'classCategoryName' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -233,7 +225,6 @@ final class AdminClassCategoryResourceSqlTest extends AbstractResourceSqlTestCas
 
         $ro = $this->resource->delete('page://self/admin/class-category/class-category', [
             'classCategoryId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -244,7 +235,6 @@ final class AdminClassCategoryResourceSqlTest extends AbstractResourceSqlTestCas
     {
         $ro = $this->resource->delete('page://self/admin/class-category/class-category', [
             'classCategoryId' => 'nonexistent-zzz',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }

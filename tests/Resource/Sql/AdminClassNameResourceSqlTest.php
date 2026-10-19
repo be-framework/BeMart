@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -99,7 +98,6 @@ final class AdminClassNameResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/admin/class-name/class-name-list', [
             'classNameLabel' => $label,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $id = $ro->body['classNameId'];
         assert(is_string($id));
@@ -111,7 +109,6 @@ final class AdminClassNameResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/admin/class-name/class-name-list', [
             'classNameLabel' => 'Color',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -123,7 +120,6 @@ final class AdminClassNameResourceSqlTest extends AbstractResourceSqlTestCase
         $this->rebindAdminSession(null);
         $ro = $this->resource->post('page://self/admin/class-name/class-name-list', [
             'classNameLabel' => 'Color',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -153,7 +149,6 @@ final class AdminClassNameResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/class-name/class-name', [
             'classNameId' => $id,
             'classNameLabel' => 'Colour',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -168,7 +163,6 @@ final class AdminClassNameResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/class-name/class-name', [
             'classNameId' => 'nonexistent-zzz',
             'classNameLabel' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -179,7 +173,6 @@ final class AdminClassNameResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->delete('page://self/admin/class-name/class-name', [
             'classNameId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);

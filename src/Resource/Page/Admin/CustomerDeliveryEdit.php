@@ -20,8 +20,8 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminCustomerDeliveryForm;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Csrf\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -64,7 +64,6 @@ class CustomerDeliveryEdit extends ResourceObject
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
@@ -103,7 +102,6 @@ class CustomerDeliveryEdit extends ResourceObject
         $this->body = [
             'form' => $form,
             'customerId' => $customerId,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -134,6 +132,7 @@ class CustomerDeliveryEdit extends ResourceObject
     #[Link(rel: 'goCustomer', href: 'page://self/admin/customer')]
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $customerId,
         string $name01,
@@ -217,6 +216,7 @@ class CustomerDeliveryEdit extends ResourceObject
     #[Link(rel: 'goCustomer', href: 'page://self/admin/customer')]
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onDelete(string $customerId, string $addressId): static
     {
         $final = ($this->becoming)(new AdminDeleteCustomerDeliveryAddressInput(

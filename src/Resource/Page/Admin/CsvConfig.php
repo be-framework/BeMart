@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -16,7 +17,6 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\CsvConfigUpdated;
 use MyVendor\BeMart\Be\Input\UpdateCsvInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminCsvConfigForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -53,7 +53,6 @@ class CsvConfig extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
@@ -85,7 +84,6 @@ class CsvConfig extends ResourceObject
         $this->body = [
             'form' => $form,
             'csvType' => $csvType,
-            'csrfToken' => $this->csrf->issue(),
             'outputColumns' => AdminCsvConfigForm::outputColumns(),
             'notOutputColumns' => AdminCsvConfigForm::notOutputColumns(),
         ];
@@ -112,6 +110,7 @@ class CsvConfig extends ResourceObject
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     #[Link(rel: 'goExportProduct', href: 'page://self/admin/product-csv', method: 'get')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         int $csvType,
         array $columns = [],

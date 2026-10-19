@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -21,7 +22,6 @@ use MyVendor\BeMart\Be\Input\AdminUpdateCustomerInput;
 use MyVendor\BeMart\Be\Input\GetAdminCustomerInput;
 use MyVendor\BeMart\Form\AdminCustomerForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 use SensitiveParameter;
 
@@ -69,7 +69,6 @@ class Customer extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
@@ -141,7 +140,6 @@ class Customer extends ResourceObject
             'totalSpent' => $final->totalSpent,
             'favorites' => $final->favorites,
             'favoriteCount' => $final->favoriteCount,
-            'csrfToken' => $this->csrf->issue(),
         ];
         // Phase 3: an AdminCustomerForm pre-filled with the persisted
         // profile, for the HTML edit page (Customer.html.twig) to render
@@ -195,6 +193,7 @@ class Customer extends ResourceObject
     #[JsonSchema(schema: 'post-admin-update-customer.json', params: 'post-admin-update-customer.param.json')]
     #[Link(rel: 'goCustomer', href: 'page://self/admin/customer', method: 'get')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $customerId,
         string $email,

@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -65,7 +64,6 @@ final class AdminBaseInfoResourceTest extends TestCase
             'pref' => 13,
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-1-1',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -95,7 +93,6 @@ final class AdminBaseInfoResourceTest extends TestCase
             'businessHour' => $seed['businessHour'],
             'shopEmail01' => $seed['shopEmail01'],
             'shopMessage' => $seed['shopMessage'],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -108,7 +105,6 @@ final class AdminBaseInfoResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/base-info', [
             'shopName' => '   ',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -119,7 +115,6 @@ final class AdminBaseInfoResourceTest extends TestCase
         $this->resource->post('page://self/admin/base-info', [
             'shopName' => '新ショップ',
             'phoneNumber' => 'not-digits',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -131,7 +126,6 @@ final class AdminBaseInfoResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/base-info', [
             'shopName' => '新ショップ',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

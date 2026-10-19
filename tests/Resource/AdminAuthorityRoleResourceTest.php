@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -59,7 +58,6 @@ final class AdminAuthorityRoleResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'shop-owner',
             'authority' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -75,7 +73,6 @@ final class AdminAuthorityRoleResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'shop-owner',
             'authority' => 1,  // already this value
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -92,7 +89,6 @@ final class AdminAuthorityRoleResourceTest extends TestCase
         $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'shop-owner',
             'authority' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -105,7 +101,6 @@ final class AdminAuthorityRoleResourceTest extends TestCase
         $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'deputy',
             'authority' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -118,7 +113,6 @@ final class AdminAuthorityRoleResourceTest extends TestCase
         $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'no-such-admin',
             'authority' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -131,7 +125,6 @@ final class AdminAuthorityRoleResourceTest extends TestCase
         $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'shop-owner',
             'authority' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

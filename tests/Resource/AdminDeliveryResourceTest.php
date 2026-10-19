@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminDeliveryForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -67,7 +66,6 @@ final class AdminDeliveryResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/delivery/delivery-list', [
             'deliveryName' => 'ヤマト宅急便',
             'visible' => true,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -82,7 +80,6 @@ final class AdminDeliveryResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/delivery/delivery-list', [
             'deliveryName' => 'ヤマト',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -113,7 +110,6 @@ final class AdminDeliveryResourceTest extends TestCase
             'deliveryId' => $id,
             'deliveryName' => 'ヤマト宅急便',
             'visible' => false,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -128,7 +124,6 @@ final class AdminDeliveryResourceTest extends TestCase
         $this->resource->put('page://self/admin/delivery/delivery', [
             'deliveryId' => 'nonexistent-zzz',
             'deliveryName' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -138,7 +133,6 @@ final class AdminDeliveryResourceTest extends TestCase
 
         $ro = $this->resource->delete('page://self/admin/delivery/delivery', [
             'deliveryId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);

@@ -37,7 +37,6 @@ final class ResourceSchemas
             'classNames' => 'array',
             'mainImage' => 'string|null',
             'form' => 'object',
-            'csrfToken' => 'string',
         ]);
     }
 
@@ -52,7 +51,6 @@ final class ResourceSchemas
             'cartCount' => 'int',
             'totalPrice' => 'int',
             'deliveryFeeTotal' => 'int',
-            'csrfToken' => 'string',
             'carts' => 'array',
         ]);
     }
@@ -63,7 +61,6 @@ final class ResourceSchemas
             'transitionId' => 'string',
             'fields' => 'array',
             'submitTo' => 'array',
-            'csrfToken' => 'string',
             'form' => 'object',
         ]);
     }
@@ -73,7 +70,6 @@ final class ResourceSchemas
         return new ResourceSchema('Login.onPost.input', [
             'email' => 'string',
             'password' => 'string',
-            'csrfToken' => 'string',
         ]);
     }
 
@@ -108,7 +104,6 @@ final class ResourceSchemas
             'categoryNames' => 'array',
             'tagNames' => 'array',
             'classNames' => 'array',
-            'csrfToken' => 'string',
             'productStatusOptions' => 'array',
         ]);
     }

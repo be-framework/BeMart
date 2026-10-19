@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminCalendarForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -81,7 +80,6 @@ final class AdminCalendarResourceTest extends TestCase
             'calendarId' => 1,
             'title' => '元日',
             'holiday' => '2026-01-01',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -97,7 +95,6 @@ final class AdminCalendarResourceTest extends TestCase
             'operation' => 'create',
             'title' => '建国記念の日',
             'holiday' => '2026-02-11',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -110,7 +107,6 @@ final class AdminCalendarResourceTest extends TestCase
 
         $ro = $this->resource->delete('page://self/admin/calendar', [
             'calendarId' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);

@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Form\EntryForm;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\WebFormModule\FormFactory;
@@ -96,11 +97,6 @@ final class EntryHtmlRenderTest extends TestCase
         '<title>EC-CUBE / 新規会員登録</title>',
         '<meta name="author" content="">',
 
-        // --- entry form: CSRF hidden input ------------------------------
-        // EC-CUBE's hidden csrfToken carries a live form CSRF token; BeMart's
-        // html context has no CSRF widget, so the value is empty. Same
-        // hidden input, different (empty) value.
-        '<input type="hidden" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -212,9 +208,8 @@ final class EntryHtmlRenderTest extends TestCase
         // With the 16 form inputs AND the 10 field labels rendered by a
         // real EntryForm / ported `form_label` on both sides, wave-1's
         // 73-line residual collapses to 11 — all shared <head> /
-        // <title> / inline-CSRF-script frame material + the empty CSRF
-        // hidden value, none form-related. Same residual family as the
-        // Login pilot.
+        // <title> / inline-CSRF-script frame material, none form-related.
+        // Same residual family as the Login pilot.
         $this->assertLessThanOrEqual(
             13,
             count($onlyInEcCube) + count($onlyInBeMart),
@@ -234,7 +229,6 @@ final class EntryHtmlRenderTest extends TestCase
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
-            'name="csrfToken"',
             // EC-CUBE renders每 field label through the Symfony FormView
             // `form_label` helper (a <label> element); BeMart authors the
             // `<label class="ec-label">` plainly. Same label text, FormView
@@ -387,7 +381,7 @@ final class EntryHtmlRenderTest extends TestCase
             }
 
             if ($field === '_csrfToken__') {
-                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
+                return new Markup('<input type="hidden" name="csrfToken" value="' . FakeCsrfToken::DEFAULT_TOKEN . '">', 'UTF-8');
             }
 
             if ($entryForm instanceof EntryForm) {

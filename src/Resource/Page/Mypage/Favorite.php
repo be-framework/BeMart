@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Mypage;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -46,6 +47,7 @@ class Favorite extends ResourceObject
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     #[Link(rel: 'goProduct', href: 'page://self/product')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string $productCode): static
     {
         $final = ($this->becoming)(new AddFavoriteInput(productCode: $productCode));
@@ -82,6 +84,7 @@ class Favorite extends ResourceObject
     #[Link(rel: 'goMypageWithdraw', href: 'page://self/mypage/withdraw')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onDelete(string $productCode): static
     {
         $final = ($this->becoming)(new RemoveFavoriteInput(productCode: $productCode));

@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -128,7 +127,6 @@ final class AdminLayoutResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/layout/layout', [
             'layoutId' => (string) $pcId,
             'layoutName' => 'PC Refreshed',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('PC Refreshed', $ro->body['layoutName']);
@@ -144,7 +142,6 @@ final class AdminLayoutResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/layout/layout', [
             'layoutId' => 'nonexistent',
             'layoutName' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -157,7 +154,6 @@ final class AdminLayoutResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/layout/layout', [
             'layoutId' => (string) $pcId,
             'layoutName' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }

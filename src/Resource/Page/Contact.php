@@ -11,13 +11,13 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Exception\ContactContentsFormatException;
 use MyVendor\BeMart\Be\Exception\EmailFormatException;
 use MyVendor\BeMart\Be\Exception\Name01FormatException;
 use MyVendor\BeMart\Be\Exception\Name02FormatException;
 use MyVendor\BeMart\Be\Final\ContactSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitContactInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\ContactForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -44,7 +44,6 @@ class Contact extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -54,10 +53,8 @@ class Contact extends ResourceObject
      *
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
-     * state). `csrfToken` carries the trusted reference
-     * {@see CsrfToken::$token} issues — the HTML port
-     * renders it into the form's hidden `_token` input so the
-     * subsequent POST passes CSRF validation.
+     * state). The HTML port fills the form's hidden `csrfToken` input
+     * via `csrf_token()`; the body carries no token.
      */
     #[Alps('goContactForm')]
     #[JsonSchema(schema: 'get-contact.json')]
@@ -72,14 +69,12 @@ class Contact extends ResourceObject
                 'contactName02',
                 'contactEmail',
                 'contactContents',
-                'csrfToken',
             ],
             'submitTo' => [
                 'rel' => 'doSubmitContact',
                 'method' => 'POST',
                 'href' => 'page://self/contact',
             ],
-            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty ContactForm for the HTML port to render
             // via `{{ form.input(...) }}`. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ContactForm::class),
@@ -99,6 +94,7 @@ class Contact extends ResourceObject
     #[JsonSchema(schema: 'post-contact.json', params: 'post-contact.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string|null $contactName01 = null,
         string|null $contactName02 = null,
@@ -186,14 +182,12 @@ class Contact extends ResourceObject
                 'contactName02',
                 'contactEmail',
                 'contactContents',
-                'csrfToken',
             ],
             'submitTo' => [
                 'rel' => 'doSubmitContact',
                 'method' => 'POST',
                 'href' => 'page://self/contact',
             ],
-            'csrfToken' => $this->csrf->issue(),
             'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
             'errors' => $errors,
             'form' => $this->failedForm($values, $errors),

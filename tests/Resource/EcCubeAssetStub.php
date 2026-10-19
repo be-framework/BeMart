@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource;
 
 use MyVendor\BeMart\Module\BeMartTwigExtension;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 use Twig\Environment;
 use Twig\TwigFunction;
 
@@ -39,7 +40,7 @@ final class EcCubeAssetStub
     /** Register `asset` on $twig, resolving through the EC-CUBE asset package map. */
     public static function register(Environment $twig): void
     {
-        $extension = new BeMartTwigExtension();
+        $extension = new BeMartTwigExtension(new FakeCsrfToken());
 
         $twig->addFunction(new TwigFunction(
             'asset',

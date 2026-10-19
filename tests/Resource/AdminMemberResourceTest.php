@@ -10,7 +10,6 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Exception\InsufficientAuthorityException;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Provide\Error\ExceptionStatusMapper;
 use PHPUnit\Framework\TestCase;
@@ -92,7 +91,6 @@ final class AdminMemberResourceTest extends TestCase
             'password' => 'fresh-admin-password-2026',
             'name' => '新人管理者',
             'authority' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -115,7 +113,6 @@ final class AdminMemberResourceTest extends TestCase
                 'password' => 'minted-admin-password-2026',
                 'name' => '昇格管理者',
                 'authority' => 0,
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
             $this->fail('Expected InsufficientAuthorityException');
         } catch (InsufficientAuthorityException $e) {
@@ -132,7 +129,6 @@ final class AdminMemberResourceTest extends TestCase
             'password' => 'duplicate-attempt-2026',
             'name' => '別人',
             'authority' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -141,7 +137,6 @@ final class AdminMemberResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/member', [
             'loginId' => 'shop-owner',
             'name' => '新店舗オーナー',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -156,7 +151,6 @@ final class AdminMemberResourceTest extends TestCase
         $this->resource->put('page://self/admin/member', [
             'loginId' => 'no-such-admin',
             'name' => 'irrelevant',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -164,7 +158,6 @@ final class AdminMemberResourceTest extends TestCase
     {
         $ro = $this->resource->delete('page://self/admin/member', [
             'loginId' => 'shop-owner',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -180,7 +173,6 @@ final class AdminMemberResourceTest extends TestCase
 
         $this->resource->delete('page://self/admin/member', [
             'loginId' => 'test-admin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -191,7 +183,6 @@ final class AdminMemberResourceTest extends TestCase
         // idempotent already-deleted branch.
         $ro = $this->resource->delete('page://self/admin/member', [
             'loginId' => self::DELETED_LOGIN_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);

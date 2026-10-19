@@ -7,7 +7,6 @@
     blockName     string   — block display name (empty on new)
     blockFileName string   — twig template file name without .twig extension
     blockDeletable bool    — false for system blocks that cannot be deleted
-    csrfToken     string   — per-request token
     form          AdminBlockForm — fields: blockName, blockFileName, block_html
 
   FORM CONTRACT (src/Form/AdminBlockForm.php):
@@ -115,7 +114,7 @@
     action="{% if blockId is defined and blockId %}/admin/block/block?blockId={{ blockId }}&_method=put{% else %}/admin/block/block-list{% endif %}"
     aria-label="ブロック設定フォーム"
 >
-    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
     <section class="idea-admin-panel" aria-labelledby="section-block-settings">
         <div class="idea-admin-panel__head">
@@ -242,7 +241,7 @@
                   style="display:inline;">
                 <input type="hidden" name="_method" value="delete">
                 <input type="hidden" name="blockId" value="{{ blockId }}">
-                <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
                 <button class="idea-admin-action idea-admin-action--destructive js-dialog-confirm"
                         type="submit">
                     <i class="fa fa-trash" aria-hidden="true"></i>

@@ -19,7 +19,7 @@ use PHPUnit\Framework\TestCase;
  *
  * Data contract (src/Resource/Page/Product.php + var/json_schema/get-product.json):
  *   Required: productCode, productName, price02, stockFind
- *   Optional: description, categoryNames, tagNames, classNames, mainImage, csrfToken
+ *   Optional: description, categoryNames, tagNames, classNames, mainImage
  *   Form:     form (AddCartForm — html context only)
  *
  * Transitions on Product::onGet:

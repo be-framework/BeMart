@@ -8,7 +8,6 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -68,7 +67,6 @@ final class AdminChangePasswordResourceTest extends TestCase
             'currentPassword' => self::CURRENT_PASSWORD,
             'changePasswordFirst' => 'new-strong-password-2026',
             'changePasswordSecond' => 'new-strong-password-2026',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -85,7 +83,6 @@ final class AdminChangePasswordResourceTest extends TestCase
             'currentPassword' => 'wrong-password',
             'changePasswordFirst' => 'new-strong-password-2026',
             'changePasswordSecond' => 'new-strong-password-2026',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -97,7 +94,6 @@ final class AdminChangePasswordResourceTest extends TestCase
             'currentPassword' => self::CURRENT_PASSWORD,
             'changePasswordFirst' => 'new-strong-password-2026',
             'changePasswordSecond' => 'mismatch-confirmation-2026',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -111,7 +107,6 @@ final class AdminChangePasswordResourceTest extends TestCase
             'currentPassword' => self::CURRENT_PASSWORD,
             'changePasswordFirst' => 'new-strong-password-2026',
             'changePasswordSecond' => 'new-strong-password-2026',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

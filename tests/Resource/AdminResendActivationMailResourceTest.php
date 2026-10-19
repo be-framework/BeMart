@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -74,7 +73,6 @@ final class AdminResendActivationMailResourceTest extends TestCase
     {
         $ro = $this->resource->post(self::URI, [
             'email' => self::PROVISIONAL_EMAIL,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -98,7 +96,6 @@ final class AdminResendActivationMailResourceTest extends TestCase
 
         $this->resource->post(self::URI, [
             'email' => self::PROVISIONAL_EMAIL,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -108,7 +105,6 @@ final class AdminResendActivationMailResourceTest extends TestCase
 
         $this->resource->post(self::URI, [
             'email' => 'nobody@example.com',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -118,7 +114,6 @@ final class AdminResendActivationMailResourceTest extends TestCase
 
         $this->resource->post(self::URI, [
             'email' => self::ACTIVE_EMAIL,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

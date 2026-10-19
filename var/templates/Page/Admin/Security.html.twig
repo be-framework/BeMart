@@ -6,7 +6,7 @@
 
 {% block main %}
 <form method="post" action="/admin/security?_method=put" rel="doUpdateSecurity" novalidate>
-    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
     <div class="idea-admin-layout">
         <div class="idea-admin-primary">

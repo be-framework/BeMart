@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +20,6 @@ use MyVendor\BeMart\Be\Exception\LoginAttemptsExceededException;
 use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\AdminAuthenticated;
 use MyVendor\BeMart\Be\Input\AdminLoginInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminLoginForm;
 use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
@@ -74,7 +74,6 @@ class Login extends ResourceObject
 
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly TwoFactorAuthInterface $twoFactorAuth,
         private readonly AdminLoginChallengeInterface $loginChallenge,
@@ -87,10 +86,8 @@ class Login extends ResourceObject
      *
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
-     * state) — the admin firewall guard is on the POST. The `csrfToken`
-     * body field carries the trusted reference {@see CsrfToken::$token}
-     * issues, which the HTML port renders into the form's hidden
-     * `_csrf_token` input so the subsequent POST passes CSRF validation.
+     * state) — the admin firewall guard is on the POST. The HTML port
+     * fills the form's hidden `csrfToken` input via `csrf_token()`.
      */
     #[Alps('doAdminLogin')]
     #[JsonSchema(schema: 'get-admin-login.json')]
@@ -100,12 +97,11 @@ class Login extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goAdminLogin',
-            'fields' => ['loginId', 'password', 'csrfToken'],
+            'fields' => ['loginId', 'password'],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/admin/login',
             ],
-            'csrfToken' => $this->csrf->issue(),
             'form' => $this->emptyLoginForm(),
         ];
 
@@ -123,6 +119,7 @@ class Login extends ResourceObject
     #[JsonSchema(schema: 'post-admin-login.json', params: 'post-admin-login.param.json')]
     #[Link(rel: 'goAdminTop', href: 'page://self/admin/index')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string|null $loginId = null, #[SensitiveParameter] string|null $password = null, string|null $mode = null): static
     {
         $values = [
@@ -235,12 +232,11 @@ class Login extends ResourceObject
         $this->code = $code;
         $this->body = [
             'transitionId' => 'goAdminLogin',
-            'fields' => ['loginId', 'password', 'csrfToken'],
+            'fields' => ['loginId', 'password'],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/admin/login',
             ],
-            'csrfToken' => $this->csrf->issue(),
             'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
             'errors' => $errors,
             'form' => $this->failedForm($values, $errors),

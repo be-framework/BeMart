@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Block;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +20,6 @@ use MyVendor\BeMart\Be\Input\DeleteBlockInput;
 use MyVendor\BeMart\Be\Input\GetAdminBlockInput;
 use MyVendor\BeMart\Be\Input\UpdateBlockInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminBlockForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -47,7 +47,6 @@ class Block extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
@@ -82,7 +81,6 @@ class Block extends ResourceObject
                 'blockName' => '',
                 'blockFileName' => '',
                 'blockDeletable' => true,
-                'csrfToken' => $this->csrf->issue(),
             ];
             $this->body['form'] = $this->editForm($this->body);
 
@@ -99,7 +97,6 @@ class Block extends ResourceObject
             'blockName' => $final->blockName,
             'blockFileName' => $final->blockFileName,
             'blockDeletable' => $final->blockDeletable,
-            'csrfToken' => $this->csrf->issue(),
         ];
         $this->body['form'] = $this->editForm($this->body);
 
@@ -130,6 +127,7 @@ class Block extends ResourceObject
     #[JsonSchema(schema: 'put-admin-block-block.json', params: 'put-admin-block-block.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(
         string $blockId,
         string|null $blockName = null,
@@ -163,6 +161,7 @@ class Block extends ResourceObject
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onDelete(string $blockId): static
     {
         $final = ($this->becoming)(new DeleteBlockInput(blockId: $blockId));

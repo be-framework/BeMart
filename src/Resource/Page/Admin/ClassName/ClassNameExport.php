@@ -12,7 +12,6 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ClassNameCsvExported;
 use MyVendor\BeMart\Be\Input\ExportClassNameInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -30,7 +29,6 @@ class ClassNameExport extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -53,7 +51,6 @@ class ClassNameExport extends ResourceObject
         $this->headers['Content-Disposition'] = $final->document->contentDisposition;
         $this->body = [
             'content' => $final->document->content,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

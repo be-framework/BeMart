@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -83,7 +82,6 @@ final class AdminClassCategoryResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/class-category/class-category-list', [
             'classNameId' => $classNameId,
             'classCategoryName' => 'Red',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -97,7 +95,6 @@ final class AdminClassCategoryResourceTest extends TestCase
         $this->resource->post('page://self/admin/class-category/class-category-list', [
             'classNameId' => 'nonexistent-zzz',
             'classCategoryName' => 'Red',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -111,7 +108,6 @@ final class AdminClassCategoryResourceTest extends TestCase
         $this->resource->post('page://self/admin/class-category/class-category-list', [
             'classNameId' => $classNameId,
             'classCategoryName' => 'Red',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -148,7 +144,6 @@ final class AdminClassCategoryResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/class-category/class-category', [
             'classCategoryId' => $id,
             'classCategoryName' => 'Crimson',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -162,7 +157,6 @@ final class AdminClassCategoryResourceTest extends TestCase
         $this->resource->put('page://self/admin/class-category/class-category', [
             'classCategoryId' => 'nonexistent-zzz',
             'classCategoryName' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -173,7 +167,6 @@ final class AdminClassCategoryResourceTest extends TestCase
 
         $ro = $this->resource->delete('page://self/admin/class-category/class-category', [
             'classCategoryId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -186,7 +179,6 @@ final class AdminClassCategoryResourceTest extends TestCase
 
         $this->resource->delete('page://self/admin/class-category/class-category', [
             'classCategoryId' => 'nonexistent-zzz',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

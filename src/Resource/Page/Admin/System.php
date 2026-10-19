@@ -9,7 +9,6 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function php_uname;
@@ -26,7 +25,6 @@ class System extends ResourceObject
 {
     public function __construct(
         private readonly AdminSession $adminSession,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -53,7 +51,6 @@ class System extends ResourceObject
                 ['title' => 'Application', 'value' => 'BeMart'],
             ],
             'phpinfoEnabled' => false,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

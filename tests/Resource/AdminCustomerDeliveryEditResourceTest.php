@@ -11,7 +11,6 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAddressAccessException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminCustomerDeliveryForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -113,7 +112,6 @@ final class AdminCustomerDeliveryEditResourceTest extends TestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-1-1',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -136,7 +134,6 @@ final class AdminCustomerDeliveryEditResourceTest extends TestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前9-9-9',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -161,7 +158,6 @@ final class AdminCustomerDeliveryEditResourceTest extends TestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-1-1',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -182,7 +178,6 @@ final class AdminCustomerDeliveryEditResourceTest extends TestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-1-1',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -193,7 +188,6 @@ final class AdminCustomerDeliveryEditResourceTest extends TestCase
         $ro = $this->resource->delete('page://self/admin/customer-delivery-edit', [
             'customerId' => self::SEEDED_CUSTOMER_ID,
             'addressId' => self::SEEDED_ADDRESS_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -210,7 +204,6 @@ final class AdminCustomerDeliveryEditResourceTest extends TestCase
         $this->resource->delete('page://self/admin/customer-delivery-edit', [
             'customerId' => self::SEEDED_CUSTOMER_ID,
             'addressId' => self::SEEDED_ADDRESS_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

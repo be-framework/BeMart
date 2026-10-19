@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -119,7 +118,6 @@ final class AdminProductResourceSqlTest extends AbstractResourceSqlTestCase
             'productName' => 'Wave 8 Resource',
             'price02' => 2500,
             'stock' => 30,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -134,7 +132,6 @@ final class AdminProductResourceSqlTest extends AbstractResourceSqlTestCase
             'productCode' => 'admin-active-001',
             'productName' => 'duplicate',
             'price02' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(409, $ro->code);
@@ -148,7 +145,6 @@ final class AdminProductResourceSqlTest extends AbstractResourceSqlTestCase
             'productCode' => 'wave8-noadm-001',
             'productName' => 'No admin',
             'price02' => 100,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -162,7 +158,6 @@ final class AdminProductResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/product', [
             'productCode' => 'admin-active-001',
             'productName' => '更新後',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -176,7 +171,6 @@ final class AdminProductResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/product', [
             'productCode' => 'does-not-exist',
             'productName' => 'whatever',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -189,7 +183,6 @@ final class AdminProductResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/product', [
             'productCode' => 'admin-active-001',
             'productName' => 'no admin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -201,7 +194,6 @@ final class AdminProductResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->delete('page://self/admin/product', [
             'productCode' => 'admin-active-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -213,12 +205,10 @@ final class AdminProductResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $this->resource->delete('page://self/admin/product', [
             'productCode' => 'admin-active-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $ro = $this->resource->delete('page://self/admin/product', [
             'productCode' => 'admin-active-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -229,7 +219,6 @@ final class AdminProductResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->delete('page://self/admin/product', [
             'productCode' => 'does-not-exist',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);

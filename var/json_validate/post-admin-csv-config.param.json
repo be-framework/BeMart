@@ -134,9 +134,6 @@
         "maxLength": 255
       },
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
-    },
-    "csrfToken": {
-      "$ref": "#/$defs/csrfToken"
     }
   },
   "additionalProperties": false,
@@ -274,15 +271,6 @@
       "maxLength": 128,
       "pattern": "^.+_[0-9]+$",
       "example": "session-prefix-1_1"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     },
     "uriReference": {
       "title": "URI参照",

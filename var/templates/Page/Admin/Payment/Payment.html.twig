@@ -20,7 +20,7 @@
     DELETE /admin/payment/payment?paymentId=…&_method=delete — doDeletePayment (edit)
   Back: goPaymentList → /admin/payment/payment-list
 
-  CSRF: csrfToken from resource body; field name "csrfToken".
+  CSRF: hidden field "csrfToken" filled by csrf_token().
   _method tunnel: hidden input + action query string.
 
   MODES:
@@ -126,7 +126,7 @@
   action="/admin/payment/payment-list"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
   <div class="idea-admin-payment-create-wrap">
 
@@ -247,7 +247,7 @@
   action="/admin/payment/payment?paymentId={{ paymentId|url_encode }}&amp;_method=put"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="paymentId" value="{{ paymentId }}">
   <input type="hidden" name="_method" value="put">
 
@@ -448,7 +448,7 @@
   action="/admin/payment/payment?paymentId={{ paymentId|url_encode }}&amp;_method=delete"
   aria-hidden="true"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="paymentId" value="{{ paymentId }}">
   <input type="hidden" name="_method" value="delete">
 </form>

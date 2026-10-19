@@ -10,7 +10,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Query\DashboardCountsQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -40,7 +39,6 @@ class Index extends ResourceObject
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly DashboardCountsQueryInterface $dashboardCounts,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -80,7 +78,6 @@ class Index extends ResourceObject
             'countProducts' => (int) ($row['products'] ?? 0),
             'countCustomers' => (int) ($row['customers'] ?? 0),
             'recommendedPlugins' => [],
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

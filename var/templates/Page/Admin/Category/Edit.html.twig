@@ -7,7 +7,6 @@
     category    array|null         — {categoryId, categoryName, parentId, sortNo} when editing
     categories  array              — flat list of {categoryId, categoryName, parentId, sortNo}
     count       int                — total category count
-    csrfToken   string             — CSRF token
 
   ACTIONS (derived from #[Link] on Edit / CategoryList / Category resources):
     POST   /admin/category/category-list            — doCreateCategory (new)
@@ -78,7 +77,7 @@
   rel="doCreateCategory"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   {% if isEdit %}
   <input type="hidden" name="categoryId" value="{{ categoryId }}">
   {% endif %}
@@ -332,7 +331,7 @@
   action="/admin/category/category?categoryId={{ categoryId|url_encode }}&amp;_method=delete"
   aria-hidden="true"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 </form>
 {% endif %}
 {% endblock %}

@@ -74,12 +74,26 @@ and the resulting DB-backed state was read back with screenshot and JSON
 evidence. When the browser finds a gap, first express it as a Hypermedia
 or HTTP workflow regression, then fix the implementation.
 
-CSRF is not a null boundary in the current test contexts. The Fake context
-uses a fixed `FakeCsrfToken`, the SQL HTML context mirrors the rendered
-hidden `csrfToken` through the test header/session bridge, and only smoke
-tests use an always-valid token. Keep form token rendering and same-context
-submission visible in HTTP/browser evidence even if a future test module
-chooses to disable CSRF validation itself.
+CSRF is a browser boundary, and the tiers treat it as one. In the Fake and
+SQL in-process contexts `FakeModule` stands both BEAR.Csrf gates down
+(`FakeRequestToken` supplies `FakeCsrfToken`'s token, `AllowedOrigin` is
+null), so resource tests never mention `csrfToken`; the gates themselves are
+proved once in `tests/Resource/CsrfGateWiringTest.php`. The `hypermedia`
+tier runs the real token gate over a real session: the test puts a token
+into the session slot (`CsrfSessionKey::DEFAULT_NAME`) and the workflow
+submits it as `csrfToken`; the same-origin gate, armed by
+`BEMART_ALLOWED_ORIGIN` in `phpunit.xml`, is satisfied by binding
+`FakeRequestOrigin` because an in-process call carries no request headers.
+In the `http` tier only the servers started from `html-sql-index.php` and
+`prod-json-index.php` run both gates for real: the client mirrors a token
+through the `X-BeMart-Test-Csrf-Token` header and sends
+`Sec-Fetch-Site: same-origin` as a browser would, and
+`tests/Http/HttpSqlCsrfGateTest.php` proves a missing token or a cross-site
+submit is refused with 403. The other HTTP front controllers boot a
+`FakeModule` context, so their requests pass the gates without a token.
+Rendered forms take their hidden `csrfToken` from the Twig `csrf_token()`
+function; `tests/Html/CsrfTokenRenderedTest.php` checks every rendered POST
+form carries it filled.
 
 ## Write once, run at two transports
 

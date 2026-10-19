@@ -13,7 +13,6 @@ use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -75,7 +74,6 @@ final class AdminMasterListTransitionsResourceTest extends TestCase
             'masterType' => 'tag',
             'rowId' => 't1',
             'sortNo' => 9,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -93,7 +91,6 @@ final class AdminMasterListTransitionsResourceTest extends TestCase
             'masterType' => 'tag',
             'rowId' => 't1',
             'sortNo' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -105,7 +102,6 @@ final class AdminMasterListTransitionsResourceTest extends TestCase
             'masterType' => 'tag',
             'rowId' => 'no-such-row',
             'sortNo' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -117,7 +113,6 @@ final class AdminMasterListTransitionsResourceTest extends TestCase
             'masterType' => 'bogusMaster',
             'rowId' => 'x',
             'sortNo' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -130,7 +125,6 @@ final class AdminMasterListTransitionsResourceTest extends TestCase
             'masterType' => 'news',
             'rowId' => 'nw-welcome',
             'sortNo' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -146,7 +140,6 @@ final class AdminMasterListTransitionsResourceTest extends TestCase
             'masterType' => 'delivery',
             'rowId' => 'd1',
             'visible' => false,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -166,7 +159,6 @@ final class AdminMasterListTransitionsResourceTest extends TestCase
             'masterType' => 'delivery',
             'rowId' => 'd1',
             'visible' => false,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -178,7 +170,6 @@ final class AdminMasterListTransitionsResourceTest extends TestCase
             'masterType' => 'delivery',
             'rowId' => 'no-such-row',
             'visible' => true,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -193,7 +184,6 @@ final class AdminMasterListTransitionsResourceTest extends TestCase
             'masterType' => 'tag',
             'rowId' => 't1',
             'visible' => false,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);

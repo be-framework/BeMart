@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -67,7 +66,6 @@ final class AdminProductCopyResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/product-copy', [
             'productCode' => 'admin-active-001',
             'newProductCode' => 'admin-active-001.copy',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -81,7 +79,6 @@ final class AdminProductCopyResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/product-copy', [
             'productCode' => 'does-not-exist',
             'newProductCode' => 'new-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -92,7 +89,6 @@ final class AdminProductCopyResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/product-copy', [
             'productCode' => 'admin-active-001',
             'newProductCode' => 'sample-001',  // already exists
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(409, $ro->code);
@@ -105,7 +101,6 @@ final class AdminProductCopyResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/product-copy', [
             'productCode' => 'admin-active-001',
             'newProductCode' => 'foo',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

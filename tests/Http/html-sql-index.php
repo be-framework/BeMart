@@ -32,9 +32,12 @@ if (is_string($customerId) && $customerId !== '') {
 
 $csrfToken = $_SERVER['HTTP_X_BEMART_TEST_CSRF_TOKEN'] ?? null;
 if (is_string($csrfToken) && $csrfToken !== '') {
-    $_SESSION['_csrf_token'] = $csrfToken;
+    $_SESSION['bear_csrf_token'] = $csrfToken; // CsrfSessionKey::DEFAULT_NAME (autoloader is not loaded yet)
 }
 
 require __DIR__ . '/../../vendor/autoload.php';
+
+// Arms the same-origin gate for the test server; the HTTP tests send `Sec-Fetch-Site: same-origin`.
+putenv('BEMART_ALLOWED_ORIGIN=http://' . $_SERVER['HTTP_HOST']);
 
 exit((new Bootstrap())('html-eccube-sql-hal-app', $GLOBALS, $_SERVER));

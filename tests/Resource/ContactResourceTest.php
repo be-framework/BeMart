@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -38,15 +37,12 @@ final class ContactResourceTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('goContactForm', $ro->body['transitionId']);
         $this->assertSame(
-            ['contactName01', 'contactName02', 'contactEmail', 'contactContents', 'csrfToken'],
+            ['contactName01', 'contactName02', 'contactEmail', 'contactContents'],
             $ro->body['fields'],
         );
         $this->assertSame('doSubmitContact', $ro->body['submitTo']['rel']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/contact', $ro->body['submitTo']['href']);
-        // `csrfToken` carries the trusted reference the HTML form must
-        // echo back so the doSubmitContact POST passes CSRF validation.
-        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnPostSubmitsContactAndRedirectsToComplete(): void
@@ -56,7 +52,6 @@ final class ContactResourceTest extends TestCase
             'contactName02' => '太郎',
             'contactEmail' => 'yamada@example.com',
             'contactContents' => 'お問い合わせの本文です。',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         // Post/Redirect/Get: a successful submit returns Code::OK + a
@@ -83,7 +78,6 @@ final class ContactResourceTest extends TestCase
             'contactName02' => '太郎',
             'contactEmail' => 'not-an-email',
             'contactContents' => 'body text',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -96,7 +90,6 @@ final class ContactResourceTest extends TestCase
             'contactName02' => '太郎',
             'contactEmail' => 'yamada@example.com',
             'contactContents' => '',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

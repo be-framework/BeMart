@@ -38,6 +38,9 @@
 - Missing operation summary.
 - Missing ALPS attribute.
 
+### POST /logout
+- Missing operation summary.
+
 ### GET /unsupported-route
 - Missing operation summary.
 - Missing ALPS attribute.

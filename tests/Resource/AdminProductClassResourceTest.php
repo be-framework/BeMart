@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminProductClassForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -97,7 +96,6 @@ final class AdminProductClassResourceTest extends TestCase
             'stock' => 10,
             'stock_unlimited' => false,
             'delivery_fee' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -117,7 +115,6 @@ final class AdminProductClassResourceTest extends TestCase
             'stock' => 10,
             'stock_unlimited' => false,
             'delivery_fee' => 0,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

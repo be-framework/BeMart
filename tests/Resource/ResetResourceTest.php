@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -38,7 +37,6 @@ final class ResetResourceTest extends TestCase
         $ro = $this->resource->post('page://self/reset', [
             'resetKey' => self::VALID_RESET_KEY,
             'password' => self::NEW_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -58,7 +56,6 @@ final class ResetResourceTest extends TestCase
         $this->resource->post('page://self/reset', [
             'resetKey' => 'unknown-reset-key-not-in-storage-zzzz',
             'password' => self::NEW_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -75,7 +72,6 @@ final class ResetResourceTest extends TestCase
         $this->resource->post('page://self/reset', [
             'resetKey' => self::EXPIRED_RESET_KEY,
             'password' => self::NEW_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -86,7 +82,6 @@ final class ResetResourceTest extends TestCase
         $this->resource->post('page://self/reset', [
             'resetKey' => self::VALID_RESET_KEY,
             'password' => 'short',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -97,7 +92,6 @@ final class ResetResourceTest extends TestCase
         $this->resource->post('page://self/reset', [
             'resetKey' => 'short',
             'password' => self::NEW_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

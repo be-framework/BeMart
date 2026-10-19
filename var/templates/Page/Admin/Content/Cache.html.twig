@@ -2,7 +2,6 @@
   BeMart admin キャッシュ管理 — doClearCache (ALPS idempotent action).
 
   DATA CONTRACT (src/Resource/Page/Admin/Content/Cache.php onGet):
-    csrfToken    string|null   — CSRF token for the PUT form
 
   ACTIONS (src/Resource/Page/Admin/Content/Cache.php):
     doClearCache   PUT  /admin/content/cache
@@ -174,7 +173,7 @@
       method="post"
       action="/admin/content/cache?_method=put"
       rel="doClearCache">
-    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
     <input type="hidden" name="mode" value="content_operation_form">
 </form>
 

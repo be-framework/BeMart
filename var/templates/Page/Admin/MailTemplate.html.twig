@@ -6,7 +6,6 @@
     id              int|null  — currently selected mailTemplateId (null = no selection)
     Mail            {id, file_name, isDeletable}  — selected template meta
     count           int       — total template count
-    csrfToken       string    — CSRF token
 
   FORM CONTRACT (src/Form/AdminMailTemplateForm.php):
     mailTemplateId  hidden    — selected template id
@@ -230,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function () {
       action="/admin/mail-template"
       rel="doUpdateMailTemplate"
     >
-      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
       <div class="idea-admin-field">
         <div class="idea-admin-field__label">
           <label for="mail_template">テンプレート</label>
@@ -258,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
   action="/admin/mail-template"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   {{ form.input('mailTemplateId')|raw }}
 
   <div class="idea-admin-layout">
@@ -496,7 +495,7 @@ document.addEventListener('DOMContentLoaded', function () {
           style="display:inline;">
       <input type="hidden" name="_method" value="delete">
       <input type="hidden" name="mailTemplateId" value="{{ Mail.id }}">
-      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
       <button class="idea-admin-action idea-admin-action--destructive" type="submit">
         <i class="fa fa-trash" aria-hidden="true"></i>
         削除する

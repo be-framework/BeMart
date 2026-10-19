@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Http;
 
 use Koriym\PhpServer\PhpServer;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 use PHPUnit\Framework\TestCase;
 
 use function escapeshellarg;
@@ -52,7 +52,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'productCode' => 'sample-001',
             'quantity' => '1',
             'operation' => 'add',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
         $this->assertSame(303, $added['status']);
         $this->assertSame('/cart', $added['headers']['Location'] ?? null);
@@ -67,7 +67,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'productCode' => 'sample-001',
             'operation' => 'up',
             'quantity' => '4',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
         $this->assertSame(303, $increased['status']);
         $this->assertSame('/cart', $increased['headers']['Location'] ?? null);
@@ -77,7 +77,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'productCode' => 'sample-001',
             'operation' => 'down',
             'quantity' => '3',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
         $this->assertSame(303, $decreased['status']);
         $this->assertSame('/cart', $decreased['headers']['Location'] ?? null);
@@ -85,7 +85,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
         $removed = $this->form('POST', '/cart/item', [
             'productCode' => 'sample-001',
             'operation' => 'remove',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
         $this->assertSame(303, $removed['status']);
         $this->assertSame('/cart', $removed['headers']['Location'] ?? null);
@@ -118,7 +118,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'pref' => '',
             'addr01' => '',
             'addr02' => '',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
 
         $this->assertSame(400, $rejected['status']);
@@ -135,7 +135,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'productCode' => 'sample-001',
             'quantity' => '1',
             'operation' => 'add',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
         $this->assertSame(303, $added['status']);
 
@@ -157,7 +157,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'pref' => '13',
             'addr01' => '千代田区',
             'addr02' => '1-1',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
 
         $this->assertSame(303, $submitted['status']);
@@ -210,7 +210,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'sex' => '1',
             'job' => '',
             'mode' => 'confirm',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
 
         $this->assertSame(400, $rejected['status']);
@@ -250,7 +250,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'job' => '18',
             'user_policy_check' => '1',
             'mode' => 'confirm',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
 
         $this->assertSame(303, $registered['status']);
@@ -269,7 +269,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'email' => '',
             'password' => '',
             'mode' => 'login',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
 
         $this->assertSame(400, $rejected['status']);
@@ -293,7 +293,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'loginId' => 'missing-admin',
             'password' => 'wrong-password-2026',
             'mode' => 'login',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
 
         $this->assertSame(401, $rejected['status']);
@@ -318,7 +318,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'contactEmail' => '',
             'contactContents' => '',
             'mode' => 'confirm',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
 
         $this->assertSame(400, $rejected['status']);
@@ -337,7 +337,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'contactName02' => '太郎',
             'contactEmail' => 'broken',
             'contactContents' => str_repeat('x', 5000),
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
 
         $this->assertSame(400, $rejected['status']);

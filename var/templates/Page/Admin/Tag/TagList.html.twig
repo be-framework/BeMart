@@ -55,6 +55,7 @@
             payload[row.dataset.tagId] = oldSortNos[i];
             i++;
         });
+        payload.csrfToken = '{{ csrf_token()|e('js') }}';
         fetch('/admin/sort-no-move?masterType=tag&_method=put', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -154,7 +155,7 @@
             aria-label="タグ新規登録フォーム"
             rel="doCreateTag"
         >
-            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+            <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
             <div class="idea-admin-field">
                 <div class="idea-admin-field__label">
                     <label for="admin_tag_name">タグ名</label>
@@ -224,7 +225,7 @@
                         >
                             <input type="hidden" name="_method" value="delete">
                             <input type="hidden" name="tagId" value="{{ Tag.tagId }}">
-                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                            <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
                             <button
                                 type="submit"
                                 class="idea-admin-icon-btn idea-admin-text-btn--danger"
@@ -278,7 +279,7 @@
             <form id="js-dialog-confirm-form" method="post" action="" style="display:inline;">
                 <input type="hidden" name="_method" value="delete">
                 <input type="hidden" name="tagId" value="">
-                <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
                 <button type="submit" class="idea-admin-action idea-admin-action--destructive">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                     削除する

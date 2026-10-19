@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -58,7 +57,6 @@ final class AdminPluginDisableResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/plugin-disable', [
             'pluginCode' => 'Sample/SamplePlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -74,7 +72,6 @@ final class AdminPluginDisableResourceTest extends TestCase
         // Seed-disabled plugin is already disabled — replay is a no-op.
         $ro = $this->resource->post('page://self/admin/plugin-disable', [
             'pluginCode' => 'Sample/DisabledPlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -88,7 +85,6 @@ final class AdminPluginDisableResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/plugin-disable', [
             'pluginCode' => 'NoSuch/Plugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -100,7 +96,6 @@ final class AdminPluginDisableResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/plugin-disable', [
             'pluginCode' => 'Sample/SamplePlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

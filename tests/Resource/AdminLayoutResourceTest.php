@@ -10,7 +10,6 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -75,7 +74,6 @@ final class AdminLayoutResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/layout/layout', [
             'layoutId' => 'lo-pc-default',
             'layoutName' => 'PC Refreshed',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('PC Refreshed', $ro->body['layoutName']);
@@ -88,7 +86,6 @@ final class AdminLayoutResourceTest extends TestCase
         $this->resource->put('page://self/admin/layout/layout', [
             'layoutId' => 'nonexistent',
             'layoutName' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -100,7 +97,6 @@ final class AdminLayoutResourceTest extends TestCase
         $this->resource->put('page://self/admin/layout/layout', [
             'layoutId' => 'lo-pc-default',
             'layoutName' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

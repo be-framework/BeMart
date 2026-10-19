@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function str_contains;
@@ -88,7 +87,6 @@ final class AdminMailTemplateResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => $id,
             'mailSubject' => '【更新】ご注文ありがとうございます',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -108,7 +106,6 @@ final class AdminMailTemplateResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => $id,
             'mailSubject' => 'ご登録ありがとうございます',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -120,7 +117,6 @@ final class AdminMailTemplateResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => 99999999,
             'mailSubject' => 'whatever',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -133,7 +129,6 @@ final class AdminMailTemplateResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => $id,
             'mailSubject' => '   ',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -147,7 +142,6 @@ final class AdminMailTemplateResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => $id,
             'mailSubject' => 'whatever',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

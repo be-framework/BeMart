@@ -310,6 +310,7 @@
               action="/admin/content/file-manager"
               enctype="multipart/form-data"
               novalidate>
+            <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
           <input type="hidden" name="mode" value="upload">
           <input type="hidden" name="now_dir" value="{{ nowDir }}">
 
@@ -349,6 +350,7 @@
               method="post"
               action="/admin/content/file-manager"
               novalidate>
+            <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
           <input type="hidden" name="mode" value="create_file">
           <input type="hidden" name="now_dir" value="{{ nowDir }}">
           <div class="idea-admin-field">
@@ -380,6 +382,7 @@
 
 {# ── Hidden delete / rename form ──────────────────────────────────────────── #}
 <form id="fm-action-form" method="post" action="/admin/content/file-manager" hidden>
+    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="mode" id="fm-action-mode" value="">
   <input type="hidden" name="now_dir" value="{{ nowDir }}">
   <input type="hidden" name="select_file" id="fm-select-file" value="">

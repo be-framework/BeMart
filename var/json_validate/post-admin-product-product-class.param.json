@@ -86,7 +86,7 @@
     }
   },
   "additionalProperties": false,
-  "$comment": "Derived from ALPS meaning, AdminProductClassForm leaf fields, and the actual posted shape of var/templates/Page/Admin/Product/ProductClass.html.twig. csrfToken は CsrfToken インターセプタが除去するため宣言しない。Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+  "$comment": "Derived from ALPS meaning, AdminProductClassForm leaf fields, and the actual posted shape of var/templates/Page/Admin/Product/ProductClass.html.twig.Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
   "required": [
     "productCode"
   ]

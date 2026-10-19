@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -45,13 +44,11 @@ final class ShoppingNonMemberResourceTest extends TestCase
                 'pref',
                 'addr01',
                 'addr02',
-                'csrfToken',
             ],
             $ro->body['fields'],
         );
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/shopping/non-member', $ro->body['submitTo']['href']);
-        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnPostValidatesAndReturnsPreOrderId(): void
@@ -67,7 +64,6 @@ final class ShoppingNonMemberResourceTest extends TestCase
             'pref' => 13,
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-2-3',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -93,7 +89,6 @@ final class ShoppingNonMemberResourceTest extends TestCase
             'pref' => 13,
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-2-3',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -120,7 +115,6 @@ final class ShoppingNonMemberResourceTest extends TestCase
             'pref' => '',
             'addr01' => '',
             'addr02' => '',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);

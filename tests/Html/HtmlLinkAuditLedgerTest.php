@@ -10,10 +10,8 @@ use MyVendor\BeMart\Tests\Smoke\ResourceSmokeTest;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\NullCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Support\Html\AuditedLinkHeaderModule;
 use MyVendor\BeMart\Support\Html\HtmlLinkAuditLoggerInterface;
 use MyVendor\BeMart\Tests\Support\RecordingHtmlLinkAuditLogger;
@@ -137,7 +135,6 @@ final class HtmlLinkAuditLedgerTest extends TestCase
             {
                 $this->install(new AuditedLinkHeaderModule());
                 $this->bind(HtmlLinkAuditLoggerInterface::class)->toInstance($this->logger);
-                $this->bind(CsrfTokenInterface::class)->toInstance(new NullCsrfToken());
                 $this->bind(AdminSession::class)->toInstance(new FakeAdminSession($this->admin ? HtmlLinkAuditLedgerTest::ADMIN_ID : null));
                 $this->bind(CustomerSession::class)->toInstance(new FakeSession($this->customerId ?? HtmlLinkAuditLedgerTest::CUSTOMER_ID));
             }

@@ -9,6 +9,7 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -67,6 +68,7 @@ class ShippingMultiple extends ResourceObject
     #[JsonSchema(schema: 'post-shopping-shipping-multiple.json', params: 'post-shopping-shipping-multiple.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(array $allocations = []): static
     {
         $this->code = Code::SEE_OTHER;

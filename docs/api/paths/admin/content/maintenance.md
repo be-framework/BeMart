@@ -31,7 +31,6 @@ _No parameters required_
 | Name | Type | Description | Required | Constraints | Example |
 |------|------|-------------|----------|-------------|---------|
 | isMaintenance | boolean|null | メンテナンス中フラグ - /admin/content/maintenance の処理状態を示すメンテナンス中フラグ。画面表示や冪等処理結果の分岐に使う真偽値。 | Required |  |  |
-| csrfToken | string|null | CSRFトークン - /admin/content/maintenance のHTMLフォーム送信用CSRFトークン。 | Optional | {"minLength":0,"maxLength":160} |  |
 
 #### Links
 

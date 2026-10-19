@@ -16,13 +16,13 @@ use const PHP_SESSION_ACTIVE;
 
 /**
  * Production {@see SessionStarterInterface}: starts a cookie-backed PHP session under a given
- * cookie name, once, with the options every BeMart session/CSRF adapter has always used.
+ * cookie name, once, with the options every BeMart session adapter and the CSRF store share.
  *
- * Extracted from three near-identical private methods that used to live on
- * {@see EccubeSharedSessionAdapter}, {@see HtmlAdminSessionAdapter}, and
- * {@see EccubeSharedCsrfTokenAdapter} - each hardcoded the same cookie name and the same options,
- * so which cookie a request's session lived under was a fact only recoverable by reading Auth/
- * adapter internals rather than the context module that wires them. See #93.
+ * Extracted from near-identical private methods that used to live on the session adapters
+ * ({@see EccubeSharedSessionAdapter}, {@see HtmlAdminSessionAdapter}) and the since-removed CSRF
+ * adapter - each hardcoded the same cookie name and the same options, so which cookie a request's
+ * session lived under was a fact only recoverable by reading Auth/ adapter internals rather than
+ * the context module that wires them. See #93.
  */
 final class CookieSessionStarter implements SessionStarterInterface
 {

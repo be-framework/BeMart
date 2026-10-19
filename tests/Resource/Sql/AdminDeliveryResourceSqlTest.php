@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -93,7 +92,6 @@ final class AdminDeliveryResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/admin/delivery/delivery-list', [
             'deliveryName' => $name,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $id = $ro->body['deliveryId'];
         assert(is_string($id));
@@ -106,7 +104,6 @@ final class AdminDeliveryResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/admin/delivery/delivery-list', [
             'deliveryName' => 'ヤマト宅急便',
             'visible' => true,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -119,7 +116,6 @@ final class AdminDeliveryResourceSqlTest extends AbstractResourceSqlTestCase
         $this->rebindAdminSession(null);
         $ro = $this->resource->post('page://self/admin/delivery/delivery-list', [
             'deliveryName' => 'ヤマト',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -150,7 +146,6 @@ final class AdminDeliveryResourceSqlTest extends AbstractResourceSqlTestCase
             'deliveryId' => $id,
             'deliveryName' => 'ヤマト宅急便',
             'visible' => false,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -163,7 +158,6 @@ final class AdminDeliveryResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/delivery/delivery', [
             'deliveryId' => 'nonexistent-zzz',
             'deliveryName' => 'X',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -174,7 +168,6 @@ final class AdminDeliveryResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->delete('page://self/admin/delivery/delivery', [
             'deliveryId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);

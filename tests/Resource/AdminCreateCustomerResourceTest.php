@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -61,7 +60,6 @@ final class AdminCreateCustomerResourceTest extends TestCase
             'password' => 'admin-set-passphrase-2026',
             'name01' => '管理',
             'name02' => '太郎',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -87,7 +85,6 @@ final class AdminCreateCustomerResourceTest extends TestCase
             'password' => 'admin-overwrite-attempt-2026',
             'name01' => '別人',
             'name02' => 'A',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -105,7 +102,6 @@ final class AdminCreateCustomerResourceTest extends TestCase
             'password' => 'no-admin-passphrase-2026',
             'name01' => '無権限',
             'name02' => '次郎',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -118,7 +114,6 @@ final class AdminCreateCustomerResourceTest extends TestCase
             'password' => 'whatever-2026',
             'name01' => '佐藤',
             'name02' => '五郎',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +20,6 @@ use MyVendor\BeMart\Be\Final\CategoryCreated;
 use MyVendor\BeMart\Be\Input\CreateCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryListInput;
 use BEAR\Resource\Annotation\JsonSchema;
-use BEAR\Csrf\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -48,7 +48,6 @@ class CategoryList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -71,7 +70,6 @@ class CategoryList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'categories' => $final->categories,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -87,6 +85,7 @@ class CategoryList extends ResourceObject
     #[JsonSchema(schema: 'post-admin-category-category-list.json', params: 'post-admin-category-category-list.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $categoryName,
         int $sortNo,

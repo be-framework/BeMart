@@ -129,8 +129,7 @@ final class AdminBlockListHtmlRenderTest extends TestCase
 
     public function testCreateFormHasCsrfTokenField(): void
     {
-        // A hardcoded value="" once satisfied a name-only assertion while
-        // EccubeSharedCsrfTokenAdapter::isValid() rejected every submission.
+        // A hardcoded value="" once satisfied a name-only assertion.
         $this->assertMatchesRegularExpression(
             '/<input type="hidden" name="csrfToken" value="[^"]+">/',
             $this->html,

@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -101,7 +100,6 @@ final class AdminPageResourceSqlTest extends AbstractResourceSqlTestCase
             'pageName' => $name,
             'pageUrl' => $url,
             'pageFileName' => $file,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $id = $ro->body['pageId'];
         assert(is_string($id));
@@ -135,7 +133,6 @@ final class AdminPageResourceSqlTest extends AbstractResourceSqlTestCase
             'pageName' => '会社案内',
             'pageUrl' => 'company',
             'pageFileName' => 'company',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -151,7 +148,6 @@ final class AdminPageResourceSqlTest extends AbstractResourceSqlTestCase
             'pageName' => '会社案内',
             'pageUrl' => 'company',
             'pageFileName' => 'company',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -177,7 +173,6 @@ final class AdminPageResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/page/page', [
             'pageId' => $id,
             'pageName' => 'Foo!',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('Foo!', $ro->body['pageName']);
@@ -189,7 +184,6 @@ final class AdminPageResourceSqlTest extends AbstractResourceSqlTestCase
         $id = $this->seed('Foo', 'foo', 'foo');
         $ro = $this->resource->delete('page://self/admin/page/page', [
             'pageId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($id, $ro->body['pageId']);
@@ -212,7 +206,6 @@ final class AdminPageResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->delete('page://self/admin/page/page', [
             'pageId' => $systemId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }

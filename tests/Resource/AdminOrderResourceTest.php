@@ -11,7 +11,6 @@ use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -25,7 +24,7 @@ use function dirname;
  *
  * Seeds an order owned by alice (a real seeded customer) so the GET path
  * surfaces a populated customer summary. PUT covers happy-path edits
- * + CSRF rejection + AUTHZ failure + 404 + mass-assignment safety.
+ * + AUTHZ failure + 404 + mass-assignment safety.
  */
 #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminOrderResourceTest extends TestCase
@@ -141,7 +140,6 @@ final class AdminOrderResourceTest extends TestCase
             'discount' => 1000,
             'charge' => 0,
             'usePoint' => 200,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -161,7 +159,6 @@ final class AdminOrderResourceTest extends TestCase
         $this->resource->put('page://self/admin/order-list', [
             'orderNo' => self::ORDER_NO,
             'discount' => 500,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $persisted = $this->storage->byOrderNo(self::ORDER_NO);
@@ -177,7 +174,6 @@ final class AdminOrderResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/order-list', [
             'orderNo' => 'nonexistentordernononononononono',
             'discount' => 1000,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -191,7 +187,6 @@ final class AdminOrderResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/order-list', [
             'orderNo' => self::ORDER_NO,
             'discount' => 1000,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

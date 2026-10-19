@@ -162,8 +162,7 @@ final class AdminCalendarHtmlRenderTest extends TestCase
     }
 
     /**
-     * The CSRF token field is present in the create form
-     * (resource body carries csrfToken from CsrfToken service).
+     * The CSRF token field is present in the create form.
      */
     public function testCsrfTokenFieldPresent(): void
     {

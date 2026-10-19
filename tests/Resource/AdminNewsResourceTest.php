@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -80,7 +79,6 @@ final class AdminNewsResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/news/news-list', [
             'newsTitle' => '新店舗オープン',
             'publishDate' => '2026-05-01T00:00:00+09:00',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $ro->code);
         $this->assertSame('新店舗オープン', $ro->body['newsTitle']);
@@ -94,7 +92,6 @@ final class AdminNewsResourceTest extends TestCase
         $this->resource->post('page://self/admin/news/news-list', [
             'newsTitle' => 'X',
             'publishDate' => '2026-05-01T00:00:00+09:00',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -119,7 +116,6 @@ final class AdminNewsResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/news/news', [
             'newsId' => $id,
             'newsTitle' => 'New',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('New', $ro->body['newsTitle']);
@@ -130,7 +126,6 @@ final class AdminNewsResourceTest extends TestCase
         $id = $this->seed('Tmp');
         $ro = $this->resource->delete('page://self/admin/news/news', [
             'newsId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
     }
@@ -141,7 +136,6 @@ final class AdminNewsResourceTest extends TestCase
 
         $this->resource->delete('page://self/admin/news/news', [
             'newsId' => 'nonexistent',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

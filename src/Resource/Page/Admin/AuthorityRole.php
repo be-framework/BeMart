@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -21,7 +22,6 @@ use MyVendor\BeMart\Be\Input\UpdateAuthorityRulesInput;
 use MyVendor\BeMart\Be\Input\UpdateAuthorityRoleInput;
 use MyVendor\BeMart\Be\Reason\Query\AuthorityRoleRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -69,7 +69,6 @@ class AuthorityRole extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly AuthorityRoleRuleStorageInterface $authorityRules,
-        private readonly CsrfTokenInterface $csrf,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
@@ -111,7 +110,6 @@ class AuthorityRole extends ResourceObject
                 ['id' => 1, 'label' => '店舗オーナー'],
             ],
             'rules' => $ruleRows,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -133,6 +131,7 @@ class AuthorityRole extends ResourceObject
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     #[Link(rel: 'goLoginHistoryList', href: 'page://self/admin/login-history')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string|null $loginId = null,
         int|null $authority = null,

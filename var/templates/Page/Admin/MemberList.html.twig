@@ -9,7 +9,6 @@
     members     list<{adminId, loginId, name, authority, work, sortNo}>
     count       int   — total rows returned
     filters     {nameKeyword: string|null, limit: int, offset: int}
-    csrfToken   string — CSRF token (used by per-row delete forms)
 
   ACTIONS (derived from #[Link] on MemberList / Member resource):
     GET  /admin/member-list                           — goMemberList (this page, search)
@@ -178,7 +177,7 @@
         rel="doDeleteMember"
         style="display:contents;"
       >
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
         <input type="hidden" name="mode" value="member_form">
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">
           削除

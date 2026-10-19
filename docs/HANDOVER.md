@@ -2321,5 +2321,26 @@ credential を守る作業。request params はライブラリの `SensitivePara
   `src/Compatibility/Eccube/EccubeTemplateCompatibility.php`、このブランチの変更とは無関係)
   が残るため clean ではない。
 
+## 2026-10-19 — CSRF を BEAR.Csrf（bear/csrf 1.x-dev）へ全面委譲
 
+BEAR.Kata の `csrf-same-origin-protection` と同じ形に揃えた。経緯と現在の構成は
+`docs/methodology/csrf-protection.md` に集約し、ここには判断だけ残す。
 
+- **BeMart 独自の CSRF 実装を全部捨てた。** `EccubeSharedCsrfTokenAdapter`、
+  `CsrfForbiddenInterceptor`、Be 層の `FakeCsrfToken` / `NullCsrfToken` を削除。
+  残るのは `SessionStarterCsrfStore`（`CsrfStoreInterface` を `SessionStarterInterface`
+  経由で実装）だけ。上流に足りなかった点は BEAR.Kata PR #69 と BEAR.Csrf 側で解消済み。
+- **`#[SameOrigin]` を配線した。** `page://` の unsafe verb は `#[CsrfToken]` と
+  `#[SameOrigin]` の両方を持ち、`app://` は持たない。`CsrfProtectionCoverageTest` が強制。
+- **`BEMART_ALLOWED_ORIGIN` が prod の必須環境変数になった。** `ProdModule` が未設定で
+  起動を拒む。`phpunit.xml` の `<env>` がテスト用の値を立てる（値は比較されない。
+  HTTP tier は `Sec-Fetch-Site: same-origin` を送り、hypermedia tier は
+  `FakeRequestOrigin(fetchSite: 'same-origin')` を bind する）。
+- **Resource body から `csrfToken` を外した。** テンプレートは Twig の `csrf_token()` で
+  token を取る。`ResourceSchemas` からも削除。JSON context の Page 表現は `csrfToken` を
+  返さなくなる。
+- **コンパイル済み context のため `HtmlModule` が `BeMartTwigExtension` を明示 bind。**
+  Ray の compiler はコンストラクタ依存を持つ具象クラスを JIT bind しない。
+- テスト側: Resource テストは `csrfToken` を渡さない（約 170 ファイルに及ぶ）。
+  ゲートの検証は `CsrfGateWiringTest` に集約。store は `SessionStarterCsrfStoreTest`、
+  描画は `CsrfTokenRenderedTest`。

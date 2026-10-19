@@ -82,7 +82,7 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
             'contactName02' => '太郎',
             'contactEmail' => self::CONTACT_EMAIL,
             'contactContents' => 'ハイパーメディア workflow pilot の問い合わせ本文です。',
-            'csrfToken' => $this->bodyValue($response, 'csrfToken'),
+            'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $submitted->code);

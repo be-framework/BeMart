@@ -146,6 +146,7 @@
               method="post"
               action="/admin/class-category/class-category-list"
               rel="doCreateClassCategory">
+            <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
             {% if classNameId %}
                 <input type="hidden" name="classNameId" value="{{ classNameId }}">
             {% endif %}
@@ -228,6 +229,7 @@
                           action="/admin/class-category/class-category?classCategoryId={{ cat.classCategoryId|url_encode }}&amp;_method=put"
                           rel="doUpdateClassCategory"
                           style="display:flex;gap:.5rem;align-items:center;">
+                        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
                         <input class="idea-admin-inline-input"
                                type="text"
                                name="classCategoryName"
@@ -266,6 +268,7 @@
         <div style="display:flex;justify-content:flex-end;gap:.65rem;padding:.75rem 1rem;border-top:1px solid rgba(205,191,170,.4);">
             <button class="idea-admin-action" id="idea-delete-cancel" type="button">キャンセル</button>
             <form id="idea-delete-form" method="post" action="" style="margin:0;">
+                <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
                 <button class="idea-admin-action idea-admin-action--destructive" type="submit">削除する</button>
             </form>
         </div>

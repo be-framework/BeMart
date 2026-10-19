@@ -85,7 +85,7 @@
       aria-label="カテゴリ新規登録"
       rel="doCreateCategory"
     >
-      <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
+      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
       <div class="idea-admin-cat-create">
 
@@ -329,7 +329,7 @@
       >
         <input type="hidden" name="_method" value="delete">
         <input type="hidden" name="categoryId" value="{{ category.categoryId }}">
-        <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
+        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">
           削除
         </button>

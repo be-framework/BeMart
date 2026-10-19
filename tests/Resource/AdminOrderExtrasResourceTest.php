@@ -12,7 +12,6 @@ use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use MyVendor\BeMart\Form\AdminOrderMailForm;
@@ -134,7 +133,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/order/bulk-delete', [
             'orderNos' => [self::ORDER_NO_A, self::ORDER_NO_B],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -150,7 +148,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/order/bulk-delete', [
             'orderNos' => [self::ORDER_NO_A, 'nonexistent-zzz000000000000000zz'],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -162,11 +159,9 @@ final class AdminOrderExtrasResourceTest extends TestCase
     {
         $this->resource->post('page://self/admin/order/bulk-delete', [
             'orderNos' => [self::ORDER_NO_A],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $ro = $this->resource->post('page://self/admin/order/bulk-delete', [
             'orderNos' => [self::ORDER_NO_A],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -177,7 +172,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/order/bulk-delete', [
             'orderNos' => [],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -190,7 +184,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
 
         $ro = $this->resource->post('page://self/admin/order/bulk-delete', [
             'orderNos' => [self::ORDER_NO_A],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -207,7 +200,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
 
         $ro = $this->resource->post('page://self/admin/order/send-mail', [
             'orderNo' => self::ORDER_NO_A,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -220,7 +212,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/order/send-mail', [
             'orderNo' => 'nonexistent-zzz000000000000000zz',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -233,7 +224,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
 
         $ro = $this->resource->post('page://self/admin/order/send-mail', [
             'orderNo' => self::ORDER_NO_A,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -274,7 +264,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
                 ['productCode' => 'SKU-1', 'productName' => '商品A', 'unitPrice' => 500, 'quantity' => 2],
             ],
             'deliveryFeeTotal' => 100,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -303,7 +292,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
             ],
             'charge' => 50,
             'discount' => 200,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -317,7 +305,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
             'customerId' => self::ALICE_ID,
             'paymentMethodId' => 2,
             'orderItems' => [],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
@@ -332,7 +319,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
             'orderItems' => [
                 ['productCode' => 'SKU-1', 'productName' => '商品A', 'unitPrice' => 500, 'quantity' => 2],
             ],
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -414,7 +400,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
             'csv' => "受注番号,お問い合わせ番号\n"
                 . "past0000000000000000000000000001,XY-123\n"
                 . "no-such-order,ZZ-999\n",
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -429,7 +414,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $this->rebindAdminSession(null);
         $ro = $this->resource->post('page://self/admin/order/import-shipping', [
             'csv' => 'foo',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -481,7 +465,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/order/shipping-address', [
             'orderNo' => self::ORDER_NO_A,
             'addressId' => 'addr-alice-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -497,7 +480,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/order/shipping-address', [
             'orderNo' => 'nonexistent-zzz000000000000000zz',
             'addressId' => 'addr-alice-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -507,7 +489,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/order/shipping-address', [
             'orderNo' => self::ORDER_NO_A,
             'addressId' => 'addr-does-not-exist',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -533,7 +514,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/order/shipping-address', [
             'orderNo' => self::ORDER_NO_A,
             'addressId' => 'addr-bob-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -549,7 +529,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前2-2',
             'phoneNumber' => '090-0000-0000',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -572,7 +551,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
             'addr01' => 'A',
             'addr02' => 'B',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -591,7 +569,6 @@ final class AdminOrderExtrasResourceTest extends TestCase
             'addr01' => 'A',
             'addr02' => 'B',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }

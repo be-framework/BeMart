@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 
 use function assert;
 use function is_string;
@@ -99,7 +98,6 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->post('page://self/forgot-password-password', [
             'email' => self::ALICE_EMAIL,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
 
@@ -123,7 +121,6 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/reset', [
             'resetKey' => $resetKey,
             'password' => self::NEW_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -157,7 +154,6 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/reset', [
             'resetKey' => 'unknown-reset-key-not-in-storage-zzzz',
             'password' => self::NEW_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -171,7 +167,6 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
         $first = $this->resource->post('page://self/reset', [
             'resetKey' => $resetKey,
             'password' => self::NEW_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $first->code);
 
@@ -180,7 +175,6 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
         $second = $this->resource->post('page://self/reset', [
             'resetKey' => $resetKey,
             'password' => self::NEW_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::BAD_REQUEST, $second->code);
         $this->assertStringContainsString('無効', $second->body['message']);
@@ -207,7 +201,6 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/reset', [
             'resetKey' => $resetKey,
             'password' => self::NEW_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -221,7 +214,6 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/reset', [
             'resetKey' => $resetKey,
             'password' => 'short',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -232,7 +224,6 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->post('page://self/reset', [
             'resetKey' => 'short',
             'password' => self::NEW_PASSWORD,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -246,7 +237,6 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
         // written anywhere.
         $ro = $this->resource->post('page://self/forgot-password-password', [
             'email' => 'nobody-here@example.com',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);

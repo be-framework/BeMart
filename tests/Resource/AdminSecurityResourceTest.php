@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminSecurityForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -61,7 +60,6 @@ final class AdminSecurityResourceTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertInstanceOf(AdminSecurityForm::class, $ro->body['form']);
         $this->assertFalse($ro->body['isSecureRequest']);
-        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnGetAnonymousAdminReturns403(): void
@@ -81,7 +79,6 @@ final class AdminSecurityResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/security', [
             'adminAllowHosts' => '192.168.0.0/24',
             'trustedHosts' => '^example\\.com$',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -96,7 +93,6 @@ final class AdminSecurityResourceTest extends TestCase
 
         $this->resource->put('page://self/admin/security', [
             'adminAllowHosts' => '192.168.0.0/24',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

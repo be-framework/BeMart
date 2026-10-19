@@ -23,7 +23,7 @@ use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\ResetKeyInvalidException;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\ObserveModule;
@@ -127,7 +127,7 @@ final class EventSourcingExtractionTest extends TestCase
 
         $ro = $resource->post('page://self/shopping/checkout', [
             'preOrderId' => self::PRE_ORDER_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
         $this->assertSame(201, $ro->code, 'fixture must actually succeed for this test to mean anything');
         $this->assertSame('customer-001', $ro->body['customerId']);
@@ -174,7 +174,7 @@ final class EventSourcingExtractionTest extends TestCase
         try {
             $resource->post('page://self/shopping/checkout', [
                 'preOrderId' => self::UNKNOWN_PRE_ORDER_ID,
-                'csrfToken' => FakeCsrfToken::TOKEN,
+                'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
             ]);
             $this->fail('expected PreOrderNotFoundException for an unknown preOrderId');
         } catch (PreOrderNotFoundException) {
@@ -221,7 +221,7 @@ final class EventSourcingExtractionTest extends TestCase
         $ro = $resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => 'local-dev-admin-password',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
         $this->assertSame(200, $ro->code, 'fixture must actually succeed for this test to mean anything');
 
@@ -254,7 +254,7 @@ final class EventSourcingExtractionTest extends TestCase
             $resource->post('page://self/reset', [
                 'resetKey' => 'unknown-reset-key-not-in-storage-zzzz',
                 'password' => 'a-new-password-123',
-                'csrfToken' => FakeCsrfToken::TOKEN,
+                'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
             ]);
             $this->fail('expected ResetKeyInvalidException for a resetKey absent from storage');
         } catch (ResetKeyInvalidException) {
@@ -295,7 +295,7 @@ final class EventSourcingExtractionTest extends TestCase
         $ro = $resource->put('page://self/admin/two-factor-auth-set', [
             'deviceToken' => '123456',
             'authKey' => 'legacy-client-supplied-authkey-must-never-be-logged',
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
         $this->assertSame(
             403,

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\AbstractModule;
@@ -103,7 +102,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
             'phoneNumber' => '0312345678',
             'kana01' => 'ヤマダ',
             'kana02' => 'アリス',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         assert($ro->code === Code::CREATED);
         assert(is_array($ro->body));
@@ -168,7 +166,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-1-1',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -191,7 +188,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-1-1',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);
@@ -207,7 +203,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-1-1',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -222,7 +217,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/mypage/address', [
             'addressId' => $addressId,
             'phoneNumber' => '0399998888',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -239,7 +233,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/mypage/address', [
             'addressId' => '99999999', // numeric but unused PK
             'phoneNumber' => '0399998888',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -253,7 +246,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/mypage/address', [
             'addressId' => $aliceAddressId,
             'phoneNumber' => '0399998888',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -267,7 +259,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->delete('page://self/mypage/address', [
             'addressId' => $addressId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -282,7 +273,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->delete('page://self/mypage/address', [
             'addressId' => '99999999',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -295,7 +285,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
         $this->loginAs($this->bobId);
         $ro = $this->resource->delete('page://self/mypage/address', [
             'addressId' => $aliceAddressId,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -311,7 +300,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->delete('page://self/mypage/address', [
             'addressId' => '99999999',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);

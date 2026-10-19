@@ -17,6 +17,7 @@
         <exclude-pattern>*/public/*</exclude-pattern>
         <exclude-pattern>*/bin/*</exclude-pattern>
         <exclude-pattern>*/src/Module/DatabaseUrl.php</exclude-pattern>
+        <exclude-pattern>*/src/Module/AllowedOriginEnv.php</exclude-pattern>
         <properties>
             <property name="forbiddenFunctions" type="array">
                 <element key="getenv" value="null"/>

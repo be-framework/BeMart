@@ -9,7 +9,7 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\Csrf\Attribute\CsrfToken;
-use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -28,11 +28,6 @@ use BEAR\Resource\Annotation\JsonSchema;
  */
 class Shipping extends ResourceObject
 {
-    public function __construct(
-        private readonly CsrfTokenInterface $csrf,
-    ) {
-    }
-
     /**
      * ALPS `goShoppingShipping` に対応する GET 操作。
      * @todo Wave-future: surface the authenticated customer's
@@ -51,14 +46,13 @@ class Shipping extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goShoppingShipping',
-            'fields' => ['shippingAddressId', 'csrfToken'],
+            'fields' => ['shippingAddressId'],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/shopping/shipping',
             ],
             'staticContent' => null,
             'addresses' => [],
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -80,6 +74,7 @@ class Shipping extends ResourceObject
     #[JsonSchema(schema: 'post-shopping-shipping.json', params: 'post-shopping-shipping.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string|null $shippingAddressId = null): static
     {
         $this->code = Code::SEE_OTHER;

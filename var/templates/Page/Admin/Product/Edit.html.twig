@@ -14,7 +14,6 @@
     categoryNames        string[]
     tagNames             string[]
     classNames           string[]
-    csrfToken            string
     productStatusOptions array<int,string>
 
   FORM CONTRACT (src/Form/AdminProductEditForm.php):
@@ -26,7 +25,7 @@
     PUT    /admin/product         — doUpdateProduct (edit, via _method=put)
     DELETE /admin/product         — doDeleteProduct (via separate confirm)
 
-  CSRF: csrfToken from resource body; field name "csrfToken" (CsrfToken service).
+  CSRF: hidden field "csrfToken" filled by csrf_token().
 
   IdeaStore admin design vocabulary (idea-admin-*):
     idea-admin-layout       two-column editor shell (main col + side panel)
@@ -59,7 +58,7 @@
   rel="doCreateProduct"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="productCode" value="{{ productCode|default('') }}">
 
   <div class="idea-admin-layout">
@@ -262,7 +261,7 @@
       rel="doDeleteProduct">
   <input type="hidden" name="_method" value="delete">
   <input type="hidden" name="productCode" value="{{ productCode }}">
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 </form>
 {% endif %}
 

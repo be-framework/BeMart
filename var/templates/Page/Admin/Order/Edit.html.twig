@@ -106,7 +106,7 @@
   {% if not isNew %}
   <input type="hidden" name="_method" value="put">
   {% endif %}
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   {% if not isNew %}
   <input type="hidden" name="orderNo" value="{{ orderNo }}">
   {% endif %}

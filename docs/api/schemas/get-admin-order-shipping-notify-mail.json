@@ -37,15 +37,6 @@
       "description": "管理者に出荷通知メール送信の確認を促す画面メッセージ。注文時のお問い合わせ本文ではない。",
       "example": "出荷通知メールを送信します。よろしいですか？"
     },
-    "csrfToken": {
-      "type": "string",
-      "title": "出荷通知メール送信フォームCSRFトークン",
-      "description": "POST /admin/order/shipping-notify-mail のhidden inputで送るCSRFトークン。",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
-    },
     "submitTo": {
       "type": "object",
       "title": "出荷通知メール送信リンク",
@@ -212,15 +203,6 @@
       "pattern": "^.+_[0-9]+$",
       "example": "session-prefix-1_1"
     },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
-    },
     "uriReference": {
       "title": "URI参照",
       "description": "画面遷移・リダイレクト・リンク先を表す相対または絶対URI。",
@@ -299,7 +281,6 @@
     "orderNo",
     "customerId",
     "message",
-    "csrfToken",
     "submitTo"
   ]
 }

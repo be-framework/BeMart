@@ -18,6 +18,9 @@ use MyVendor\BeMart\Auth\AdminSessionWriterInterface;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
+use MyVendor\BeMart\Auth\SessionStarterInterface;
+use MyVendor\BeMart\Auth\SessionStarterCsrfStore;
+use MyVendor\BeMart\Auth\NullSessionStarter;
 use MyVendor\BeMart\Auth\NoopAdminSessionWriter;
 use MyVendor\BeMart\Auth\NoopCartSessionPrefix;
 use MyVendor\BeMart\Auth\NoopCustomerSessionWriter;
@@ -86,14 +89,8 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeSecurityConfigWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTemplateCompatibility;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
-use BEAR\Csrf\Attribute\CsrfToken;
-use BEAR\Csrf\Http\CompositeRequestToken;
-use BEAR\Csrf\Http\CsrfTokenField;
-use BEAR\Csrf\Http\HeaderRequestToken;
-use BEAR\Csrf\Http\PostRequestToken;
-use BEAR\Csrf\Http\RequestTokenInterface;
-use BEAR\Csrf\Http\ResourceQueryRequestToken;
-use MyVendor\BeMart\Interceptor\CsrfForbiddenInterceptor;
+use BEAR\Csrf\CsrfModule;
+use BEAR\Csrf\CsrfStoreInterface;
 use MyVendor\BeMart\Provide\Transfer\ApiDownloadContentTypePolicy;
 use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\DownloadResponder;
@@ -186,23 +183,17 @@ final class AppModule extends AbstractAppModule
             ),
         );
 
-        // BeMart's default wire field name predates BEAR.Csrf; keep it so
-        // existing templates/JS that submit `csrfToken` need no changes.
-        $this->bind(CsrfTokenField::class)->toInstance(new CsrfTokenField('csrfToken'));
-        $this->bind(HeaderRequestToken::class);
-        $this->bind(ResourceQueryRequestToken::class);
-        $this->bind(PostRequestToken::class);
-        $this->bind(RequestTokenInterface::class)->to(CompositeRequestToken::class);
-
-        // CsrfForbiddenInterceptor reuses BEAR.Csrf's field/token-lookup
-        // primitives but keeps BeMart's non-throwing 403-ResourceObject
-        // contract (see docs/methodology/csrf-protection.md) instead of
-        // BEAR.Csrf's own throwing Interceptor\CsrfTokenInterceptor.
-        $this->bindPriorityInterceptor(
-            $this->matcher->subclassesOf(ResourceObject::class),
-            $this->matcher->annotatedWith(CsrfToken::class),
-            [CsrfForbiddenInterceptor::class],
-        );
+        // The wire field stays `csrfToken`: every template and the admin JS submit
+        // it under that name. The same-origin gate is on only when an origin was
+        // configured; ProdModule refuses to boot without one.
+        $allowedOrigin = AllowedOriginEnv::value();
+        $this->install($allowedOrigin === null
+            ? CsrfModule::withoutSameOriginCheck(tokenField: 'csrfToken')
+            : CsrfModule::withSameOriginCheck($allowedOrigin, tokenField: 'csrfToken'));
+        // One store for every context: the bundled SessionCsrfStore calls session_start() itself.
+        // HtmlModule and EccubeModule swap the starter for the cookie one; CLI keeps the null starter.
+        $this->bind(SessionStarterInterface::class)->to(NullSessionStarter::class);
+        $this->bind(CsrfStoreInterface::class)->to(SessionStarterCsrfStore::class)->in(Scope::SINGLETON);
 
         // Be Framework: BecomingInterface, SemanticLogger, semantic validator,
         // Been provider. Dev/Test contexts override logging with DevLoggingModule;

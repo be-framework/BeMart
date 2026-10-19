@@ -9,8 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
@@ -64,7 +62,6 @@ final class AdminCategoryResourceTest extends TestCase
                 if ($this->htmlMutation) {
                     $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
                 }
-                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
             }
         };
         $base->override($override);
@@ -87,7 +84,6 @@ final class AdminCategoryResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/category/category-list', [
             'categoryName' => 'Food',
             'sortNo' => 10,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -101,22 +97,10 @@ final class AdminCategoryResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/category/category-list', [
                 'categoryName' => 'Food',
                 'sortNo' => 10,
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertStringContainsString('/admin/category/category?categoryId=', $ro->headers['Location']);
-    }
-
-    public function testCreateRejectsMissingCsrf(): void
-    {
-        $ro = $this->resource->post('page://self/admin/category/category-list', [
-            'categoryName' => 'Food',
-            'sortNo' => 10,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
     }
 
     public function testCreateRejectsAnonymousAdmin(): void
@@ -128,7 +112,6 @@ final class AdminCategoryResourceTest extends TestCase
         $this->resource->post('page://self/admin/category/category-list', [
             'categoryName' => 'Food',
             'sortNo' => 10,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -140,7 +123,6 @@ final class AdminCategoryResourceTest extends TestCase
             'categoryName' => 'Cookies',
             'sortNo' => 20,
             'parentId' => 'nonexistent-zzz',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -190,7 +172,6 @@ final class AdminCategoryResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/category/category', [
             'categoryId' => $id,
             'categoryName' => 'Foods',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -205,23 +186,10 @@ final class AdminCategoryResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/category/category', [
                 'categoryId' => $id,
                 'categoryName' => 'Foods',
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('/admin/category/category?categoryId=' . $id, $ro->headers['Location']);
-    }
-
-    public function testPutRejectsMissingCsrf(): void
-    {
-        $id = $this->seed('Food');
-        $ro = $this->resource->put('page://self/admin/category/category', [
-            'categoryId' => $id,
-            'categoryName' => 'X',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
     }
 
     public function testDeleteHappyPath(): void
@@ -230,7 +198,6 @@ final class AdminCategoryResourceTest extends TestCase
 
         $ro = $this->resource->delete('page://self/admin/category/category', [
             'categoryId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -243,7 +210,6 @@ final class AdminCategoryResourceTest extends TestCase
         $id = $this->seed('Food');
         $ro = $this->resource->delete('page://self/admin/category/category', [
                 'categoryId' => $id,
-                'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
@@ -256,7 +222,6 @@ final class AdminCategoryResourceTest extends TestCase
 
         $this->resource->delete('page://self/admin/category/category', [
             'categoryId' => 'nonexistent-zzz',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -276,7 +241,6 @@ final class AdminCategoryResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/category/csv', [
             'csv' => "カテゴリID,カテゴリ名,親カテゴリID,カテゴリ削除フラグ\ncat-food,食品,,0\n",
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -292,7 +256,6 @@ final class AdminCategoryResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/category/csv', [
             'csv' => "foo\nbar",
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

@@ -26,9 +26,10 @@ final class HtmlTwigEnvironmentProvider implements ProviderInterface
     public function __construct(
         #[Named('original')]
         private readonly Environment $twig,
+        BeMartTwigExtension $extension,
     ) {
         if (! $twig->hasExtension(BeMartTwigExtension::class)) {
-            $twig->addExtension(new BeMartTwigExtension());
+            $twig->addExtension($extension);
         }
     }
 

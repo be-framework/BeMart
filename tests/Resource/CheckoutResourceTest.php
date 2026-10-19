@@ -8,7 +8,6 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Exception\PreOrderAlreadyClaimedException;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
@@ -57,7 +56,6 @@ final class CheckoutResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -77,14 +75,12 @@ final class CheckoutResourceTest extends TestCase
         // must not reach the gateway or the confirmation mail again.
         $first = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $first->code);
 
         $this->expectException(PreOrderAlreadyClaimedException::class);
         $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -94,7 +90,6 @@ final class CheckoutResourceTest extends TestCase
 
         $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'eeee00000000000000000000000000000000eeee',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -104,7 +99,6 @@ final class CheckoutResourceTest extends TestCase
 
         $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'bbbb00000000000000000000000000000000bbbb',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -118,7 +112,6 @@ final class CheckoutResourceTest extends TestCase
 
         $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'cccc00000000000000000000000000000000cccc',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -133,7 +126,6 @@ final class CheckoutResourceTest extends TestCase
 
         $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -147,7 +139,6 @@ final class CheckoutResourceTest extends TestCase
 
         $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -157,7 +148,6 @@ final class CheckoutResourceTest extends TestCase
 
         $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'not-a-hex-id',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -171,7 +161,6 @@ final class CheckoutResourceTest extends TestCase
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
             'paymentMethodId' => 9, // would otherwise trigger PaymentDeclinedException
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);

@@ -8,7 +8,6 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -54,28 +53,28 @@ final class AdminContentSideEffectResourceTest extends TestCase
 
     public function testClearCache(): void
     {
-        $ro = $this->resource->put('page://self/admin/content/cache', ['csrfToken' => FakeCsrfToken::TOKEN]);
+        $ro = $this->resource->put('page://self/admin/content/cache', []);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('doClearCache', $ro->body['transitionId']);
     }
 
     public function testUpdateCss(): void
     {
-        $ro = $this->resource->put('page://self/admin/content/css', ['css' => 'body{}', 'csrfToken' => FakeCsrfToken::TOKEN]);
+        $ro = $this->resource->put('page://self/admin/content/css', ['css' => 'body{}']);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('doUpdateContentCss', $ro->body['transitionId']);
     }
 
     public function testUpdateJs(): void
     {
-        $ro = $this->resource->put('page://self/admin/content/js', ['js' => 'void 0', 'csrfToken' => FakeCsrfToken::TOKEN]);
+        $ro = $this->resource->put('page://self/admin/content/js', ['js' => 'void 0']);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('doUpdateContentJs', $ro->body['transitionId']);
     }
 
     public function testToggleMaintenance(): void
     {
-        $ro = $this->resource->put('page://self/admin/content/maintenance', ['enabled' => true, 'csrfToken' => FakeCsrfToken::TOKEN]);
+        $ro = $this->resource->put('page://self/admin/content/maintenance', ['enabled' => true]);
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('doToggleMaintenance', $ro->body['transitionId']);
         $this->assertTrue($ro->body['isMaintenance']);
@@ -86,6 +85,6 @@ final class AdminContentSideEffectResourceTest extends TestCase
         $this->rebindAdminSession(null);
         $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
 
-        $this->resource->put('page://self/admin/content/css', ['css' => 'x', 'csrfToken' => FakeCsrfToken::TOKEN]);
+        $this->resource->put('page://self/admin/content/css', ['css' => 'x']);
     }
 }

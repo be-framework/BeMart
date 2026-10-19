@@ -65,7 +65,7 @@
     {% endif %}
 
     <form class="idea-withdraw-form" method="post" action="/mypage/withdraw" rel="doWithdrawCustomer">
-      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
       <div class="idea-form-actions">
         <button type="submit" class="idea-button idea-button--withdraw" aria-describedby="idea-withdraw-warning">
           退会手続きへ進む

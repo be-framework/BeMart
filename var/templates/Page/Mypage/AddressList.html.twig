@@ -47,7 +47,7 @@
                 <form method="post" action="/mypage/address" class="idea-address-delete-form">
                   <input type="hidden" name="_method" value="delete">
                   <input type="hidden" name="addressId" value="{{ address.addressId }}">
-                  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
                   <button type="submit" class="idea-text-button" aria-label="{{ address.name01 }} {{ address.name02 }} のお届け先を削除">削除</button>
                 </form>
               </div>

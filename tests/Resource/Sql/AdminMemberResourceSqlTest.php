@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -138,7 +137,6 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
             'password' => 'fresh-admin-password-2026',
             'name' => '新人管理者',
             'authority' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -163,7 +161,6 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
             'password' => 'duplicate-attempt-2026',
             'name' => '別人',
             'authority' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(409, $ro->code);
@@ -174,7 +171,6 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/member', [
             'loginId' => 'shop-owner',
             'name' => '新店舗オーナー',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -191,7 +187,6 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->put('page://self/admin/member', [
             'loginId' => 'no-such-admin',
             'name' => 'irrelevant',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -203,7 +198,6 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
             'masterType' => 'member',
             'rowId' => $this->shopOwnerId,
             'sortNo' => 12,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -219,7 +213,6 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $ro = $this->resource->delete('page://self/admin/member', [
             'loginId' => 'shop-owner',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -241,7 +234,6 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
         // guard compares the session adminId against the target's id.
         $ro = $this->resource->delete('page://self/admin/member', [
             'loginId' => 'test-admin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -252,12 +244,10 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $this->resource->delete('page://self/admin/member', [
             'loginId' => 'shop-owner',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $ro = $this->resource->delete('page://self/admin/member', [
             'loginId' => 'shop-owner',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);

@@ -10,7 +10,6 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminOrderStatusForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -24,7 +23,7 @@ use function dirname;
  * Wave 7 (doUpdateOrderStatus) — admin-side status-flip Resource.
  *
  * Lives at `page://self/admin/order-status` (sub-resource of order).
- * Tests the happy path + idempotent replay + format rejection + CSRF +
+ * Tests the happy path + idempotent replay + format rejection +
  * AUTHZ failure + 404.
  */
 #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
@@ -112,7 +111,6 @@ final class AdminOrderStatusResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/order-status', [
             'orderNo' => self::ORDER_NO,
             'orderStatus' => FinalizedOrderEntity::STATUS_DELIVERED,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -132,14 +130,12 @@ final class AdminOrderStatusResourceTest extends TestCase
         $this->resource->post('page://self/admin/order-status', [
             'orderNo' => self::ORDER_NO,
             'orderStatus' => FinalizedOrderEntity::STATUS_DELIVERED,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         // Replay with the same status.
         $ro = $this->resource->post('page://self/admin/order-status', [
             'orderNo' => self::ORDER_NO,
             'orderStatus' => FinalizedOrderEntity::STATUS_DELIVERED,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -152,7 +148,6 @@ final class AdminOrderStatusResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/order-status', [
             'orderNo' => self::ORDER_NO,
             'orderStatus' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -163,7 +158,6 @@ final class AdminOrderStatusResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/order-status', [
             'orderNo' => 'nonexistentordernononononononono',
             'orderStatus' => FinalizedOrderEntity::STATUS_CANCEL,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -177,7 +171,6 @@ final class AdminOrderStatusResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/order-status', [
             'orderNo' => self::ORDER_NO,
             'orderStatus' => FinalizedOrderEntity::STATUS_CANCEL,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

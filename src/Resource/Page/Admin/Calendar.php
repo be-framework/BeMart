@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -20,7 +21,6 @@ use MyVendor\BeMart\Be\Input\DeleteCalendarHolidayInput;
 use MyVendor\BeMart\Be\Input\GetAdminCalendarInput;
 use MyVendor\BeMart\Be\Input\UpdateCalendarHolidayInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminCalendarForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -37,7 +37,6 @@ class Calendar extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
@@ -80,6 +79,7 @@ class Calendar extends ResourceObject
     #[JsonSchema(schema: 'post-admin-calendar.json', params: 'post-admin-calendar.param.json')]
     #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $operation = 'update',
         string $title = '',
@@ -132,6 +132,7 @@ class Calendar extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-calendar.json', params: 'delete-admin-calendar.param.json')]
     #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onDelete(string|int|null $calendarId = null): static
     {
         if ($this->adminSession->adminId === null) {
@@ -160,8 +161,7 @@ class Calendar extends ResourceObject
      * @return array{
      *     form: AdminCalendarForm,
      *     calendars: list<array{id: string, title: string, holiday: string, form: AdminCalendarForm, hasError: false}>,
-     *     errors: list<string>,
-     *     csrfToken: string
+     *     errors: list<string>
      * }
      */
     private function calendarBody(array $calendars): array
@@ -192,7 +192,6 @@ class Calendar extends ResourceObject
             'form' => $form,
             'calendars' => $items,
             'errors' => [],
-            'csrfToken' => $this->csrf->issue(),
         ];
     }
 }

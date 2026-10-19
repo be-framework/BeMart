@@ -18,7 +18,6 @@
   DATA CONTRACT (src/Resource/Page/Admin/Calendar.php + be/src/Final/AdminCalendarFetched.php):
     form        AdminCalendarForm — blank create form (fields: title, holiday — both required)
     calendars   list<{id: string, title: string, holiday: string, form: AdminCalendarForm, hasError: bool}>
-    csrfToken   string
 
   ACTIONS (derived from #[Link] on Calendar resource):
     POST   /admin/calendar?operation=create              — doCreateCalendarHoliday
@@ -67,7 +66,7 @@
       rel="doCreateCalendarHoliday"
       novalidate
     >
-      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
       <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:.75rem;align-items:end;">
 
@@ -147,7 +146,7 @@
               rel="doUpdateCalendar"
               novalidate
             >
-              <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+              <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
               <input type="hidden" name="calendarId" value="{{ item.id }}">
 
               <td>
@@ -251,7 +250,7 @@
                   rel="doDeleteCalendarHoliday"
                   style="display:inline;"
                 >
-                  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
                   <button class="idea-admin-action idea-admin-action--destructive" type="submit">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                     削除

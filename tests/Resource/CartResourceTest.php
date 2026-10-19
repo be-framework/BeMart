@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -73,7 +72,6 @@ final class CartResourceTest extends TestCase
         $post = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 3,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $post->code);
 

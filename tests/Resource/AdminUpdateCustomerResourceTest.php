@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -70,7 +69,6 @@ final class AdminUpdateCustomerResourceTest extends TestCase
             'name01' => '更新',
             'name02' => '花子',
             'phoneNumber' => '0312345678',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -95,7 +93,6 @@ final class AdminUpdateCustomerResourceTest extends TestCase
             'email' => self::ALICE_EMAIL,
             'name01' => '無権限',
             'name02' => '太郎',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -108,7 +105,6 @@ final class AdminUpdateCustomerResourceTest extends TestCase
             'email' => 'ghost@example.com',
             'name01' => '幽霊',
             'name02' => '太郎',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -122,7 +118,6 @@ final class AdminUpdateCustomerResourceTest extends TestCase
             'email' => 'bob@example.com',
             'name01' => '更新',
             'name02' => '花子',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -135,7 +130,6 @@ final class AdminUpdateCustomerResourceTest extends TestCase
             'email' => 'not-an-email',
             'name01' => '更新',
             'name02' => '花子',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 }

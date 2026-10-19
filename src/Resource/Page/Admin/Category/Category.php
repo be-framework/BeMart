@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -20,7 +21,6 @@ use MyVendor\BeMart\Be\Final\CategoryUpdated;
 use MyVendor\BeMart\Be\Input\DeleteCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryInput;
 use MyVendor\BeMart\Be\Input\UpdateCategoryInput;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -43,7 +43,6 @@ class Category extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -68,7 +67,6 @@ class Category extends ResourceObject
             'categoryName' => $final->categoryName,
             'parentId' => $final->parentId,
             'sortNo' => $final->sortNo,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -85,6 +83,7 @@ class Category extends ResourceObject
     #[JsonSchema(schema: 'put-admin-category-category.json', params: 'put-admin-category-category.param.json')]
     #[Link(rel: 'goCategory', href: 'page://self/admin/category/category')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(
         string $categoryId,
         string|null $categoryName = null,
@@ -119,6 +118,7 @@ class Category extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-category-category.json', params: 'delete-admin-category-category.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onDelete(string $categoryId): static
     {
         $final = ($this->becoming)(new DeleteCategoryInput(categoryId: $categoryId));

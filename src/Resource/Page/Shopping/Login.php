@@ -10,7 +10,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Form\LoginForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -40,7 +39,6 @@ class Login extends ResourceObject
 {
     public function __construct(
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -58,7 +56,6 @@ class Login extends ResourceObject
             'fields' => [],
             'submitTo' => null,
             'staticContent' => null,
-            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty LoginForm for the HTML port to render
             // the checkout-login inputs. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(LoginForm::class),

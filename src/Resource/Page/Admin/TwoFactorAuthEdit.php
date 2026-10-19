@@ -11,7 +11,6 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
-use BEAR\Csrf\CsrfTokenInterface;
 
 use function assert;
 
@@ -27,7 +26,6 @@ class TwoFactorAuthEdit extends ResourceObject
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
     /** ALPS `goAdminTwoFactorAuthEdit` に対応する GET 操作。 */
@@ -53,7 +51,6 @@ class TwoFactorAuthEdit extends ResourceObject
             'authKey' => '',
             'memberName' => $adminId,
             'shopName' => 'BeMart',
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

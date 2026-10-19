@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -73,7 +72,6 @@ final class AdminDeleteCustomerResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/delete-customer', [
             'customerId' => self::ALICE_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -93,7 +91,6 @@ final class AdminDeleteCustomerResourceTest extends TestCase
 
         $ro = $this->resource->post('page://self/admin/delete-customer', [
             'customerId' => self::WITHDRAWN_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -112,7 +109,6 @@ final class AdminDeleteCustomerResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/delete-customer', [
             'customerId' => 'nonexistent-customer-id-zzzz9999',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -124,7 +120,6 @@ final class AdminDeleteCustomerResourceTest extends TestCase
 
         $this->resource->post('page://self/admin/delete-customer', [
             'customerId' => self::ALICE_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -48,6 +49,7 @@ class ProductCopy extends ResourceObject
     #[Link(rel: 'goProduct', href: 'page://self/admin/product', method: 'get')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $productCode,
         string $newProductCode,

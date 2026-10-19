@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -82,6 +83,7 @@ class PluginList extends ResourceObject
     #[JsonSchema(schema: 'post-admin-plugin-list.json', params: 'post-admin-plugin-list.param.json')]
     #[Link(rel: 'goPluginList', href: 'page://self/admin/plugin-list', method: 'get')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $pluginCode,
         string $pluginName,

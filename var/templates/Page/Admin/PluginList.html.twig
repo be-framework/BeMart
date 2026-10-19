@@ -49,6 +49,7 @@
       action="/admin/plugin-list"
       aria-label="プラグインインストール"
     >
+      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:.75rem;align-items:end;">
 
         <div class="idea-admin-field">
@@ -175,6 +176,7 @@
               rel="doEnablePlugin"
               style="display:inline;"
             >
+              <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
               <input type="hidden" name="pluginCode" value="{{ plugin.pluginCode }}">
               <button
                 class="idea-admin-icon-btn"
@@ -196,6 +198,7 @@
               rel="doDisablePlugin"
               style="display:inline;"
             >
+              <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
               <input type="hidden" name="pluginCode" value="{{ plugin.pluginCode }}">
               <button
                 class="idea-admin-icon-btn"
@@ -253,6 +256,7 @@
       >キャンセル</button>
       {# DELETE /admin/plugin (doUninstallPlugin) via hidden _method #}
       <form method="post" action="/admin/plugin" rel="doUninstallPlugin" style="display:contents;">
+        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
         <input type="hidden" name="_method" value="delete">
         <input type="hidden" name="pluginCode" value="{{ plugin.pluginCode }}">
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">

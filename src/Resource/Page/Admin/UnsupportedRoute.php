@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -44,6 +45,7 @@ class UnsupportedRoute extends ResourceObject
 
     #[JsonSchema(schema: 'post-admin-unsupported-route.json', params: 'post-admin-unsupported-route.param.json')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string $routeName = '', string|null $returnTo = null): static
     {
         if ($this->adminSession->adminId === null) {

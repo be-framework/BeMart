@@ -99,17 +99,6 @@
       "maximum": 2147483647,
       "title": "件数",
       "description": "/admin/payment/payment-list のレスポンスで返す件数。一覧・集計・処理結果の規模を表す非負整数。"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "一覧画面から送信する削除・表示切替フォーム用のCSRFトークン。",
-      "type": [
-        "string",
-        "null"
-      ],
-      "minLength": 0,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]*$"
     }
   },
   "additionalProperties": false,
@@ -248,15 +237,6 @@
       "pattern": "^.+_[0-9]+$",
       "example": "session-prefix-1_1"
     },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
-    },
     "uriReference": {
       "title": "URI参照",
       "description": "画面遷移・リダイレクト・リンク先を表す相対または絶対URI。",
@@ -333,7 +313,6 @@
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
     "payments",
-    "count",
-    "csrfToken"
+    "count"
   ]
 }

@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Resource\Page;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function preg_match;
@@ -28,6 +29,7 @@ class UnsupportedRoute extends ResourceObject
 
     #[JsonSchema(schema: 'post-unsupported-route.json', params: 'post-unsupported-route.param.json')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string $routeName = '', string|null $returnTo = null): static
     {
         $this->code = Code::OK;

@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,7 +18,6 @@ use MyVendor\BeMart\Be\Final\BaseInfoUpdated;
 use MyVendor\BeMart\Be\Input\GetBaseInfoInput;
 use MyVendor\BeMart\Be\Input\UpdateBaseInfoInput;
 use MyVendor\BeMart\Form\AdminShopMasterForm;
-use BEAR\Csrf\CsrfTokenInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -50,7 +50,6 @@ class BaseInfo extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -105,7 +104,6 @@ class BaseInfo extends ResourceObject
             'businessHour' => $final->businessHour,
             'shopEmail01' => $final->shopEmail01,
             'shopMessage' => $final->shopMessage,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -132,6 +130,7 @@ class BaseInfo extends ResourceObject
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $shopName,
         string|null $shopKana = null,

@@ -8,7 +8,6 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -50,11 +49,6 @@ use BEAR\Resource\Annotation\JsonSchema;
  */
 class WithdrawConfirm extends ResourceObject
 {
-    public function __construct(
-        private readonly CsrfTokenInterface $csrf,
-    ) {
-    }
-
     /** ALPS `goMypageWithdrawConfirm` に対応する GET 操作。 */
     #[Alps('goMypageWithdrawConfirm')]
     #[JsonSchema(schema: 'get-mypage-withdraw-confirm.json')]
@@ -65,12 +59,11 @@ class WithdrawConfirm extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goMypageWithdrawConfirm',
-            'fields' => ['csrfToken'],
+            'fields' => [],
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/mypage/withdraw',
             ],
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

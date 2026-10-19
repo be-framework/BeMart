@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -64,6 +65,7 @@ class Logout extends ResourceObject
     #[JsonSchema(schema: 'post-admin-logout.json')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(): static
     {
         $final = ($this->becoming)(new AdminLogoutInput());

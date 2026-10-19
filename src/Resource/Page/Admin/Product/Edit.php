@@ -18,7 +18,6 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminProductEditForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
-use BEAR\Csrf\CsrfTokenInterface;
 
 use function assert;
 
@@ -50,7 +49,6 @@ class Edit extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -88,7 +86,6 @@ class Edit extends ResourceObject
                 'form' => $form,
                 'productCode' => '',
                 'product' => null,
-                'csrfToken' => $this->csrf->issue(),
             ];
 
             return $this;
@@ -123,7 +120,6 @@ class Edit extends ResourceObject
                 'searchWord' => $final->searchWord,
                 'note' => $final->note,
             ],
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

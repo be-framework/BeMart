@@ -9,7 +9,6 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -72,7 +71,6 @@ final class AdminTaxRuleResourceTest extends TestCase
             'taxRate' => 10.0,
             'applyDate' => '2024-04-01T00:00:00+09:00',
             'roundingType' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -89,7 +87,6 @@ final class AdminTaxRuleResourceTest extends TestCase
         $this->resource->post('page://self/admin/tax-rule/tax-rule-list', [
             'taxRate' => 10.0,
             'applyDate' => '2024-04-01T00:00:00+09:00',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 
@@ -118,7 +115,6 @@ final class AdminTaxRuleResourceTest extends TestCase
 
         $ro = $this->resource->delete('page://self/admin/tax-rule/tax-rule', [
             'taxRuleId' => $id,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -131,7 +127,6 @@ final class AdminTaxRuleResourceTest extends TestCase
 
         $this->resource->delete('page://self/admin/tax-rule/tax-rule', [
             'taxRuleId' => 'nonexistent-zzz',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }
 

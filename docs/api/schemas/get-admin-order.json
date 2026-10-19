@@ -255,18 +255,6 @@
       "minimum": 0,
       "maximum": 999999999
     },
-    "csrfToken": {
-      "title": "処理識別子",
-      "description": "フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。",
-      "type": [
-        "string",
-        "null"
-      ],
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
-    },
     "total": {
       "type": [
         "integer",
@@ -414,15 +402,6 @@
       "maxLength": 128,
       "pattern": "^.+_[0-9]+$",
       "example": "session-prefix-1_1"
-    },
-    "csrfToken": {
-      "title": "CSRFトークン",
-      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 160,
-      "pattern": "^[A-Za-z0-9_.:-]+$",
-      "example": "fake-csrf-token-bemart-2026"
     },
     "uriReference": {
       "title": "URI参照",

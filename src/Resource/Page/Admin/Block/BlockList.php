@@ -6,10 +6,10 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Block;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use BEAR\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
@@ -32,7 +32,6 @@ class BlockList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -50,7 +49,6 @@ class BlockList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'blocks' => $final->blocks,
-            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -65,6 +63,7 @@ class BlockList extends ResourceObject
     #[JsonSchema(schema: 'post-admin-block-block-list.json', params: 'post-admin-block-block-list.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(
         string $blockName,
         string $blockFileName,

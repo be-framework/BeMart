@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -68,7 +67,6 @@ final class AdminPluginResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->delete('page://self/admin/plugin', [
             'pluginCode' => 'Sample/DisabledPlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -88,7 +86,6 @@ final class AdminPluginResourceSqlTest extends AbstractResourceSqlTestCase
         // Idempotent: unknown plugin → 200, wasInstalled=false.
         $ro = $this->resource->delete('page://self/admin/plugin', [
             'pluginCode' => 'NoSuch/Plugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -102,13 +99,11 @@ final class AdminPluginResourceSqlTest extends AbstractResourceSqlTestCase
         // First call: actually uninstalls.
         $this->resource->delete('page://self/admin/plugin', [
             'pluginCode' => 'Sample/SamplePlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         // Replay: now wasInstalled=false.
         $ro = $this->resource->delete('page://self/admin/plugin', [
             'pluginCode' => 'Sample/SamplePlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -122,7 +117,6 @@ final class AdminPluginResourceSqlTest extends AbstractResourceSqlTestCase
 
         $ro = $this->resource->delete('page://self/admin/plugin', [
             'pluginCode' => 'Sample/DisabledPlugin',
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

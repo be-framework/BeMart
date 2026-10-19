@@ -6,7 +6,6 @@
     authorityOptions  array   — [{id: int, label: string}, ...]
                                0=システム管理者 / 1=店舗オーナー
     rules             array   — [{authority: int, denyUrl: string}, ...]
-    csrfToken         string  — CSRF token
 
   ACTIONS (derived from #[Link] on AuthorityRole resource):
     POST   /admin/authority-role   — doUpdateAuthorityRole
@@ -225,7 +224,7 @@
 
 {% block main %}
 <form name="form1" method="post" action="/admin/authority-role" rel="doUpdateAuthorityRole" id="authority-role-form" role="form" novalidate>
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
   {% if message is defined and message %}
   <div class="idea-admin-notice idea-admin-notice--info" role="status">

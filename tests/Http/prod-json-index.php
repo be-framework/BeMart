@@ -30,9 +30,13 @@ if (is_string($customerId) && $customerId !== '') {
 
 $csrfToken = $_SERVER['HTTP_X_BEMART_TEST_CSRF_TOKEN'] ?? null;
 if (is_string($csrfToken) && $csrfToken !== '') {
-    $_SESSION['_csrf_token'] = $csrfToken;
+    $_SESSION['bear_csrf_token'] = $csrfToken; // CsrfSessionKey::DEFAULT_NAME (autoloader is not loaded yet)
 }
 
 require __DIR__ . '/../../vendor/autoload.php';
+
+// Read only while the compiled prod injector is cold; a warm cache keeps the origin it was compiled with
+// (phpunit.xml's). The tests send Sec-Fetch-Site: same-origin, so the exact value does not matter here.
+putenv('BEMART_ALLOWED_ORIGIN=http://' . $_SERVER['HTTP_HOST']);
 
 exit((new Bootstrap())('prod-eccube-sql-hal-app', $GLOBALS, $_SERVER));

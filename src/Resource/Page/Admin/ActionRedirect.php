@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -41,6 +42,7 @@ class ActionRedirect extends ResourceObject
 
     #[JsonSchema(schema: 'post-admin-action-redirect.json', params: 'post-admin-action-redirect.param.json')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPost(string|null $returnTo = null): static
     {
         if (! $this->authorized()) {

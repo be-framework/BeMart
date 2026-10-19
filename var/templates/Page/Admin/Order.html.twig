@@ -21,7 +21,6 @@
     items             list<{productCode, productName, quantity, unitPrice}>
     itemCount         int
     customer          {customerId, email, name01, name02}|null
-    csrfToken         string
     orderStatusOptions object {1:string, 3:string, 4:string, 5:string, 6:string, 9:string}
 
   FORM CONTRACT (src/Form/AdminOrderEditForm.php):
@@ -165,7 +164,7 @@
   novalidate
 >
   <input type="hidden" name="_method" value="put">
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
   <input type="hidden" name="orderNo" value="{{ orderNo }}">
 
   <div class="idea-admin-layout">
@@ -343,7 +342,7 @@
             action="/admin/order-status"
             novalidate
           >
-            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+            <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
             <input type="hidden" name="orderNo" value="{{ orderNo }}">
 
             <div class="idea-admin-field">

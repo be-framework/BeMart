@@ -9,7 +9,6 @@
     pageUrl       string|null
     pageFileName  string
     pageEditType  int          — 0=user, 1=preview, 2=system, 3=system-editable
-    csrfToken     string
     form          object       — AdminPageForm (Ray.WebFormModule)
 
   FORM CONTRACT (src/Form/AdminPageForm.php):
@@ -119,7 +118,7 @@
   action="{{ isEdit ? '/admin/page/page?pageId=' ~ pageId|url_encode ~ '&_method=put' : '/admin/page/page-list' }}"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
 
   <div class="idea-admin-layout">
 
@@ -368,7 +367,7 @@
         action="/admin/page/page?pageId={{ pageId|url_encode }}&_method=delete"
         style="display:contents;"
       >
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
         <button type="submit" class="idea-admin-action idea-admin-action--destructive">
           <i class="fa fa-trash" aria-hidden="true"></i>
           削除する

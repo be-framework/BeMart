@@ -6,7 +6,6 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 
@@ -65,7 +64,6 @@ final class CartHtmlRenderTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 2,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $html = $this->resource->get('page://self/cart', [
@@ -106,7 +104,6 @@ final class CartHtmlRenderTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $html = $this->resource->get('page://self/cart', [
@@ -126,7 +123,6 @@ final class CartHtmlRenderTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $html = $this->resource->get('page://self/cart', [
@@ -155,7 +151,6 @@ final class CartHtmlRenderTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $html = $this->resource->get('page://self/cart', [
@@ -172,7 +167,6 @@ final class CartHtmlRenderTest extends TestCase
         $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 1,
-            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $html = $this->resource->get('page://self/cart', [

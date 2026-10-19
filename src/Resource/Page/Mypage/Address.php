@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Mypage;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -23,7 +24,6 @@ use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Form\AddressForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
@@ -60,7 +60,6 @@ class Address extends ResourceObject
         private readonly AddressStorageInterface $addresses,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -146,7 +145,6 @@ class Address extends ResourceObject
             'submitTo' => $addressId === null
                 ? ['method' => 'POST', 'href' => 'page://self/mypage/address-list']
                 : ['method' => 'PUT', 'href' => 'page://self/mypage/address'],
-            'csrfToken' => $this->csrf->issue(),
             'form' => $form,
         ];
 
@@ -171,6 +169,7 @@ class Address extends ResourceObject
     #[JsonSchema(schema: 'put-mypage-address.json', params: 'put-mypage-address.param.json')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onPut(
         string $addressId,
         string|null $name01 = null,
@@ -228,6 +227,7 @@ class Address extends ResourceObject
     #[Link(rel: 'goFavoriteList', href: 'page://self/mypage/favorite-list')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     #[CsrfToken]
+    #[SameOrigin]
     public function onDelete(string $addressId): static
     {
         $final = ($this->becoming)(new DeleteCustomerAddressInput(addressId: $addressId));

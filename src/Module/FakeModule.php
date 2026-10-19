@@ -10,7 +10,6 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\InMemoryPreOrderClaim;
 use MyVendor\BeMart\Auth\NullSessionStarter;
 use MyVendor\BeMart\Auth\SessionStarterInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeClientIp;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCustomerInitialPoint;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeInventoryAllocator;
@@ -27,7 +26,6 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSecurityConfigWriter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTemplateCompatibility;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
-use MyVendor\BeMart\Be\Reason\Fake\Service\NullCsrfToken;
 use MyVendor\BeMart\Be\Reason\Query\LoginAttemptGateInterface;
 use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\PreOrderClaimInterface;
@@ -36,6 +34,12 @@ use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClientIpInterface;
 use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\Http\AllowedOrigin;
+use BEAR\Csrf\Http\RequestOriginInterface;
+use BEAR\Csrf\Http\RequestTokenInterface;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeRequestOrigin;
+use MyVendor\BeMart\Tests\Fake\Csrf\FakeRequestToken;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface;
@@ -76,7 +80,6 @@ final class FakeModule extends AbstractAppModule
         $mailer = new FakeMailer();
         $session = new FakeSession('customer-001');
         $adminSession = new FakeAdminSession(null);
-        $csrf = new NullCsrfToken();
 
         $this->bind(FakeInventoryAllocator::class)->toInstance($inventory);
         $this->bind(InventoryAllocatorInterface::class)->toInstance($inventory);
@@ -88,9 +91,15 @@ final class FakeModule extends AbstractAppModule
         $this->bind(CustomerSession::class)->toInstance($session);
         $this->bind(FakeAdminSession::class)->toInstance($adminSession);
         $this->bind(AdminSession::class)->toInstance($adminSession);
-        $this->bind(NullCsrfToken::class)->toInstance($csrf);
-        $this->bind(FakeCsrfToken::class);
-        $this->bind(CsrfTokenInterface::class)->toInstance($csrf);
+
+        // Both CSRF gates stand down: nothing here drives HTTP, so there is no header or
+        // body to script. The token gate still runs, fed the fake's own token, so the
+        // wiring is exercised; a test that is about the gate rebinds FakeRequestToken /
+        // FakeRequestOrigin / AllowedOrigin through its override module.
+        $this->bind(AllowedOrigin::class)->toInstance(new AllowedOrigin(null));
+        $this->bind(RequestOriginInterface::class)->to(FakeRequestOrigin::class)->in(Scope::SINGLETON);
+        $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class)->in(Scope::SINGLETON);
+        $this->bind(RequestTokenInterface::class)->to(FakeRequestToken::class)->in(Scope::SINGLETON);
 
         $sessionStarter = new NullSessionStarter();
         $this->bind(NullSessionStarter::class)->toInstance($sessionStarter);
