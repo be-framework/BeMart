@@ -87,15 +87,21 @@ final class CsrfTokenRenderedTest extends TestCase
 
     public function testTemplatesSubmittingViaFetchReferenceTheToken(): void
     {
+        // Judged per <script> block, comments stripped: a hidden input elsewhere in the
+        // page or a comment naming the token must not vouch for a fetch() that omits it.
         $offenders = [];
         foreach ($this->twigFiles() as $file) {
             $contents = (string) file_get_contents($file->getPathname());
-            if (preg_match('/\bfetch\(/', $contents) !== 1 || preg_match('/\bmethod:\s*[\'"](POST|PUT|PATCH|DELETE)[\'"]/i', $contents) !== 1) {
-                continue;
-            }
+            preg_match_all('/<script\b[^>]*>(.*?)<\/script>/is', $contents, $scripts);
+            foreach ($scripts[1] as $index => $script) {
+                $code = (string) preg_replace(['/\{#.*?#\}/s', '~/\*.*?\*/~s', '~^\s*//.*$~m'], '', $script);
+                if (preg_match('/\bfetch\(/', $code) !== 1 || preg_match('/\bmethod:\s*[\'"](POST|PUT|PATCH|DELETE)[\'"]/i', $code) !== 1) {
+                    continue;
+                }
 
-            if (preg_match('/csrf_token\(\)|csrfToken/', $contents) !== 1) {
-                $offenders[] = $file->getPathname();
+                if (preg_match('/csrfToken/', $code) !== 1) {
+                    $offenders[] = $file->getPathname() . ' <script> #' . ($index + 1);
+                }
             }
         }
 

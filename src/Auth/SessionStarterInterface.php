@@ -12,8 +12,9 @@ namespace MyVendor\BeMart\Auth;
  * cookie policy, bound explicitly by {@see \MyVendor\BeMart\Module\HtmlModule} and
  * {@see \MyVendor\BeMart\Module\EccubeModule}, and used as every adapter's constructor default so
  * direct instantiation (unit tests) keeps working without a context. {@see NullSessionStarter}
- * is the test-null implementation, bound by {@see \MyVendor\BeMart\Module\FakeModule} for
- * hypermedia/fake test contexts.
+ * is the null implementation: {@see \MyVendor\BeMart\Module\AppModule} binds it as the default
+ * for every context without a cookie policy (CLI, plain JSON), and
+ * {@see \MyVendor\BeMart\Module\FakeModule} relies on it for hypermedia/fake tests.
  */
 interface SessionStarterInterface
 {
