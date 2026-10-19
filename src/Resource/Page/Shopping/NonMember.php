@@ -95,7 +95,7 @@ class NonMember extends ResourceObject
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
      * state). Fields mirror SubmitNonMemberInput; the HTML port fills
-     * the hidden `csrfToken` input via `csrf_token()`.
+     * the hidden `csrfToken` input via `csrf_field()`.
      */
     #[Alps('goShoppingNonMember')]
     #[JsonSchema(schema: 'get-shopping-non-member.json')]

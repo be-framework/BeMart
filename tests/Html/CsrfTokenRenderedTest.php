@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Html;
 
+use BEAR\Csrf\Html\CsrfHiddenInput;
+use BEAR\Csrf\Http\CsrfTokenField;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use Madapaja\TwigModule\Exception\TemplateNotFound;
@@ -112,13 +114,16 @@ final class CsrfTokenRenderedTest extends TestCase
         );
     }
 
-    public function testTheTwigExtensionExposesCsrfToken(): void
+    public function testTheTwigExtensionExposesCsrfFieldAndCsrfToken(): void
     {
+        $csrf = new FakeCsrfToken();
+        $extension = new BeMartTwigExtension($csrf, new CsrfHiddenInput($csrf, new CsrfTokenField('csrfToken')));
         $names = [];
-        foreach ((new BeMartTwigExtension(new FakeCsrfToken()))->getFunctions() as $function) {
+        foreach ($extension->getFunctions() as $function) {
             $names[] = $function->getName();
         }
 
+        $this->assertContains('csrf_field', $names);
         $this->assertContains('csrf_token', $names);
     }
 

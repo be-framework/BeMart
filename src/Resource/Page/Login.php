@@ -74,7 +74,7 @@ class Login extends ResourceObject
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
      * state). The HTML port fills the form's hidden `csrfToken` input
-     * via `csrf_token()`; the body carries no token.
+     * via `csrf_field()`; the body carries no token.
      */
     #[Alps('goLogin')]
     #[JsonSchema(schema: 'get-login.json')]

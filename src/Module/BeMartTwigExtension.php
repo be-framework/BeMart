@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Module;
 
 use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\Html\CsrfHiddenInput;
 use NumberFormatter;
 use Override;
 use Twig\Extension\AbstractExtension;
@@ -38,18 +39,26 @@ use Twig\TwigFunction;
  *                        URLs (`/assets`, `/template/admin/assets`,
  *                        `/bundle`), so every package resolves to a real,
  *                        byte-identical EC-CUBE file.
- *  - `csrf_token` function — the hidden-field value for every form that POSTs
- *                        to a Page. Read lazily from the BEAR.Csrf port, so a
- *                        page without a form never touches the session and
- *                        Resources carry no CSRF knowledge at all.
+ *  - `csrf_field` function — the hidden `csrfToken` input of every form that
+ *                        POSTs to a Page, rendered by BEAR.Csrf's
+ *                        `CsrfHiddenInput` and emitted raw: it escapes both
+ *                        attributes itself.
+ *  - `csrf_token` function — the bare token value, for the admin scripts that
+ *                        submit with fetch() instead of a form.
+ *
+ * Both CSRF functions read the token lazily from the BEAR.Csrf port, so a page
+ * without a form never touches the session and Resources carry no CSRF
+ * knowledge at all.
  *
  * Every value produced here is deterministic, so the rendered HTML is
  * diffable against EC-CUBE's output (residual-diff verification).
  */
 final class BeMartTwigExtension extends AbstractExtension
 {
-    public function __construct(private readonly CsrfTokenInterface $csrf)
-    {
+    public function __construct(
+        private readonly CsrfTokenInterface $csrf,
+        private readonly CsrfHiddenInput $csrfField,
+    ) {
     }
 
     /** @return list<TwigFilter> */
@@ -68,6 +77,7 @@ final class BeMartTwigExtension extends AbstractExtension
         return [
             new TwigFunction('asset', [$this, 'asset']),
             new TwigFunction('csrf_token', $this->csrf->issue(...)),
+            new TwigFunction('csrf_field', $this->csrfField, ['is_safe' => ['html']]),
         ];
     }
 

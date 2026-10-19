@@ -87,7 +87,7 @@ class Login extends ResourceObject
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
      * state) — the admin firewall guard is on the POST. The HTML port
-     * fills the form's hidden `csrfToken` input via `csrf_token()`.
+     * fills the form's hidden `csrfToken` input via `csrf_field()`.
      */
     #[Alps('doAdminLogin')]
     #[JsonSchema(schema: 'get-admin-login.json')]
