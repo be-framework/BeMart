@@ -66,7 +66,7 @@
   action="{{ isEdit ? '/admin/news/news?newsId=' ~ newsId|url_encode ~ '&_method=put' : '/admin/news/news-list' }}"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
 
   <div class="idea-admin-layout">
 
@@ -196,7 +196,7 @@
   action="/admin/news/news?newsId={{ newsId|url_encode }}&_method=delete"
   aria-hidden="true"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
 </form>
 {% endif %}
 

@@ -96,7 +96,7 @@
     novalidate
     aria-label="メール送信確認フォーム"
   >
-    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+    {{ csrf_field() }}
     <input type="hidden" name="orderNo"   value="{{ orderNo|default('') }}">
 
     <section class="idea-admin-panel" aria-labelledby="mail-confirm-heading">

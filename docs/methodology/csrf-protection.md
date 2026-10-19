@@ -19,7 +19,7 @@ BeMart の CSRF 対応は [BEAR.Csrf](https://github.com/bearsunday/BEAR.Csrf)�
 
 **prod の値はコンパイル時に焼き込まれる。** prod context は `PackageInjector` が injector を直列化して `var/tmp/<context>/` にキャッシュするため、`ProdModule` の起動拒否も `AllowedOrigin` の値も、キャッシュが空のときの環境で決まる。`BEMART_ALLOWED_ORIGIN` を変えたら `var/tmp/<context>/` を消して再コンパイルする。古い値のまま動いても fail-open にはならない（新しいオリジンからの正規リクエストが 403 になる）。
 
-**token の受け渡しは Twig の `csrf_token()`。** `BeMartTwigExtension` が `CsrfTokenInterface::issue()` を Twig 関数として公開し、POST するフォームはすべて `<input type="hidden" name="csrfToken" value="{{ csrf_token() }}">` を描画する。Resource の representation body に `csrfToken` は載せない（JSON 表現からも消えている）。ログイン・ログアウトの session writer は `CsrfTokenInterface::clear()` で token を廃棄し、次の描画で新しい token が発行される。
+**token の受け渡しは Twig の `csrf_field()`。** `BeMartTwigExtension` が BEAR.Csrf の `CsrfHiddenInput` を Twig 関数 `csrf_field()` として公開し、POST するフォームはすべて `{{ csrf_field() }}` で `<input type="hidden" name="csrfToken" value="…">` を描画する。field 名とエスケープは `CsrfHiddenInput` が持ち、テンプレートは input を手書きしない。fetch() で送る admin のスクリプトだけが `csrf_token()` で値を受け取る。Resource の representation body に `csrfToken` は載せない（JSON 表現からも消えている）。ログイン・ログアウトの session writer は `CsrfTokenInterface::clear()` で token を廃棄し、次の描画で新しい token が発行される。
 
 ## テスト
 
@@ -33,7 +33,7 @@ BeMart の CSRF 対応は [BEAR.Csrf](https://github.com/bearsunday/BEAR.Csrf)�
 
 CSRF は Web / HTTP boundary concern であり、Resource の意味的契約ではない。
 
-Resource は業務操作の意味を表す。CSRF token はブラウザフォームや HTTP request の安全性を検証するための境界情報であり、商品、注文、会員といったドメイン意味を持たない。そのため、mutating Resource method の引数や request params schema に `csrfToken` を漏らしてはいけない。token を Resource body に載せる以前の許容も廃止した。token はテンプレート層が `csrf_token()` で取る。
+Resource は業務操作の意味を表す。CSRF token はブラウザフォームや HTTP request の安全性を検証するための境界情報であり、商品、注文、会員といったドメイン意味を持たない。そのため、mutating Resource method の引数や request params schema に `csrfToken` を漏らしてはいけない。token を Resource body に載せる以前の許容も廃止した。token はテンプレート層が `csrf_field()` / `csrf_token()` で取る。
 
 ## 不採用案
 

@@ -334,7 +334,7 @@
                   style="display:inline;">
               <input type="hidden" name="_method" value="delete">
               <input type="hidden" name="blockId" value="{{ Block.blockId }}">
-              <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+              {{ csrf_field() }}
               <button type="submit"
                       class="idea-admin-action idea-admin-action--destructive js-dialog-confirm">
                 <i class="fa fa-trash" aria-hidden="true"></i>
@@ -405,7 +405,7 @@
           action="/admin/block/block-list"
           rel="doCreateBlock"
           aria-label="新規ブロック作成フォーム">
-      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+      {{ csrf_field() }}
 
       {# Block name #}
       <div class="idea-admin-field">

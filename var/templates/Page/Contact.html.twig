@@ -26,7 +26,7 @@
 
 <section class="idea-container idea-section">
   <form class="idea-checkout-panel" method="post" action="/contact" rel="doSubmitContact" novalidate>
-    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+    {{ csrf_field() }}
 
     <div class="idea-panel-head">
       <div>

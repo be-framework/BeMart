@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Resource;
 
+use BEAR\Csrf\Http\CsrfTokenField;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use PHPUnit\Framework\TestCase;
@@ -120,19 +121,19 @@ final class ShoppingShippingMultipleHtmlRenderTest extends TestCase
     }
 
     /**
-     * CSRF hidden input のフィールド名が csrfToken であることを確認する。
+     * フォームが csrf_field() で hidden input を描画し、その field 名が csrfToken であることを確認する。
      *
      * 現在 Resource は Wave-future 状態（cartItems = []）のため配送割当フォームが
      * 描画されず、CSRF フィールドも出力されない。
-     * このテストはテンプレートの直接参照でフィールド名契約を検証する。
+     * このテストはテンプレートの直接参照と bind された CsrfTokenField で契約を検証する。
      */
     public function testCsrfFieldNameContract(): void
     {
         $template = (string) file_get_contents(
             dirname(__DIR__, 2) . '/var/templates/Page/Shopping/ShippingMultiple.html.twig',
         );
-        // テンプレート内の hidden CSRF フィールドのフィールド名が csrfToken であること
-        $this->assertStringContainsString('name="csrfToken"', $template);
+        $this->assertStringContainsString('{{ csrf_field() }}', $template);
+        $this->assertSame('csrfToken', HtmlTestInjector::getInstance()->getInstance(CsrfTokenField::class)->name);
         // フォームの POST action が Resource の onPost と一致すること
         $this->assertStringContainsString('action="/shopping/shipping-multiple"', $template);
         $this->assertStringContainsString('method="post"', $template);

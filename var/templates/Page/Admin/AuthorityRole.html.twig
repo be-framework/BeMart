@@ -224,7 +224,7 @@
 
 {% block main %}
 <form name="form1" method="post" action="/admin/authority-role" rel="doUpdateAuthorityRole" id="authority-role-form" role="form" novalidate>
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
 
   {% if message is defined and message %}
   <div class="idea-admin-notice idea-admin-notice--info" role="status">

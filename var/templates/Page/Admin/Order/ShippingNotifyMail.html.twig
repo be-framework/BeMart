@@ -21,7 +21,7 @@
     GET  /admin/order                       — goOrder (back link)
 
   FORM: no AdminOrderMailForm needed — only hidden fields on POST.
-  CSRF: hidden field "csrfToken" filled by csrf_token(); #[CsrfToken] on onPost.
+  CSRF: hidden field "csrfToken" rendered by csrf_field(); #[CsrfToken] on onPost.
 
   UX rationale (clean-room, no EC-CUBE mirror):
   - Narrow centered card: this is a single irreversible action;
@@ -194,7 +194,7 @@
     novalidate
     aria-label="出荷通知メール送信フォーム"
   >
-    <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+    {{ csrf_field() }}
     <input type="hidden" name="orderNo"   value="{{ orderNo|default('') }}">
     {#
       No additional visible fields: the resource's onPost signature

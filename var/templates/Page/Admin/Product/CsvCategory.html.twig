@@ -75,8 +75,7 @@
       id="category-csv-upload-form"
       aria-label="カテゴリCSVアップロード">
 
-    <input type="hidden" name="csrfToken"
-           value="{{ csrf_token() }}">
+    {{ csrf_field() }}
 
     <div class="idea-admin-layout">
 

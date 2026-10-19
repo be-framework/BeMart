@@ -82,7 +82,7 @@
   novalidate
 >
   <span class="p-country-name" style="display:none;">Japan</span>
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
 
   {# ── Summary KPIs (read-only) ─────────────────────────────────────────── #}
   <div class="idea-admin-kpi-grid">

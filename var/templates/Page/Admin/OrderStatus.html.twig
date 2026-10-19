@@ -173,7 +173,7 @@
   aria-label="受注対応状況設定"
 >
   <input type="hidden" name="_method" value="PUT">
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
 
   {# ── Status label editor ─────────────────────────────────────── #}
   <section class="idea-admin-panel" aria-labelledby="section-statuses">

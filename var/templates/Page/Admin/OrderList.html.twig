@@ -49,7 +49,7 @@
     {# --- bulk-delete form (wraps order grid + checkboxes) ----------- #}
     <form id="form_bulk" method="post" action="/admin/order/bulk-delete">
         <input type="hidden" name="mode" value="order_bulk_delete_form">
-        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+        {{ csrf_field() }}
 
     {# --- order grid -------------------------------------------------- #}
     {% if count %}

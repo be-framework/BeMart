@@ -17,7 +17,7 @@
     DELETE /admin/tax-rule/tax-rule      — doDeleteTaxRule  (remove one rule)
       via GET  ?taxRuleId=…&_method=delete  (method-override)
 
-  CSRF: hidden field "csrfToken" filled by csrf_token().
+  CSRF: hidden field "csrfToken" rendered by csrf_field().
 
   No doUpdateTaxRule — alps.json routes edits as delete-then-create.
   roundingType is rendered read-only (bare int; no option-set in projection).
@@ -63,7 +63,7 @@
                               method="post"
                               action="/admin/tax-rule/tax-rule-list"
                               rel="doCreateTaxRule">
-                            <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+                            {{ csrf_field() }}
                             <td>—</td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:.4rem;">
@@ -136,7 +136,7 @@
                                           style="display:inline;">
                                         <input type="hidden" name="_method" value="delete">
                                         <input type="hidden" name="taxRuleId" value="{{ TaxRule.taxRuleId }}">
-                                        <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+                                        {{ csrf_field() }}
                                         <button class="idea-admin-action idea-admin-action--destructive"
                                                 type="submit">
                                             <i class="fa fa-trash fa-fw" aria-hidden="true"></i>

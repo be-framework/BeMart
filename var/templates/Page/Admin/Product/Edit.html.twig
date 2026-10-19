@@ -25,7 +25,7 @@
     PUT    /admin/product         — doUpdateProduct (edit, via _method=put)
     DELETE /admin/product         — doDeleteProduct (via separate confirm)
 
-  CSRF: hidden field "csrfToken" filled by csrf_token().
+  CSRF: hidden field "csrfToken" rendered by csrf_field().
 
   IdeaStore admin design vocabulary (idea-admin-*):
     idea-admin-layout       two-column editor shell (main col + side panel)
@@ -58,7 +58,7 @@
   rel="doCreateProduct"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   <input type="hidden" name="productCode" value="{{ productCode|default('') }}">
 
   <div class="idea-admin-layout">
@@ -261,7 +261,7 @@
       rel="doDeleteProduct">
   <input type="hidden" name="_method" value="delete">
   <input type="hidden" name="productCode" value="{{ productCode }}">
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
 </form>
 {% endif %}
 

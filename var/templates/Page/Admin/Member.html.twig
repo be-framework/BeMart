@@ -28,7 +28,7 @@
     DELETE /admin/member?loginId=…&_method=delete  — doDeleteMember (edit)
   Back: goMemberList → /admin/member-list
 
-  CSRF: hidden field "csrfToken" filled by csrf_token().
+  CSRF: hidden field "csrfToken" rendered by csrf_field().
   _method tunnel: hidden input in form action query.
   mode: name="mode" value="member_form" — signals browser-form path in resource.
 
@@ -117,7 +117,7 @@
   action="/admin/member"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   <input type="hidden" name="mode" value="member_form">
 
   <div class="idea-admin-create-wrap">
@@ -270,7 +270,7 @@
   action="/admin/member?_method=put"
   novalidate
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   <input type="hidden" name="mode" value="member_form">
   <input type="hidden" name="loginId" value="{{ loginId }}">
 
@@ -385,7 +385,7 @@
   action="/admin/member?loginId={{ loginId|url_encode }}&_method=delete"
   aria-hidden="true"
 >
-  <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+  {{ csrf_field() }}
   <input type="hidden" name="loginId" value="{{ loginId }}">
   <input type="hidden" name="mode" value="member_form">
 </form>

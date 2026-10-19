@@ -38,11 +38,11 @@ use const PREG_SET_ORDER;
 /**
  * Every rendered POST form carries the session token.
  *
- * Templates fill the hidden `csrfToken` input from the Twig `csrf_token()` function, which
- * reads the bound {@see \BEAR\Csrf\CsrfTokenInterface}. The HTML test context binds
- * {@see FakeCsrfToken}. A POST form without the input is dead on submit in every armed
- * context, and any other value means a template still expects the resource to publish the
- * token — the pre-BEAR.Csrf shape, which rendered `value=""`.
+ * Templates render the hidden `csrfToken` input with the Twig `csrf_field()` function, which
+ * wraps BEAR.Csrf's {@see CsrfHiddenInput} over the bound {@see \BEAR\Csrf\CsrfTokenInterface}.
+ * The HTML test context binds {@see FakeCsrfToken}. A POST form without the input is dead on
+ * submit in every armed context, and any other value means a template still expects the
+ * resource to publish the token — the pre-BEAR.Csrf shape, which rendered `value=""`.
  */
 final class CsrfTokenRenderedTest extends TestCase
 {
@@ -83,7 +83,26 @@ final class CsrfTokenRenderedTest extends TestCase
         $this->assertSame(
             [],
             $offenders,
-            "Templates must fill csrfToken via csrf_token(), not from the resource body:\n" . implode("\n", $offenders),
+            "Templates must render csrfToken via csrf_field(), not from the resource body:\n" . implode("\n", $offenders),
+        );
+    }
+
+    public function testTemplatesDoNotHandWriteTheHiddenInput(): void
+    {
+        // The field name and the escaping live in CsrfHiddenInput; a template that spells the
+        // input itself would drift from the bound CsrfTokenField the gate reads.
+        $offenders = [];
+        foreach ($this->twigFiles() as $file) {
+            $contents = (string) file_get_contents($file->getPathname());
+            if (preg_match('/<input\b[^>]*\bname="csrfToken"/s', $contents) === 1) {
+                $offenders[] = $file->getPathname();
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $offenders,
+            "Templates must render the hidden input with {{ csrf_field() }}:\n" . implode("\n", $offenders),
         );
     }
 

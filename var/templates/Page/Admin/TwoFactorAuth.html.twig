@@ -204,7 +204,7 @@
     {% endif %}
 
     <form method="post" action="/admin/two-factor-auth" novalidate rel="doVerifyTwoFactorAuth">
-      <input type="hidden" name="csrfToken" value="{{ csrf_token() }}">
+      {{ csrf_field() }}
       <input type="hidden" name="mode" value="verify">
 
       <div style="display: grid; gap: 1.1rem;">
