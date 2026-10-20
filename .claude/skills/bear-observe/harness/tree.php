@@ -13,17 +13,16 @@ declare(strict_types=1);
  * resolved path — `latest.json` changes on every request, and a stale tree must never pass
  * silently as evidence of the run that just happened.
  *
- * `body_ref` holds a `file://` URI into the body store (see ObserveModule); `stree` has no
- * domain knowledge of it and would render the full URI, truncated mid-path. This rewrites
- * `body_ref` to its basename on an in-memory copy of the log before handing off to `stree` —
- * the file on disk is untouched. Every other rendering decision (truncation, FQCN shortening,
- * the type that closes each scope) is `stree`'s; this file no longer reimplements any of it.
+ * `body_ref` holds a `file://` URI into the es-bodies store; `stree` has no domain knowledge of
+ * it and would render the full URI, truncated mid-path. This rewrites `body_ref` to its basename
+ * on an in-memory copy of the log before handing off to `stree` — the file on disk is untouched.
+ * Every other rendering decision (truncation, FQCN shortening, the type that closes each scope)
+ * is `stree`'s; this file no longer reimplements any of it.
  *
- * Every argument not resolved as the log path is forwarded to `stree` verbatim — `--full`,
- * `--threshold`/`-t`, `--lines`/`-l`, `--values`/`-V`, `--json` all work exactly as documented
- * by `vendor/bin/stree --help`, including the space-separated value form (`--lines 20`, not
- * only `--lines=20`) since `-t`/`--threshold` and `-l`/`--lines` consume their following token
- * here the same way `StreeCommand::parseArgument()` does.
+ * The log path, if given, must come first — everything after it is forwarded to `stree`
+ * verbatim, in order, so every current and future `stree` flag works through `tree.php` for
+ * free (`--full`, `--threshold 10ms`, `--lines 20`, `--values`, `--json`, ...) without this file
+ * needing to know which flags exist or which ones take a value.
  */
 
 function fail(string $message): never
@@ -40,34 +39,13 @@ use Koriym\SemanticLogger\Stree\StreeCommand;
 $argvList = $argv;
 array_shift($argvList);
 
-// Flags that consume the next token as their value, mirroring StreeCommand's own parser — a
-// bare "--lines 20" must forward both tokens to stree, not strand "20" as a second positional.
-$valueFlags = ['--threshold', '-t', '--lines', '-l'];
-
-$positional = [];
-$streeArgs = [];
-$count = count($argvList);
-for ($i = 0; $i < $count; $i++) {
-    $arg = $argvList[$i];
-
-    if (in_array($arg, $valueFlags, true)) {
-        $streeArgs[] = $arg;
-        if ($i + 1 < $count) {
-            $streeArgs[] = $argvList[++$i];
-        }
-
-        continue;
-    }
-
-    if ($arg !== '' && $arg[0] === '-') {
-        $streeArgs[] = $arg;
-        continue;
-    }
-
-    $positional[] = $arg;
+$file = null;
+if (isset($argvList[0]) && $argvList[0] !== '' && $argvList[0][0] !== '-') {
+    $file = array_shift($argvList);
 }
 
-$file = $positional[0] ?? null;
+$streeArgs = $argvList;
+
 if ($file === null) {
     $found = glob(getcwd() . '/var/log/*/observe/latest.json') ?: [];
     $found !== [] || fail('no var/log/*/observe/latest.json — run a request first, or pass a path');
