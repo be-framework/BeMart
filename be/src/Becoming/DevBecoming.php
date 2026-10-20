@@ -15,6 +15,7 @@ use function is_dir;
 use function json_encode;
 use function mkdir;
 
+use const JSON_PRESERVE_ZERO_FRACTION;
 use const JSON_PRETTY_PRINT;
 use const JSON_UNESCAPED_SLASHES;
 use const JSON_UNESCAPED_UNICODE;
@@ -45,7 +46,7 @@ final class DevBecoming implements BecomingInterface
             // totality semantic-logger itself guarantees for its own recording failures.
             $json = json_encode(
                 $this->logger->flush()->toArray(),
-                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION,
             );
             if ($json !== false) {
                 file_put_contents($this->logFile, $json . PHP_EOL);
