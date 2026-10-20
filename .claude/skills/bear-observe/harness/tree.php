@@ -113,12 +113,14 @@ function summarize(array $context, bool $full): string
 /** @param array<string, mixed> $node */
 function render(array $node, bool $full, string $indent = ''): void
 {
-    // Events are recorded against the enclosing scope, so they belong under it, ahead of the
-    // scopes it went on to open.
+    // The root node carries its ordered list under `entries`; a nested open entry carries its
+    // own under `children`. Only one of the two is ever present on a given node, so this reads
+    // whichever applies instead of merging two keys — the list is already in record order, events
+    // and nested opens interleaved as they happened.
     // The file is written by another process and may be any semantic log, so a child that carries
     // no type is skipped rather than rendered as a blank branch.
     $children = array_values(array_filter(
-        array_merge((array) ($node['events'] ?? []), (array) ($node['open'] ?? [])),
+        (array) ($node['children'] ?? $node['entries'] ?? []),
         static fn (mixed $child): bool => is_array($child) && is_string($child['type'] ?? null),
     ));
     $last = count($children) - 1;

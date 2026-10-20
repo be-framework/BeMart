@@ -1817,12 +1817,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/koriym/Koriym.SemanticLogger.git",
-                "reference": "6139f63c8e084760cd212dff749b8ebf77850582"
+                "reference": "22db07f86459e06b066354071cfe45b3348d767d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/koriym/Koriym.SemanticLogger/zipball/6139f63c8e084760cd212dff749b8ebf77850582",
-                "reference": "6139f63c8e084760cd212dff749b8ebf77850582",
+                "url": "https://api.github.com/repos/koriym/Koriym.SemanticLogger/zipball/22db07f86459e06b066354071cfe45b3348d767d",
+                "reference": "22db07f86459e06b066354071cfe45b3348d767d",
                 "shasum": ""
             },
             "require": {
@@ -1866,7 +1866,7 @@
                 "issues": "https://github.com/koriym/Koriym.SemanticLogger/issues",
                 "source": "https://github.com/koriym/Koriym.SemanticLogger/tree/1.x"
             },
-            "time": "2026-09-19T03:17:34+00:00"
+            "time": "2026-10-20T04:15:34+00:00"
         },
         {
             "name": "madapaja/twig-module",

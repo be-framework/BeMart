@@ -131,7 +131,7 @@
             "@sa",
             "@test"
         ],
-        "stree": "ls -t var/log/*.json | head -1 | xargs -I{} vendor/bin/stree {}",
+        "stree": "f=$(ls -t var/log/*.json var/log/*/observe/*.json 2>/dev/null | head -1); test -n \"$f\" || { echo 'no semantic log under var/log — run a request first' >&2; exit 1; }; echo \"$f\" >&2; vendor/bin/stree \"$f\"",
         "app": "php bin/app.php",
         "fake": "php bin/fake.php",
         "dev": "php bin/dev.php",
@@ -184,6 +184,7 @@
         "agent": "Run the BEAR.ToolUse agent demo.",
         "admin": "Admin maintenance CLI (list / reset-2fa / disable / delete) operating on dtb_member via DATABASE_URL.",
         "stats": "Print the README Evidence Snapshot from live repository counts (--write refreshes README.md).",
+        "stree": "Render the most recently written semantic log (flat var/log/*.json or the newest var/log/<context>/observe/latest.json) as a tree.",
         "db:reset": "Rebuild the dev DB to a deterministic known state (schema + master + fake-derived fixture). Run BEFORE any browser/visual verification so mutating runs don't drift."
     },
     "config": {
