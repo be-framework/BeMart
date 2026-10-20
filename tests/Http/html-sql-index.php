@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use MyVendor\BeMart\Bootstrap;
 
-putenv('APP_CONTEXT=html-eccube-sql-hal-app');
-
 $sessionPath = __DIR__ . '/../../var/tmp/http-html/session';
 if (! is_dir($sessionPath)) {
     mkdir($sessionPath, 0777, true);

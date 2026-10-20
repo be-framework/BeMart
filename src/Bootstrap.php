@@ -17,7 +17,6 @@ use Throwable;
 
 use function assert;
 use function http_build_query;
-use function putenv;
 
 /**
  * @psalm-import-type Globals from RouterInterface
@@ -35,8 +34,6 @@ final class Bootstrap
      */
     public function __invoke(string $context, array $globals, array $server, AbstractModule|null $override = null): int
     {
-        putenv('APP_CONTEXT=' . $context);
-
         $injector = $override !== null
             ? Injector::getOverrideInstance($context, $override)
             : Injector::getInstance($context);
