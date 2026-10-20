@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use MyVendor\BeMart\Bootstrap;
+use MyVendor\BeMart\Module\AllowedOriginModule;
 
 $sessionPath = __DIR__ . '/../../var/tmp/http-html/session';
 if (! is_dir($sessionPath)) {
@@ -36,6 +37,4 @@ if (is_string($csrfToken) && $csrfToken !== '') {
 require __DIR__ . '/../../vendor/autoload.php';
 
 // Arms the same-origin gate for the test server; the HTTP tests send `Sec-Fetch-Site: same-origin`.
-putenv('BEMART_ALLOWED_ORIGIN=http://' . $_SERVER['HTTP_HOST']);
-
-exit((new Bootstrap())('html-eccube-sql-hal-app', $GLOBALS, $_SERVER));
+exit((new Bootstrap())('html-eccube-sql-hal-app', $GLOBALS, $_SERVER, new AllowedOriginModule('http://' . $_SERVER['HTTP_HOST'])));

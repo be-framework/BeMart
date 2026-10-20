@@ -81,9 +81,11 @@ null), so resource tests never mention `csrfToken`; the gates themselves are
 proved once in `tests/Resource/CsrfGateWiringTest.php`. The `hypermedia`
 tier runs the real token gate over a real session: the test puts a token
 into the session slot (`CsrfSessionKey::DEFAULT_NAME`) and the workflow
-submits it as `csrfToken`; the same-origin gate, armed by
-`BEMART_ALLOWED_ORIGIN` in `phpunit.xml`, is satisfied by binding
-`FakeRequestOrigin` because an in-process call carries no request headers.
+submits it as `csrfToken`; the same-origin gate is armed by
+`WorkflowDbSession` binding `AllowedOrigin` explicitly in its override module
+(`AppModule` installs the gate off by default), and is satisfied by also
+binding `FakeRequestOrigin` because an in-process call carries no request
+headers.
 In the `http` tier only the servers started from `html-sql-index.php` and
 `prod-json-index.php` run both gates for real: the client mirrors a token
 through the `X-BeMart-Test-Csrf-Token` header and sends
