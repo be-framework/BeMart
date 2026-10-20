@@ -14,7 +14,6 @@ use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Injector as AppInjector;
-use MyVendor\BeMart\Module\AllowedOriginEnv;
 use MyVendor\BeMart\Module\AppModule;
 use MyVendor\BeMart\Module\MissingAllowedOriginException;
 use MyVendor\BeMart\Module\ProdModule;
@@ -133,10 +132,10 @@ final class ProdModuleTest extends TestCase
     #[PreserveGlobalState(false)]
     public function testProductionRefusesToBootWithoutAnAllowedOrigin(): void
     {
-        putenv(AllowedOriginEnv::NAME);
+        putenv(ProdModule::ALLOWED_ORIGIN_ENV);
 
         $this->expectException(MissingAllowedOriginException::class);
-        $this->expectExceptionMessage(AllowedOriginEnv::NAME);
+        $this->expectExceptionMessage(ProdModule::ALLOWED_ORIGIN_ENV);
         new Injector(new ProdModule());
     }
 
@@ -144,7 +143,7 @@ final class ProdModuleTest extends TestCase
     #[PreserveGlobalState(false)]
     public function testProductionRefusesAnEmptyAllowedOrigin(): void
     {
-        putenv(AllowedOriginEnv::NAME . '=');
+        putenv(ProdModule::ALLOWED_ORIGIN_ENV . '=');
 
         $this->expectException(MissingAllowedOriginException::class);
         new Injector(new ProdModule());
@@ -154,7 +153,7 @@ final class ProdModuleTest extends TestCase
     #[PreserveGlobalState(false)]
     public function testProductionBootsWithAnAllowedOrigin(): void
     {
-        putenv(AllowedOriginEnv::NAME . '=https://shop.example');
+        putenv(ProdModule::ALLOWED_ORIGIN_ENV . '=https://shop.example');
 
         // ProdModule wraps AppModule as the context string does, so the origin the
         // same-origin gate will compare against is the one read from the env here.
