@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e7594ef9e167777dd7a74355fc73f693",
+    "content-hash": "f8bad824d5268acec4225fa030c3b856",
     "packages": [
         {
             "name": "aura/cli",
@@ -1423,16 +1423,16 @@
         },
         {
             "name": "justinrainbow/json-schema",
-            "version": "6.12.0",
+            "version": "6.13.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jsonrainbow/json-schema.git",
-                "reference": "8ef236a1a37df364b518b7411a4b5bb95b040d79"
+                "reference": "e54aacc4c0657b3a4af4f628428d2702146828c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jsonrainbow/json-schema/zipball/8ef236a1a37df364b518b7411a4b5bb95b040d79",
-                "reference": "8ef236a1a37df364b518b7411a4b5bb95b040d79",
+                "url": "https://api.github.com/repos/jsonrainbow/json-schema/zipball/e54aacc4c0657b3a4af4f628428d2702146828c6",
+                "reference": "e54aacc4c0657b3a4af4f628428d2702146828c6",
                 "shasum": ""
             },
             "require": {
@@ -1482,9 +1482,9 @@
             ],
             "support": {
                 "issues": "https://github.com/jsonrainbow/json-schema/issues",
-                "source": "https://github.com/jsonrainbow/json-schema/tree/6.12.0"
+                "source": "https://github.com/jsonrainbow/json-schema/tree/6.13.1"
             },
-            "time": "2026-09-04T12:54:20+00:00"
+            "time": "2026-09-30T07:42:28+00:00"
         },
         {
             "name": "koriym/csv-entities",
@@ -1813,16 +1813,16 @@
         },
         {
             "name": "koriym/semantic-logger",
-            "version": "0.9.0",
+            "version": "1.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/koriym/Koriym.SemanticLogger.git",
-                "reference": "5e427285bad04169e6d33162b2afd2611b3a52c1"
+                "reference": "6139f63c8e084760cd212dff749b8ebf77850582"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/koriym/Koriym.SemanticLogger/zipball/5e427285bad04169e6d33162b2afd2611b3a52c1",
-                "reference": "5e427285bad04169e6d33162b2afd2611b3a52c1",
+                "url": "https://api.github.com/repos/koriym/Koriym.SemanticLogger/zipball/6139f63c8e084760cd212dff749b8ebf77850582",
+                "reference": "6139f63c8e084760cd212dff749b8ebf77850582",
                 "shasum": ""
             },
             "require": {
@@ -1833,6 +1833,7 @@
                 "bamarni/composer-bin-plugin": "^1.8",
                 "phpunit/phpunit": "^10.5"
             },
+            "default-branch": true,
             "bin": [
                 "bin/validate-semantic-log.php",
                 "src-stree/bin/stree"
@@ -1863,9 +1864,9 @@
             "description": "Type-safe structured logging with schema validation and meaningful context",
             "support": {
                 "issues": "https://github.com/koriym/Koriym.SemanticLogger/issues",
-                "source": "https://github.com/koriym/Koriym.SemanticLogger/tree/0.9.0"
+                "source": "https://github.com/koriym/Koriym.SemanticLogger/tree/1.x"
             },
-            "time": "2026-08-12T12:58:19+00:00"
+            "time": "2026-09-19T03:17:34+00:00"
         },
         {
             "name": "madapaja/twig-module",
@@ -2209,16 +2210,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v5.8.0",
+            "version": "v5.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "044a6a392ff8ad0d61f14370a5fbbd0a0107152f"
+                "reference": "9e33da9553fe7786f0962b35f4e4ecf01be89def"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/044a6a392ff8ad0d61f14370a5fbbd0a0107152f",
-                "reference": "044a6a392ff8ad0d61f14370a5fbbd0a0107152f",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/9e33da9553fe7786f0962b35f4e4ecf01be89def",
+                "reference": "9e33da9553fe7786f0962b35f4e4ecf01be89def",
                 "shasum": ""
             },
             "require": {
@@ -2260,9 +2261,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/v5.8.0"
+                "source": "https://github.com/nikic/PHP-Parser/tree/v5.9.0"
             },
-            "time": "2026-07-04T14:30:18+00:00"
+            "time": "2026-09-13T18:51:52+00:00"
         },
         {
             "name": "nyholm/psr7",
@@ -5779,16 +5780,16 @@
         },
         {
             "name": "symfony/polyfill-php80",
-            "version": "v1.37.0",
+            "version": "v1.43.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php80.git",
-                "reference": "dfb55726c3a76ea3b6459fcfda1ec2d80a682411"
+                "reference": "9c6a5d6b01ca51d486c813e9a9c0ed55f208bb74"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/dfb55726c3a76ea3b6459fcfda1ec2d80a682411",
-                "reference": "dfb55726c3a76ea3b6459fcfda1ec2d80a682411",
+                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/9c6a5d6b01ca51d486c813e9a9c0ed55f208bb74",
+                "reference": "9c6a5d6b01ca51d486c813e9a9c0ed55f208bb74",
                 "shasum": ""
             },
             "require": {
@@ -5839,7 +5840,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php80/tree/v1.37.0"
+                "source": "https://github.com/symfony/polyfill-php80/tree/v1.43.0"
             },
             "funding": [
                 {
@@ -5859,20 +5860,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-10T16:19:22+00:00"
+            "time": "2026-09-25T15:50:05+00:00"
         },
         {
             "name": "symfony/polyfill-php83",
-            "version": "v1.41.0",
+            "version": "v1.43.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php83.git",
-                "reference": "5ea99087fb99c273a9b9236ed4c31e78b16103c6"
+                "reference": "80ccff923a8d61f73ebe9da0aa94e25232f004ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php83/zipball/5ea99087fb99c273a9b9236ed4c31e78b16103c6",
-                "reference": "5ea99087fb99c273a9b9236ed4c31e78b16103c6",
+                "url": "https://api.github.com/repos/symfony/polyfill-php83/zipball/80ccff923a8d61f73ebe9da0aa94e25232f004ce",
+                "reference": "80ccff923a8d61f73ebe9da0aa94e25232f004ce",
                 "shasum": ""
             },
             "require": {
@@ -5919,7 +5920,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php83/tree/v1.41.0"
+                "source": "https://github.com/symfony/polyfill-php83/tree/v1.43.0"
             },
             "funding": [
                 {
@@ -5939,7 +5940,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-01T12:47:55+00:00"
+            "time": "2026-09-25T15:50:05+00:00"
         },
         {
             "name": "symfony/process",
@@ -7347,12 +7348,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.EventSourcing.git",
-                "reference": "e811a13a47c08f4795bcd223d31b7778a68ba30c"
+                "reference": "10068a6de43f3b556cd9624d6b923f218aa2f5d5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.EventSourcing/zipball/e811a13a47c08f4795bcd223d31b7778a68ba30c",
-                "reference": "e811a13a47c08f4795bcd223d31b7778a68ba30c",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.EventSourcing/zipball/10068a6de43f3b556cd9624d6b923f218aa2f5d5",
+                "reference": "10068a6de43f3b556cd9624d6b923f218aa2f5d5",
                 "shasum": ""
             },
             "require": {
@@ -7433,7 +7434,7 @@
                 "issues": "https://github.com/bearsunday/BEAR.EventSourcing/issues",
                 "source": "https://github.com/bearsunday/BEAR.EventSourcing"
             },
-            "time": "2026-09-19T03:17:37+00:00"
+            "time": "2026-09-21T19:53:43+00:00"
         },
         {
             "name": "composer/pcre",
@@ -9584,6 +9585,12 @@
             "alias_normalized": "1.9999999.9999999.9999999-dev"
         },
         {
+            "package": "koriym/semantic-logger",
+            "version": "1.9999999.9999999.9999999-dev",
+            "alias": "0.9.0",
+            "alias_normalized": "0.9.0.0"
+        },
+        {
             "package": "ray/fake-query",
             "version": "dev-codex/fake-query-release-hardening",
             "alias": "1.x-dev",
@@ -9597,6 +9604,7 @@
         "bear/event-sourcing": 20,
         "bear/query-repository": 20,
         "bear/tool-use": 20,
+        "koriym/semantic-logger": 20,
         "my-vendor/be-mart-be": 20,
         "ray/fake-query": 20
     },
