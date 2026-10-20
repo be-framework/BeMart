@@ -19,11 +19,20 @@ declare(strict_types=1);
  * the file on disk is untouched. Every other rendering decision (truncation, FQCN shortening,
  * the type that closes each scope) is `stree`'s; this file no longer reimplements any of it.
  *
- * Any flag not recognized above as a log path is forwarded to `stree` as-is — `--full`,
- * `--threshold`, `--lines`, `--values`, `--json` all work exactly as documented by
- * `vendor/bin/stree --help`.
+ * Every argument not resolved as the log path is forwarded to `stree` verbatim — `--full`,
+ * `--threshold`/`-t`, `--lines`/`-l`, `--values`/`-V`, `--json` all work exactly as documented
+ * by `vendor/bin/stree --help`, including the space-separated value form (`--lines 20`, not
+ * only `--lines=20`) since `-t`/`--threshold` and `-l`/`--lines` consume their following token
+ * here the same way `StreeCommand::parseArgument()` does.
  */
 
+function fail(string $message): never
+{
+    fwrite(STDERR, "FAIL  {$message}\n");
+    exit(1);
+}
+
+is_file(getcwd() . '/vendor/autoload.php') || fail('no vendor/autoload.php in ' . getcwd() . ' — run from the app root');
 require getcwd() . '/vendor/autoload.php';
 
 use Koriym\SemanticLogger\Stree\StreeCommand;
@@ -31,21 +40,31 @@ use Koriym\SemanticLogger\Stree\StreeCommand;
 $argvList = $argv;
 array_shift($argvList);
 
+// Flags that consume the next token as their value, mirroring StreeCommand's own parser — a
+// bare "--lines 20" must forward both tokens to stree, not strand "20" as a second positional.
+$valueFlags = ['--threshold', '-t', '--lines', '-l'];
+
 $positional = [];
 $streeArgs = [];
-foreach ($argvList as $arg) {
+$count = count($argvList);
+for ($i = 0; $i < $count; $i++) {
+    $arg = $argvList[$i];
+
+    if (in_array($arg, $valueFlags, true)) {
+        $streeArgs[] = $arg;
+        if ($i + 1 < $count) {
+            $streeArgs[] = $argvList[++$i];
+        }
+
+        continue;
+    }
+
     if ($arg !== '' && $arg[0] === '-') {
         $streeArgs[] = $arg;
         continue;
     }
 
     $positional[] = $arg;
-}
-
-function fail(string $message): never
-{
-    fwrite(STDERR, "FAIL  {$message}\n");
-    exit(1);
 }
 
 $file = $positional[0] ?? null;
@@ -85,6 +104,7 @@ function basenameBodyRef(array $value): array
 }
 
 $scratch = tempnam(sys_get_temp_dir(), 'tree_'); // StreeCommand reads by content, not extension.
+$scratch !== false || fail('could not create a scratch file in ' . sys_get_temp_dir());
 register_shutdown_function(static fn () => @unlink($scratch));
 file_put_contents(
     $scratch,
