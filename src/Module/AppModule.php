@@ -184,12 +184,10 @@ final class AppModule extends AbstractAppModule
         );
 
         // The wire field stays `csrfToken`: every template and the admin JS submit
-        // it under that name. The same-origin gate is on only when an origin was
-        // configured; ProdModule refuses to boot without one.
-        $allowedOrigin = AllowedOriginEnv::value();
-        $this->install($allowedOrigin === null
-            ? CsrfModule::withoutSameOriginCheck(tokenField: 'csrfToken')
-            : CsrfModule::withSameOriginCheck($allowedOrigin, tokenField: 'csrfToken'));
+        // it under that name. The same-origin gate is off by default; a context that
+        // knows the canonical origin (ProdModule, a test harness) installs
+        // AllowedOriginModule to turn it on. See docs/methodology/csrf-protection.md.
+        $this->install(CsrfModule::withoutSameOriginCheck(tokenField: 'csrfToken'));
         // One store for every context: the bundled SessionCsrfStore calls session_start() itself.
         // HtmlModule and EccubeModule swap the starter for the cookie one; CLI keeps the null starter.
         $this->bind(SessionStarterInterface::class)->to(NullSessionStarter::class);

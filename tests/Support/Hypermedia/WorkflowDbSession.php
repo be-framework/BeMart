@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Support\Hypermedia;
 
 use Aura\Sql\ExtendedPdoInterface;
+use BEAR\Csrf\Http\AllowedOrigin;
 use BEAR\Csrf\Http\RequestOriginInterface;
 use BEAR\Resource\ResourceInterface;
 use Closure;
@@ -45,15 +46,17 @@ final class WorkflowDbSession
         // workflow drives resources as a Resource/JSON client, so the two
         // browser-shaped ports (mutation response, login form submission) are
         // overridden back to their API bindings. The token gate stays real;
-        // the same-origin gate is told what the HTTP projection's
-        // `Sec-Fetch-Site: same-origin` header tells it, since no request
-        // headers exist in-process.
+        // AppModule installs the same-origin gate off by default (AllowedOrigin
+        // null), so it is rebound here to a real value — the same-origin gate is
+        // then told what the HTTP projection's `Sec-Fetch-Site: same-origin`
+        // header tells it, since no request headers exist in-process.
         $injector = Injector::getOverrideInstance('html-eccube-sql-hal-app', new class extends AbstractModule {
             #[Override]
             protected function configure(): void
             {
                 $this->bind(MutationResponseInterface::class)->to(ApiMutationResponse::class);
                 $this->bind(AdminLoginFormSubmissionInterface::class)->to(ExplicitAdminLoginFormSubmission::class);
+                $this->bind(AllowedOrigin::class)->toInstance(new AllowedOrigin('http://127.0.0.1'));
                 $this->bind(RequestOriginInterface::class)->toInstance(new FakeRequestOrigin(fetchSite: 'same-origin'));
             }
         });
