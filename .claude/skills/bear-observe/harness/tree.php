@@ -4,26 +4,38 @@
 declare(strict_types=1);
 
 /**
- * Renders an observation log as a tree, naming the type that closes each scope.
+ * Resolves which observation log to read, then renders it with stree.
  *
- * Usage: php tree.php [log.json] [--full]   (default: the newest latest.json under var/log)
+ * Usage: php tree.php [log.json] [stree options]   (default: the newest latest.json under var/log)
  *
- * `stree` prints the closing context but not its type, and here the type carries the answer:
- * `get` closed by `cache_hit` and `get` closed by `cache_miss` have the same context keys.
+ * `stree` takes a required file argument and knows nothing of this project's
+ * `var/log/*\/observe/latest.json` convention, so this resolves the file first and echoes the
+ * resolved path — `latest.json` changes on every request, and a stale tree must never pass
+ * silently as evidence of the run that just happened.
  *
- * `--full` disables the 60-char value truncation; without it, a cut value is marked
- * `...(+N)` with the number of characters dropped, so it reads as cut rather than as a
- * value that happened to end there.
+ * `body_ref` holds a `file://` URI into the body store (see ObserveModule); `stree` has no
+ * domain knowledge of it and would render the full URI, truncated mid-path. This rewrites
+ * `body_ref` to its basename on an in-memory copy of the log before handing off to `stree` —
+ * the file on disk is untouched. Every other rendering decision (truncation, FQCN shortening,
+ * the type that closes each scope) is `stree`'s; this file no longer reimplements any of it.
+ *
+ * Any flag not recognized above as a log path is forwarded to `stree` as-is — `--full`,
+ * `--threshold`, `--lines`, `--values`, `--json` all work exactly as documented by
+ * `vendor/bin/stree --help`.
  */
+
+require getcwd() . '/vendor/autoload.php';
+
+use Koriym\SemanticLogger\Stree\StreeCommand;
 
 $argvList = $argv;
 array_shift($argvList);
 
-$full = false;
 $positional = [];
-foreach ((is_array($argvList) ? $argvList : []) as $arg) {
-    if ($arg === '--full') {
-        $full = true;
+$streeArgs = [];
+foreach ($argvList as $arg) {
+    if ($arg !== '' && $arg[0] === '-') {
+        $streeArgs[] = $arg;
         continue;
     }
 
@@ -48,93 +60,37 @@ is_file($file) || fail("no such file: {$file}");
 $log = json_decode((string) file_get_contents($file), true);
 is_array($log) || fail("not JSON: {$file}");
 
-// Runs in the application's PHP, which may be a no-dev install without ext-mbstring.
-function truncate(string $text, bool $full): string
+/**
+ * Rewrites every `body_ref` string found anywhere in the tree to its basename, recursively —
+ * the shape differs at each level (root `entries`/`close`, nested `children`/`close`), so this
+ * walks blindly by key instead of encoding that shape a second time.
+ *
+ * @param array<array-key, mixed> $value
+ *
+ * @return array<array-key, mixed>
+ */
+function basenameBodyRef(array $value): array
 {
-    if ($full) {
-        return $text;
+    if (isset($value['body_ref']) && is_string($value['body_ref'])) {
+        $value['body_ref'] = basename($value['body_ref']);
     }
 
-    if (function_exists('mb_substr')) {
-        $length = mb_strlen($text);
-
-        return $length > 60 ? mb_substr($text, 0, 57) . '...(+' . ($length - 57) . ')' : $text;
-    }
-
-    $length = strlen($text);
-
-    return $length > 60 ? substr($text, 0, 57) . '...(+' . ($length - 57) . ')' : $text;
-}
-
-// A value whose whole string is backslash-joined identifiers is a FQCN, not a URI, a JSON
-// blob, or free text — none of those parse as this pattern.
-function shortenFqcn(string $text): string
-{
-    if (! str_contains($text, '\\') || preg_match('/^(\\\\?[A-Za-z_][A-Za-z0-9_]*)+$/', $text) !== 1) {
-        return $text;
-    }
-
-    $pos = strrpos($text, '\\');
-
-    return $pos === false ? $text : substr($text, $pos + 1);
-}
-
-function formatScalar(bool|int|float|string $value): string
-{
-    if (is_bool($value)) {
-        return $value ? 'true' : 'false';
-    }
-
-    return (string) $value;
-}
-
-/** @param array<string, mixed> $context */
-function summarize(array $context, bool $full): string
-{
-    $parts = [];
-    foreach ($context as $key => $value) {
-        if ($key === 'timestamp' || $value === null || $value === []) {
-            continue;
+    foreach ($value as $key => $item) {
+        if (is_array($item)) {
+            $value[$key] = basenameBodyRef($item);
         }
-
-        $text = is_scalar($value) ? formatScalar($value) : (string) json_encode($value, JSON_UNESCAPED_SLASHES);
-        if ($key === 'body_ref') {
-            $text = basename($text);
-        } elseif (is_string($value)) {
-            $text = shortenFqcn($text);
-        }
-
-        $parts[] = $key . '=' . truncate($text, $full);
     }
 
-    return implode(' ', $parts);
+    return $value;
 }
 
-/** @param array<string, mixed> $node */
-function render(array $node, bool $full, string $indent = ''): void
-{
-    // The root node carries its ordered list under `entries`; a nested open entry carries its
-    // own under `children`. Only one of the two is ever present on a given node, so this reads
-    // whichever applies instead of merging two keys — the list is already in record order, events
-    // and nested opens interleaved as they happened.
-    // The file is written by another process and may be any semantic log, so a child that carries
-    // no type is skipped rather than rendered as a blank branch.
-    $children = array_values(array_filter(
-        (array) ($node['children'] ?? $node['entries'] ?? []),
-        static fn (mixed $child): bool => is_array($child) && is_string($child['type'] ?? null),
-    ));
-    $last = count($children) - 1;
-    foreach ($children as $i => $child) {
-        $branch = $i === $last ? '└── ' : '├── ';
-        $next = $indent . ($i === $last ? '    ' : '│   ');
-        $close = $child['close'] ?? null;
-        $arrow = is_array($close) && is_string($close['type'] ?? null)
-            ? ' → ' . $close['type'] . ' ' . summarize((array) ($close['context'] ?? []), $full)
-            : '';
-        echo $indent, $branch, $child['type'], ' ', summarize((array) ($child['context'] ?? []), $full), $arrow, "\n";
-        render($child, $full, $next);
-    }
-}
+$scratch = tempnam(sys_get_temp_dir(), 'tree_'); // StreeCommand reads by content, not extension.
+register_shutdown_function(static fn () => @unlink($scratch));
+file_put_contents(
+    $scratch,
+    (string) json_encode(basenameBodyRef($log), JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+);
 
 echo $file, "\n";
-render($log, $full);
+
+exit((new StreeCommand())(['tree.php', $scratch, ...$streeArgs]));

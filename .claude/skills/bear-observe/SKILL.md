@@ -170,12 +170,14 @@ $injector->getInstance($class)->bindings;               // メソッド名 => �
 ## 3. 観測 — リクエストを流して木を読む
 
 ```bash
-php bin/dev.php get '/orders?order_id=O-1'
+php bin/observe.php get '/products'
 php <skill>/harness/tree.php
 ```
 
 `tree.php` は引数なしなら `var/log/*/observe/latest.json` の最新を読む。パスを渡せばそれを読む。
-`ls -t var/log/<context>/observe/*.json` で過去のセッションが新しい順に並ぶ。
+`ls -t var/log/<context>/observe/*.json` で過去のセッションが新しい順に並ぶ。中身は
+`vendor/bin/stree` が描く(`tree.php` は `body_ref` のベースネーム化と、この var/log 規約の解決・
+表示だけをする薄い委譲先)。
 
 **読むのは今回の実行が書いたものか。** `latest.json` はリクエストごとに入れ替わる。リポジトリに
 commit されたサンプル出力を判定に使うと、自分の変更が反映されない結果を測ることになる。
@@ -183,32 +185,41 @@ commit されたサンプル出力を判定に使うと、自分の変更が反�
 コールドの GET:
 
 ```text
-└── resource_request uri=page://self/orders method=GET params={"order_id":"O-1"} → resource_response code=200 body_ref=000002.json durationMs=7.653
-    └── get uri=page://self/orders?order_id=O-1 → cache_miss layer=resource durationMs=6.346
-        ├── pre_write_cleanup uri=page://self/orders?order_id=O-1
-        ├── invalidate tags=["_orders_order_id=O-1"] roPool=invalidated etagPool=invalidated cdn=skipped
-        ├── cache_policy uri=page://self/orders?order_id=O-1 expiry=never resolvedTtl=31536000
-        ├── save_etag uri=page://self/orders?order_id=O-1 etag="3620929378" tags=[...] requestedTtl=31536000 saved=1
-        ├── save_value uri=page://self/orders?order_id=O-1 tags=[...] requestedTtl=31536000 saved=1
-        └── resource_request uri=app://self/orders method=GET params={"orderId":"O-1"} → resource_response code=200
-            └── get uri=app://self/orders?orderId=O-1 → cache_miss layer=resource durationMs=2.818
+resource_request uri=page://self/products method=GET replayable=true
+├── resource_request uri=app://self/products method=GET replayable=true
+│   ├── get uri=app://self/products
+│   │   ├── pre_write_cleanup uri=app://self/products [event]
+│   │   ├── invalidate tags=[_products_] roPool=invalidated etagPool=invalidated cdn=skipped (+1 more) [event]
+│   │   ├── cache_policy uri=app://self/products expiry=short resolvedTtl=60 [event]
+│   │   ├── save_etag uri=app://self/products etag="2772019802" tags=[product-corpus, _products_] requestedTtl=60 (+1 more) [event]
+│   │   ├── save_value uri=app://self/products tags=[_products_, product-corpus] requestedTtl=60 saved=true [event]
+│   │   └── cache_miss layer=resource durationMs=15.146
+│   └── resource_response code=200 body_ref=000001.json
+└── resource_response code=200 durationMs=34.882
 ```
 
 同じ URI の 2 回目:
 
 ```text
-└── resource_request uri=page://self/orders method=GET params={"order_id":"O-1"} → resource_response code=200 durationMs=0.93
-    └── get uri=page://self/orders?order_id=O-1 → cache_hit layer=resource durationMs=0.296
+resource_request uri=page://self/products method=GET replayable=true
+├── resource_request uri=app://self/products method=GET replayable=true
+│   ├── get uri=app://self/products
+│   │   └── cache_hit layer=resource durationMs=0.363
+│   └── resource_response code=200 body_ref=000001.json
+└── resource_response code=200 durationMs=8.412
 ```
 
 木の文法は 3 つだけ:
 
-- **`A → B`** — スコープ A が型 B で閉じた。**答えを運ぶのは閉じた型**(`get` を閉じるのが `cache_hit` か
-  `cache_miss` か)。`vendor/bin/stree` はこの型を出さないので、判定には `tree.php` を使う
+- **閉じの型** — 開いたスコープの最後の子として現れる行が、そのスコープを閉じた型を運ぶ
+  (`get` を閉じるのが `cache_hit` か `cache_miss` か)。閉じの行だけの特別な記号は無いので、
+  それが閉じの型かどうかは §4 の表にある語彙(`cache_hit` / `cache_miss` / `resource_response` /
+  `command_result` など)で見分ける
 - **入れ子** — 外側の実行中に内側が起きた。**入れ子は依存の証拠ではない**(§4)
-- **葉** — そのスコープの中で起きた出来事。`save_*` `invalidate` `cache_policy` など
+- **葉**(`[event]` の印つき)— そのスコープの中で起きた出来事。`save_*` `invalidate` `cache_policy` など
 
-`--full` 相当の生 JSON が要るなら `php -r` ではなく `vendor/bin/stree --json <file>`。
+生の JSON が要るなら `tree.php --json`(内部で `stree --json` を呼ぶので同じ出力だが、
+`body_ref` はベースネーム済み)。
 
 ### ファイルが無い現場もある
 
