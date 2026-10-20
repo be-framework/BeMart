@@ -27,6 +27,9 @@ final class ProdModule extends AbstractModule
             throw new MissingAllowedOriginException(AllowedOriginEnv::NAME);
         }
 
+        // Ray.Di: within one configure(), install() is first-wins, not last-wins — so
+        // AllowedOriginModule's binding only survives because PackageProdModule does not
+        // bind AllowedOrigin itself. If that ever changes, this install() must move first.
         $this->install(new PackageProdModule());
         $this->install(new AllowedOriginModule($origin));
     }

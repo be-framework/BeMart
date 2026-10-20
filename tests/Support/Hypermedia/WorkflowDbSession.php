@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Support\Hypermedia;
 
 use Aura\Sql\ExtendedPdoInterface;
-use BEAR\Csrf\Http\AllowedOrigin;
 use BEAR\Csrf\Http\RequestOriginInterface;
 use BEAR\Resource\ResourceInterface;
 use Closure;
 use MyVendor\BeMart\Injector;
+use MyVendor\BeMart\Module\AllowedOriginModule;
 use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use MyVendor\BeMart\Support\Resource\ApiMutationResponse;
 use MyVendor\BeMart\Support\Resource\ExplicitAdminLoginFormSubmission;
@@ -56,7 +56,7 @@ final class WorkflowDbSession
             {
                 $this->bind(MutationResponseInterface::class)->to(ApiMutationResponse::class);
                 $this->bind(AdminLoginFormSubmissionInterface::class)->to(ExplicitAdminLoginFormSubmission::class);
-                $this->bind(AllowedOrigin::class)->toInstance(new AllowedOrigin('http://127.0.0.1'));
+                $this->install(new AllowedOriginModule('http://127.0.0.1'));
                 $this->bind(RequestOriginInterface::class)->toInstance(new FakeRequestOrigin(fetchSite: 'same-origin'));
             }
         });

@@ -16,9 +16,9 @@ use Ray\Di\AbstractModule;
 /**
  * EC-CUBE bridge bindings for production-like contexts.
  *
- * These stay out of {@see ProdModule}: the `prod` token is only the boot-time
- * origin check over BEAR.Package's ProdModule, and the bridge is equally
- * wanted in the non-prod `eccube` contexts.
+ * These stay out of {@see ProdModule}: the `prod` token is just the boot-time
+ * origin guard and arming over BEAR.Package's ProdModule, and the bridge is
+ * equally wanted in the non-prod `eccube` contexts.
  */
 final class EccubeModule extends AbstractModule
 {
