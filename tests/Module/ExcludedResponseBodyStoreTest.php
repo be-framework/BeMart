@@ -158,7 +158,7 @@ final class ExcludedResponseBodyStoreTest extends TestCase
         $tree = self::flushToTree($logger);
         $this->assertArrayNotHasKey(
             'body_ref',
-            $tree['open'][0]['close']['context'],
+            $tree['entries'][0]['close']['context'],
             'a page:// response must never record a body_ref',
         );
         $this->assertStringNotContainsString(
@@ -188,7 +188,7 @@ final class ExcludedResponseBodyStoreTest extends TestCase
         $tree = self::flushToTree($logger);
         $this->assertArrayNotHasKey(
             'body_ref',
-            $tree['open'][0]['close']['context'],
+            $tree['entries'][0]['close']['context'],
             'a page:// response must never record a body_ref',
         );
         $this->assertStringNotContainsString(
@@ -211,12 +211,12 @@ final class ExcludedResponseBodyStoreTest extends TestCase
         $tree = self::flushToTree($logger);
         $this->assertArrayNotHasKey(
             'body_ref',
-            $tree['open'][0]['close']['context'],
+            $tree['entries'][0]['close']['context'],
             'the outer page:// response must not record a body_ref',
         );
         $this->assertArrayHasKey(
             'body_ref',
-            $tree['open'][0]['open'][0]['close']['context'],
+            $tree['entries'][0]['children'][0]['close']['context'],
             'the nested app:// response must still record a body_ref',
         );
         $this->assertStringNotContainsString(

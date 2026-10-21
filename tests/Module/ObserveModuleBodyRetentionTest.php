@@ -144,7 +144,7 @@ final class ObserveModuleBodyRetentionTest extends TestCase
         $this->assertSame(200, $ro1->code, 'fixture must actually reach the products page');
 
         $tree1 = self::flushToTree($logger1);
-        $bodyRef1 = $tree1['open'][0]['open'][0]['close']['context']['body_ref'] ?? null;
+        $bodyRef1 = $tree1['entries'][0]['children'][0]['close']['context']['body_ref'] ?? null;
         $this->assertIsString($bodyRef1, 'the nested app:// call must record a body_ref');
         $bodyPath1 = self::bodyPath($bodyRef1);
         $this->assertFileExists($bodyPath1, 'the body this session just wrote must exist right after writing it');
@@ -168,7 +168,7 @@ final class ObserveModuleBodyRetentionTest extends TestCase
         $tree2 = self::flushToTree($logger2);
         $this->assertArrayNotHasKey(
             'body_ref',
-            $tree2['open'][0]['close']['context'],
+            $tree2['entries'][0]['close']['context'],
             'fixture precondition: this session must itself write zero bodies, so a survival check '
             . 'right after it cannot pass by the second session coincidentally recreating the same file',
         );
@@ -192,7 +192,7 @@ final class ObserveModuleBodyRetentionTest extends TestCase
         $ro3 = $resource3->get('page://self/products');
         $this->assertSame(200, $ro3->code, 'third session fixture must also reach the products page');
         $tree3 = self::flushToTree($logger3);
-        $bodyRef3 = $tree3['open'][0]['open'][0]['close']['context']['body_ref'] ?? null;
+        $bodyRef3 = $tree3['entries'][0]['children'][0]['close']['context']['body_ref'] ?? null;
         $this->assertIsString($bodyRef3, 'the third session must also record its own body_ref');
         $bodyPath3 = self::bodyPath($bodyRef3);
         $this->assertNotSame($bodyPath1, $bodyPath3, 'each body-writing session must use its own generation');

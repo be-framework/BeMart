@@ -248,12 +248,8 @@ function flatten(LogJson $log): array
     $flat = [];
     $walk = static function (array $node) use (&$walk, &$flat): void {
         $flat[] = ['type' => (string) $node['type'], 'context' => (array) ($node['context'] ?? [])];
-        foreach ((array) ($node['open'] ?? []) as $child) {
+        foreach ((array) ($node['children'] ?? []) as $child) {
             $walk((array) $child);
-        }
-
-        foreach ((array) ($node['events'] ?? []) as $event) {
-            $walk((array) $event);
         }
 
         if (isset($node['close'])) {
@@ -261,11 +257,7 @@ function flatten(LogJson $log): array
         }
     };
     $tree = $log->toArray();
-    foreach ((array) ($tree['open'] ?? []) as $node) {
-        $walk((array) $node);
-    }
-
-    foreach ((array) ($tree['events'] ?? []) as $node) {
+    foreach ((array) ($tree['entries'] ?? []) as $node) {
         $walk((array) $node);
     }
 
