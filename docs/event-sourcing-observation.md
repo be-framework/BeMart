@@ -11,8 +11,8 @@ BeMart の credential(password / secretKey / resetKey / authKey / deviceToken �
 [`HANDOVER.md`](HANDOVER.md#2026-09-14--event-sourcing-観測ログ-credential-redaction-と-replayable-の契約)
 を参照。ここは「今どうなっているか」の正。
 
-依存: `bear/event-sourcing` `1.x-dev`(`composer.lock` は `10068a6`、
-[bearsunday/BEAR.EventSourcing#27](https://github.com/bearsunday/BEAR.EventSourcing/pull/27)
+依存: `bear/event-sourcing` `1.x-dev`(`composer.lock` は `e73ce4c`、
+[bearsunday/BEAR.EventSourcing#32](https://github.com/bearsunday/BEAR.EventSourcing/pull/32)
 のマージ commit)。タグ付きリリースはまだ無い(最新タグ `0.1.0` はマージ前)。
 
 ## redaction の仕組み(2系統、別々の層で効く)
