@@ -133,9 +133,9 @@ final class EventSourcingExtractionTest extends TestCase
         $this->assertSame('customer-001', $ro->body['customerId']);
 
         $log = $logger->flush();
-        $rawOpen = $log->toArray()['entries'] ?? [];
+        $rawOpen = $log->toArray()['log'] ?? [];
         $this->assertCount(1, $rawOpen, 'a single external request must have exactly one root scope');
-        $rootChildren = $rawOpen[0]['children'] ?? [];
+        $rootChildren = $rawOpen[0]['log'] ?? [];
         $this->assertNotEmpty(
             $rootChildren,
             'checkout must compose nested Be becoming/being scopes for the single-event '
@@ -193,7 +193,7 @@ final class EventSourcingExtractionTest extends TestCase
         $this->assertSame(200, $ro->code);
 
         $log = $logger->flush();
-        $rawOpen = $log->toArray()['entries'] ?? [];
+        $rawOpen = $log->toArray()['log'] ?? [];
         $this->assertGreaterThanOrEqual(
             1,
             count($rawOpen),
@@ -227,9 +227,9 @@ final class EventSourcingExtractionTest extends TestCase
 
         $log = $logger->flush();
         $tree = json_decode(json_encode($log->toArray()), true);
-        $this->assertSame(SensitiveParamsFilter::FILTERED, $tree['entries'][0]['context']['params']['password']);
-        $this->assertSame('test-admin', $tree['entries'][0]['context']['params']['loginId']);
-        $this->assertFalse($tree['entries'][0]['context']['replayable']);
+        $this->assertSame(SensitiveParamsFilter::FILTERED, $tree['log'][0]['context']['params']['password']);
+        $this->assertSame('test-admin', $tree['log'][0]['context']['params']['loginId']);
+        $this->assertFalse($tree['log'][0]['context']['replayable']);
 
         $events = $extractor->extract($log);
         $this->assertCount(1, $events, 'a successful request must be extracted even with a redacted credential');
@@ -263,13 +263,13 @@ final class EventSourcingExtractionTest extends TestCase
 
         $log = $logger->flush();
         $tree = json_decode(json_encode($log->toArray()), true);
-        $params = $tree['entries'][0]['context']['params'];
+        $params = $tree['log'][0]['context']['params'];
         $this->assertSame(
             SensitiveParamsFilter::FILTERED,
             $params['resetKey'],
             'the extra credential substring must redact resetKey; the library default alone would not',
         );
-        $this->assertFalse($tree['entries'][0]['context']['replayable']);
+        $this->assertFalse($tree['log'][0]['context']['replayable']);
 
         $events = $extractor->extract($log);
         $this->assertCount(
@@ -305,7 +305,7 @@ final class EventSourcingExtractionTest extends TestCase
 
         $log = $logger->flush();
         $tree = json_decode(json_encode($log->toArray()), true);
-        $params = $tree['entries'][0]['context']['params'];
+        $params = $tree['log'][0]['context']['params'];
         $this->assertSame(
             SensitiveParamsFilter::FILTERED,
             $params['authKey'],
@@ -316,7 +316,7 @@ final class EventSourcingExtractionTest extends TestCase
             $params['deviceToken'],
             'deviceToken must be redacted by the library default token rule, with no app help needed',
         );
-        $this->assertFalse($tree['entries'][0]['context']['replayable']);
+        $this->assertFalse($tree['log'][0]['context']['replayable']);
 
         $events = $extractor->extract($log);
         $this->assertCount(

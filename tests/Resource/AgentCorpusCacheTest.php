@@ -118,7 +118,7 @@ final class AgentCorpusCacheTest extends TestCase
         $types = [];
         $walk = static function (array $node) use (&$walk, &$types): void {
             $types[] = (string) $node['type'];
-            foreach ((array) ($node['children'] ?? []) as $child) {
+            foreach ((array) ($node['log'] ?? []) as $child) {
                 $walk((array) $child);
             }
 
@@ -128,7 +128,7 @@ final class AgentCorpusCacheTest extends TestCase
         };
 
         $tree = $log->toArray();
-        foreach ((array) ($tree['entries'] ?? []) as $node) {
+        foreach ((array) ($tree['log'] ?? []) as $node) {
             $walk((array) $node);
         }
 

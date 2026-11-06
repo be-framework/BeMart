@@ -29,13 +29,18 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 use Ray\Di\Scope;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 use function dirname;
 use function file_get_contents;
 use function json_decode;
 use function json_encode;
+use function mkdir;
+use function rmdir;
 use function sys_get_temp_dir;
 use function uniqid;
+use function unlink;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -60,8 +65,7 @@ final class ExcludedResponseBodyStoreTest extends TestCase
     {
         try {
             if ($this->bodyDir !== null) {
-                FileBodyStore::clearDirectory($this->bodyDir);
-                self::assertTrue(rmdir($this->bodyDir), 'temp body directory must be removable after clearing');
+                self::removeTree($this->bodyDir);
             }
         } finally {
             $this->bodyDir = null;
@@ -77,7 +81,7 @@ final class ExcludedResponseBodyStoreTest extends TestCase
     private function buildGraph(): array
     {
         $bodyDir = sys_get_temp_dir() . '/' . uniqid('bear-es-excluded-response-body-', true);
-        FileBodyStore::clearDirectory($bodyDir);
+        mkdir($bodyDir);
         $this->bodyDir = $bodyDir;
         $logger = new SemanticLogger();
 
@@ -128,17 +132,29 @@ final class ExcludedResponseBodyStoreTest extends TestCase
         return json_decode(json_encode($logger->flush(), JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
     }
 
-    /** Every file actually written by this run, concatenated, for a secret-absence scan. */
+    /** Every file written under the body root, generation subdirectories included, concatenated for a secret-absence scan. */
     private static function allWrittenBytes(string $dir): string
     {
         $bytes = '';
-        foreach (new FilesystemIterator($dir, FilesystemIterator::SKIP_DOTS) as $file) {
-            if ($file->isFile()) {
-                $bytes .= (string) file_get_contents($file->getPathname());
-            }
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS));
+        foreach ($files as $file) {
+            $bytes .= (string) file_get_contents($file->getPathname());
         }
 
         return $bytes;
+    }
+
+    private static function removeTree(string $dir): void
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST,
+        );
+        foreach ($iterator as $file) {
+            $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+        }
+
+        rmdir($dir);
     }
 
     public function testResetPageResponseIsNeverWrittenToDisk(): void
@@ -158,7 +174,7 @@ final class ExcludedResponseBodyStoreTest extends TestCase
         $tree = self::flushToTree($logger);
         $this->assertArrayNotHasKey(
             'body_ref',
-            $tree['entries'][0]['close']['context'],
+            $tree['log'][0]['close']['context'],
             'a page:// response must never record a body_ref',
         );
         $this->assertStringNotContainsString(
@@ -188,7 +204,7 @@ final class ExcludedResponseBodyStoreTest extends TestCase
         $tree = self::flushToTree($logger);
         $this->assertArrayNotHasKey(
             'body_ref',
-            $tree['entries'][0]['close']['context'],
+            $tree['log'][0]['close']['context'],
             'a page:// response must never record a body_ref',
         );
         $this->assertStringNotContainsString(
@@ -211,12 +227,12 @@ final class ExcludedResponseBodyStoreTest extends TestCase
         $tree = self::flushToTree($logger);
         $this->assertArrayNotHasKey(
             'body_ref',
-            $tree['entries'][0]['close']['context'],
+            $tree['log'][0]['close']['context'],
             'the outer page:// response must not record a body_ref',
         );
         $this->assertArrayHasKey(
             'body_ref',
-            $tree['entries'][0]['children'][0]['close']['context'],
+            $tree['log'][0]['log'][0]['close']['context'],
             'the nested app:// response must still record a body_ref',
         );
         $this->assertStringNotContainsString(
