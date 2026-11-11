@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "77243b777b76ef514d31a8278a5ce005",
+    "content-hash": "bb407bf3d6a24b9473d00f58a3836bc6",
     "packages": [
         {
             "name": "aura/cli",
@@ -868,16 +868,16 @@
         },
         {
             "name": "bear/query-repository",
-            "version": "1.19.0",
+            "version": "1.20.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.QueryRepository.git",
-                "reference": "8a29534ed1c9793205b5027d78b14fa3e07a0910"
+                "reference": "8aa4b4f6c1a24b5038a26f9b76c61c3a83db1609"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.QueryRepository/zipball/8a29534ed1c9793205b5027d78b14fa3e07a0910",
-                "reference": "8a29534ed1c9793205b5027d78b14fa3e07a0910",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.QueryRepository/zipball/8aa4b4f6c1a24b5038a26f9b76c61c3a83db1609",
+                "reference": "8aa4b4f6c1a24b5038a26f9b76c61c3a83db1609",
                 "shasum": ""
             },
             "require": {
@@ -888,7 +888,7 @@
                 "psr/cache": "^1.0 || ^2.0 || ^3.0",
                 "psr/log": "^2.0 || ^3.0",
                 "ray/aop": "^2.19.1",
-                "ray/di": "^2.20",
+                "ray/di": "^2.23",
                 "ray/psr-cache-module": "^1.6",
                 "symfony/cache": "^6.0 || ^7.3 || ^8.0",
                 "symfony/polyfill-php83": "^v1.32.0"
@@ -900,6 +900,7 @@
                 "mobiledetect/mobiledetectlib": "^3.74 || ^4.8",
                 "phpunit/phpunit": "^11.0",
                 "predis/predis": "^2.4",
+                "ray/compiler": "^1.17",
                 "symfony/process": "^6.1 || ^7.1 || ^8.0",
                 "twig/twig": "^3.4.3"
             },
@@ -947,10 +948,10 @@
             ],
             "support": {
                 "issues": "https://github.com/bearsunday/BEAR.QueryRepository/issues",
-                "source": "https://github.com/bearsunday/BEAR.QueryRepository/tree/1.19.0"
+                "source": "https://github.com/bearsunday/BEAR.QueryRepository/tree/1.20.0"
             },
-            "time": "2026-11-06T05:51:54+00:00",
-            "published-time": "2026-11-06T05:52:10+00:00"
+            "time": "2026-11-11T02:17:44+00:00",
+            "published-time": "2026-11-11T02:20:03+00:00"
         },
         {
             "name": "bear/resource",
@@ -1819,16 +1820,16 @@
         },
         {
             "name": "koriym/semantic-logger",
-            "version": "0.11.0",
+            "version": "0.11.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/koriym/Koriym.SemanticLogger.git",
-                "reference": "54fa16b28c45461fc380e41d92f6bbd12afad345"
+                "reference": "6a373ac93dbdf53b7da7f5cea644246d71f1c39d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/koriym/Koriym.SemanticLogger/zipball/54fa16b28c45461fc380e41d92f6bbd12afad345",
-                "reference": "54fa16b28c45461fc380e41d92f6bbd12afad345",
+                "url": "https://api.github.com/repos/koriym/Koriym.SemanticLogger/zipball/6a373ac93dbdf53b7da7f5cea644246d71f1c39d",
+                "reference": "6a373ac93dbdf53b7da7f5cea644246d71f1c39d",
                 "shasum": ""
             },
             "require": {
@@ -1869,10 +1870,10 @@
             "description": "Type-safe structured logging with schema validation and meaningful context",
             "support": {
                 "issues": "https://github.com/koriym/Koriym.SemanticLogger/issues",
-                "source": "https://github.com/koriym/Koriym.SemanticLogger/tree/0.11.0"
+                "source": "https://github.com/koriym/Koriym.SemanticLogger/tree/0.11.1"
             },
-            "time": "2026-10-23T01:01:57+00:00",
-            "published-time": "2026-10-23T01:02:08+00:00"
+            "time": "2026-11-11T01:59:04+00:00",
+            "published-time": "2026-11-11T02:04:09+00:00"
         },
         {
             "name": "madapaja/twig-module",
@@ -7384,28 +7385,28 @@
         },
         {
             "name": "bear/event-sourcing",
-            "version": "1.x-dev",
+            "version": "0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.EventSourcing.git",
-                "reference": "d251146f640852f084b499bd535fb2b17680e78d"
+                "reference": "65c8bcf4e6ba9b402ff6ace03646cca5dc41127b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.EventSourcing/zipball/d251146f640852f084b499bd535fb2b17680e78d",
-                "reference": "d251146f640852f084b499bd535fb2b17680e78d",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.EventSourcing/zipball/65c8bcf4e6ba9b402ff6ace03646cca5dc41127b",
+                "reference": "65c8bcf4e6ba9b402ff6ace03646cca5dc41127b",
                 "shasum": ""
             },
             "require": {
-                "koriym/semantic-logger": "^0.11",
-                "php": "^8.3",
+                "koriym/semantic-logger": "^0.11.1",
+                "php": "^8.2",
                 "ray/di": "^2.19"
             },
             "conflict": {
                 "bear/resource": "<1.31"
             },
             "require-dev": {
-                "bear/query-repository": "1.x-dev",
+                "bear/query-repository": "^1.20",
                 "bear/resource": "^1.32",
                 "justinrainbow/json-schema": "^6.13",
                 "maglnet/composer-require-checker": "^4.14",
@@ -7416,11 +7417,18 @@
                 "vimeo/psalm": "^6.0"
             },
             "suggest": {
+                "bear/query-repository": "To record resource requests into the cache log's session with DevObservationModule (^1.20)",
                 "bear/resource": "To observe BEAR.Resource execution with the InvokerInterface bridge (^1.32)",
                 "ray/media-query": "To back EventStoreInterface with SQL and to observe media queries as semantic log events (^1.1)"
             },
-            "default-branch": true,
             "type": "library",
+            "extra": {
+                "stree": {
+                    "formatters": {
+                        "resource_request": "BEAR\\EventSourcing\\Resource\\Stree\\ResourceNodeFormatter"
+                    }
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "BEAR\\EventSourcing\\": "src/"
@@ -7475,7 +7483,7 @@
                 "issues": "https://github.com/bearsunday/BEAR.EventSourcing/issues",
                 "source": "https://github.com/bearsunday/BEAR.EventSourcing"
             },
-            "time": "2026-10-30T05:59:28+00:00"
+            "time": "2026-11-11T03:17:01+00:00"
         },
         {
             "name": "composer/pcre",
@@ -9645,7 +9653,6 @@
     "stability-flags": {
         "be-framework/be": 20,
         "bear/devtools": 20,
-        "bear/event-sourcing": 20,
         "bear/tool-use": 20,
         "my-vendor/be-mart-be": 20,
         "ray/fake-query": 20
