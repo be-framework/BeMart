@@ -34,9 +34,8 @@ final class DevModule extends AbstractAppModule
     private const ORIGINAL_INVOKER = 'original_invoker';
 
     /**
-     * Body generations retained alongside log sessions (same count passed to
-     * DevQueryRepositoryLogModule below): a log's body_ref keeps resolving for as long as the
-     * log itself survives, and neither is pruned without the other (issue #134).
+     * Log sessions retained by DevQueryRepositoryLogModule below; body generations keep one more,
+     * so a retained log's body_ref keeps resolving (issue #134).
      *
      * Matches DevQueryRepositoryLogModule's own default so aligning the two lifetimes does not
      * shorten the log history the bear-observe skill tells people to read back through.
@@ -47,9 +46,9 @@ final class DevModule extends AbstractAppModule
     protected function configure(): void
     {
         // FileBodyStore creates one generation directory per process under $bodiesRoot the
-        // first time a body is stored (never eagerly) and prunes sibling generations it
-        // marked itself down to KEEP_GENERATIONS, so sessions sharing this root cannot
-        // collide and a crashed process leaves nothing for this module to track.
+        // first time a body is stored (never eagerly) and prunes sibling generations it marked
+        // itself. It keeps one more than the logs: the new generation and its prune come at the
+        // first stored body, before this request's log is written and the oldest log pruned.
         $bodiesRoot = $this->appMeta->logDir . '/es-bodies';
 
         $this->rename(InvokerInterface::class, self::ORIGINAL_INVOKER);
@@ -66,7 +65,7 @@ final class DevModule extends AbstractAppModule
         // reads visible in the tree.
         $this->bind(RecordedMethods::class)->annotatedWith(Recorded::class)
             ->toInstance(new RecordedMethods(RecordedMethods::WITH_READS));
-        $this->bind(BodyStoreInterface::class)->toInstance(new FileBodyStore($bodiesRoot, self::KEEP_GENERATIONS));
+        $this->bind(BodyStoreInterface::class)->toInstance(new FileBodyStore($bodiesRoot, self::KEEP_GENERATIONS + 1));
         $this->install(new EventSourcingModule());
 
         // The cache log module owns the writer and the shutdown flush, so the application

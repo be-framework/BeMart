@@ -226,8 +226,8 @@ final class ObserveModuleBodyRetentionTest extends TestCase
     {
         $root = dirname(__DIR__, 2) . '/var/log/' . self::CONTEXT . '/es-bodies';
         mkdir($root, 0775, true);
-        // One more than the module keeps, so storing a body below has to prune. FileBodyStore::MARKER
-        // is what it checks before pruning a directory, so planting it is what makes these owned.
+        // As many as the body store keeps (one more than the logs), so storing a body below has to
+        // prune. FileBodyStore::MARKER is what it checks before pruning, so planting it makes these owned.
         $planted = [];
         for ($i = 0; $i <= ObserveModule::KEEP_GENERATIONS; $i++) {
             $dir = $root . '/' . sprintf('20200101-000000-%06d-0000000%d', $i, $i % 10);
@@ -245,9 +245,9 @@ final class ObserveModuleBodyRetentionTest extends TestCase
 
         $survivors = self::generations();
         $this->assertCount(
-            ObserveModule::KEEP_GENERATIONS,
+            ObserveModule::KEEP_GENERATIONS + 1,
             $survivors,
-            'the retention count is the ceiling, and the deletion branch must enforce it',
+            'body generations keep one more than log sessions, and the deletion branch must enforce it',
         );
         $this->assertNotContains($planted[0], $survivors, 'the oldest generation must be the one pruned');
         $this->assertContains(
