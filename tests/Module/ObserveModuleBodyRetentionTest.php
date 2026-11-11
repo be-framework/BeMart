@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Tests\Module;
 use Be\Framework\Becoming;
 use Be\Framework\BecomingInterface;
 use BEAR\AppMeta\Meta;
+use BEAR\EventSourcing\Resource\FileBodyStore;
 use BEAR\RepositoryModule\Annotation\EtagPool;
 use BEAR\RepositoryModule\Annotation\ResourceObjectPool;
 use BEAR\Resource\ResourceInterface;
@@ -43,15 +44,14 @@ use const JSON_THROW_ON_ERROR;
 /**
  * Proves issue #134: a body {@see ObserveModule} wrote in one session is still readable after a
  * later injector creation — the same shape as a second `php bin/observe.php` process starting
- * while the log from an earlier one is still retained. Before the fix,
- * `FileBodyStore::clearDirectory()` wiped the single shared `es-bodies` directory on every
- * `ObserveModule::configure()` run, so an earlier session's `body_ref` stopped resolving (or, if
- * the two sessions' sequence numbers collided, silently pointed at the wrong bytes) the moment a
- * second session's injector was built.
+ * while the log from an earlier one is still retained. `FileBodyStore` creates one generation
+ * directory per process under the shared `es-bodies` root and prunes only the generations it
+ * marked itself, so an earlier session's `body_ref` keeps resolving once a second session's
+ * injector is built, and each session's numbered files land in their own directory.
  *
- * Uses the real {@see ObserveModule} (not a duplicated wiring) since the fix lives in its
- * generation-key/retention logic; only the logger and the resource-object/etag pools are
- * overridden, matching how `check.php`'s own diagnostics keep a pool inside one process
+ * Uses the real {@see ObserveModule} (not a duplicated wiring) since the retention contract this
+ * guards lives in how it constructs `FileBodyStore`; only the logger and the resource-object/etag
+ * pools are overridden, matching how `check.php`'s own diagnostics keep a pool inside one process
  * (ArrayAdapter) instead of depending on — or polluting — the on-disk pool a real CLI run uses.
  *
  * @psalm-suppress MixedArrayAccess,MixedArgument The canonical JSON tree view is untyped by design.
@@ -144,7 +144,7 @@ final class ObserveModuleBodyRetentionTest extends TestCase
         $this->assertSame(200, $ro1->code, 'fixture must actually reach the products page');
 
         $tree1 = self::flushToTree($logger1);
-        $bodyRef1 = $tree1['open'][0]['open'][0]['close']['context']['body_ref'] ?? null;
+        $bodyRef1 = $tree1['log'][0]['log'][0]['close']['context']['body_ref'] ?? null;
         $this->assertIsString($bodyRef1, 'the nested app:// call must record a body_ref');
         $bodyPath1 = self::bodyPath($bodyRef1);
         $this->assertFileExists($bodyPath1, 'the body this session just wrote must exist right after writing it');
@@ -152,14 +152,14 @@ final class ObserveModuleBodyRetentionTest extends TestCase
 
         // A later injector creation: a brand new ObserveModule::configure() run, the same shape
         // as a second `php bin/observe.php` process starting. Same context, so the same
-        // logDir/es-bodies root — the exact scenario issue #134 broke: FileBodyStore's
-        // clearDirectory() wiped every earlier session's bodies out from under this second run.
+        // logDir/es-bodies root — the exact scenario issue #134 broke, before FileBodyStore gave
+        // each process its own generation directory under that shared root.
         //
         // This session's own request records no body at all (page://self/product resolves its
         // data through a direct MediaQuery, no nested app:// call — see
         // ExcludedResponseBodyStore's own contract for why the outer page:// response itself
         // never gets a body_ref), so nothing in this session can recreate session 1's file by
-        // coincidence: if it is gone after this session, this session's own clearing broke it.
+        // coincidence: if it is gone after this session, this session's own generation handling broke it.
         $logger2 = new SemanticLogger();
         $resource2 = $this->buildSession($logger2);
 
@@ -168,7 +168,7 @@ final class ObserveModuleBodyRetentionTest extends TestCase
         $tree2 = self::flushToTree($logger2);
         $this->assertArrayNotHasKey(
             'body_ref',
-            $tree2['open'][0]['close']['context'],
+            $tree2['log'][0]['close']['context'],
             'fixture precondition: this session must itself write zero bodies, so a survival check '
             . 'right after it cannot pass by the second session coincidentally recreating the same file',
         );
@@ -192,7 +192,7 @@ final class ObserveModuleBodyRetentionTest extends TestCase
         $ro3 = $resource3->get('page://self/products');
         $this->assertSame(200, $ro3->code, 'third session fixture must also reach the products page');
         $tree3 = self::flushToTree($logger3);
-        $bodyRef3 = $tree3['open'][0]['open'][0]['close']['context']['body_ref'] ?? null;
+        $bodyRef3 = $tree3['log'][0]['log'][0]['close']['context']['body_ref'] ?? null;
         $this->assertIsString($bodyRef3, 'the third session must also record its own body_ref');
         $bodyPath3 = self::bodyPath($bodyRef3);
         $this->assertNotSame($bodyPath1, $bodyPath3, 'each body-writing session must use its own generation');
@@ -226,25 +226,28 @@ final class ObserveModuleBodyRetentionTest extends TestCase
     {
         $root = dirname(__DIR__, 2) . '/var/log/' . self::CONTEXT . '/es-bodies';
         mkdir($root, 0775, true);
-        // One more than the module keeps, so the deletion branch has to run. The `.bear-es-bodies`
-        // marker is what FileBodyStore::clearDirectory() checks before deleting anything, so a
-        // generation without it is refused — planting it is what makes these fixtures real.
+        // As many as the body store keeps (one more than the logs), so storing a body below has to
+        // prune. FileBodyStore::MARKER is what it checks before pruning, so planting it makes these owned.
         $planted = [];
         for ($i = 0; $i <= ObserveModule::KEEP_GENERATIONS; $i++) {
             $dir = $root . '/' . sprintf('20200101-000000-%06d-0000000%d', $i, $i % 10);
             mkdir($dir, 0775, true);
-            file_put_contents($dir . '/.bear-es-bodies', '');
+            file_put_contents($dir . '/' . FileBodyStore::MARKER, '');
             file_put_contents($dir . '/000001.json', '{}');
             $planted[] = $dir;
         }
 
-        $this->buildSession(new SemanticLogger());
+        // Storing a body is what makes FileBodyStore create its own generation and prune siblings;
+        // configure() alone creates nothing.
+        $resource = $this->buildSession(new SemanticLogger());
+        $ro = $resource->get('page://self/products');
+        $this->assertSame(200, $ro->code, 'fixture must actually reach the products page');
 
         $survivors = self::generations();
         $this->assertCount(
-            ObserveModule::KEEP_GENERATIONS,
+            ObserveModule::KEEP_GENERATIONS + 1,
             $survivors,
-            'the retention count is the ceiling, and the deletion branch must enforce it',
+            'body generations keep one more than log sessions, and the deletion branch must enforce it',
         );
         $this->assertNotContains($planted[0], $survivors, 'the oldest generation must be the one pruned');
         $this->assertContains(
@@ -264,15 +267,20 @@ final class ObserveModuleBodyRetentionTest extends TestCase
         $foreign = $root . '/tmp';
         mkdir($foreign, 0775, true);
 
+        // One fewer than the module keeps: the session below stores a body and so creates one more
+        // generation of its own, bringing the owned total to exactly KEEP_GENERATIONS if (and only
+        // if) the foreign directory is never counted.
         $owned = [];
-        for ($i = 0; $i < ObserveModule::KEEP_GENERATIONS; $i++) {
+        for ($i = 0; $i < ObserveModule::KEEP_GENERATIONS - 1; $i++) {
             $dir = $root . '/' . sprintf('20200101-000000-%06d-0000000%d', $i, $i % 10);
             mkdir($dir, 0775, true);
-            file_put_contents($dir . '/.bear-es-bodies', '');
+            file_put_contents($dir . '/' . FileBodyStore::MARKER, '');
             $owned[] = $dir;
         }
 
-        $this->buildSession(new SemanticLogger());
+        $resource = $this->buildSession(new SemanticLogger());
+        $ro = $resource->get('page://self/products');
+        $this->assertSame(200, $ro->code, 'fixture must actually reach the products page');
 
         $survivors = self::generations();
         $this->assertContains($owned[0], $survivors, 'exactly the retention count is owned, so none may be pruned');

@@ -15,6 +15,7 @@ use function is_dir;
 use function json_encode;
 use function mkdir;
 
+use const JSON_PRESERVE_ZERO_FRACTION;
 use const JSON_PRETTY_PRINT;
 use const JSON_UNESCAPED_SLASHES;
 use const JSON_UNESCAPED_UNICODE;
@@ -39,10 +40,17 @@ final class DevBecoming implements BecomingInterface
                 mkdir($dir, 0755, true);
             }
 
-            file_put_contents(
-                $this->logFile,
-                json_encode($this->logger->flush()->toTreeArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL,
+            // Not JSON_THROW_ON_ERROR: this runs in `finally`, so a thrown JsonException here
+            // would replace whatever the try block was returning or throwing. A logging failure
+            // must stay a logging failure, never the application's actual outcome — the same
+            // totality semantic-logger itself guarantees for its own recording failures.
+            $json = json_encode(
+                $this->logger->flush()->toArray(),
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION,
             );
+            if ($json !== false) {
+                file_put_contents($this->logFile, $json . PHP_EOL);
+            }
         }
     }
 }
