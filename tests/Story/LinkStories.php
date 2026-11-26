@@ -50,6 +50,12 @@ final class LinkStories
                 '/shopping/non-member',
                 [],
             ],
+            'guest finds a product in the list and puts it in the cart' => [
+                'page://self/#link=self:goProductList?nameKeyword=sample,self:goProduct?productCode=sample-001,self:doAddCartItem?' . self::form(['productCode' => 'sample-001', 'quantity' => '1']),
+                Code::OK,
+                '/cart',
+                [],
+            ],
         ];
     }
 
