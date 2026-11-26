@@ -10,12 +10,14 @@ use BEAR\Resource\Exception\ParameterException;
 use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 
 use function dirname;
+use function http_build_query;
 use function uri_template;
 
 /**
  * Stories a client follows from one URI, each named by what it shows.
  *
- * Each URI is a URI template expanded with the values of its story.
+ * Each URI is a URI template expanded with the values of its story. A link whose query holds a list writes that query
+ * with http_build_query(), the form LinkType::listFromUri() reads.
  */
 final class LinkStories
 {
@@ -160,6 +162,14 @@ final class LinkStories
                 ]),
                 Code::NOT_FOUND,
                 '/admin/payment/payment',
+                [],
+            ],
+            'bulk status change sends every product code' => [
+                'page://self/admin/product-list#link=self:doBulkUpdateProductStatus?' . http_build_query(
+                    self::form(['productStatus' => '2']) + ['productCodes' => ['admin-active-001', 'admin-withdrawn-001']],
+                ),
+                Code::OK,
+                '/admin/product-list',
                 [],
             ],
         ];
