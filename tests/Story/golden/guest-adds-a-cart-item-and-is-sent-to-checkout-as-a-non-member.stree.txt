@@ -1,174 +1,184 @@
-resource_request get 'page://self/cart'
+link_request get 'page://self/cart#link=self:doAddCartItem,self:goCheckoutEntry,self:goShoppingNonMember' : Failed
 ├── uri: page://self/cart
 ├── method: GET
-├── replayable: true
-├── becoming GetCartsInput
-│   ├── sessionPrefix: session-prefix-1
-│   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
-│   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
-│   │   └── close being_final_close
-│   │       ├── carts[0].cartKey: session-prefix-1_1
-│   │       ├── carts[0].saleTypeId: 1
-│   │       ├── carts[0].saleTypeName: 通常販売
-│   │       ├── carts[0].items[0].productCode: sample-001
-│   │       ├── carts[0].items[0].quantity: 3
-│   │       ├── carts[0].items[0].price: 1200
-│   │       ├── carts[0].items[0].productClassId: 0
-│   │       ├── carts[0].items[0].productId: 0
-│   │       ├── carts[0].items[0].productName: サンプル商品 A
-│   │       ├── carts[0].totalPrice: 3600
-│   │       ├── carts[0].deliveryFeeTotal: 0
-│   │       ├── carts[0].preOrderId: deadbeefcafe1234567890abcdef01234567890a
-│   │       ├── carts[1].cartKey: session-prefix-1_2
-│   │       ├── carts[1].saleTypeId: 2
-│   │       ├── carts[1].saleTypeName: 予約販売
-│   │       ├── carts[1].totalPrice: 0
-│   │       ├── carts[1].deliveryFeeTotal: 0
-│   │       ├── carts[1].preOrderId: deadbeefcafe1234567890abcdef01234567890b
-│   │       ├── cartCount: 2
-│   │       ├── totalPrice: 3600
-│   │       └── deliveryFeeTotal: 0
-│   └── close becoming_close
-│       └── exit: success
-└── close resource_response
-    ├── code: 200
-    └── durationMs: [volatile]
-resource_request post 'page://self/cart/item?productCode=sample-001&quantity=1&csrfToken=%5BFILTERED%5D'
-├── uri: page://self/cart/item
-├── method: POST
-├── params.productCode: sample-001
-├── params.quantity: 1
-├── params.csrfToken: [FILTERED]
-├── replayable: true
-├── becoming AddCartItemInput
-│   ├── productCode: sample-001
-│   ├── quantity: 1
-│   ├── sessionPrefix: session-prefix-1
-│   ├── being QuantityAdjusted input=[productCode, quantity, sessionPrefix] inject=[productClassQuery]
-│   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-2>
-│   │   └── close being_close
-│   │       ├── productCode: sample-001
-│   │       ├── requestedQuantity: 1
-│   │       ├── adjustedQuantity: 1
-│   │       ├── sessionPrefix: session-prefix-1
-│   │       ├── unitPrice: 1200
-│   │       ├── saleTypeId: 1
-│   │       ├── saleTypeName: 通常販売
-│   │       ├── deliveryFee: 0
-│   │       ├── stockUnlimited: false
-│   │       ├── stock: 50
-│   │       └── cartKey: session-prefix-1_1
-│   ├── being CartMerged input=[productCode, requestedQuantity +8 items] inject=[cartQuery, productClassQuery]
-│   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
-│   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-2>
-│   │   └── close being_close
-│   │       ├── productCode: sample-001
-│   │       ├── requestedQuantity: 1
-│   │       ├── adjustedQuantity: 1
-│   │       ├── cartKey: session-prefix-1_1
-│   │       ├── unitPrice: 1200
-│   │       ├── saleTypeName: 通常販売
-│   │       ├── mergedCart.cartKey: session-prefix-1_1
-│   │       ├── mergedCart.saleTypeId: 1
-│   │       ├── mergedCart.saleTypeName: 通常販売
-│   │       ├── mergedCart.items[0].productCode: sample-001
-│   │       ├── mergedCart.items[0].quantity: 4
-│   │       ├── mergedCart.items[0].price: 1200
-│   │       ├── mergedCart.items[0].productClassId: 0
-│   │       ├── mergedCart.items[0].productId: 0
-│   │       ├── mergedCart.items[0].productName: 
-│   │       ├── mergedCart.totalPrice: 4800
-│   │       ├── mergedCart.deliveryFeeTotal: 0
-│   │       └── mergedCart.preOrderId: deadbeefcafe1234567890abcdef01234567890a
-│   ├── being_final CartItemAdded input=[productCode, requestedQuantity +5 items] inject=[cartCommand]
-│   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null-3>
-│   │   └── close being_final_close
-│   │       ├── cartKey: session-prefix-1_1
-│   │       ├── productCode: sample-001
-│   │       ├── requestedQuantity: 1
-│   │       ├── adjustedQuantity: 1
-│   │       ├── unitPrice: 1200
-│   │       ├── totalPrice: 4800
-│   │       ├── deliveryFeeTotal: 0
-│   │       └── saleTypeName: 通常販売
-│   └── close becoming_close
-│       └── exit: success
-└── close resource_response
-    ├── code: 201
-    └── durationMs: [volatile]
-resource_request get 'page://self/cart'
-├── uri: page://self/cart
-├── method: GET
-├── replayable: true
-├── becoming GetCartsInput
-│   ├── sessionPrefix: session-prefix-1
-│   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
-│   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
-│   │   └── close being_final_close
-│   │       ├── carts[0].cartKey: session-prefix-1_1
-│   │       ├── carts[0].saleTypeId: 1
-│   │       ├── carts[0].saleTypeName: 通常販売
-│   │       ├── carts[0].items[0].productCode: sample-001
-│   │       ├── carts[0].items[0].quantity: 3
-│   │       ├── carts[0].items[0].price: 1200
-│   │       ├── carts[0].items[0].productClassId: 0
-│   │       ├── carts[0].items[0].productId: 0
-│   │       ├── carts[0].items[0].productName: サンプル商品 A
-│   │       ├── carts[0].totalPrice: 3600
-│   │       ├── carts[0].deliveryFeeTotal: 0
-│   │       ├── carts[0].preOrderId: deadbeefcafe1234567890abcdef01234567890a
-│   │       ├── carts[1].cartKey: session-prefix-1_2
-│   │       ├── carts[1].saleTypeId: 2
-│   │       ├── carts[1].saleTypeName: 予約販売
-│   │       ├── carts[1].totalPrice: 0
-│   │       ├── carts[1].deliveryFeeTotal: 0
-│   │       ├── carts[1].preOrderId: deadbeefcafe1234567890abcdef01234567890b
-│   │       ├── cartCount: 2
-│   │       ├── totalPrice: 3600
-│   │       └── deliveryFeeTotal: 0
-│   └── close becoming_close
-│       └── exit: success
-└── close resource_response
-    ├── code: 200
-    └── durationMs: [volatile]
-resource_request get 'page://self/shopping' : Failed
-├── uri: page://self/shopping
-├── method: GET
-├── replayable: true
-├── becoming GetShoppingInput : Failed
-│   ├── sessionPrefix: session-prefix-1
-│   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +3 items] : Failed
-│   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-4>
-│   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
-│   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null-5>
-│   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-6>
-│   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
-│   │   └── close being_error_close
+├── links[0]: self:doAddCartItem
+├── links[1]: self:goCheckoutEntry
+├── links[2]: self:goShoppingNonMember
+├── resource_request get 'page://self/cart'
+│   ├── uri: page://self/cart
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCartsInput
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── carts[0].cartKey: session-prefix-1_1
+│   │   │       ├── carts[0].saleTypeId: 1
+│   │   │       ├── carts[0].saleTypeName: 通常販売
+│   │   │       ├── carts[0].items[0].productCode: sample-001
+│   │   │       ├── carts[0].items[0].quantity: 3
+│   │   │       ├── carts[0].items[0].price: 1200
+│   │   │       ├── carts[0].items[0].productClassId: 0
+│   │   │       ├── carts[0].items[0].productId: 0
+│   │   │       ├── carts[0].items[0].productName: サンプル商品 A
+│   │   │       ├── carts[0].totalPrice: 3600
+│   │   │       ├── carts[0].deliveryFeeTotal: 0
+│   │   │       ├── carts[0].preOrderId: deadbeefcafe1234567890abcdef01234567890a
+│   │   │       ├── carts[1].cartKey: session-prefix-1_2
+│   │   │       ├── carts[1].saleTypeId: 2
+│   │   │       ├── carts[1].saleTypeName: 予約販売
+│   │   │       ├── carts[1].totalPrice: 0
+│   │   │       ├── carts[1].deliveryFeeTotal: 0
+│   │   │       ├── carts[1].preOrderId: deadbeefcafe1234567890abcdef01234567890b
+│   │   │       ├── cartCount: 2
+│   │   │       ├── totalPrice: 3600
+│   │   │       └── deliveryFeeTotal: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/cart/item?productCode=sample-001&quantity=1&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/cart/item
+│   ├── method: POST
+│   ├── params.productCode: sample-001
+│   ├── params.quantity: 1
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming AddCartItemInput
+│   │   ├── productCode: sample-001
+│   │   ├── quantity: 1
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being QuantityAdjusted input=[productCode, quantity, sessionPrefix] inject=[productClassQuery]
+│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-2>
+│   │   │   └── close being_close
+│   │   │       ├── productCode: sample-001
+│   │   │       ├── requestedQuantity: 1
+│   │   │       ├── adjustedQuantity: 1
+│   │   │       ├── sessionPrefix: session-prefix-1
+│   │   │       ├── unitPrice: 1200
+│   │   │       ├── saleTypeId: 1
+│   │   │       ├── saleTypeName: 通常販売
+│   │   │       ├── deliveryFee: 0
+│   │   │       ├── stockUnlimited: false
+│   │   │       ├── stock: 50
+│   │   │       └── cartKey: session-prefix-1_1
+│   │   ├── being CartMerged input=[productCode, requestedQuantity +8 items] inject=[cartQuery, productClassQuery]
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
+│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-2>
+│   │   │   └── close being_close
+│   │   │       ├── productCode: sample-001
+│   │   │       ├── requestedQuantity: 1
+│   │   │       ├── adjustedQuantity: 1
+│   │   │       ├── cartKey: session-prefix-1_1
+│   │   │       ├── unitPrice: 1200
+│   │   │       ├── saleTypeName: 通常販売
+│   │   │       ├── mergedCart.cartKey: session-prefix-1_1
+│   │   │       ├── mergedCart.saleTypeId: 1
+│   │   │       ├── mergedCart.saleTypeName: 通常販売
+│   │   │       ├── mergedCart.items[0].productCode: sample-001
+│   │   │       ├── mergedCart.items[0].quantity: 4
+│   │   │       ├── mergedCart.items[0].price: 1200
+│   │   │       ├── mergedCart.items[0].productClassId: 0
+│   │   │       ├── mergedCart.items[0].productId: 0
+│   │   │       ├── mergedCart.items[0].productName: 
+│   │   │       ├── mergedCart.totalPrice: 4800
+│   │   │       ├── mergedCart.deliveryFeeTotal: 0
+│   │   │       └── mergedCart.preOrderId: deadbeefcafe1234567890abcdef01234567890a
+│   │   ├── being_final CartItemAdded input=[productCode, requestedQuantity +5 items] inject=[cartCommand]
+│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null-3>
+│   │   │   └── close being_final_close
+│   │   │       ├── cartKey: session-prefix-1_1
+│   │   │       ├── productCode: sample-001
+│   │   │       ├── requestedQuantity: 1
+│   │   │       ├── adjustedQuantity: 1
+│   │   │       ├── unitPrice: 1200
+│   │   │       ├── totalPrice: 4800
+│   │   │       ├── deliveryFeeTotal: 0
+│   │   │       └── saleTypeName: 通常販売
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 201
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/cart'
+│   ├── uri: page://self/cart
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCartsInput
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── carts[0].cartKey: session-prefix-1_1
+│   │   │       ├── carts[0].saleTypeId: 1
+│   │   │       ├── carts[0].saleTypeName: 通常販売
+│   │   │       ├── carts[0].items[0].productCode: sample-001
+│   │   │       ├── carts[0].items[0].quantity: 3
+│   │   │       ├── carts[0].items[0].price: 1200
+│   │   │       ├── carts[0].items[0].productClassId: 0
+│   │   │       ├── carts[0].items[0].productId: 0
+│   │   │       ├── carts[0].items[0].productName: サンプル商品 A
+│   │   │       ├── carts[0].totalPrice: 3600
+│   │   │       ├── carts[0].deliveryFeeTotal: 0
+│   │   │       ├── carts[0].preOrderId: deadbeefcafe1234567890abcdef01234567890a
+│   │   │       ├── carts[1].cartKey: session-prefix-1_2
+│   │   │       ├── carts[1].saleTypeId: 2
+│   │   │       ├── carts[1].saleTypeName: 予約販売
+│   │   │       ├── carts[1].totalPrice: 0
+│   │   │       ├── carts[1].deliveryFeeTotal: 0
+│   │   │       ├── carts[1].preOrderId: deadbeefcafe1234567890abcdef01234567890b
+│   │   │       ├── cartCount: 2
+│   │   │       ├── totalPrice: 3600
+│   │   │       └── deliveryFeeTotal: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/shopping' : Failed
+│   ├── uri: page://self/shopping
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetShoppingInput : Failed
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +3 items] : Failed
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-4>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
+│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null-5>
+│   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-6>
+│   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
+│   │   │   └── close being_error_close
+│   │   │       ├── error: MyVendor\BeMart\Be\Exception\UnauthenticatedException
+│   │   │       ├── message: 
+│   │   │       ├── file: <root>/be/src/Final/ShoppingFetched.php
+│   │   │       └── line: 115
+│   │   └── close becoming_close
+│   │       ├── exit: error
 │   │       ├── error: MyVendor\BeMart\Be\Exception\UnauthenticatedException
 │   │       ├── message: 
 │   │       ├── file: <root>/be/src/Final/ShoppingFetched.php
 │   │       └── line: 115
-│   └── close becoming_close
-│       ├── exit: error
-│       ├── error: MyVendor\BeMart\Be\Exception\UnauthenticatedException
-│       ├── message: 
-│       ├── file: <root>/be/src/Final/ShoppingFetched.php
-│       └── line: 115
-└── close resource_response
-    ├── code: 303
-    └── durationMs: [volatile]
-resource_request get 'page://self/shopping/login'
-├── uri: page://self/shopping/login
-├── method: GET
-├── replayable: true
-└── close resource_response
-    ├── code: 200
-    └── durationMs: [volatile]
-resource_request get 'page://self/shopping/non-member'
-├── uri: page://self/shopping/non-member
-├── method: GET
-├── replayable: true
-└── close resource_response
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/shopping/login'
+│   ├── uri: page://self/shopping/login
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/shopping/non-member'
+│   ├── uri: page://self/shopping/non-member
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── uri: page://self/shopping/non-member
     ├── code: 200
     └── durationMs: [volatile]

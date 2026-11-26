@@ -14,8 +14,10 @@ use BEAR\EventSourcing\Resource\BodyStoreInterface;
 use BEAR\EventSourcing\Resource\NullBodyStore;
 use BEAR\EventSourcing\Resource\ParamsFilterInterface;
 use BEAR\EventSourcing\Resource\SemanticLogInvoker;
+use BEAR\EventSourcing\Resource\SemanticLogLinker;
 use BEAR\EventSourcing\Resource\SensitiveParamsFilter;
 use BEAR\Resource\InvokerInterface;
+use BEAR\Resource\LinkerInterface;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
@@ -26,14 +28,16 @@ use Ray\Di\AbstractModule;
 use Ray\Di\Scope;
 
 /**
- * Records every resource request into the given logger, with a signed-in admin and a guest customer.
+ * Records every resource request, and each request with links as the link_request they nest in, into the given
+ * logger, with a signed-in admin and a guest customer.
  *
- * Wraps the module it is given, as ObserveModule does, so the rename reaches that module's invoker.
+ * Wraps the module it is given, as ObserveModule does, so the renames reach that module's invoker and linker.
  */
 final class StoryModule extends AbstractModule
 {
     public const string ADMIN_ID = 'ad000000000000000000000000000001';
     private const string ORIGINAL_INVOKER = 'original_invoker';
+    private const string ORIGINAL_LINKER = 'original_linker';
 
     public function __construct(
         private readonly SemanticLoggerInterface $logger,
@@ -45,6 +49,10 @@ final class StoryModule extends AbstractModule
     protected function configure(): void
     {
         $this->rename(InvokerInterface::class, self::ORIGINAL_INVOKER);
+        $this->rename(LinkerInterface::class, self::ORIGINAL_LINKER);
+        $this->bind(LinkerInterface::class)
+            ->toConstructor(SemanticLogLinker::class, ['linker' => self::ORIGINAL_LINKER])
+            ->in(Scope::SINGLETON);
         $this->bind(ParamsFilterInterface::class)->annotatedWith(Filtered::class)
             ->toInstance(new SensitiveParamsFilter(ObserveModule::EXTRA_CREDENTIALS));
         $this->bind(InvokerInterface::class)
