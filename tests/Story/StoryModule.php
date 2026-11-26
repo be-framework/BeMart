@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Tests\Story;
 
 use Be\Framework\Becoming;
 use Be\Framework\BecomingInterface;
+use BEAR\Dev\DeclaredMethodLinker;
 use BEAR\EventSourcing\Filtered;
 use BEAR\EventSourcing\Module\EventSourcingModule;
 use BEAR\EventSourcing\Recorded;
@@ -31,7 +32,8 @@ use Ray\Di\Scope;
  * Records every resource request, and each request with links as the link_request they nest in, into the given
  * logger, with a signed-in admin and a guest customer.
  *
- * Wraps the module it is given, as ObserveModule does, so the renames reach that module's invoker and linker.
+ * Links are followed with the method each #[Link] declares, as a client steps through a workflow. Wraps the module it
+ * is given, as ObserveModule does, so the rename reaches that module's invoker.
  */
 final class StoryModule extends AbstractModule
 {
@@ -49,7 +51,7 @@ final class StoryModule extends AbstractModule
     protected function configure(): void
     {
         $this->rename(InvokerInterface::class, self::ORIGINAL_INVOKER);
-        $this->rename(LinkerInterface::class, self::ORIGINAL_LINKER);
+        $this->bind(LinkerInterface::class)->annotatedWith(self::ORIGINAL_LINKER)->to(DeclaredMethodLinker::class);
         $this->bind(LinkerInterface::class)
             ->toConstructor(SemanticLogLinker::class, ['linker' => self::ORIGINAL_LINKER, 'recordedMethods' => Recorded::class])
             ->in(Scope::SINGLETON);
