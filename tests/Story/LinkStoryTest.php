@@ -35,10 +35,15 @@ use function trim;
  */
 final class LinkStoryTest extends AbstractLinkStoryCase
 {
-    /** Values made anew on each run or checkout, written as one numbered placeholder per distinct value. */
+    /**
+     * Values made anew on each run or checkout, written as one numbered placeholder per distinct value
+     *
+     * Neither the schemas nor the stories can fix them: a schema's x-volatile does not reach the request URI a value
+     * also appears in, and the code that makes them takes no generator to inject.
+     */
     private const array VOLATILE = [
-        '/INQ-[0-9a-f]+\.[0-9]+/' => 'INQ', // inquiry ticket ids
-        '/(?<=Interface)[0-9a-f]{8}Null\d+/' => 'Null', // classes Ray.MediaQuery generates for null query ports
+        '/INQ-[0-9a-f]+\.[0-9]+/' => 'INQ', // ContactSubmitted makes the ticket id with uniqid()
+        '/(?<=Interface)[0-9a-f]{8}Null\d+/' => 'Null', // classes generated for null bindings get suffixes per checkout and run
     ];
 
     private ResourceInterface $resource;
