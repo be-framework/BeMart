@@ -51,7 +51,7 @@ final class StoryModule extends AbstractModule
         $this->rename(InvokerInterface::class, self::ORIGINAL_INVOKER);
         $this->rename(LinkerInterface::class, self::ORIGINAL_LINKER);
         $this->bind(LinkerInterface::class)
-            ->toConstructor(SemanticLogLinker::class, ['linker' => self::ORIGINAL_LINKER])
+            ->toConstructor(SemanticLogLinker::class, ['linker' => self::ORIGINAL_LINKER, 'recordedMethods' => Recorded::class])
             ->in(Scope::SINGLETON);
         $this->bind(ParamsFilterInterface::class)->annotatedWith(Filtered::class)
             ->toInstance(new SensitiveParamsFilter(ObserveModule::EXTRA_CREDENTIALS));
