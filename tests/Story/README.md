@@ -13,6 +13,27 @@ golden では、リクエストの順、method、params、becoming、応答の c
 
 ツリーの後の `events:` は、bear/event-sourcing の抽出器がこのログからイベントとして取り出すリクエスト（再生で再び実行されるもの）。連鎖の途中の POST・PUT・DELETE が 1 件ずつ並び、GET だけの連鎖と途中で止まった連鎖は `(none)` になる。
 
+## URI の書き方
+
+URI は `uri_template()`（RFC 6570）で組み、値は行ごとに渡す。文字列の値は `{?form*}` のように書く。フォームの値は `LinkStories::form()` で CSRF トークンを足す。
+
+```php
+uri_template('page://self/admin/layout/layout-list#link=self:goLayout{?layoutId},self:doUpdateLayout{?form*}', [
+    'layoutId' => 'lo-pc-default',
+    'form' => self::form(['layoutId' => 'lo-pc-default', 'name' => 'Story Layout']),
+]),
+```
+
+list や入れ子の値（`productCodes[]` など）を含むリンクは、そのリンクのクエリーだけを `http_build_query()` で書く。`{?form*}` に list を入れると `productCodes=a&productCodes=b` になり、PHP は最後の 1 つしか読まない。`http_build_query()` の形は `LinkType::listFromUri()` がそのまま読む。
+
+```php
+'page://self/admin/product-list#link=self:doBulkUpdateProductStatus?' . http_build_query(
+    self::form(['productStatus' => '2']) + ['productCodes' => ['admin-active-001', 'admin-withdrawn-001']],
+),
+```
+
+リソースクライアントは既定ですべてのリンクを GET で辿る。in-process のストーリーは、`LinkerInterface` に BEAR.DevTools の `DeclaredMethodLinker` を束縛している（`StoryModule`、SQL では `WorkflowDbSession`）。このリンカーは、リンクを `#[Link]` に宣言した method で辿り、303・201 の Location を GET で辿る。
+
 ## 行の足し方
 
 1. `LinkStories::forGuests()`（ゲストが辿る）か `forAdmins()`（管理者が辿る）に行を足す。`followable()` はこの 2 つを合わせたもの。キーは、そのストーリーが示すことを書いた文にする。値は URI、終点の code、終点の path、終点の body の部分一致。
