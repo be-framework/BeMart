@@ -1,0 +1,60 @@
+resource_request get 'page://self/admin/delivery/delivery-list'
+├── uri: page://self/admin/delivery/delivery-list
+├── method: GET
+├── replayable: true
+├── becoming GetAdminDeliveryListInput
+│   ├── being_final AdminDeliveryListFetched inject=[adminSession, deliveries]
+│   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   ├── inject.deliveries: MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface<Null-1>
+│   │   └── close being_final_close
+│   │       ├── count: 2
+│   │       ├── deliveries[0].deliveryId: del-yamato
+│   │       ├── deliveries[0].deliveryName: ヤマト宅急便
+│   │       ├── deliveries[0].visible: true
+│   │       ├── deliveries[1].deliveryId: del-yupack
+│   │       ├── deliveries[1].deliveryName: ゆうパック
+│   │       └── deliveries[1].visible: true
+│   └── close becoming_close
+│       └── exit: success
+└── close resource_response
+    ├── code: 200
+    └── durationMs: [volatile]
+resource_request delete 'page://self/admin/delivery/delivery?deliveryId=del-yamato&csrfToken=%5BFILTERED%5D'
+├── uri: page://self/admin/delivery/delivery
+├── method: DELETE
+├── params.deliveryId: del-yamato
+├── params.csrfToken: [FILTERED]
+├── replayable: true
+├── becoming DeleteDeliveryInput
+│   ├── deliveryId: del-yamato
+│   ├── being_final DeliveryDeleted input=[deliveryId] inject=[adminSession, deliveries]
+│   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   ├── inject.deliveries: MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface<Null-1>
+│   │   └── close being_final_close
+│   │       └── deliveryId: del-yamato
+│   └── close becoming_close
+│       └── exit: success
+└── close resource_response
+    ├── code: 303
+    └── durationMs: [volatile]
+resource_request get 'page://self/admin/delivery/delivery-list'
+├── uri: page://self/admin/delivery/delivery-list
+├── method: GET
+├── replayable: true
+├── becoming GetAdminDeliveryListInput
+│   ├── being_final AdminDeliveryListFetched inject=[adminSession, deliveries]
+│   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   ├── inject.deliveries: MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface<Null-1>
+│   │   └── close being_final_close
+│   │       ├── count: 2
+│   │       ├── deliveries[0].deliveryId: del-yamato
+│   │       ├── deliveries[0].deliveryName: ヤマト宅急便
+│   │       ├── deliveries[0].visible: true
+│   │       ├── deliveries[1].deliveryId: del-yupack
+│   │       ├── deliveries[1].deliveryName: ゆうパック
+│   │       └── deliveries[1].visible: true
+│   └── close becoming_close
+│       └── exit: success
+└── close resource_response
+    ├── code: 200
+    └── durationMs: [volatile]

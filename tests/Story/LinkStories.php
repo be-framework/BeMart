@@ -53,6 +53,54 @@ final class LinkStories
                 '/admin/class-category/class-category-list',
                 [],
             ],
+            'deleted payment method returns to the list' => [
+                'page://self/admin/payment/payment?paymentId=pay-cod#link=self:doDeletePayment?' . self::form(['paymentId' => 'pay-cod']),
+                Code::OK,
+                '/admin/payment/payment-list',
+                [],
+            ],
+            'updated payment method is shown again' => [
+                'page://self/admin/payment/payment?paymentId=pay-cod#link=self:doUpdatePayment?' . self::form(['paymentId' => 'pay-cod', 'paymentMethodName' => 'Story Pay', 'charge' => '100']),
+                Code::OK,
+                '/admin/payment/payment',
+                ['paymentId' => 'pay-cod'],
+            ],
+            'deleted delivery leaves the list' => [
+                'page://self/admin/delivery/delivery-list#link=self:doDeleteDelivery?' . self::form(['deliveryId' => 'del-yamato']),
+                Code::OK,
+                '/admin/delivery/delivery-list',
+                [],
+            ],
+            'page is updated from the list' => [
+                'page://self/admin/page/page-list#link=self:doUpdatePage?' . self::form(['pageId' => 'pg-company', 'name' => 'Story Page']),
+                Code::OK,
+                '/admin/page/page',
+                [],
+            ],
+            'layout list opens a layout and updates it' => [
+                'page://self/admin/layout/layout-list#link=self:goLayout?layoutId=lo-pc-default,self:doUpdateLayout?' . self::form(['layoutId' => 'lo-pc-default', 'name' => 'Story Layout']),
+                Code::OK,
+                '/admin/layout/layout-list',
+                [],
+            ],
+            'guest adds a cart item and is sent to checkout as a non-member' => [
+                'page://self/cart#link=self:doAddCartItem?' . self::form(['productCode' => 'sample-001', 'quantity' => '1']) . ',self:goCheckoutEntry,self:goShoppingNonMember',
+                Code::OK,
+                '/shopping/non-member',
+                [],
+            ],
+            'a GET chain goes around the layout list and back' => [
+                'page://self/admin/layout/layout-list#link=self:goLayout?layoutId=lo-pc-default,self:goLayoutList,self:goLayout?layoutId=lo-pc-default',
+                Code::OK,
+                '/admin/layout/layout',
+                [],
+            ],
+            'unknown payment method stops the chain' => [
+                'page://self/admin/payment/payment-list#link=self:goPayment?paymentId=nope,self:doDeletePayment?' . self::form(['paymentId' => 'pay-cod']),
+                Code::NOT_FOUND,
+                '/admin/payment/payment',
+                [],
+            ],
         ];
     }
 
