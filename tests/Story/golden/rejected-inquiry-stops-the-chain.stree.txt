@@ -1,0 +1,44 @@
+resource_request get 'page://self/index'
+├── uri: page://self/index
+├── method: GET
+├── replayable: true
+└── close resource_response
+    ├── code: 200
+    └── durationMs: [volatile]
+resource_request get 'page://self/contact'
+├── uri: page://self/contact
+├── method: GET
+├── replayable: true
+└── close resource_response
+    ├── code: 200
+    └── durationMs: [volatile]
+resource_request post 'page://self/contact?contactEmail=not-an-email&mode=contact&contactName01=%E5%B1%B1%E7%94%B0&contactName02=%E5%A4%AA%E9%83%8E&contactContents=A+story+asks+a+question.&csrfToken=%5BFILTERED%5D' : Failed
+├── uri: page://self/contact
+├── method: POST
+├── params.contactEmail: not-an-email
+├── params.mode: contact
+├── params.contactName01: 山田
+├── params.contactName02: 太郎
+├── params.contactContents: A story asks a question.
+├── params.csrfToken: [FILTERED]
+├── replayable: true
+├── becoming SubmitContactInput : Failed
+│   ├── contactName01: 山田
+│   ├── contactName02: 太郎
+│   ├── contactEmail: not-an-email
+│   ├── contactContents: A story asks a question.
+│   └── close becoming_close
+│       ├── exit: error
+│       ├── error: Be\Framework\Exception\SemanticVariableException
+│       ├── message: 
+│       ├── origin: input
+│       ├── errors[0].variable: contactEmail
+│       ├── errors[0].error: MyVendor\BeMart\Be\Exception\EmailFormatException
+│       ├── errors[0].message: 
+│       ├── errors[0].file: /Users/akihito/git/BeMart-wt/link-pilot/be/src/Semantic/ContactEmail.php
+│       ├── errors[0].line: 19
+│       ├── file: /Users/akihito/git/BeMart-wt/link-pilot/be/src/Semantic/ContactEmail.php
+│       └── line: 19
+└── close resource_response
+    ├── code: 400
+    └── durationMs: [volatile]

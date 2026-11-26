@@ -1,0 +1,48 @@
+resource_request get 'page://self/index'
+├── uri: page://self/index
+├── method: GET
+├── replayable: true
+└── close resource_response
+    ├── code: 200
+    └── durationMs: [volatile]
+resource_request get 'page://self/contact'
+├── uri: page://self/contact
+├── method: GET
+├── replayable: true
+└── close resource_response
+    ├── code: 200
+    └── durationMs: [volatile]
+resource_request post 'page://self/contact?contactName01=%E5%B1%B1%E7%94%B0&contactName02=%E5%A4%AA%E9%83%8E&contactEmail=yamada%40example.com&contactContents=A+story+asks+a+question.&csrfToken=%5BFILTERED%5D'
+├── uri: page://self/contact
+├── method: POST
+├── params.contactName01: 山田
+├── params.contactName02: 太郎
+├── params.contactEmail: yamada@example.com
+├── params.contactContents: A story asks a question.
+├── params.csrfToken: [FILTERED]
+├── replayable: true
+├── becoming SubmitContactInput
+│   ├── contactName01: 山田
+│   ├── contactName02: 太郎
+│   ├── contactEmail: yamada@example.com
+│   ├── contactContents: A story asks a question.
+│   ├── being_final ContactSubmitted input=[contactName01, contactName02 +2 items] inject=[mailer]
+│   │   ├── inject.mailer: MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer
+│   │   └── close being_final_close
+│   │       ├── contactName01: 山田
+│   │       ├── contactName02: 太郎
+│   │       ├── contactEmail: yamada@example.com
+│   │       └── ticketId: <INQ-1>
+│   └── close becoming_close
+│       └── exit: success
+└── close resource_response
+    ├── code: 303
+    └── durationMs: [volatile]
+resource_request get 'page://self/contact/complete?ticketId=<INQ-1>'
+├── uri: page://self/contact/complete
+├── method: GET
+├── params.ticketId: <INQ-1>
+├── replayable: true
+└── close resource_response
+    ├── code: 200
+    └── durationMs: [volatile]
