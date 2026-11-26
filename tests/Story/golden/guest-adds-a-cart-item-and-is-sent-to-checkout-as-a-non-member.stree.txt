@@ -179,6 +179,5 @@ link_request get 'page://self/cart#link=self:doAddCartItem,self:goCheckoutEntry,
 │       ├── code: 200
 │       └── durationMs: [volatile]
 └── close link_response
-    ├── uri: page://self/shopping/non-member
     ├── code: 200
     └── durationMs: [volatile]

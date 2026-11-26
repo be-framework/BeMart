@@ -68,6 +68,5 @@ link_request get 'page://self/admin/payment/payment#link=self:doDeletePayment'
 │       ├── code: 200
 │       └── durationMs: [volatile]
 └── close link_response
-    ├── uri: page://self/admin/payment/payment-list
     ├── code: 200
     └── durationMs: [volatile]

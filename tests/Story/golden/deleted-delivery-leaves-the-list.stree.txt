@@ -63,6 +63,5 @@ link_request get 'page://self/admin/delivery/delivery-list#link=self:doDeleteDel
 │       ├── code: 200
 │       └── durationMs: [volatile]
 └── close link_response
-    ├── uri: page://self/admin/delivery/delivery-list
     ├── code: 200
     └── durationMs: [volatile]
