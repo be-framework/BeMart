@@ -54,28 +54,28 @@ final class AdminContentSideEffectResourceTest extends TestCase
     public function testClearCache(): void
     {
         $ro = $this->resource->put('page://self/admin/content/cache', []);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doClearCache', $ro->body['transitionId']);
     }
 
     public function testUpdateCss(): void
     {
         $ro = $this->resource->put('page://self/admin/content/css', ['css' => 'body{}']);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doUpdateContentCss', $ro->body['transitionId']);
     }
 
     public function testUpdateJs(): void
     {
         $ro = $this->resource->put('page://self/admin/content/js', ['js' => 'void 0']);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doUpdateContentJs', $ro->body['transitionId']);
     }
 
     public function testToggleMaintenance(): void
     {
         $ro = $this->resource->put('page://self/admin/content/maintenance', ['enabled' => true]);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doToggleMaintenance', $ro->body['transitionId']);
         $this->assertTrue($ro->body['isMaintenance']);
     }

@@ -57,7 +57,7 @@ final class ContactResourceTest extends TestCase
         // Post/Redirect/Get: a successful submit returns Code::OK + a
         // Location header to the completion page (the HTTP layer turns
         // that into a browser redirect).
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $ticketId = $ro->body['ticketId'];
         $this->assertIsString($ticketId);
         $this->assertNotSame('', $ticketId);

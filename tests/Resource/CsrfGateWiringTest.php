@@ -93,7 +93,7 @@ final class CsrfGateWiringTest extends TestCase
 
         $ro = $resource->post('page://self/login', self::LOGIN);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
     }
 
     public function testSafeVerbsAreNotGated(): void

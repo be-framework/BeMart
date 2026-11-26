@@ -73,11 +73,13 @@ class Maintenance extends ResourceObject
     #[SameOrigin]
     public function onPut(bool $enabled, string|null $mode = null): static
     {
+        unset($mode);
+
         $final = ($this->becoming)(new ToggleMaintenanceInput(enabled: $enabled));
 
         assert($final instanceof MaintenanceToggled);
 
-        $this->code = $mode === 'content_operation_form' ? Code::SEE_OTHER : Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/content/maintenance';
         $this->body = [
             'transitionId' => 'doToggleMaintenance',

@@ -193,7 +193,7 @@ class Product extends ResourceObject
 
         assert($final instanceof AdminProductUpdated);
 
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = sprintf('/admin/product?productCode=%s', urlencode($final->productCode));
         $this->body = [
             'productCode' => $final->productCode,

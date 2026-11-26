@@ -174,7 +174,7 @@ final class AdminCategoryResourceTest extends TestCase
             'categoryName' => 'Foods',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('Foods', $ro->body['categoryName']);
         $this->assertSame(10, $ro->body['sortNo']);
     }
@@ -200,7 +200,7 @@ final class AdminCategoryResourceTest extends TestCase
             'categoryId' => $id,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame($id, $ro->body['categoryId']);
     }
 
@@ -243,7 +243,7 @@ final class AdminCategoryResourceTest extends TestCase
             'csv' => "カテゴリID,カテゴリ名,親カテゴリID,カテゴリ削除フラグ\ncat-food,食品,,0\n",
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doImportCategoryCsv', $ro->body['transitionId']);
         $this->assertTrue($ro->body['accepted']);
         $this->assertSame(1, $ro->body['imported']);

@@ -65,7 +65,7 @@ final class AdminOrderStatusSettingsResourceTest extends TestCase
             'orderStatusRows' => '1:新規受付,3:注文取消し',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doUpdateOrderStatusList', $ro->body['transitionId']);
         $this->assertSame(2, $ro->body['count']);
         $this->assertSame('1:新規受付,3:注文取消し', $ro->body['orderStatusRows']);

@@ -103,7 +103,7 @@ final class HtmlSessionAdapterTest extends TestCase
             'password' => 'local-dev-member-password',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('10000000aaaa1111bbbb2222cccc3333', $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] ?? null);
     }
 
@@ -138,7 +138,7 @@ final class HtmlSessionAdapterTest extends TestCase
             'password' => 'local-dev-member-password',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame($sessionIdBeforeLogin, $cartPrefix);
         $this->assertNotSame($sessionIdBeforeLogin, session_id());
         $this->assertFalse($csrf->verify($anonymousToken));

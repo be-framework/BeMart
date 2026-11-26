@@ -70,7 +70,7 @@ final class FavoriteResourceTest extends TestCase
             'productCode' => 'sample-001',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertTrue($ro->body['alreadyExisted']);
     }
 
@@ -104,7 +104,7 @@ final class FavoriteResourceTest extends TestCase
             'productCode' => 'sample-001',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('sample-001', $ro->body['productCode']);
         $this->assertSame('favorite-html-customer', $ro->body['customerId']);
         $this->assertFalse($ro->body['alreadyAbsent']);
@@ -117,7 +117,7 @@ final class FavoriteResourceTest extends TestCase
             'productCode' => 'sample-001',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('sample-001', $ro->body['productCode']);
         $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
         $this->assertTrue($ro->body['alreadyAbsent']);

@@ -44,7 +44,7 @@ final class LoginResourceTest extends TestCase
             'password' => 'local-dev-member-password',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('login-test@example.com', $ro->body['email']);
         $this->assertSame('10000000aaaa1111bbbb2222cccc3333', $ro->body['customerId']);
         $this->assertSame('鈴木', $ro->body['name01']);

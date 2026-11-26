@@ -49,7 +49,7 @@ final class ResourceSchemaTest extends TestCase
         ];
         ResourceSchemas::loginPostInput()->assertMatches($loginInput);
         $login = $resource->post('page://self/login', $loginInput);
-        $this->assertSame(Code::OK, $login->code);
+        $this->assertSame(Code::SEE_OTHER, $login->code);
         ResourceSchemas::loginPostOk()->assertMatches($login->body);
 
         $adminResource = $this->resource(self::TEST_ADMIN_ID);

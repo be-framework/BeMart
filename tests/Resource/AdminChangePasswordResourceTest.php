@@ -69,7 +69,7 @@ final class AdminChangePasswordResourceTest extends TestCase
             'changePasswordSecond' => 'new-strong-password-2026',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doChangePassword', $ro->body['transitionId']);
         $this->assertSame('test-admin', $ro->body['loginId']);
         $this->assertArrayHasKey('Location', $ro->headers);

@@ -146,7 +146,7 @@ final class AdminClassCategoryResourceTest extends TestCase
             'classCategoryName' => 'Crimson',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('Crimson', $ro->body['name']);
     }
 
@@ -169,7 +169,7 @@ final class AdminClassCategoryResourceTest extends TestCase
             'classCategoryId' => $id,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame($id, $ro->body['classCategoryId']);
     }
 

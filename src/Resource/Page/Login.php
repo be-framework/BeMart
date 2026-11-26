@@ -159,15 +159,7 @@ class Login extends ResourceObject
             'name02' => $final->name02,
             'customerStatus' => $final->customerStatus,
         ];
-        if ($browserForm) {
-            // Post/Redirect/Get: EC-CUBE's browser login redirects to My Page.
-            // JSON/Resource clients keep the success body below with 200 OK.
-            $this->code = Code::SEE_OTHER;
-
-            return $this;
-        }
-
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
 
         return $this;
     }

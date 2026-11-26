@@ -75,7 +75,7 @@ final class AdminLayoutResourceTest extends TestCase
             'layoutId' => 'lo-pc-default',
             'layoutName' => 'PC Refreshed',
         ]);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('PC Refreshed', $ro->body['layoutName']);
     }
 

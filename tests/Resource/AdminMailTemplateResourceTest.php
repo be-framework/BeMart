@@ -62,7 +62,7 @@ final class AdminMailTemplateResourceTest extends TestCase
             'mailSubject' => '【更新】ご注文ありがとうございます',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('【更新】ご注文ありがとうございます', $ro->body['mailSubject']);
         $this->assertTrue($ro->body['changed']);
         // fileName and mailTemplateName are preserved from the seed.
@@ -83,7 +83,7 @@ final class AdminMailTemplateResourceTest extends TestCase
             'mailSubject' => $seed->subject,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertFalse($ro->body['changed']);
     }
 
@@ -125,7 +125,7 @@ final class AdminMailTemplateResourceTest extends TestCase
             'mailTemplateId' => 1,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doDeleteMailTemplate', $ro->body['transitionId']);
         $this->assertSame(1, $ro->body['mailTemplateId']);
         $this->assertSame('Mail/order.twig', $ro->body['fileName']);

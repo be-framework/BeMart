@@ -71,7 +71,7 @@ final class AdminUpdateCustomerResourceTest extends TestCase
             'phoneNumber' => '0312345678',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('更新', $ro->body['name01']);
         $this->assertSame('花子', $ro->body['name02']);
         $this->assertSame(self::ALICE_ID, $ro->body['customerId']);

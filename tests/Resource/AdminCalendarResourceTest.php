@@ -82,7 +82,7 @@ final class AdminCalendarResourceTest extends TestCase
             'holiday' => '2026-01-01',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doUpdateCalendar', $ro->body['transitionId']);
         $this->assertSame('元日', $ro->body['title']);
     }
@@ -109,7 +109,7 @@ final class AdminCalendarResourceTest extends TestCase
             'calendarId' => 1,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doDeleteCalendarHoliday', $ro->body['transitionId']);
         $this->assertSame('1', $ro->body['calendarId']);
     }

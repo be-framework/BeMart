@@ -91,7 +91,7 @@ final class AdminTwoFactorAuthSetResourceTest extends TestCase
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doSetTwoFactorAuth', $ro->body['transitionId']);
         $this->assertSame(self::LOGIN_ID, $ro->body['loginId']);
         $this->assertSame(self::SERVER_SECRET, $this->twoFactorAuth->secrets[self::LOGIN_ID]);
@@ -109,7 +109,7 @@ final class AdminTwoFactorAuthSetResourceTest extends TestCase
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame(self::LOGIN_ID, $ro->body['loginId']);
         $this->assertSame(self::SERVER_SECRET, $this->twoFactorAuth->secrets[self::LOGIN_ID]);
         $this->assertSame(FakeTwoFactorAuth::FIXED_SECRET, $this->twoFactorAuth->secrets['test-admin']);

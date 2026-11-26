@@ -108,7 +108,7 @@ final class AdminClassNameResourceTest extends TestCase
             'classNameLabel' => 'Colour',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('Colour', $ro->body['name']);
     }
 
@@ -130,7 +130,7 @@ final class AdminClassNameResourceTest extends TestCase
             'classNameId' => $id,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame($id, $ro->body['classNameId']);
     }
 

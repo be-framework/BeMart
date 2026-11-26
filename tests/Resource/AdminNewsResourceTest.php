@@ -117,7 +117,7 @@ final class AdminNewsResourceTest extends TestCase
             'newsId' => $id,
             'newsTitle' => 'New',
         ]);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('New', $ro->body['newsTitle']);
     }
 
@@ -127,7 +127,7 @@ final class AdminNewsResourceTest extends TestCase
         $ro = $this->resource->delete('page://self/admin/news/news', [
             'newsId' => $id,
         ]);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
     }
 
     public function testDeleteUnknownReturns404(): void

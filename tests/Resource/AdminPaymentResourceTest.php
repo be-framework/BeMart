@@ -132,7 +132,7 @@ final class AdminPaymentResourceTest extends TestCase
             'charge' => 200,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('クレジット', $ro->body['paymentMethodName']);
         $this->assertSame(200, $ro->body['charge']);
     }
@@ -169,7 +169,7 @@ final class AdminPaymentResourceTest extends TestCase
             'paymentId' => $id,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame($id, $ro->body['paymentId']);
     }
 

@@ -154,6 +154,7 @@ class TradeLaw extends ResourceObject
         string|null $trade_law_6_displayOrderScreen = null,
     ): static {
         unset(
+            $mode,
             $trade_law_1_displayOrderScreen,
             $trade_law_2_displayOrderScreen,
             $trade_law_3_displayOrderScreen,
@@ -174,7 +175,7 @@ class TradeLaw extends ResourceObject
 
         assert($final instanceof TradeLawUpdated);
 
-        $this->code = $mode === 'trade_law_form' ? Code::SEE_OTHER : Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/trade-law';
         $this->body = [
             'tradeLawBody' => $final->tradeLawBody,

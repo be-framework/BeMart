@@ -99,7 +99,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $selected->code);
+        $this->assertSame(Code::SEE_OTHER, $selected->code);
         $this->assertSame($templateId, $this->bodyValue($selected, 'templateId'));
 
         $list = $this->followLocation($selected);

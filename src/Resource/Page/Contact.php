@@ -135,13 +135,9 @@ class Contact extends ResourceObject
 
         assert($final instanceof ContactSubmitted);
 
-        // Post/Redirect/Get: a successful submit redirects to the
-        // completion page. The resource returns `Code::OK` + a `Location`
-        // header (mirrors Admin\Login::onPost) — the HTTP layer turns
-        // that into a browser redirect, while JSON clients still read the
-        // projected body. Rendering Contact.html.twig against this body
-        // is never attempted: the redirect supersedes it.
-        $this->code = Code::OK;
+        // Post/Redirect/Get: a successful submit answers 303 with the completion page in Location.
+        // JSON clients still read the projected body.
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/contact/complete?ticketId=' . rawurlencode($final->ticketId);
         $this->body = [
             'contactName01' => $final->contactName01,

@@ -136,7 +136,7 @@ final class AdminCustomerDeliveryEditResourceTest extends TestCase
             'phoneNumber' => '0312345678',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame(self::SEEDED_ADDRESS_ID, $ro->body['addressId']);
         $this->assertSame(self::SEEDED_CUSTOMER_ID, $ro->body['customerId']);
         $this->assertSame('改名', $ro->body['name01']);
@@ -190,7 +190,7 @@ final class AdminCustomerDeliveryEditResourceTest extends TestCase
             'addressId' => self::SEEDED_ADDRESS_ID,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame(self::SEEDED_ADDRESS_ID, $ro->body['addressId']);
         $this->assertSame(self::SEEDED_CUSTOMER_ID, $ro->body['customerId']);
     }

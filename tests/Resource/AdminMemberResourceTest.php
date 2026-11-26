@@ -139,7 +139,7 @@ final class AdminMemberResourceTest extends TestCase
             'name' => '新店舗オーナー',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('新店舗オーナー', $ro->body['name']);
         $this->assertArrayNotHasKey('mailAddress', $ro->body);
     }
@@ -160,7 +160,7 @@ final class AdminMemberResourceTest extends TestCase
             'loginId' => 'shop-owner',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('shop-owner', $ro->body['loginId']);
         $this->assertFalse($ro->body['alreadyDeleted']);
         $this->assertStringContainsString('削除', $ro->body['message']);
@@ -185,7 +185,7 @@ final class AdminMemberResourceTest extends TestCase
             'loginId' => self::DELETED_LOGIN_ID,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertTrue($ro->body['alreadyDeleted']);
         $this->assertStringContainsString('既に削除', $ro->body['message']);
     }

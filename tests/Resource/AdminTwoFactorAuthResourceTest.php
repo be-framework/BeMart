@@ -89,7 +89,7 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doVerifyTwoFactorAuth', $ro->body['transitionId']);
         $this->assertSame(self::LOGIN_ID, $ro->body['loginId']);
         $this->assertArrayHasKey('Location', $ro->headers);
@@ -106,7 +106,7 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
             'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame(self::LOGIN_ID, $ro->body['loginId']);
     }
 

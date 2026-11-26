@@ -61,7 +61,7 @@ final class AdminTradeLawResourceTest extends TestCase
             'tradeLawBody' => "販売業者: 新会社\n所在地: 東京都\n連絡先: 03-1234-5678",
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertStringContainsString('新会社', $ro->body['tradeLawBody']);
         $this->assertTrue($ro->body['changed']);
 
@@ -76,7 +76,7 @@ final class AdminTradeLawResourceTest extends TestCase
             'tradeLawBody' => $current->body,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertFalse($ro->body['changed']);
     }
 

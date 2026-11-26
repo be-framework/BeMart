@@ -138,7 +138,7 @@ final class AdminProductResourceTest extends TestCase
             'productName' => '更新後',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('更新後', $ro->body['productName']);
         // Price is unchanged.
         $this->assertSame(3500, $ro->body['price02']);
@@ -174,7 +174,7 @@ final class AdminProductResourceTest extends TestCase
             'productCode' => 'admin-active-001',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('admin-active-001', $ro->body['productCode']);
         $this->assertFalse($ro->body['alreadyDeleted']);
     }
@@ -200,7 +200,7 @@ final class AdminProductResourceTest extends TestCase
             'productCode' => 'admin-withdrawn-001',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertTrue($ro->body['alreadyDeleted']);
     }
 

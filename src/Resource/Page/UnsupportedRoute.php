@@ -32,7 +32,7 @@ class UnsupportedRoute extends ResourceObject
     #[SameOrigin]
     public function onPost(string $routeName = '', string|null $returnTo = null): static
     {
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = $this->safeReturnTo($returnTo);
         $this->body = [
             'routeName' => $routeName,

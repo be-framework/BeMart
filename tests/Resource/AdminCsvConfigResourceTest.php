@@ -88,7 +88,7 @@ final class AdminCsvConfigResourceTest extends TestCase
             ],
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame(1, $ro->body['csvType']);
         $this->assertSame(3, $ro->body['count']);
 
@@ -107,7 +107,7 @@ final class AdminCsvConfigResourceTest extends TestCase
                 ['columnName' => 'total', 'enabled' => true, 'sortNo' => 2],
             ],
         ]);
-        $this->assertSame(Code::OK, $first->code);
+        $this->assertSame(Code::SEE_OTHER, $first->code);
         $this->assertSame(2, $first->body['count']);
 
         $second = $this->resource->post('page://self/admin/csv-config', [
@@ -116,7 +116,7 @@ final class AdminCsvConfigResourceTest extends TestCase
                 ['columnName' => 'orderDate', 'enabled' => true, 'sortNo' => 1],
             ],
         ]);
-        $this->assertSame(Code::OK, $second->code);
+        $this->assertSame(Code::SEE_OTHER, $second->code);
         $this->assertSame(1, $second->body['count']);
     }
 
