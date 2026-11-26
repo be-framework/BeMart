@@ -26,6 +26,7 @@ use function json_encode;
 use function preg_replace;
 use function preg_replace_callback;
 use function sprintf;
+use function str_replace;
 use function strtolower;
 use function trim;
 
@@ -36,10 +37,10 @@ use function trim;
  */
 final class LinkStoryTest extends TestCase
 {
-    /** Values made anew on each run, written as one numbered placeholder per distinct value. */
+    /** Values made anew on each run or checkout, written as one numbered placeholder per distinct value. */
     private const array VOLATILE = [
         '/INQ-[0-9a-f]+\.[0-9]+/' => 'INQ', // inquiry ticket ids
-        '/(?<=Interface[0-9a-f]{8})Null\d+/' => 'Null', // classes Ray.MediaQuery generates for null query ports
+        '/(?<=Interface)[0-9a-f]{8}Null\d+/' => 'Null', // classes Ray.MediaQuery generates for null query ports
     ];
 
     private ResourceInterface $resource;
@@ -113,6 +114,7 @@ final class LinkStoryTest extends TestCase
 
     private function stabilize(string $tree): string
     {
+        $tree = str_replace(dirname(__DIR__, 2), '<root>', $tree);
         foreach (self::VOLATILE as $pattern => $name) {
             $seen = [];
             $tree = (string) preg_replace_callback($pattern, static function (array $match) use (&$seen, $name): string {

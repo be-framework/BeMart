@@ -7,7 +7,7 @@ resource_request get 'page://self/admin/product?productCode=admin-active-001'
 │   ├── productCode: admin-active-001
 │   ├── being_final AdminProductFetched input=[productCode] inject=[adminSession, productQuery]
 │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface49c79d96<Null-1>
+│   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
 │   │   └── close being_final_close
 │   │       ├── productCode: admin-active-001
 │   │       ├── productName: 管理画面用 商品A
@@ -41,8 +41,8 @@ resource_request put 'page://self/admin/product?productCode=admin-active-001&pro
 │   ├── price02: 1500
 │   ├── being_final AdminProductUpdated input=[productCode, productName, price02, stock +4 items] inject=[adminSession, productQuery +2 items]
 │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface49c79d96<Null-1>
-│   │   ├── inject.productCommand: MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface49c79d96<Null-2>
+│   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   ├── inject.productCommand: MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface<Null-2>
 │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
 │   │   └── close being_final_close
 │   │       ├── productCode: admin-active-001
@@ -65,7 +65,7 @@ resource_request get 'page://self/admin/product?productCode=admin-active-001'
 │   ├── productCode: admin-active-001
 │   ├── being_final AdminProductFetched input=[productCode] inject=[adminSession, productQuery]
 │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface49c79d96<Null-1>
+│   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
 │   │   └── close being_final_close
 │   │       ├── productCode: admin-active-001
 │   │       ├── productName: 管理画面用 商品A
