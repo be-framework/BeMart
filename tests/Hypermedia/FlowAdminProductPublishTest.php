@@ -112,7 +112,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame(self::$productCode, $this->bodyValue($updated, 'productCode'));
         $this->assertSame(self::$updatedProductName, $this->bodyValue($updated, 'productName'));
 
@@ -174,7 +174,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame([self::$copiedProductCode], $this->bodyValue($updated, 'productCodes'));
         $this->assertSame(2, $this->bodyValue($updated, 'productStatus'));
         $this->assertSame(1, $this->bodyValue($updated, 'requestedCount'));
@@ -205,7 +205,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame(self::$copiedProductCode, $this->bodyValue($deleted, 'productCode'));
         $this->assertFalse($this->bodyValue($deleted, 'alreadyDeleted'));
 

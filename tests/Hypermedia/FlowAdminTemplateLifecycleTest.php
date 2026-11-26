@@ -78,7 +78,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $installed->code);
+        $this->assertSame(Code::SEE_OTHER, $installed->code);
         $templateId = $this->bodyValue($installed, 'templateId');
         $this->assertIsString($templateId);
         $this->assertSame('template-upload.zip', $this->bodyValue($installed, 'archiveName'));
@@ -138,7 +138,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame($templateId, $this->bodyValue($deleted, 'templateId'));
 
         return $deleted;

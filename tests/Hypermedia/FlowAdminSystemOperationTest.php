@@ -94,7 +94,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $loggedIn->code);
+        $this->assertSame(Code::SEE_OTHER, $loggedIn->code);
         $this->assertSame(self::$adminLoginId, $this->bodyValue($loggedIn, 'loginId'));
         assert(self::$dbSession instanceof WorkflowDbSession);
         self::$dbSession->session()->setAdminId((string) $this->bodyValue($loggedIn, 'adminId'));
@@ -151,7 +151,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame(self::$memberLoginId, $this->bodyValue($updated, 'loginId'));
 
         return $updated;
@@ -185,7 +185,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame(self::$memberLoginId, $this->bodyValue($deleted, 'loginId'));
         $this->assertFalse((bool) $this->bodyValue($deleted, 'alreadyDeleted'));
 
@@ -231,7 +231,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame('doUpdateSecurity', $this->bodyValue($updated, 'transitionId'));
 
         return $updated;
@@ -260,7 +260,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $configured->code);
+        $this->assertSame(Code::SEE_OTHER, $configured->code);
         $this->assertSame('doSetTwoFactorAuth', $this->bodyValue($configured, 'transitionId'));
         $this->assertSame(self::$adminLoginId, $this->bodyValue($configured, 'loginId'));
 
@@ -287,7 +287,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $verified->code);
+        $this->assertSame(Code::SEE_OTHER, $verified->code);
         $this->assertSame('doVerifyTwoFactorAuth', $this->bodyValue($verified, 'transitionId'));
         $this->assertSame(self::$adminLoginId, $this->bodyValue($verified, 'loginId'));
 
@@ -309,7 +309,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $cleared->code);
+        $this->assertSame(Code::SEE_OTHER, $cleared->code);
         $this->assertSame('doClearCache', $this->bodyValue($cleared, 'transitionId'));
 
         return $cleared;
@@ -331,7 +331,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $toggled->code);
+        $this->assertSame(Code::SEE_OTHER, $toggled->code);
         $this->assertSame('doToggleMaintenance', $this->bodyValue($toggled, 'transitionId'));
 
         return $toggled;

@@ -102,7 +102,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame($newsId, $this->bodyValue($updated, 'newsId'));
         $this->assertSame('Workflow News Updated ' . self::$suffix, $this->bodyValue($updated, 'newsTitle'));
 
@@ -127,7 +127,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame($newsId, $this->bodyValue($deleted, 'newsId'));
 
         $readbackList = $this->follow($deleted, 'goNewsList');
@@ -179,7 +179,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame($pageId, $this->bodyValue($updated, 'pageId'));
         $this->assertSame('Workflow Page Updated ' . self::$suffix, $this->bodyValue($updated, 'pageName'));
 
@@ -204,7 +204,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame($pageId, $this->bodyValue($deleted, 'pageId'));
 
         $readbackList = $this->follow($deleted, 'goPageList');
@@ -264,7 +264,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame($blockId, $this->bodyValue($updated, 'blockId'));
         $this->assertSame('Workflow Block Updated ' . self::$suffix, $this->bodyValue($updated, 'blockName'));
 
@@ -287,7 +287,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame($blockId, $this->bodyValue($deleted, 'blockId'));
 
         return $deleted;
@@ -331,7 +331,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame($layoutId, $this->bodyValue($updated, 'layoutId'));
         $this->assertSame('Workflow Layout ' . self::$suffix, $this->bodyValue($updated, 'layoutName'));
 
@@ -354,7 +354,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertStringContainsString('Workflow Company', (string) $this->bodyValue($updated, 'tradeLawBody'));
 
         return $updated;
@@ -376,7 +376,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame('doUpdateContentCss', $this->bodyValue($updated, 'transitionId'));
 
         return $updated;
@@ -398,7 +398,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame('doUpdateContentJs', $this->bodyValue($updated, 'transitionId'));
     }
 }

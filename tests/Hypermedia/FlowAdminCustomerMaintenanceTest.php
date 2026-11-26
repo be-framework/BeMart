@@ -112,7 +112,7 @@ class FlowAdminCustomerMaintenanceTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame(self::$customerId, $this->bodyValue($updated, 'customerId'));
         $this->assertSame('更新', $this->bodyValue($updated, 'name01'));
 
@@ -168,7 +168,7 @@ class FlowAdminCustomerMaintenanceTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame(self::$addressId, $this->bodyValue($updated, 'addressId'));
         $this->assertSame('更新先', $this->bodyValue($updated, 'name01'));
 
@@ -189,7 +189,7 @@ class FlowAdminCustomerMaintenanceTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame(self::$addressId, $this->bodyValue($deleted, 'addressId'));
 
         return $deleted;
@@ -216,7 +216,7 @@ class FlowAdminCustomerMaintenanceTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame(self::$customerId, $this->bodyValue($deleted, 'customerId'));
         $this->assertSame(self::$email, $this->bodyValue($deleted, 'originalEmail'));
         $this->assertFalse($this->bodyValue($deleted, 'alreadyDeleted'));

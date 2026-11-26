@@ -161,7 +161,7 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame(self::$updatedProductName, $this->bodyValue($updated, 'productName'));
 
         return $updated;
@@ -469,7 +469,7 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $imported->code);
+        $this->assertSame(Code::SEE_OTHER, $imported->code);
         $this->assertSame('doImportShippingCsv', $this->bodyValue($imported, 'transitionId'));
         $this->assertSame(1, $this->bodyValue($imported, 'imported'));
         $this->assertSame(0, $this->bodyValue($imported, 'skipped'));

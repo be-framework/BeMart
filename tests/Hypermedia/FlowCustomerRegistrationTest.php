@@ -116,7 +116,7 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $loggedIn->code);
+        $this->assertSame(Code::SEE_OTHER, $loggedIn->code);
         $this->assertSame(self::$email, $this->bodyValue($loggedIn, 'email'));
 
         assert(self::$dbSession instanceof WorkflowDbSession);

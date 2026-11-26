@@ -139,7 +139,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame($paymentId, $this->bodyValue($updated, 'paymentId'));
         $this->assertSame(self::$paymentName . ' Updated', $this->bodyValue($updated, 'paymentMethodName'));
 
@@ -177,7 +177,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame($paymentId, $this->bodyValue($deleted, 'paymentId'));
 
         return $deleted;
@@ -236,7 +236,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame($deliveryId, $this->bodyValue($updated, 'deliveryId'));
         $this->assertSame(self::$deliveryName . ' Updated', $this->bodyValue($updated, 'deliveryName'));
 
@@ -256,7 +256,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame($deliveryId, $this->bodyValue($deleted, 'deliveryId'));
 
         return $deleted;
@@ -314,7 +314,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame($taxRuleId, $this->bodyValue($deleted, 'taxRuleId'));
 
         return $deleted;
@@ -375,7 +375,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame('doUpdateCalendar', $this->bodyValue($updated, 'transitionId'));
         $this->assertSame($calendarId, $this->bodyValue($updated, 'calendarId'));
 
@@ -410,7 +410,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame('doDeleteCalendarHoliday', $this->bodyValue($deleted, 'transitionId'));
 
         return $deleted;

@@ -96,7 +96,7 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame('Workflow mail template subject', $this->bodyValue($updated, 'mailSubject'));
 
         return $updated;
@@ -144,7 +144,7 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
             'note' => 'Updated through admin hypermedia before storefront checkout.',
             'csrfToken' => self::CSRF_TOKEN,
         ]);
-        $this->assertSame(Code::OK, $publishedProduct->code);
+        $this->assertSame(Code::SEE_OTHER, $publishedProduct->code);
 
         $storefrontList = $this->follow($publishedProduct, 'goProductList', ['nameKeyword' => self::$updatedProductName]);
         $this->assertSame(1, $this->bodyValue($storefrontList, 'totalItemCount'));
@@ -244,7 +244,7 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(Code::SEE_OTHER, $deleted->code);
         $this->assertSame('doDeleteMailTemplate', $this->bodyValue($deleted, 'transitionId'));
 
         return $deleted;
