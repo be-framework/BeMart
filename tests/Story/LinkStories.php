@@ -81,6 +81,12 @@ final class LinkStories
                 '/admin/class-category/class-category-list',
                 [],
             ],
+            'a new link puts the category list beside the class names' => [
+                'page://self/admin/class-name/class-name-list#link=new:goClassCategoryList?classNameId=cn-color',
+                Code::OK,
+                '/admin/class-name/class-name-list',
+                [],
+            ],
             'deleted payment method returns to the list' => [
                 'page://self/admin/payment/payment?paymentId=pay-cod#link=self:doDeletePayment?' . self::form(['paymentId' => 'pay-cod']),
                 Code::OK,
