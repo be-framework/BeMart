@@ -276,7 +276,7 @@ final class ResourceSmokeTest extends TestCase
             'POST page://self/admin/order-status?orderNo=past0000000000000000000000000001&orderStatus=3' => Code::OK,
             'POST page://self/admin/order/bulk-delete?orderNos%5B0%5D=past0000000000000000000000000001' => Code::SEE_OTHER,
             'POST page://self/admin/order/create?customerId=0123456789abcdef0123456789abcdef&paymentMethodId=1&orderItems%5B0%5D%5BproductCode%5D=sample-001&orderItems%5B0%5D%5BproductName%5D=%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E5%95%86%E5%93%81%20A&orderItems%5B0%5D%5BunitPrice%5D=1200&orderItems%5B0%5D%5Bquantity%5D=1' => Code::CREATED,
-            'POST page://self/admin/order/import-shipping?csv=%E5%8F%97%E6%B3%A8%E7%95%AA%E5%8F%B7%2C%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B%E7%95%AA%E5%8F%B7%0Apast0000000000000000000000000001%2CTRACK123456789%0A' => Code::SEE_OTHER,
+            'POST page://self/admin/order/import-shipping?csv=%E5%8F%97%E6%B3%A8%E7%95%AA%E5%8F%B7%2C%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B%E7%95%AA%E5%8F%B7%0Apast0000000000000000000000000001%2CTRACK123456789%0A' => Code::OK,
             'POST page://self/admin/order/send-mail?orderNo=past0000000000000000000000000001' => Code::OK,
             'POST page://self/admin/product/product-class?productCode=admin-active-001&stock=10' => Code::CREATED,
             'POST page://self/admin/order/shipping-address?orderNo=past0000000000000000000000000001&addressId=addr00000000000000000000000000a1' => Code::NOT_FOUND,

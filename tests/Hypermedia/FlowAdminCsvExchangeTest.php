@@ -149,7 +149,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::SEE_OTHER, $imported->code);
+        $this->assertSame(Code::OK, $imported->code);
         $this->assertSame('doImportShippingCsv', $this->bodyValue($imported, 'transitionId'));
 
         return $imported;
