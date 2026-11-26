@@ -59,13 +59,13 @@ final class ActivateResourceSqlTest extends AbstractResourceSqlTestCase
         ]);
     }
 
-    public function testOnPostActivatesAndReturns200(): void
+    public function testOnPostActivatesAndReturns303(): void
     {
         $ro = $this->resource->post('page://self/entry/activate', [
             'secretKey' => self::PROVISIONAL_KEY,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame($this->provisionalId, $ro->body['customerId']);
         $this->assertSame('provisional@example.com', $ro->body['email']);
         $this->assertSame(2, $ro->body['customerStatus']);

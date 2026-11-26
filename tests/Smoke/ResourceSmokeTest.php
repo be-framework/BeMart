@@ -107,7 +107,7 @@ final class ResourceSmokeTest extends TestCase
             'DELETE page://self/admin/customer-delivery-edit?customerId=0123456789abcdef0123456789abcdef&addressId=addr00000000000000000000000000a1' => Code::SEE_OTHER,
             'DELETE page://self/admin/delivery/delivery?deliveryId=del-yamato' => Code::SEE_OTHER,
             'DELETE page://self/admin/mail-template?mailTemplateId=1' => Code::SEE_OTHER,
-            'DELETE page://self/admin/member?loginId=shop-owner' => Code::SEE_OTHER,
+            'DELETE page://self/admin/member?loginId=shop-owner' => Code::OK,
             'DELETE page://self/admin/news/news?newsId=nw-welcome' => Code::SEE_OTHER,
             'DELETE page://self/admin/page/page?pageId=pg-company' => Code::SEE_OTHER,
             'DELETE page://self/admin/payment/payment?paymentId=pay-cod' => Code::SEE_OTHER,

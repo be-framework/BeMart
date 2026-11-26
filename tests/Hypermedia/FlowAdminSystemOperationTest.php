@@ -185,7 +185,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::SEE_OTHER, $deleted->code);
+        $this->assertSame(Code::OK, $deleted->code);
         $this->assertSame(self::$memberLoginId, $this->bodyValue($deleted, 'loginId'));
         $this->assertFalse((bool) $this->bodyValue($deleted, 'alreadyDeleted'));
 

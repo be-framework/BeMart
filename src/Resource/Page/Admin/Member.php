@@ -413,7 +413,7 @@ class Member extends ResourceObject
         assert($final instanceof MemberDeleted);
 
         $browserForm = $mode === 'member_form';
-        $this->code = Code::SEE_OTHER;
+        $this->code = $browserForm ? Code::SEE_OTHER : Code::OK;
         if ($browserForm) {
             $this->headers['Location'] = '/admin/member-list';
         }
