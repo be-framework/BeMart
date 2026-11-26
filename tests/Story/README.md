@@ -10,7 +10,7 @@
 2. `UPDATE_GOLDEN=1 vendor/bin/phpunit tests/Story` でツリーを記録する。
 3. 新しい golden を読み、辿った順と各ステップの code が意図どおりかを確かめてから commit する。golden がないと失敗する。
 
-辿れないことを示すストーリーは `unfollowable()`（URI と例外）に、最初のリクエストでファイルを送るストーリーは `uploads()` に書く。
+辿れないことを示すストーリーは `unfollowable()`（URI と例外）に、最初のリクエストでファイルを送るストーリーは `uploads()` に書く。作ったものを読み戻すストーリー（201 の Location など）は Fake では保存されないので `persisted()` に書き、`PersistedLinkStoryTest` が SQL の context で流す（tests/Hypermedia と同じ MySQL が要る。DB が付ける ID が毎回変わるので、ツリーは照合しない）。
 
 ## 書けないとき
 

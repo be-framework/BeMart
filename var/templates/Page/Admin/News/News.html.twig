@@ -62,6 +62,7 @@
 <form
   id="news_form"
   role="form"
+  rel="{{ isEdit ? 'doUpdateNews' : 'doCreateNews' }}"
   method="post"
   action="{{ isEdit ? '/admin/news/news?newsId=' ~ newsId|url_encode ~ '&_method=put' : '/admin/news/news-list' }}"
   novalidate
@@ -193,6 +194,7 @@
 <form
   id="news-delete-form"
   method="post"
+  rel="doDeleteNews"
   action="/admin/news/news?newsId={{ newsId|url_encode }}&_method=delete"
   aria-hidden="true"
 >

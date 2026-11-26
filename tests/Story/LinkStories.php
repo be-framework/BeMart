@@ -90,6 +90,35 @@ final class LinkStories
         ];
     }
 
+    /**
+     * Stories that read back what they wrote, so they need the SQL context. Same row shape as followable().
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    public static function persisted(): array
+    {
+        $created = 'page://self/admin/news/news-list#link=self:doCreateNews?' . self::form([
+            'newsTitle' => 'Story News',
+            'publishDate' => '2027-03-01 00:00:00',
+            'newsDescription' => 'Created by a story.',
+            'newsUrl' => 'https://example.com/story-news',
+            'linkMethod' => '0',
+        ]);
+        $updated = $created . ',self:doUpdateNews?' . self::form([
+            'newsTitle' => 'Story News Updated',
+            'publishDate' => '2027-03-02 00:00:00',
+            'newsDescription' => 'Updated by a story.',
+            'newsUrl' => 'https://example.com/story-news-updated',
+            'linkMethod' => '0',
+        ]);
+
+        return [
+            'created news is shown at its location' => [$created, Code::OK, '/admin/news/news', ['newsTitle' => 'Story News']],
+            'news id fills the href template of the next link' => [$updated, Code::OK, '/admin/news/news', ['newsTitle' => 'Story News Updated']],
+            'deleted news leaves the list' => [$updated . ',self:doDeleteNews?' . self::form([]), Code::OK, '/admin/news/news-list', []],
+        ];
+    }
+
     /** @return array<string, string> */
     private static function inquiry(): array
     {
