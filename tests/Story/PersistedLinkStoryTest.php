@@ -7,16 +7,13 @@ namespace MyVendor\BeMart\Tests\Story;
 use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\DataProviderExternal;
-use PHPUnit\Framework\TestCase;
-
-use function is_array;
 
 /**
  * Follows the stories that read back what they wrote, on the SQL context inside a rolled-back transaction.
  *
  * Needs the MySQL that tests/Hypermedia uses; the tree is not compared, as the ids the database assigns change per run.
  */
-final class PersistedLinkStoryTest extends TestCase
+final class PersistedLinkStoryTest extends AbstractLinkStoryCase
 {
     private WorkflowDbSession|null $db = null;
 
@@ -36,13 +33,6 @@ final class PersistedLinkStoryTest extends TestCase
     public function testFollows(string $uri, int $code, string $path, array $body): void
     {
         $this->assertNotNull($this->db);
-        $ro = $this->db->resource()->get($uri);
-
-        $this->assertSame($code, $ro->code);
-        $this->assertSame($path, $ro->uri->path);
-        $this->assertTrue(is_array($ro->body));
-        foreach ($body as $key => $value) {
-            $this->assertSame($value, $ro->body[$key] ?? null, $key);
-        }
+        $this->assertEnd($this->db->resource()->get($uri), $code, $path, $body);
     }
 }

@@ -6,7 +6,6 @@ namespace MyVendor\BeMart\Tests\Story;
 
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
-use BEAR\Resource\ResourceObject;
 use Koriym\FileUpload\FileUpload;
 use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\Stree\FormatterRegistry;
@@ -14,7 +13,6 @@ use Koriym\SemanticLogger\Stree\RenderConfig;
 use Koriym\SemanticLogger\Stree\TreeRenderer;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\Attributes\DataProviderExternal;
-use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
 use function count;
@@ -35,7 +33,7 @@ use function trim;
  *
  * `UPDATE_GOLDEN=1 vendor/bin/phpunit tests/Story` records the trees; read their diff before committing.
  */
-final class LinkStoryTest extends TestCase
+final class LinkStoryTest extends AbstractLinkStoryCase
 {
     /** Values made anew on each run or checkout, written as one numbered placeholder per distinct value. */
     private const array VOLATILE = [
@@ -75,17 +73,6 @@ final class LinkStoryTest extends TestCase
     public function testUploads(string $uri, array $query, string $file, int $code, string $path): void
     {
         $this->assertEnd($this->resource->post($uri, $query + ['file' => FileUpload::fromFile($file)]), $code, $path, []);
-    }
-
-    /** @param array<string, mixed> $body */
-    private function assertEnd(ResourceObject $ro, int $code, string $path, array $body): void
-    {
-        $this->assertSame($code, $ro->code);
-        $this->assertSame($path, $ro->uri->path);
-        $this->assertIsArray($ro->body);
-        foreach ($body as $key => $value) {
-            $this->assertSame($value, $ro->body[$key] ?? null, $key);
-        }
     }
 
     private function assertTree(): void

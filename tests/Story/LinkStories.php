@@ -24,8 +24,17 @@ final class LinkStories
      */
     public static function followable(): array
     {
+        return self::forGuests() + self::forAdmins();
+    }
+
+    /**
+     * Stories a guest follows. Same row shape as followable().
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    public static function forGuests(): array
+    {
         $inquiry = 'page://self/#link=self:goContactForm,self:doSubmitContact?';
-        $product = 'page://self/admin/product?productCode=admin-active-001#link=';
 
         return [
             'inquiry is answered with a ticket' => [$inquiry . self::form(self::inquiry()), Code::OK, '/contact/complete', []],
@@ -35,6 +44,25 @@ final class LinkStories
                 '/contact',
                 [],
             ],
+            'guest adds a cart item and is sent to checkout as a non-member' => [
+                'page://self/cart#link=self:doAddCartItem?' . self::form(['productCode' => 'sample-001', 'quantity' => '1']) . ',self:goCheckoutEntry,self:goShoppingNonMember',
+                Code::OK,
+                '/shopping/non-member',
+                [],
+            ],
+        ];
+    }
+
+    /**
+     * Stories an admin follows. Same row shape as followable().
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    public static function forAdmins(): array
+    {
+        $product = 'page://self/admin/product?productCode=admin-active-001#link=';
+
+        return [
             'updated product is shown' => [
                 $product . 'self:doUpdateProduct?' . self::form(['productCode' => 'admin-active-001', 'productName' => 'Story Product', 'price02' => '1500']),
                 Code::OK,
@@ -81,12 +109,6 @@ final class LinkStories
                 'page://self/admin/layout/layout-list#link=self:goLayout?layoutId=lo-pc-default,self:doUpdateLayout?' . self::form(['layoutId' => 'lo-pc-default', 'name' => 'Story Layout']),
                 Code::OK,
                 '/admin/layout/layout-list',
-                [],
-            ],
-            'guest adds a cart item and is sent to checkout as a non-member' => [
-                'page://self/cart#link=self:doAddCartItem?' . self::form(['productCode' => 'sample-001', 'quantity' => '1']) . ',self:goCheckoutEntry,self:goShoppingNonMember',
-                Code::OK,
-                '/shopping/non-member',
                 [],
             ],
             'a GET chain goes around the layout list and back' => [

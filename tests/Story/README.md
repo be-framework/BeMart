@@ -1,16 +1,23 @@
 # リンクのストーリー
 
-1 本の URI（`#link=type:rel?query` 付き）で、クライアントがリンクを辿る流れを書く。行は `LinkStories.php`、実行は `LinkStoryTest.php`（in-process、Fake）。
+1 本の URI（`#link=type:rel?query` 付き）で、クライアントがリンクを辿る流れを書く。行は `LinkStories.php` に 1 度だけ書き、次のテストが同じ行を流す。
 
-各ストーリーのセマンティックログのツリーを `golden/<ストーリー名>.stree.txt` と照合する。リクエストの順、method、params、becoming、応答の code が、そのまま読める。
+| テスト | 流し方 | 行 |
+|---|---|---|
+| `LinkStoryTest` | in-process、Fake。セマンティックログのツリーを `golden/<ストーリー名>.stree.txt` と照合する | `followable()`・`unfollowable()`・`uploads()` |
+| `HttpLinkStoryTest` | HTTP、Fake の HAL（`tests/Http/admin-json-index.php`、管理者がログイン済み）。リンクは HAL の `_links` から読む | 同上 |
+| `HtmlLinkStoryTest` | HTTP、Fake の HTML（`tests/Http/index.php`）。リンクはページの `<a>`・`<form>` から読む | `forGuests()` だけ（管理者のフォームは PUT・DELETE を `_method` 付きの POST で送り、クライアントはそれを辿らない） |
+| `PersistedLinkStoryTest` | in-process、SQL（tests/Hypermedia と同じ MySQL が要る） | `persisted()` |
+
+golden では、リクエストの順、method、params、becoming、応答の code が、そのまま読める。
 
 ## 行の足し方
 
-1. `LinkStories::followable()` に行を足す。キーは、そのストーリーが示すことを書いた文にする。値は URI、終点の code、終点の path、終点の body の部分一致。
+1. `LinkStories::forGuests()`（ゲストが辿る）か `forAdmins()`（管理者が辿る）に行を足す。`followable()` はこの 2 つを合わせたもの。キーは、そのストーリーが示すことを書いた文にする。値は URI、終点の code、終点の path、終点の body の部分一致。
 2. `UPDATE_GOLDEN=1 vendor/bin/phpunit tests/Story` でツリーを記録する。
 3. 新しい golden を読み、辿った順と各ステップの code が意図どおりかを確かめてから commit する。golden がないと失敗する。
 
-辿れないことを示すストーリーは `unfollowable()`（URI と例外）に、最初のリクエストでファイルを送るストーリーは `uploads()` に書く。作ったものを読み戻すストーリー（201 の Location など）は Fake では保存されないので `persisted()` に書き、`PersistedLinkStoryTest` が SQL の context で流す（tests/Hypermedia と同じ MySQL が要る。DB が付ける ID が毎回変わるので、ツリーは照合しない）。
+辿れないことを示すストーリーは `unfollowable()`（URI と例外）に、最初のリクエストでファイルを送るストーリーは `uploads()` に書く。作ったものを読み戻すストーリー（201 の Location など）は Fake では保存されないので `persisted()` に書く（DB が付ける ID が毎回変わるので、ツリーは照合しない）。
 
 ## 書けないとき
 
