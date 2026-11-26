@@ -65,3 +65,6 @@ link_request get 'page://self/admin/delivery/delivery-list#link=self:doDeleteDel
 └── close link_response
     ├── code: 200
     └── durationMs: [volatile]
+
+events:
+DELETE page://self/admin/delivery/delivery {"deliveryId":"del-yamato","csrfToken":"[FILTERED]"}

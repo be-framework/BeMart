@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Story;
 
 use BEAR\AppMeta\Meta;
+use BEAR\EventSourcing\SemanticLogExtractor;
 use BEAR\Resource\ResourceInterface;
 use Koriym\FileUpload\FileUpload;
+use Koriym\SemanticLogger\LogJson;
 use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\Stree\FormatterRegistry;
 use Koriym\SemanticLogger\Stree\RenderConfig;
@@ -19,6 +21,7 @@ use function count;
 use function dirname;
 use function file_put_contents;
 use function getenv;
+use function implode;
 use function json_decode;
 use function json_encode;
 use function preg_replace;
@@ -28,8 +31,13 @@ use function str_replace;
 use function strtolower;
 use function trim;
 
+use const JSON_THROW_ON_ERROR;
+use const JSON_UNESCAPED_SLASHES;
+use const JSON_UNESCAPED_UNICODE;
+
 /**
- * Follows each story in-process and compares its semantic log tree with tests/Story/golden.
+ * Follows each story in-process and compares its semantic log tree, and the events extracted from it, with
+ * tests/Story/golden.
  *
  * `UPDATE_GOLDEN=1 vendor/bin/phpunit tests/Story` records the trees; read their diff before committing.
  */
@@ -91,10 +99,11 @@ final class LinkStoryTest extends AbstractLinkStoryCase
             snapshot: true,
             schemaDir: $vendor . '/bear/event-sourcing/docs/schemas',
         ));
+        $logJson = $this->logger->flush();
         // LogJson::render() leaves out nested context values that stree prints, so render the JSON form stree reads.
-        $log = json_decode((string) json_encode($this->logger->flush()), true);
+        $log = json_decode((string) json_encode($logJson), true);
         $this->assertIsArray($log);
-        $tree = $this->stabilize($renderer->renderTree($log));
+        $tree = $this->stabilize($renderer->renderTree($log) . $this->events($logJson));
         $golden = sprintf('%s/golden/%s.stree.txt', __DIR__, trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower((string) $this->dataName())), '-'));
         if (getenv('UPDATE_GOLDEN') === '1') {
             file_put_contents($golden, $tree);
@@ -102,6 +111,17 @@ final class LinkStoryTest extends AbstractLinkStoryCase
 
         $this->assertFileExists($golden, 'Record the tree with UPDATE_GOLDEN=1 and read it before committing.');
         $this->assertStringEqualsFile($golden, $tree);
+    }
+
+    /** The requests bear/event-sourcing extracts as events, the ones a replay runs again */
+    private function events(LogJson $log): string
+    {
+        $lines = [];
+        foreach ((new SemanticLogExtractor())->extract($log) as $event) {
+            $lines[] = sprintf('%s %s %s', $event->method, $event->uri, json_encode($event->params, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
+        }
+
+        return "\n\nevents:\n" . ($lines === [] ? '(none)' : implode("\n", $lines));
     }
 
     private function stabilize(string $tree): string

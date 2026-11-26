@@ -53,3 +53,6 @@ link_request get 'page://self/admin/payment/payment-list#link=self:goPayment,sel
 └── close link_response
     ├── code: 404
     └── durationMs: [volatile]
+
+events:
+(none)

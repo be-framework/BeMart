@@ -51,3 +51,6 @@ link_request get 'page://self/index#link=self:goContactForm,self:doSubmitContact
 └── close link_response
     ├── code: 400
     └── durationMs: [volatile]
+
+events:
+(none)

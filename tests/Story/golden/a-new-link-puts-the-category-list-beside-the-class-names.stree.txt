@@ -48,3 +48,6 @@ link_request get 'page://self/admin/class-name/class-name-list#link=new:goClassC
 └── close link_response
     ├── code: 200
     └── durationMs: [volatile]
+
+events:
+(none)

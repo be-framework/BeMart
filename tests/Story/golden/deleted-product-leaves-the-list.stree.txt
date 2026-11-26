@@ -135,3 +135,6 @@ link_request get 'page://self/admin/product#link=self:doDeleteProduct'
 └── close link_response
     ├── code: 200
     └── durationMs: [volatile]
+
+events:
+DELETE page://self/admin/product {"productCode":"admin-active-001","csrfToken":"[FILTERED]"}

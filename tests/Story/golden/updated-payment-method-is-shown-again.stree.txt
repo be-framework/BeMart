@@ -78,3 +78,6 @@ link_request get 'page://self/admin/payment/payment#link=self:doUpdatePayment'
 └── close link_response
     ├── code: 200
     └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/payment/payment {"paymentId":"pay-cod","paymentMethodName":"Story Pay","charge":"100","csrfToken":"[FILTERED]"}

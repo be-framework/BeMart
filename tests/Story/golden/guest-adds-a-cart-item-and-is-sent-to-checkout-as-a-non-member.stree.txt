@@ -181,3 +181,6 @@ link_request get 'page://self/cart#link=self:doAddCartItem,self:goCheckoutEntry,
 └── close link_response
     ├── code: 200
     └── durationMs: [volatile]
+
+events:
+POST page://self/cart/item {"productCode":"sample-001","quantity":"1","csrfToken":"[FILTERED]"}

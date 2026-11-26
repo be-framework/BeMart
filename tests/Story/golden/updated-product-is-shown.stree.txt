@@ -92,3 +92,6 @@ link_request get 'page://self/admin/product#link=self:doUpdateProduct'
 └── close link_response
     ├── code: 200
     └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/product {"productCode":"admin-active-001","productName":"Story Product","price02":"1500","csrfToken":"[FILTERED]"}

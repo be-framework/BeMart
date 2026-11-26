@@ -9,7 +9,9 @@
 | `HtmlLinkStoryTest` | HTTP、Fake の HTML（`tests/Http/index.php`）。リンクはページの `<a>`・`<form>` から読む | `forGuests()` だけ（管理者のフォームは PUT・DELETE を `_method` 付きの POST で送り、クライアントはそれを辿らない） |
 | `PersistedLinkStoryTest` | in-process、SQL（tests/Hypermedia と同じ MySQL が要る） | `persisted()` |
 
-golden では、リクエストの順、method、params、becoming、応答の code が、そのまま読める。ツリーの根は `link_request` で、最初の URI と辿るリンク（`type:rel`。リンクの query は、それを辿ったリクエストの params に出る）を示す。辿ったリクエストはその下に並び、閉じの `link_response` は終点の uri と code を示す。
+golden では、リクエストの順、method、params、becoming、応答の code が、そのまま読める。ツリーの根は `link_request` で、最初の URI と辿るリンク（`type:rel`。リンクの query は、それを辿ったリクエストの params に出る）を示す。辿ったリクエストはその下に並び、閉じの `link_response` は返った code を示す。
+
+ツリーの後の `events:` は、bear/event-sourcing の抽出器がこのログからイベントとして取り出すリクエスト（再生で再び実行されるもの）。連鎖の途中の POST・PUT・DELETE が 1 件ずつ並び、GET だけの連鎖と途中で止まった連鎖は `(none)` になる。
 
 ## 行の足し方
 

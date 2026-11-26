@@ -54,3 +54,6 @@ link_request get 'page://self/index#link=self:goContactForm,self:doSubmitContact
 └── close link_response
     ├── code: 200
     └── durationMs: [volatile]
+
+events:
+POST page://self/contact {"contactName01":"山田","contactName02":"太郎","contactEmail":"yamada@example.com","contactContents":"A story asks a question.","csrfToken":"[FILTERED]"}

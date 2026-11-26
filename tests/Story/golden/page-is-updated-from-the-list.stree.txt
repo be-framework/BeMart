@@ -79,3 +79,6 @@ link_request get 'page://self/admin/page/page-list#link=self:doUpdatePage'
 └── close link_response
     ├── code: 200
     └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/page/page {"pageId":"pg-company","name":"Story Page","csrfToken":"[FILTERED]"}

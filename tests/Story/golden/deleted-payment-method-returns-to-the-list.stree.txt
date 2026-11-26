@@ -70,3 +70,6 @@ link_request get 'page://self/admin/payment/payment#link=self:doDeletePayment'
 └── close link_response
     ├── code: 200
     └── durationMs: [volatile]
+
+events:
+DELETE page://self/admin/payment/payment {"paymentId":"pay-cod","csrfToken":"[FILTERED]"}

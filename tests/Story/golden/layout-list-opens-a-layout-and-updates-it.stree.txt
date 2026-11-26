@@ -89,3 +89,6 @@ link_request get 'page://self/admin/layout/layout-list#link=self:goLayout,self:d
 └── close link_response
     ├── code: 200
     └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/layout/layout {"layoutId":"lo-pc-default","name":"Story Layout","csrfToken":"[FILTERED]"}
