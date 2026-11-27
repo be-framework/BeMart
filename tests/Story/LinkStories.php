@@ -806,6 +806,14 @@ final class LinkStories
                 uri_template('page://self/admin/change-password#link=self:doChangePassword{?form*}', ['form' => self::form(['currentPassword' => 'a', 'newPassword' => 'b'])]),
                 LinkRelException::class,
             ],
+            'the block list declares the block page only on write methods' => [
+                'page://self/admin/block/block-list#link=self:goBlock',
+                LinkRelException::class,
+            ],
+            'the css page declares the js page only on the write method' => [
+                'page://self/admin/content/css#link=self:goContentJs',
+                LinkRelException::class,
+            ],
             'the delivery address editor declares the customer page only on write methods' => [
                 uri_template('page://self/admin/customer-delivery-edit{?customerId}#link=self:goCustomer', ['customerId' => '0123456789abcdef0123456789abcdef']),
                 LinkRelException::class,
