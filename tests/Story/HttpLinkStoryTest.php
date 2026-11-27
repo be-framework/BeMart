@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Tests\Story;
 
 use BEAR\Dev\Http\HttpResource;
 use BEAR\Resource\Code;
-use BEAR\Resource\Exception\LinkRelException;
+use BEAR\Resource\Exception\ParameterException;
 use Koriym\FileUpload\FileUpload;
 use PHPUnit\Framework\Attributes\DataProviderExternal;
 
@@ -42,7 +42,7 @@ final class HttpLinkStoryTest extends AbstractLinkStoryCase
     #[DataProviderExternal(LinkStories::class, 'unfollowable')]
     public function testRefuses(string $uri, string $exception): void
     {
-        if ($exception !== LinkRelException::class) {
+        if ($exception === ParameterException::class) {
             // The server answers a request it cannot invoke with 400 instead of throwing to the client
             $this->assertSame(Code::BAD_REQUEST, $this->resource->get($uri)->code);
 

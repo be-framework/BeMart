@@ -1,0 +1,406 @@
+link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:doConfirmOrder,self:doCheckout'
+├── uri: page://self/mypage
+├── method: GET
+├── links[0]: self:goCart
+├── links[1]: self:goCheckoutEntry
+├── links[2]: self:doConfirmOrder
+├── links[3]: self:doCheckout
+├── resource_request get 'page://self/mypage'
+│   ├── uri: page://self/mypage
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetMypageInput
+│   │   ├── orderLimit: 5
+│   │   ├── being_final MypageFetched input=[orderLimit] inject=[session, customerQuery, orderQuery +2 items]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null-3>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── email: alice@example.com
+│   │   │       ├── name01: 山田
+│   │   │       ├── name02: アリス
+│   │   │       ├── recentOrderCount: 0
+│   │   │       └── favoriteCount: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/cart'
+│   ├── uri: page://self/cart
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCartsInput
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-5>
+│   │   │   └── close being_final_close
+│   │   │       ├── carts[0].cartKey: session-prefix-1_1
+│   │   │       ├── carts[0].saleTypeId: 1
+│   │   │       ├── carts[0].saleTypeName: 通常販売
+│   │   │       ├── carts[0].items[0].productCode: sample-001
+│   │   │       ├── carts[0].items[0].quantity: 3
+│   │   │       ├── carts[0].items[0].price: 1200
+│   │   │       ├── carts[0].items[0].productClassId: 0
+│   │   │       ├── carts[0].items[0].productId: 0
+│   │   │       ├── carts[0].items[0].productName: サンプル商品 A
+│   │   │       ├── carts[0].totalPrice: 3600
+│   │   │       ├── carts[0].deliveryFeeTotal: 0
+│   │   │       ├── carts[0].preOrderId: deadbeefcafe1234567890abcdef01234567890a
+│   │   │       ├── carts[1].cartKey: session-prefix-1_2
+│   │   │       ├── carts[1].saleTypeId: 2
+│   │   │       ├── carts[1].saleTypeName: 予約販売
+│   │   │       ├── carts[1].totalPrice: 0
+│   │   │       ├── carts[1].deliveryFeeTotal: 0
+│   │   │       ├── carts[1].preOrderId: deadbeefcafe1234567890abcdef01234567890b
+│   │   │       ├── cartCount: 2
+│   │   │       ├── totalPrice: 3600
+│   │   │       └── deliveryFeeTotal: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/shopping'
+│   ├── uri: page://self/shopping
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetShoppingInput
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +3 items]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-5>
+│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null-6>
+│   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-7>
+│   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── email: alice@example.com
+│   │   │       ├── name01: 山田
+│   │   │       ├── name02: アリス
+│   │   │       ├── defaultShippingAddress.postalCode: 1500001
+│   │   │       ├── defaultShippingAddress.pref: 13
+│   │   │       ├── defaultShippingAddress.addr01: 渋谷区
+│   │   │       ├── defaultShippingAddress.addr02: 神宮前1-1-1
+│   │   │       ├── defaultShippingAddress.phoneNumber: 0312345678
+│   │   │       ├── carts[0].cartKey: session-prefix-1_1
+│   │   │       ├── carts[0].preOrderId: deadbeefcafe1234567890abcdef01234567890a
+│   │   │       ├── carts[0].saleTypeName: 通常販売
+│   │   │       ├── carts[0].totalPrice: 3600
+│   │   │       ├── carts[0].deliveryFeeTotal: 0
+│   │   │       ├── carts[0].items[0].productCode: sample-001
+│   │   │       ├── carts[0].items[0].quantity: 3
+│   │   │       ├── carts[0].items[0].price: 1200
+│   │   │       ├── carts[1].cartKey: session-prefix-1_2
+│   │   │       ├── carts[1].preOrderId: deadbeefcafe1234567890abcdef01234567890b
+│   │   │       ├── carts[1].saleTypeName: 予約販売
+│   │   │       ├── carts[1].totalPrice: 0
+│   │   │       ├── carts[1].deliveryFeeTotal: 0
+│   │   │       ├── cartCount: 2
+│   │   │       ├── totalPrice: 3600
+│   │   │       ├── deliveryFeeTotal: 0
+│   │   │       ├── paymentMethods[0].paymentMethodId: 1
+│   │   │       ├── paymentMethods[0].paymentMethodName: 代金引換
+│   │   │       ├── paymentMethods[1].paymentMethodId: 2
+│   │   │       ├── paymentMethods[1].paymentMethodName: クレジットカード
+│   │   │       └── canCheckout: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/shopping/confirm?preOrderId=aceface0000000000000000000000000000a11ce&payment=2&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/shopping/confirm
+│   ├── method: POST
+│   ├── params.preOrderId: aceface0000000000000000000000000000a11ce
+│   ├── params.payment: 2
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming ConfirmOrderInput
+│   │   ├── preOrderId: aceface0000000000000000000000000000a11ce
+│   │   ├── paymentMethodId: 2
+│   │   ├── being PreOrderResolved input=[preOrderId, paymentMethodId] inject=[orderQuery, session]
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   └── close being_close
+│   │   │       ├── order.preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       ├── order.customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── order.paymentMethodId: 2
+│   │   │       ├── order.items[0].productCode: sample-001
+│   │   │       ├── order.items[0].quantity: 2
+│   │   │       ├── order.items[0].price: 1200
+│   │   │       ├── order.items[0].productClassId: 0
+│   │   │       ├── order.items[0].productId: 0
+│   │   │       ├── order.items[0].productName: 
+│   │   │       ├── order.items[1].productCode: preorder-2026-spring-bag
+│   │   │       ├── order.items[1].quantity: 1
+│   │   │       ├── order.items[1].price: 13500
+│   │   │       ├── order.items[1].productClassId: 0
+│   │   │       ├── order.items[1].productId: 0
+│   │   │       ├── order.items[1].productName: 
+│   │   │       ├── order.deliveryFeeTotal: 800
+│   │   │       ├── preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       └── paymentMethodId: 2
+│   │   ├── being PurchaseFlowApplied input=[preOrderId, paymentMethodId, order] inject=[purchaseFlow]
+│   │   │   ├── inject.purchaseFlow: MyVendor\BeMart\Be\Reason\Fake\Service\FakePurchaseFlow
+│   │   │   └── close being_close
+│   │   │       ├── totals.subtotal: 15900
+│   │   │       ├── totals.deliveryFeeTotal: 800
+│   │   │       ├── totals.charge: 0
+│   │   │       ├── totals.discount: 0
+│   │   │       ├── totals.tax: 1590
+│   │   │       ├── totals.total: 18290
+│   │   │       ├── totals.paymentTotal: 18290
+│   │   │       ├── totals.addPoint: 182
+│   │   │       ├── totals.usePoint: 0
+│   │   │       ├── preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       ├── paymentMethodId: 2
+│   │   │       ├── order.preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       ├── order.customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── order.paymentMethodId: 2
+│   │   │       ├── order.items[0].productCode: sample-001
+│   │   │       ├── order.items[0].quantity: 2
+│   │   │       ├── order.items[0].price: 1200
+│   │   │       ├── order.items[0].productClassId: 0
+│   │   │       ├── order.items[0].productId: 0
+│   │   │       ├── order.items[0].productName: 
+│   │   │       ├── order.items[1].productCode: preorder-2026-spring-bag
+│   │   │       ├── order.items[1].quantity: 1
+│   │   │       ├── order.items[1].price: 13500
+│   │   │       ├── order.items[1].productClassId: 0
+│   │   │       ├── order.items[1].productId: 0
+│   │   │       ├── order.items[1].productName: 
+│   │   │       └── order.deliveryFeeTotal: 800
+│   │   ├── being PaymentVerified input=[preOrderId, paymentMethodId, order +1 items] inject=[paymentMethodFactory]
+│   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
+│   │   │   └── close being_close
+│   │   │       ├── paymentVerification.success: true
+│   │   │       ├── preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       ├── paymentMethodId: 2
+│   │   │       ├── order.preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       ├── order.customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── order.paymentMethodId: 2
+│   │   │       ├── order.items[0].productCode: sample-001
+│   │   │       ├── order.items[0].quantity: 2
+│   │   │       ├── order.items[0].price: 1200
+│   │   │       ├── order.items[0].productClassId: 0
+│   │   │       ├── order.items[0].productId: 0
+│   │   │       ├── order.items[0].productName: 
+│   │   │       ├── order.items[1].productCode: preorder-2026-spring-bag
+│   │   │       ├── order.items[1].quantity: 1
+│   │   │       ├── order.items[1].price: 13500
+│   │   │       ├── order.items[1].productClassId: 0
+│   │   │       ├── order.items[1].productId: 0
+│   │   │       ├── order.items[1].productName: 
+│   │   │       ├── order.deliveryFeeTotal: 800
+│   │   │       ├── totals.subtotal: 15900
+│   │   │       ├── totals.deliveryFeeTotal: 800
+│   │   │       ├── totals.charge: 0
+│   │   │       ├── totals.discount: 0
+│   │   │       ├── totals.tax: 1590
+│   │   │       ├── totals.total: 18290
+│   │   │       ├── totals.paymentTotal: 18290
+│   │   │       ├── totals.addPoint: 182
+│   │   │       └── totals.usePoint: 0
+│   │   ├── being OrderConfirming input=[preOrderId, paymentMethodId, order +2 items]
+│   │   │   └── close being_close
+│   │   │       ├── being.totals.subtotal: 15900
+│   │   │       ├── being.totals.deliveryFeeTotal: 800
+│   │   │       ├── being.totals.charge: 0
+│   │   │       ├── being.totals.discount: 0
+│   │   │       ├── being.totals.tax: 1590
+│   │   │       ├── being.totals.total: 18290
+│   │   │       ├── being.totals.paymentTotal: 18290
+│   │   │       ├── being.totals.addPoint: 182
+│   │   │       ├── being.totals.usePoint: 0
+│   │   │       ├── preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       ├── paymentMethodId: 2
+│   │   │       ├── order.preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       ├── order.customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── order.paymentMethodId: 2
+│   │   │       ├── order.items[0].productCode: sample-001
+│   │   │       ├── order.items[0].quantity: 2
+│   │   │       ├── order.items[0].price: 1200
+│   │   │       ├── order.items[0].productClassId: 0
+│   │   │       ├── order.items[0].productId: 0
+│   │   │       ├── order.items[0].productName: 
+│   │   │       ├── order.items[1].productCode: preorder-2026-spring-bag
+│   │   │       ├── order.items[1].quantity: 1
+│   │   │       ├── order.items[1].price: 13500
+│   │   │       ├── order.items[1].productClassId: 0
+│   │   │       ├── order.items[1].productId: 0
+│   │   │       ├── order.items[1].productName: 
+│   │   │       └── order.deliveryFeeTotal: 800
+│   │   ├── being_final OrderConfirmed input=[being, preOrderId, paymentMethodId +1 items] inject=[customerQuery, productClasses +1 items]
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.productClasses: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-8>
+│   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
+│   │   │   └── close being_final_close
+│   │   │       ├── preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       ├── paymentMethodId: 2
+│   │   │       ├── paymentMethodName: クレジットカード
+│   │   │       ├── subtotal: 15900
+│   │   │       ├── deliveryFeeTotal: 800
+│   │   │       ├── charge: 0
+│   │   │       ├── discount: 0
+│   │   │       ├── tax: 1590
+│   │   │       ├── total: 18290
+│   │   │       ├── paymentTotal: 18290
+│   │   │       ├── addPoint: 182
+│   │   │       ├── usePoint: 0
+│   │   │       ├── customer.name01: 山田
+│   │   │       ├── customer.name02: アリス
+│   │   │       ├── customer.kana01: ヤマダ
+│   │   │       ├── customer.kana02: アリス
+│   │   │       ├── customer.email: alice@example.com
+│   │   │       ├── customer.phoneNumber: 0312345678
+│   │   │       ├── customer.postalCode: 1500001
+│   │   │       ├── customer.pref: 13
+│   │   │       ├── customer.addr01: 渋谷区
+│   │   │       ├── customer.addr02: 神宮前1-1-1
+│   │   │       ├── items[0].productCode: sample-001
+│   │   │       ├── items[0].productName: サンプル商品 A
+│   │   │       ├── items[0].quantity: 2
+│   │   │       ├── items[0].unitPrice: 1200
+│   │   │       ├── items[0].totalPrice: 2400
+│   │   │       ├── items[1].productCode: preorder-2026-spring-bag
+│   │   │       ├── items[1].productName: 2026 春予約バッグ
+│   │   │       ├── items[1].quantity: 1
+│   │   │       ├── items[1].unitPrice: 13500
+│   │   │       ├── items[1].totalPrice: 13500
+│   │   │       ├── being.totals.subtotal: 15900
+│   │   │       ├── being.totals.deliveryFeeTotal: 800
+│   │   │       ├── being.totals.charge: 0
+│   │   │       ├── being.totals.discount: 0
+│   │   │       ├── being.totals.tax: 1590
+│   │   │       ├── being.totals.total: 18290
+│   │   │       ├── being.totals.paymentTotal: 18290
+│   │   │       ├── being.totals.addPoint: 182
+│   │   │       └── being.totals.usePoint: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/shopping/checkout?preOrderId=aceface0000000000000000000000000000a11ce&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/shopping/checkout
+│   ├── method: POST
+│   ├── params.preOrderId: aceface0000000000000000000000000000a11ce
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming CheckoutInput
+│   │   ├── preOrderId: aceface0000000000000000000000000000a11ce
+│   │   ├── being CheckoutPrepared input=[preOrderId] inject=[orderQuery, session, purchaseFlow]
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.purchaseFlow: MyVendor\BeMart\Be\Reason\Fake\Service\FakePurchaseFlow
+│   │   │   └── close being_close
+│   │   │       ├── order.preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       ├── order.customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── order.paymentMethodId: 2
+│   │   │       ├── order.items[0].productCode: sample-001
+│   │   │       ├── order.items[0].quantity: 2
+│   │   │       ├── order.items[0].price: 1200
+│   │   │       ├── order.items[0].productClassId: 0
+│   │   │       ├── order.items[0].productId: 0
+│   │   │       ├── order.items[0].productName: 
+│   │   │       ├── order.items[1].productCode: preorder-2026-spring-bag
+│   │   │       ├── order.items[1].quantity: 1
+│   │   │       ├── order.items[1].price: 13500
+│   │   │       ├── order.items[1].productClassId: 0
+│   │   │       ├── order.items[1].productId: 0
+│   │   │       ├── order.items[1].productName: 
+│   │   │       ├── order.deliveryFeeTotal: 800
+│   │   │       ├── totals.subtotal: 15900
+│   │   │       ├── totals.deliveryFeeTotal: 800
+│   │   │       ├── totals.charge: 0
+│   │   │       ├── totals.discount: 0
+│   │   │       ├── totals.tax: 1590
+│   │   │       ├── totals.total: 18290
+│   │   │       ├── totals.paymentTotal: 18290
+│   │   │       ├── totals.addPoint: 182
+│   │   │       ├── totals.usePoint: 0
+│   │   │       └── preOrderId: aceface0000000000000000000000000000a11ce
+│   │   ├── being CheckoutSettled input=[preOrderId, order, totals] inject=[orderNumbers, claim, inventory, gateway]
+│   │   │   ├── inject.orderNumbers: MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider
+│   │   │   ├── inject.claim: MyVendor\BeMart\Be\Reason\Fake\Service\InMemoryPreOrderClaim
+│   │   │   ├── inject.inventory: MyVendor\BeMart\Be\Reason\Fake\Service\FakeInventoryAllocator
+│   │   │   ├── inject.gateway: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentGateway
+│   │   │   └── close being_close
+│   │   │       ├── orderNo: <OrderNo-1>
+│   │   │       ├── orderDate: <Now-1>
+│   │   │       ├── paymentDate: <Now-1>
+│   │   │       ├── preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       ├── order.preOrderId: aceface0000000000000000000000000000a11ce
+│   │   │       ├── order.customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── order.paymentMethodId: 2
+│   │   │       ├── order.items[0].productCode: sample-001
+│   │   │       ├── order.items[0].quantity: 2
+│   │   │       ├── order.items[0].price: 1200
+│   │   │       ├── order.items[0].productClassId: 0
+│   │   │       ├── order.items[0].productId: 0
+│   │   │       ├── order.items[0].productName: 
+│   │   │       ├── order.items[1].productCode: preorder-2026-spring-bag
+│   │   │       ├── order.items[1].quantity: 1
+│   │   │       ├── order.items[1].price: 13500
+│   │   │       ├── order.items[1].productClassId: 0
+│   │   │       ├── order.items[1].productId: 0
+│   │   │       ├── order.items[1].productName: 
+│   │   │       ├── order.deliveryFeeTotal: 800
+│   │   │       ├── totals.subtotal: 15900
+│   │   │       ├── totals.deliveryFeeTotal: 800
+│   │   │       ├── totals.charge: 0
+│   │   │       ├── totals.discount: 0
+│   │   │       ├── totals.tax: 1590
+│   │   │       ├── totals.total: 18290
+│   │   │       ├── totals.paymentTotal: 18290
+│   │   │       ├── totals.addPoint: 182
+│   │   │       └── totals.usePoint: 0
+│   │   ├── being_final CheckoutCompleted input=[preOrderId, order, totals, orderNo +2 items] inject=[orderCommand, orderItemCommand +3 items]
+│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null-6>
+│   │   │   ├── inject.orderItemCommand: MyVendor\BeMart\Be\Reason\Query\OrderItemCommandInterface<Null-9>
+│   │   │   ├── inject.productClasses: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-8>
+│   │   │   ├── inject.mailer: MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer
+│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null-10>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: <OrderNo-1>
+│   │   │       ├── completeMessage: 
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── total: 18290
+│   │   │       ├── paymentTotal: 18290
+│   │   │       ├── addPoint: 182
+│   │   │       ├── orderStatus: 1
+│   │   │       ├── orderDate: <Now-1>
+│   │   │       └── paymentDate: <Now-1>
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 201
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/shopping/complete?orderNo=<OrderNo-1>'
+│   ├── uri: page://self/shopping/complete
+│   ├── method: GET
+│   ├── params.orderNo: <OrderNo-1>
+│   ├── replayable: true
+│   ├── resource_request get 'app://self/order/header?orderNo=<OrderNo-1>'
+│   │   ├── uri: app://self/order/header
+│   │   ├── method: GET
+│   │   ├── params.orderNo: <OrderNo-1>
+│   │   ├── replayable: true
+│   │   └── close resource_response
+│   │       ├── code: 200
+│   │       └── durationMs: [volatile]
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+POST page://self/shopping/confirm {"preOrderId":"aceface0000000000000000000000000000a11ce","payment":"2","csrfToken":"[FILTERED]"}
+POST page://self/shopping/checkout {"preOrderId":"aceface0000000000000000000000000000a11ce","csrfToken":"[FILTERED]"}

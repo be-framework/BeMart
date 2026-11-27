@@ -52,6 +52,8 @@ final class LinkStoryTest extends AbstractLinkStoryCase
     private const array VOLATILE = [
         '/INQ-[0-9a-f]+\.[0-9]+/' => 'INQ', // ContactSubmitted makes the ticket id with uniqid()
         '/(?<=Interface)[0-9a-f]{8}Null\d+/' => 'Null', // classes generated for null bindings get suffixes per checkout and run
+        '/(?<=orderNo: |orderNo=)[0-9a-f]{32}/' => 'OrderNo', // OrderNoProvider draws the number of a placed order at random
+        '/(?<=orderDate: |paymentDate: )\d{4}-\d\d-\d\dT\S+/' => 'Now', // a placed order is stamped with the clock
     ];
 
     /** The line a throw sits on moves with any edit above it in that file; the file it names stays */
@@ -62,9 +64,7 @@ final class LinkStoryTest extends AbstractLinkStoryCase
 
     protected function setUp(): void
     {
-        $this->logger = new SemanticLogger();
-        $module = new StoryModule($this->logger, new TestModule(new Meta('MyVendor\\BeMart', 'test')));
-        $this->resource = (new Injector($module, dirname(__DIR__, 2) . '/var/tmp/story'))->getInstance(ResourceInterface::class);
+        $this->signIn(null);
     }
 
     /**
@@ -74,9 +74,29 @@ final class LinkStoryTest extends AbstractLinkStoryCase
     #[DataProviderExternal(LinkStories::class, 'followable')]
     public function testFollows(string $uri, int $code, string $path, array $body, string|array $flow = []): void
     {
-        $this->assertFlow($uri, $flow);
-        $this->assertEnd($this->resource->get($uri), $code, $path, $body);
-        $this->assertTree();
+        $this->assertStory($uri, $code, $path, $body, $flow);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     * @param string|list<string> $flow
+     */
+    #[DataProviderExternal(LinkStories::class, 'forMembers')]
+    public function testFollowsAsMember(string $uri, int $code, string $path, array $body, string|array $flow = []): void
+    {
+        $this->signIn(StoryModule::MEMBER_ID);
+        $this->assertStory($uri, $code, $path, $body, $flow);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     * @param string|list<string> $flow
+     */
+    #[DataProviderExternal(LinkStories::class, 'forBuyers')]
+    public function testFollowsAsBuyer(string $uri, int $code, string $path, array $body, string|array $flow = []): void
+    {
+        $this->signIn(StoryModule::BUYER_ID);
+        $this->assertStory($uri, $code, $path, $body, $flow);
     }
 
     /** @param class-string<\Throwable> $exception */
@@ -93,6 +113,25 @@ final class LinkStoryTest extends AbstractLinkStoryCase
     public function testUploads(string $uri, array $query, string $file, int $code, string $path): void
     {
         $this->assertEnd($this->resource->post($uri, $query + ['file' => FileUpload::fromFile($file)]), $code, $path, []);
+    }
+
+    private function signIn(string|null $customerId): void
+    {
+        $this->logger = new SemanticLogger();
+        $module = new StoryModule($this->logger, new TestModule(new Meta('MyVendor\\BeMart', 'test')), $customerId);
+        $tmp = dirname(__DIR__, 2) . '/var/tmp/story' . ($customerId === null ? '' : '-' . $customerId);
+        $this->resource = (new Injector($module, $tmp))->getInstance(ResourceInterface::class);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     * @param string|list<string> $flow
+     */
+    private function assertStory(string $uri, int $code, string $path, array $body, string|array $flow): void
+    {
+        $this->assertFlow($uri, $flow);
+        $this->assertEnd($this->resource->get($uri), $code, $path, $body);
+        $this->assertTree();
     }
 
     private function assertTree(): void

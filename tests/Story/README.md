@@ -4,7 +4,7 @@
 
 | テスト | 流し方 | 行 |
 |---|---|---|
-| `LinkStoryTest` | in-process、Fake。`followable()` の行は、セマンティックログのツリーを `golden/<ストーリー名>.stree.txt` と照合する | `followable()`・`unfollowable()`・`uploads()` |
+| `LinkStoryTest` | in-process、Fake。`followable()` の行は、セマンティックログのツリーを `golden/<ストーリー名>.stree.txt` と照合する | `followable()`・`unfollowable()`・`uploads()`、会員として辿る `forMembers()`・`forBuyers()` |
 | `HttpLinkStoryTest` | HTTP、Fake の HAL（`tests/Http/admin-json-index.php`、管理者がログイン済み）。リンクは HAL の `_links` から読む | 同上 |
 | `HtmlLinkStoryTest` | HTTP、Fake の HTML（`tests/Http/index.php`）。リンクはページの `<a>`・`<form>` から読む | `forGuests()` だけ（管理者のフォームは PUT・DELETE を `_method` 付きの POST で送り、クライアントはそれを辿らない） |
 | `PersistedLinkStoryTest` | in-process、SQL（tests/Hypermedia と同じ MySQL が要る） | `persisted()` |
@@ -36,10 +36,12 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 
 ## 行の足し方
 
-1. `LinkStories::forGuests()`（ゲストが辿る）か `forAdmins()`（管理者が辿る）に行を足す。`followable()` はこの 2 つを合わせたもの。キーは、そのストーリーが示すことを書いた文にする。値は URI、終点の code、終点の path、終点の body の部分一致（キーの `.` で入れ子の配列を指す）、**そのストーリーが辿る `flow-*` タグ**。タグは `alps.json` の遷移に付いたもので、2 つのフローを辿るなら配列で書く。
+1. `LinkStories::forGuests()`（ゲストが辿る）か `forAdmins()`（管理者が辿る）に行を足す。`followable()` はこの 2 つを合わせたもの。会員として辿る行は `forMembers()`・`forBuyers()` に足す。キーは、そのストーリーが示すことを書いた文にする。値は URI、終点の code、終点の path、終点の body の部分一致（キーの `.` で入れ子の配列を指す）、**そのストーリーが辿る `flow-*` タグ**。タグは `alps.json` の遷移に付いたもので、2 つのフローを辿るなら配列で書く。
 2. `UPDATE_GOLDEN=1 vendor/bin/phpunit tests/Story` でツリーを記録する。
 3. 新しい golden を読み、辿った順と各ステップの code が意図どおりかを確かめてから commit する。`followable()` の行は、golden がないと失敗する。
 4. `composer story:flows` で `docs/story-flows.md` を作り直す。
+
+会員のストーリーは in-process だけで流す（HTTP の 2 つのアプリには会員のログイン状態がない）。`forMembers()` は `StoryModule::MEMBER_ID`（プロフィール・住所・カート・購入前の注文がある会員）、`forBuyers()` は `StoryModule::BUYER_ID`（注文履歴だけがある会員。プロフィールがないので `/mypage` には入れず、履歴のページから始める）としてログインして辿る。
 
 辿れないことを示すストーリーは `unfollowable()`（URI と例外）に、最初のリクエストでファイルを送るストーリーは `uploads()` に書く。作ったものを読み戻すストーリー（201 の Location など）は Fake では保存されないので `persisted()` に書く（DB が付ける ID が毎回変わるので、ツリーは照合しない）。
 

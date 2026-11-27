@@ -1,0 +1,128 @@
+link_request get 'page://self/mypage#link=self:goFavoriteList,self:doAddFavorite,self:doRemoveFavorite'
+├── uri: page://self/mypage
+├── method: GET
+├── links[0]: self:goFavoriteList
+├── links[1]: self:doAddFavorite
+├── links[2]: self:doRemoveFavorite
+├── resource_request get 'page://self/mypage'
+│   ├── uri: page://self/mypage
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetMypageInput
+│   │   ├── orderLimit: 5
+│   │   ├── being_final MypageFetched input=[orderLimit] inject=[session, customerQuery, orderQuery +2 items]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null-3>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── email: alice@example.com
+│   │   │       ├── name01: 山田
+│   │   │       ├── name02: アリス
+│   │   │       ├── recentOrderCount: 0
+│   │   │       └── favoriteCount: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/mypage/favorite-list'
+│   ├── uri: page://self/mypage/favorite-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetFavoriteListInput
+│   │   ├── being_final FavoriteListFetched inject=[session, favorites]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       └── favoriteCount: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/mypage/favorite?productCode=sample-001&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/mypage/favorite
+│   ├── method: POST
+│   ├── params.productCode: sample-001
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming AddFavoriteInput
+│   │   ├── productCode: sample-001
+│   │   ├── being_final FavoriteAdded input=[productCode] inject=[session, productQuery, favorites]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-5>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── productCode: sample-001
+│   │   │       ├── productName: サンプル商品 A
+│   │   │       ├── unitPrice: 1200
+│   │   │       └── alreadyExisted: false
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 201
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/mypage/favorite-list'
+│   ├── uri: page://self/mypage/favorite-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetFavoriteListInput
+│   │   ├── being_final FavoriteListFetched inject=[session, favorites]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       └── favoriteCount: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request delete 'page://self/mypage/favorite?productCode=sample-001&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/mypage/favorite
+│   ├── method: DELETE
+│   ├── params.productCode: sample-001
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming RemoveFavoriteInput
+│   │   ├── productCode: sample-001
+│   │   ├── being_final FavoriteRemoved input=[productCode] inject=[session, favorites]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── productCode: sample-001
+│   │   │       └── alreadyAbsent: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/mypage/favorite-list'
+│   ├── uri: page://self/mypage/favorite-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetFavoriteListInput
+│   │   ├── being_final FavoriteListFetched inject=[session, favorites]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       └── favoriteCount: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+POST page://self/mypage/favorite {"productCode":"sample-001","csrfToken":"[FILTERED]"}
+DELETE page://self/mypage/favorite {"productCode":"sample-001","csrfToken":"[FILTERED]"}

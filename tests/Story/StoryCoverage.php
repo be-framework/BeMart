@@ -278,7 +278,7 @@ final class StoryCoverage
      */
     private function rows(): array
     {
-        return LinkStories::followable() + LinkStories::persisted();
+        return LinkStories::followable() + LinkStories::forMembers() + LinkStories::forBuyers() + LinkStories::persisted();
     }
 
     /**

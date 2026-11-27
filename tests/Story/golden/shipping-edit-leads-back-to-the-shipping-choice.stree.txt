@@ -1,0 +1,24 @@
+link_request get 'page://self/shopping/shipping-edit#link=self:goShoppingShipping'
+├── uri: page://self/shopping/shipping-edit
+├── method: GET
+├── links[0]: self:goShoppingShipping
+├── resource_request get 'page://self/shopping/shipping-edit'
+│   ├── uri: page://self/shopping/shipping-edit
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/shopping/shipping'
+│   ├── uri: page://self/shopping/shipping
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

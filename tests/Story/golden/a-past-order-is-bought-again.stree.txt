@@ -1,0 +1,153 @@
+link_request get 'page://self/mypage/history#link=self:doReorder'
+├── uri: page://self/mypage/history
+├── method: GET
+├── links[0]: self:doReorder
+├── resource_request get 'page://self/mypage/history?orderNo=past0000000000000000000000000001'
+│   ├── uri: page://self/mypage/history
+│   ├── method: GET
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── replayable: true
+│   ├── becoming GetMypageHistoryInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── being_final MypageHistoryFetched input=[orderNo] inject=[session, orderQuery]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── message: 配送は平日希望です。
+│   │   │       ├── paymentMethod: 銀行振込
+│   │   │       ├── subtotal: 11000
+│   │   │       ├── deliveryFeeTotal: 600
+│   │   │       ├── charge: 0
+│   │   │       ├── discount: 0
+│   │   │       ├── tax: 1100
+│   │   │       ├── total: 12700
+│   │   │       ├── paymentTotal: 12700
+│   │   │       ├── addPoint: 127
+│   │   │       ├── usePoint: 0
+│   │   │       ├── orderStatus: 1
+│   │   │       ├── orderDate: 2026-04-01 10:00:00
+│   │   │       ├── paymentDate: 2026-04-01 10:00:00
+│   │   │       ├── shippings[0].name01: 山田
+│   │   │       ├── shippings[0].name02: 太郎
+│   │   │       ├── shippings[0].kana01: ヤマダ
+│   │   │       ├── shippings[0].kana02: タロウ
+│   │   │       ├── shippings[0].postalCode: 530-0001
+│   │   │       ├── shippings[0].prefName: 大阪府
+│   │   │       ├── shippings[0].addr01: 大阪市北区梅田
+│   │   │       ├── shippings[0].addr02: 1-2-3
+│   │   │       ├── shippings[0].phoneNumber: 0612345678
+│   │   │       ├── shippings[0].deliveryName: サンプル宅配便
+│   │   │       ├── shippings[0].deliveryDate: 2026-04-03
+│   │   │       ├── shippings[0].deliveryTime: 午前中
+│   │   │       ├── shippings[0].items[0].productCode: sample-001
+│   │   │       ├── shippings[0].items[0].productName: サンプル商品 A
+│   │   │       ├── shippings[0].items[0].quantity: 1
+│   │   │       ├── shippings[0].items[0].unitPrice: 1200
+│   │   │       ├── shippings[0].items[1].productCode: sample-002
+│   │   │       ├── shippings[0].items[1].productName: Sample Product B
+│   │   │       ├── shippings[0].items[1].quantity: 1
+│   │   │       ├── shippings[0].items[1].unitPrice: 9800
+│   │   │       ├── mailHistories[0].sendDate: 2026-04-01 10:05:00
+│   │   │       ├── mailHistories[0].mailSubject: ご注文ありがとうございます
+│   │   │       └── mailHistories[0].mailBody: この度はご注文いただきありがとうございます。
+商品の発送まで今しばらくお待ちください。
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/mypage/reorder?orderNo=past0000000000000000000000000001&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/mypage/reorder
+│   ├── method: POST
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming ReorderInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being ReorderResolving input=[orderNo, sessionPrefix] inject=[session, orderQuery, orderItems +1 items]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null-3>
+│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-1>
+│   │   │   └── close being_close
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── sessionPrefix: session-prefix-1
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── included[0].productCode: sample-001
+│   │   │       ├── included[0].productName: サンプル商品 A
+│   │   │       ├── included[0].requestedQuantity: 1
+│   │   │       ├── included[0].adjustedQuantity: 1
+│   │   │       ├── included[0].unitPrice: 1200
+│   │   │       ├── included[0].saleTypeId: 1
+│   │   │       ├── included[0].saleTypeName: 通常販売
+│   │   │       ├── included[0].deliveryFee: 0
+│   │   │       ├── included[0].stockUnlimited: false
+│   │   │       ├── included[0].stock: 50
+│   │   │       ├── included[1].productCode: sample-002
+│   │   │       ├── included[1].productName: Sample Product B
+│   │   │       ├── included[1].requestedQuantity: 1
+│   │   │       ├── included[1].adjustedQuantity: 1
+│   │   │       ├── included[1].unitPrice: 9800
+│   │   │       ├── included[1].saleTypeId: 1
+│   │   │       ├── included[1].saleTypeName: 通常販売
+│   │   │       ├── included[1].deliveryFee: 0
+│   │   │       └── included[1].stockUnlimited: true
+│   │   ├── being_final Reordered input=[customerId, sessionPrefix, orderNo +2 items] inject=[cartQuery, cartCommand +1 items]
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-4>
+│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null-5>
+│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── addedCount: 2
+│   │   │       ├── skippedCount: 0
+│   │   │       └── cartKeys[0]: session-prefix-1_1
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 201
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/cart'
+│   ├── uri: page://self/cart
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCartsInput
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-4>
+│   │   │   └── close being_final_close
+│   │   │       ├── carts[0].cartKey: session-prefix-1_1
+│   │   │       ├── carts[0].saleTypeId: 1
+│   │   │       ├── carts[0].saleTypeName: 通常販売
+│   │   │       ├── carts[0].items[0].productCode: sample-001
+│   │   │       ├── carts[0].items[0].quantity: 3
+│   │   │       ├── carts[0].items[0].price: 1200
+│   │   │       ├── carts[0].items[0].productClassId: 0
+│   │   │       ├── carts[0].items[0].productId: 0
+│   │   │       ├── carts[0].items[0].productName: サンプル商品 A
+│   │   │       ├── carts[0].totalPrice: 3600
+│   │   │       ├── carts[0].deliveryFeeTotal: 0
+│   │   │       ├── carts[0].preOrderId: deadbeefcafe1234567890abcdef01234567890a
+│   │   │       ├── carts[1].cartKey: session-prefix-1_2
+│   │   │       ├── carts[1].saleTypeId: 2
+│   │   │       ├── carts[1].saleTypeName: 予約販売
+│   │   │       ├── carts[1].totalPrice: 0
+│   │   │       ├── carts[1].deliveryFeeTotal: 0
+│   │   │       ├── carts[1].preOrderId: deadbeefcafe1234567890abcdef01234567890b
+│   │   │       ├── cartCount: 2
+│   │   │       ├── totalPrice: 3600
+│   │   │       └── deliveryFeeTotal: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+POST page://self/mypage/reorder {"orderNo":"past0000000000000000000000000001","csrfToken":"[FILTERED]"}

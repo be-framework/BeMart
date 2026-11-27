@@ -1,0 +1,85 @@
+link_request get 'page://self/mypage/history#link=self:goProduct'
+├── uri: page://self/mypage/history
+├── method: GET
+├── links[0]: self:goProduct
+├── resource_request get 'page://self/mypage/history?orderNo=past0000000000000000000000000001'
+│   ├── uri: page://self/mypage/history
+│   ├── method: GET
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── replayable: true
+│   ├── becoming GetMypageHistoryInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── being_final MypageHistoryFetched input=[orderNo] inject=[session, orderQuery]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── message: 配送は平日希望です。
+│   │   │       ├── paymentMethod: 銀行振込
+│   │   │       ├── subtotal: 11000
+│   │   │       ├── deliveryFeeTotal: 600
+│   │   │       ├── charge: 0
+│   │   │       ├── discount: 0
+│   │   │       ├── tax: 1100
+│   │   │       ├── total: 12700
+│   │   │       ├── paymentTotal: 12700
+│   │   │       ├── addPoint: 127
+│   │   │       ├── usePoint: 0
+│   │   │       ├── orderStatus: 1
+│   │   │       ├── orderDate: 2026-04-01 10:00:00
+│   │   │       ├── paymentDate: 2026-04-01 10:00:00
+│   │   │       ├── shippings[0].name01: 山田
+│   │   │       ├── shippings[0].name02: 太郎
+│   │   │       ├── shippings[0].kana01: ヤマダ
+│   │   │       ├── shippings[0].kana02: タロウ
+│   │   │       ├── shippings[0].postalCode: 530-0001
+│   │   │       ├── shippings[0].prefName: 大阪府
+│   │   │       ├── shippings[0].addr01: 大阪市北区梅田
+│   │   │       ├── shippings[0].addr02: 1-2-3
+│   │   │       ├── shippings[0].phoneNumber: 0612345678
+│   │   │       ├── shippings[0].deliveryName: サンプル宅配便
+│   │   │       ├── shippings[0].deliveryDate: 2026-04-03
+│   │   │       ├── shippings[0].deliveryTime: 午前中
+│   │   │       ├── shippings[0].items[0].productCode: sample-001
+│   │   │       ├── shippings[0].items[0].productName: サンプル商品 A
+│   │   │       ├── shippings[0].items[0].quantity: 1
+│   │   │       ├── shippings[0].items[0].unitPrice: 1200
+│   │   │       ├── shippings[0].items[1].productCode: sample-002
+│   │   │       ├── shippings[0].items[1].productName: Sample Product B
+│   │   │       ├── shippings[0].items[1].quantity: 1
+│   │   │       ├── shippings[0].items[1].unitPrice: 9800
+│   │   │       ├── mailHistories[0].sendDate: 2026-04-01 10:05:00
+│   │   │       ├── mailHistories[0].mailSubject: ご注文ありがとうございます
+│   │   │       └── mailHistories[0].mailBody: この度はご注文いただきありがとうございます。
+商品の発送まで今しばらくお待ちください。
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/product?productCode=sample-001'
+│   ├── uri: page://self/product
+│   ├── method: GET
+│   ├── params.productCode: sample-001
+│   ├── replayable: true
+│   ├── becoming GetProductInput
+│   │   ├── productCode: sample-001
+│   │   ├── being_final ProductFetched input=[productCode] inject=[productQuery]
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-2>
+│   │   │   └── close being_final_close
+│   │   │       ├── productCode: sample-001
+│   │   │       ├── productName: サンプル商品 A
+│   │   │       ├── price02: 1200
+│   │   │       └── stock: 50
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

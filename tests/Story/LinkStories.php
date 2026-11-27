@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Story;
 
 use BEAR\Resource\Code;
+use BEAR\Resource\Exception\LinkException;
 use BEAR\Resource\Exception\LinkRelException;
 use BEAR\Resource\Exception\ParameterException;
 use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
@@ -26,6 +27,11 @@ use function uri_template;
  */
 final class LinkStories
 {
+    private const string MEMBER_ADDRESS = 'addr00000000000000000000000000a1';
+    private const string PAST_ORDER = 'past0000000000000000000000000001';
+    /** The order the Fake shopping fixtures hold for the checkout of StoryModule::MEMBER_ID */
+    private const string PRE_ORDER = 'aceface0000000000000000000000000000a11ce';
+
     /**
      * @return array<string, StoryRow>
      */
@@ -1046,6 +1052,261 @@ final class LinkStories
     }
 
     /**
+     * Stories a signed-in customer follows, run with StoryModule::MEMBER_ID. Same row shape as followable(), but not part
+     * of it: the HTTP apps have no customer signed in.
+     *
+     * @return array<string, StoryRow>
+     */
+    public static function forMembers(): array
+    {
+        return self::memberAccount() + self::memberAddresses() + self::memberPurchase();
+    }
+
+    /**
+     * Stories of a customer who has ordered before, run with StoryModule::BUYER_ID.
+     *
+     * The Fake order history belongs to this customer, who has no profile, so the dashboard is out of reach.
+     *
+     * @return array<string, StoryRow>
+     */
+    public static function forBuyers(): array
+    {
+        $order = self::PAST_ORDER;
+
+        return [
+            'order history opens a past order' => [
+                uri_template('page://self/mypage/order-history#link=self:goMypageHistory{?orderNo}', ['orderNo' => $order]),
+                Code::OK,
+                '/mypage/history',
+                ['orderNo' => $order],
+                'flow-customer-account-maintenance',
+            ],
+            'a past order leads to its product' => [
+                uri_template('page://self/mypage/history{?orderNo}#link=self:goProduct{?productCode}', ['orderNo' => $order, 'productCode' => 'sample-001']),
+                Code::OK,
+                '/product',
+                ['productCode' => 'sample-001'],
+                'flow-customer-purchase',
+            ],
+            'a past order is bought again' => [
+                uri_template('page://self/mypage/history{?orderNo}#link=self:doReorder{?form*}', ['orderNo' => $order, 'form' => self::form(['orderNo' => $order])]),
+                Code::OK,
+                '/cart',
+                [],
+                'flow-customer-purchase',
+            ],
+        ];
+    }
+
+    /**
+     * flow-customer-account-maintenance: the dashboard, the profile, the favorites and the withdrawal
+     *
+     * @return array<string, StoryRow>
+     */
+    private static function memberAccount(): array
+    {
+        $profile = self::form([
+            'email' => 'alice@example.com',
+            'name01' => '山田',
+            'name02' => 'アリス',
+            'kana01' => 'ヤマダ',
+            'kana02' => 'アリス',
+            'phoneNumber' => '0312345678',
+            'postalCode' => '1500001',
+            'pref' => '13',
+            'addr01' => '渋谷区',
+            'addr02' => '神南1-1',
+        ]);
+        $favorite = self::form(['productCode' => 'sample-001']);
+
+        return [
+            'dashboard leads to the order history' => [
+                'page://self/mypage#link=self:goOrderHistory',
+                Code::OK,
+                '/mypage/order-history',
+                [],
+                'flow-customer-account-maintenance',
+            ],
+            'dashboard leads to the product list' => [
+                'page://self/mypage#link=self:goProductList',
+                Code::OK,
+                '/products',
+                [],
+                'flow-customer-purchase',
+            ],
+            'profile change ends on its completion page and returns to the dashboard' => [
+                uri_template('page://self/mypage#link=self:goMypageChange,self:doUpdateCustomer{?form*},self:goMypageChangeComplete,self:goMypage', ['form' => $profile]),
+                Code::OK,
+                '/mypage',
+                [],
+                'flow-customer-account-maintenance',
+            ],
+            'profile change page leads back to the dashboard' => [
+                'page://self/mypage/change#link=self:goMypage',
+                Code::OK,
+                '/mypage',
+                [],
+                'flow-customer-account-maintenance',
+            ],
+            'favorite is added and removed from the favorite list' => [
+                uri_template('page://self/mypage#link=self:goFavoriteList,self:doAddFavorite{?favorite*},self:doRemoveFavorite{?favorite*}', ['favorite' => $favorite]),
+                Code::OK,
+                '/mypage/favorite-list',
+                [],
+                'flow-customer-account-maintenance',
+            ],
+            'withdrawal is confirmed and completed' => [
+                uri_template('page://self/mypage#link=self:goMypageWithdraw,self:goMypageWithdrawConfirm,self:doWithdrawCustomer{?form*}', ['form' => self::form([])]),
+                Code::OK,
+                '/mypage/withdraw-complete',
+                [],
+                'flow-customer-account-maintenance',
+            ],
+            'withdrawal confirmation leads back to the dashboard' => [
+                'page://self/mypage/withdraw-confirm#link=self:goMypage',
+                Code::OK,
+                '/mypage',
+                [],
+                'flow-customer-account-maintenance',
+            ],
+            'favorite list leads to the withdrawal' => [
+                'page://self/mypage/favorite-list#link=self:goMypageWithdraw',
+                Code::OK,
+                '/mypage/withdraw',
+                [],
+                'flow-customer-account-maintenance',
+            ],
+        ];
+    }
+
+    /**
+     * flow-customer-account-maintenance: the address book
+     *
+     * @return array<string, StoryRow>
+     */
+    private static function memberAddresses(): array
+    {
+        $address = ['name01' => '山田', 'name02' => '花子', 'postalCode' => '1500001', 'pref' => '13', 'addr01' => '渋谷区', 'addr02' => '神南1-1', 'phoneNumber' => '0312345678'];
+
+        return [
+            'profile change leads to the address list and adds an address' => [
+                uri_template(
+                    'page://self/mypage/change-complete#link=self:goCustomerAddressList,self:doCreateCustomerAddress{?form*}',
+                    ['form' => self::form($address)],
+                ),
+                Code::OK,
+                '/mypage/address-list',
+                [],
+                'flow-customer-account-maintenance',
+            ],
+            'address is updated and deleted from the address list' => [
+                uri_template(
+                    'page://self/mypage/address-list#link=self:doUpdateCustomerAddress{?update*},self:doDeleteCustomerAddress{?delete*}',
+                    ['update' => self::form(['addressId' => self::MEMBER_ADDRESS, 'addr01' => '港区']), 'delete' => self::form(['addressId' => self::MEMBER_ADDRESS])],
+                ),
+                Code::OK,
+                '/mypage/address-list',
+                [],
+                'flow-customer-account-maintenance',
+            ],
+            'address page leads back to the address list' => [
+                uri_template('page://self/mypage/address{?addressId}#link=self:goCustomerAddressList', ['addressId' => self::MEMBER_ADDRESS]),
+                Code::OK,
+                '/mypage/address-list',
+                [],
+                'flow-customer-account-maintenance',
+            ],
+            'address list leads to the dashboard and on to the favorites' => [
+                'page://self/mypage/address-list#link=self:goMypage,self:goFavoriteList',
+                Code::OK,
+                '/mypage/favorite-list',
+                [],
+                'flow-customer-account-maintenance',
+            ],
+        ];
+    }
+
+    /**
+     * flow-customer-purchase: the cart and the checkout of a signed-in customer
+     *
+     * @return array<string, StoryRow>
+     */
+    private static function memberPurchase(): array
+    {
+        $item = self::form(['productCode' => 'sample-001', 'quantity' => '1']);
+        $confirm = self::form(['preOrderId' => self::PRE_ORDER, 'payment' => '2']);
+        $checkout = self::form(['preOrderId' => self::PRE_ORDER]);
+        $checkoutChain = 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:doConfirmOrder{?confirm*},self:doCheckout{?checkout*}';
+        $entry = 'page://self/cart#link=self:goCheckoutEntry,';
+
+        return [
+            'dashboard leads to the cart and a product is added' => [
+                uri_template('page://self/mypage#link=self:goCart,self:doAddCartItem{?item*}', ['item' => $item]),
+                Code::OK,
+                '/cart',
+                [],
+                'flow-customer-purchase',
+            ],
+            'checkout is confirmed and completed' => [
+                uri_template($checkoutChain, ['confirm' => $confirm, 'checkout' => $checkout]),
+                Code::OK,
+                '/shopping/complete',
+                [],
+                'flow-customer-purchase',
+            ],
+            'completed order leads to the dashboard' => [
+                uri_template($checkoutChain . ',self:goMypage', ['confirm' => $confirm, 'checkout' => $checkout]),
+                Code::OK,
+                '/mypage',
+                [],
+                ['flow-customer-purchase', 'flow-customer-account-maintenance'],
+            ],
+            'completed order leads back to the cart' => [
+                'page://self/shopping/complete#link=self:goCart',
+                Code::OK,
+                '/cart',
+                [],
+                'flow-customer-purchase',
+            ],
+            'shipping address is chosen' => [
+                uri_template($entry . 'self:goShoppingShipping,self:doSelectShippingAddress{?form*}', ['form' => self::form(['shippingAddressId' => self::MEMBER_ADDRESS])]),
+                Code::OK,
+                '/shopping',
+                [],
+                'flow-customer-purchase',
+            ],
+            'shipping address is edited' => [
+                uri_template($entry . 'self:goShoppingShippingEdit,self:doUpdateShippingAddress{?form*}', ['form' => self::form(['name01' => '山田', 'name02' => '花子', 'postalCode' => '1500001', 'pref' => '13', 'addr01' => '渋谷区', 'addr02' => '神南1-1', 'phoneNumber' => '0312345678'])]),
+                Code::OK,
+                '/shopping',
+                [],
+                'flow-customer-purchase',
+            ],
+            'shipping choice leads to the multiple shipping page and back to checkout' => [
+                $entry . 'self:goShoppingShipping,self:goShoppingShippingMultiple,self:goShopping',
+                Code::OK,
+                '/shopping',
+                [],
+                'flow-customer-purchase',
+            ],
+            'shipping edit leads back to the shipping choice' => [
+                'page://self/shopping/shipping-edit#link=self:goShoppingShipping',
+                Code::OK,
+                '/shopping/shipping',
+                [],
+                'flow-customer-purchase',
+            ],
+            'checkout of a signed-in customer ends on the error page and leads back to the cart' => [
+                'page://self/shopping#link=self:goShoppingError,self:goCart',
+                Code::OK,
+                '/cart',
+                [],
+                'flow-customer-purchase',
+            ],
+        ];
+    }
+
+    /**
      * The URI and the exception that stops the story.
      *
      * @return array<string, array{string, class-string<\Throwable>}>
@@ -1083,6 +1344,10 @@ final class LinkStories
             'the delivery address editor declares the customer page only on write methods' => [
                 uri_template('page://self/admin/customer-delivery-edit{?customerId}#link=self:goCustomer', ['customerId' => '0123456789abcdef0123456789abcdef']),
                 LinkRelException::class,
+            ],
+            'the guest checkout location is a page that redirects a guest to the login' => [
+                uri_template('page://self/shopping/non-member#link=self:doSubmitNonMember{?form*}', ['form' => self::form(self::nonMember())]),
+                LinkException::class,
             ],
         ];
     }
@@ -1249,6 +1514,23 @@ final class LinkStories
                 ['email' => 'story-customer@example.com'],
                 'flow-manage-customer',
             ],
+        ];
+    }
+
+    /** @return array<string, string> */
+    private static function nonMember(): array
+    {
+        return [
+            'name01' => '山田',
+            'name02' => '太郎',
+            'kana01' => 'ヤマダ',
+            'kana02' => 'タロウ',
+            'email' => 'taro@example.com',
+            'phoneNumber' => '0312345678',
+            'postalCode' => '1500001',
+            'pref' => '13',
+            'addr01' => '渋谷',
+            'addr02' => '1-1',
         ];
     }
 

@@ -1,0 +1,92 @@
+link_request get 'page://self/mypage/order-history#link=self:goMypageHistory'
+├── uri: page://self/mypage/order-history
+├── method: GET
+├── links[0]: self:goMypageHistory
+├── resource_request get 'page://self/mypage/order-history'
+│   ├── uri: page://self/mypage/order-history
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetOrderHistoryInput
+│   │   ├── historyLimit: 50
+│   │   ├── offset: 0
+│   │   ├── being_final OrderHistoryFetched input=[historyLimit, offset] inject=[session, orderQuery]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── orders[0].orderNo: past0000000000000000000000000001
+│   │   │       ├── orders[0].total: 12700
+│   │   │       ├── orders[0].paymentTotal: 12700
+│   │   │       ├── orders[0].orderDate: 2026-04-01 10:00:00
+│   │   │       ├── orders[0].paymentDate: 2026-04-01 10:00:00
+│   │   │       ├── orders[0].orderStatus: 1
+│   │   │       ├── orderCount: 1
+│   │   │       ├── limit: 50
+│   │   │       └── offset: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/mypage/history?orderNo=past0000000000000000000000000001'
+│   ├── uri: page://self/mypage/history
+│   ├── method: GET
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── replayable: true
+│   ├── becoming GetMypageHistoryInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── being_final MypageHistoryFetched input=[orderNo] inject=[session, orderQuery]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface<Null-2>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── message: 配送は平日希望です。
+│   │   │       ├── paymentMethod: 銀行振込
+│   │   │       ├── subtotal: 11000
+│   │   │       ├── deliveryFeeTotal: 600
+│   │   │       ├── charge: 0
+│   │   │       ├── discount: 0
+│   │   │       ├── tax: 1100
+│   │   │       ├── total: 12700
+│   │   │       ├── paymentTotal: 12700
+│   │   │       ├── addPoint: 127
+│   │   │       ├── usePoint: 0
+│   │   │       ├── orderStatus: 1
+│   │   │       ├── orderDate: 2026-04-01 10:00:00
+│   │   │       ├── paymentDate: 2026-04-01 10:00:00
+│   │   │       ├── shippings[0].name01: 山田
+│   │   │       ├── shippings[0].name02: 太郎
+│   │   │       ├── shippings[0].kana01: ヤマダ
+│   │   │       ├── shippings[0].kana02: タロウ
+│   │   │       ├── shippings[0].postalCode: 530-0001
+│   │   │       ├── shippings[0].prefName: 大阪府
+│   │   │       ├── shippings[0].addr01: 大阪市北区梅田
+│   │   │       ├── shippings[0].addr02: 1-2-3
+│   │   │       ├── shippings[0].phoneNumber: 0612345678
+│   │   │       ├── shippings[0].deliveryName: サンプル宅配便
+│   │   │       ├── shippings[0].deliveryDate: 2026-04-03
+│   │   │       ├── shippings[0].deliveryTime: 午前中
+│   │   │       ├── shippings[0].items[0].productCode: sample-001
+│   │   │       ├── shippings[0].items[0].productName: サンプル商品 A
+│   │   │       ├── shippings[0].items[0].quantity: 1
+│   │   │       ├── shippings[0].items[0].unitPrice: 1200
+│   │   │       ├── shippings[0].items[1].productCode: sample-002
+│   │   │       ├── shippings[0].items[1].productName: Sample Product B
+│   │   │       ├── shippings[0].items[1].quantity: 1
+│   │   │       ├── shippings[0].items[1].unitPrice: 9800
+│   │   │       ├── mailHistories[0].sendDate: 2026-04-01 10:05:00
+│   │   │       ├── mailHistories[0].mailSubject: ご注文ありがとうございます
+│   │   │       └── mailHistories[0].mailBody: この度はご注文いただきありがとうございます。
+商品の発送まで今しばらくお待ちください。
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

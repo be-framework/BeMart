@@ -30,7 +30,7 @@ use Ray\Di\Scope;
 
 /**
  * Records every resource request, and each request with links as the link_request they nest in, into the given
- * logger, with a signed-in admin and a guest customer.
+ * logger, with a signed-in admin and, unless a customer id is given, a guest customer.
  *
  * Links are followed with the method each #[Link] declares, as a client steps through a workflow. Wraps the module it
  * is given, as ObserveModule does, so the rename reaches that module's invoker.
@@ -38,12 +38,15 @@ use Ray\Di\Scope;
 final class StoryModule extends AbstractModule
 {
     public const string ADMIN_ID = 'ad000000000000000000000000000001';
+    public const string MEMBER_ID = '0123456789abcdef0123456789abcdef';
+    public const string BUYER_ID = 'customer-001';
     private const string ORIGINAL_INVOKER = 'original_invoker';
     private const string ORIGINAL_LINKER = 'original_linker';
 
     public function __construct(
         private readonly SemanticLoggerInterface $logger,
         AbstractModule $module,
+        private readonly string|null $customerId = null,
     ) {
         parent::__construct($module);
     }
@@ -71,7 +74,7 @@ final class StoryModule extends AbstractModule
         $this->bind(SemanticLoggerInterface::class)->toInstance($this->logger);
         // TestModule's DevBecoming flushes the logger after each becoming, which would split a story's tree.
         $this->bind(BecomingInterface::class)->to(Becoming::class);
-        $this->bind(CustomerSession::class)->toInstance(new FakeSession(null));
+        $this->bind(CustomerSession::class)->toInstance(new FakeSession($this->customerId));
         $this->bind(AdminSession::class)->toInstance(new FakeAdminSession(self::ADMIN_ID));
     }
 }

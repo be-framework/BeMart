@@ -1,0 +1,41 @@
+link_request get 'page://self/mypage/withdraw-confirm#link=self:goMypage'
+├── uri: page://self/mypage/withdraw-confirm
+├── method: GET
+├── links[0]: self:goMypage
+├── resource_request get 'page://self/mypage/withdraw-confirm'
+│   ├── uri: page://self/mypage/withdraw-confirm
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/mypage'
+│   ├── uri: page://self/mypage
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetMypageInput
+│   │   ├── orderLimit: 5
+│   │   ├── being_final MypageFetched input=[orderLimit] inject=[session, customerQuery, orderQuery +2 items]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null-3>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── email: alice@example.com
+│   │   │       ├── name01: 山田
+│   │   │       ├── name02: アリス
+│   │   │       ├── recentOrderCount: 0
+│   │   │       └── favoriteCount: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)
