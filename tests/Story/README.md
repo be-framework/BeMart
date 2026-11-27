@@ -39,29 +39,31 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 1. `LinkStories::forGuests()`（ゲストが辿る）か `forAdmins()`（管理者が辿る）に行を足す。`followable()` はこの 2 つを合わせたもの。会員として辿る行は `forMembers()`・`forBuyers()` に足す。キーは、そのストーリーが示すことを書いた文にする。値は URI、終点の code、終点の path、終点の body の部分一致（キーの `.` で入れ子の配列を指す）、**そのストーリーが辿る `flow-*` タグ**。タグは `alps.json` の遷移に付いたもので、2 つのフローを辿るなら配列で書く。
 2. `UPDATE_GOLDEN=1 vendor/bin/phpunit tests/Story` でツリーを記録する。
 3. 新しい golden を読み、辿った順と各ステップの code が意図どおりかを確かめてから commit する。`followable()`・`forMembers()`・`forBuyers()` の行は、golden がないと失敗する。
-4. `composer story:flows` で `docs/story-flows.md` を作り直す。
+4. `composer story:flows` で `docs/story-flows.md` と、行の上の図のリンクを作り直す。行は `'<ストーリー名>' => [` の形で書く（ループで組み立てた行にはリンクを付けられず、`composer cs:story` が失敗する）。
 
 会員のストーリーは in-process だけで流す（HTTP の 2 つのアプリには会員のログイン状態がない）。`forMembers()` は `StoryModule::MEMBER_ID`（プロフィール・住所・カート・購入前の注文がある会員）、`forBuyers()` は `StoryModule::BUYER_ID`（注文履歴だけがある会員。プロフィールがないので `/mypage` には入れず、履歴のページから始める）としてログインして辿る。
 
-辿れないことを示すストーリーは `unfollowable()`（URI と例外）に、最初のリクエストでファイルを送るストーリーは `uploads()` に書く。作ったものを読み戻すストーリー（201 の Location など）は Fake では保存されないので `persisted()` に書く（DB が付ける ID が毎回変わるので、ツリーは照合しない）。
+辿れないことを示すストーリーは `unfollowable()`（URI、例外、`flow-*`）に、最初のリクエストでファイルを送るストーリーは `uploads()`（URI、query、ファイル、code、path、`flow-*`）に書く。作ったものを読み戻すストーリー（201 の Location など）は Fake では保存されないので `persisted()` に書く（DB が付ける ID が毎回変わるので、ツリーは照合しない）。
 
 ## ALPS との突き合わせ
 
 行の最後の要素は、そのストーリーが辿るフローの `flow-*` タグ（`alps.json` の遷移の `tag` にある）。どのフローの、どの遷移をそのストーリーが見せるのかを、読む人に伝える。`alps.json` はテストを知らず、ストーリーが `flow-*` で ALPS を指す。
 
-テストは次の 2 つを確かめる。どちらも、6 本の `testFollows*`（`LinkStoryTest` に 3 本、`HttpLinkStoryTest`・`HtmlLinkStoryTest`・`PersistedLinkStoryTest` に 1 本ずつ）と `composer cs:story` が見る。
+テストは次を確かめる。`composer cs:story` はすべての行を、`testFollows*`・`testRefuses`・`testUploads` は流す行の上の 3 つを見る。
 
 - 宣言したタグが `alps.json` にある
-- URI の `#link=` が辿る rel がすべて、宣言したタグのどれかを持つ遷移である（複数宣言したときは、宣言したタグのどれもが、どれかの rel に付いている）
+- URI の `#link=` が辿る rel のうち `flow-*` タグを持つものはすべて、宣言したタグのどれかを持つ（複数宣言したときは、宣言したタグのどれもが、どれかの rel に付いている）
+- `flow-*` タグを持たない遷移（`goHelp*` など）はどのフローにも属さないので、照合では中立に扱う
+- 辿る遷移に `flow-*` タグがあれば、行はフローを宣言する。フローを宣言しない（図のリンクも付かない）のは、辿る遷移のどれにも `flow-*` タグがない行だけ
 
-食い違えば、行か `alps.json` のタグの正しい方を直す。タグのない行は照合しない（ALPS にフロータグのない遷移だけを辿る行など）。
+食い違えば、行か `alps.json` のタグの正しい方を直す。
 
 ```bash
 composer story:uncovered   # flow タグごとに、そのフローを宣言したストーリーが辿らない遷移を列挙し、食い違えば失敗する
-composer story:flows       # docs/story-flows.md を作り直す
+composer story:flows       # docs/story-flows.md と、行の上の図のリンクを作り直す
 ```
 
-[`docs/story-flows.md`](../../docs/story-flows.md) は、`flow-*` ごとの ALPS の図の URL、そのフローを宣言した行、そのフローを宣言した行が辿らない遷移の表（別のフローを宣言した行が辿る遷移も載る）。`composer cs`（`cs:story`）と `StoryCoverageTest` は、この表が古いと失敗する。
+[`docs/story-flows.md`](../../docs/story-flows.md) は、`flow-*` ごとの ALPS の図の URL、そのフローを宣言した行、そのフローを宣言した行が辿らない遷移の表（別のフローを宣言した行が辿る遷移も載る）。`flow-*` を宣言した行には、その行のフローで絞った公開の図へのリンク（`// @see https://be-framework.github.io/BeMart/alps.json.html?tag=…`）が真上に付く。`composer cs`（`cs:story`）と `StoryCoverageTest` は、この表かリンクが古いか、リンクが無いと失敗する。
 
 ## 書けないとき
 

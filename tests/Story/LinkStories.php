@@ -61,6 +61,7 @@ final class LinkStories
     private static function guest(string $inquiry, array $item): array
     {
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-inquiry&tagOnly=1&label=title
             'inquiry is answered with a ticket' => [
                 uri_template($inquiry, ['form' => self::form(self::inquiry())]),
                 Code::OK,
@@ -68,6 +69,7 @@ final class LinkStories
                 [],
                 'flow-customer-inquiry',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-inquiry,flow-customer-purchase&tagOnly=1&label=title
             'rejected inquiry stops the chain' => [
                 uri_template($inquiry . ',self:goTop', ['form' => self::form(['contactEmail' => 'not-an-email', 'mode' => 'contact'] + self::inquiry())]),
                 Code::BAD_REQUEST,
@@ -75,6 +77,7 @@ final class LinkStories
                 [],
                 ['flow-customer-inquiry', 'flow-customer-purchase'],
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'guest adds a cart item and is sent to checkout as a non-member' => [
                 uri_template('page://self/cart#link=self:doAddCartItem{?item*},self:goCheckoutEntry,self:goShoppingNonMember', ['item' => $item]),
                 Code::OK,
@@ -82,6 +85,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'guest finds a product in the list and puts it in the cart' => [
                 uri_template(
                     'page://self/#link=self:goProductList{?nameKeyword},self:goProduct{?productCode},self:doAddCartItem{?item*}',
@@ -105,12 +109,15 @@ final class LinkStories
         $help = static fn (string $rel): string => 'self:' . $rel . ',self:goTop,';
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-browse&tagOnly=1&label=title
             'every help page leads back to the top' => [
                 'page://self/#link=' . $help('goHelpAbout') . $help('goHelpGuide') . $help('goHelpAgreement') . $help('goHelpPrivacy') . 'self:goHelpTradeLaw',
                 Code::OK,
                 '/help/trade-law',
                 [],
+                'flow-browse',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance,flow-customer-purchase,flow-customer-registration&tagOnly=1&label=title
             'registration confirmation leads back to the top and on to the login' => [
                 'page://self/entry#link=self:goCustomerRegistrationConfirm,self:goTop,self:goLogin',
                 Code::OK,
@@ -118,6 +125,7 @@ final class LinkStories
                 [],
                 ['flow-customer-account-maintenance', 'flow-customer-purchase', 'flow-customer-registration'],
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-registration&tagOnly=1&label=title
             'login page leads to the registration form' => [
                 'page://self/login#link=self:goCustomerRegistration',
                 Code::OK,
@@ -125,6 +133,7 @@ final class LinkStories
                 [],
                 'flow-customer-registration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-account&tagOnly=1&label=title
             'password reset is requested from the login page' => [
                 uri_template('page://self/login#link=self:doRequestPasswordReset{?form*},self:goLogin', ['form' => self::form(['email' => 'alice@example.com'])]),
                 Code::OK,
@@ -143,6 +152,7 @@ final class LinkStories
     private static function guestPurchase(): array
     {
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'a product page leads back to the list and on to the cart' => [
                 uri_template('page://self/products#link=self:goProduct{?productCode},self:goProductList,self:goCart', ['productCode' => 'sample-001']),
                 Code::OK,
@@ -150,6 +160,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-registration&tagOnly=1&label=title
             'checkout login leads to the registration form' => [
                 'page://self/shopping/login#link=self:goCustomerRegistration',
                 Code::OK,
@@ -157,6 +168,7 @@ final class LinkStories
                 [],
                 'flow-customer-registration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'shipping address pages lead to each other' => [
                 'page://self/shopping/shipping#link=self:goShoppingShippingEdit,self:goShoppingShipping,self:goShoppingShippingMultiple',
                 Code::OK,
@@ -164,6 +176,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'multiple shipping editor leads back to the list' => [
                 'page://self/shopping/shipping-multiple-edit#link=self:goShoppingShippingMultiple',
                 Code::OK,
@@ -171,6 +184,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'checkout error leads back to the cart' => [
                 'page://self/shopping/error#link=self:goCart',
                 Code::OK,
@@ -178,6 +192,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'completed order leads back to the top and on to the cart' => [
                 'page://self/shopping/complete#link=self:goTop,self:goCart',
                 Code::OK,
@@ -185,6 +200,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'completed order leads back to the cart' => [
                 'page://self/shopping/complete#link=self:goCart',
                 Code::OK,
@@ -192,6 +208,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'shipping edit leads back to the shipping choice' => [
                 'page://self/shopping/shipping-edit#link=self:goShoppingShipping',
                 Code::OK,
@@ -219,6 +236,7 @@ final class LinkStories
         $payment = 'page://self/admin/payment/payment{?paymentId}#link=';
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-product-publish&tagOnly=1&label=title
             'updated product is shown' => [
                 uri_template($product . 'self:doUpdateProduct{?form*}', [
                     'productCode' => 'admin-active-001',
@@ -229,6 +247,7 @@ final class LinkStories
                 ['productCode' => 'admin-active-001'],
                 'flow-admin-product-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'deleted product leaves the list' => [
                 uri_template($product . 'self:doDeleteProduct{?form*}', [
                     'productCode' => 'admin-active-001',
@@ -239,6 +258,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'link query fills the href template' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=self:goClassCategoryList{?classNameId}', ['classNameId' => 'cn-color']),
                 Code::OK,
@@ -246,6 +266,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'a new link puts the category list beside the class names' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=new:goClassCategoryList{?classNameId}', ['classNameId' => 'cn-color']),
                 Code::OK,
@@ -253,6 +274,7 @@ final class LinkStories
                 ['goClassCategoryList.classNameId' => 'cn-color', 'goClassCategoryList.count' => 2],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'deleted payment method returns to the list' => [
                 uri_template($payment . 'self:doDeletePayment{?form*}', ['paymentId' => 'pay-cod', 'form' => self::form(['paymentId' => 'pay-cod'])]),
                 Code::OK,
@@ -260,6 +282,7 @@ final class LinkStories
                 [],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'updated payment method is shown again' => [
                 uri_template($payment . 'self:doUpdatePayment{?form*}', [
                     'paymentId' => 'pay-cod',
@@ -270,6 +293,7 @@ final class LinkStories
                 ['paymentId' => 'pay-cod'],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'deleted delivery leaves the list' => [
                 uri_template('page://self/admin/delivery/delivery-list#link=self:doDeleteDelivery{?form*}', ['form' => self::form(['deliveryId' => 'del-yamato'])]),
                 Code::OK,
@@ -277,6 +301,7 @@ final class LinkStories
                 [],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'page is updated from the list' => [
                 uri_template('page://self/admin/page/page-list#link=self:doUpdatePage{?form*}', ['form' => self::form(['pageId' => 'pg-company', 'pageName' => 'Story Page'])]),
                 Code::OK,
@@ -284,6 +309,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'layout list opens a layout and updates it' => [
                 uri_template('page://self/admin/layout/layout-list#link=self:goLayout{?layoutId},self:doUpdateLayout{?form*}', [
                     'layoutId' => 'lo-pc-default',
@@ -294,6 +320,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'a GET chain goes around the layout list and back' => [
                 uri_template('page://self/admin/layout/layout-list#link=self:goLayout{?layoutId},self:goLayoutList,self:goLayout{?layoutId}', ['layoutId' => 'lo-pc-default']),
                 Code::OK,
@@ -301,6 +328,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'unknown payment method stops the chain' => [
                 uri_template('page://self/admin/payment/payment-list#link=self:goPayment{?paymentId},self:doDeletePayment{?form*}', [
                     'paymentId' => 'nope',
@@ -311,6 +339,7 @@ final class LinkStories
                 [],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'bulk status change sends every product code' => [
                 'page://self/admin/product-list#link=self:doBulkUpdateProductStatus?' . http_build_query(
                     self::form(['productStatus' => '2']) + ['productCodes' => ['admin-active-001', 'admin-withdrawn-001']],
@@ -334,6 +363,7 @@ final class LinkStories
         $block = 'page://self/admin/block/block{?blockId}#link=';
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'news is opened from the list and updated' => [
                 uri_template($news . ',self:doUpdateNews{?form*}', [
                     'newsId' => 'nw-welcome',
@@ -344,6 +374,7 @@ final class LinkStories
                 ['newsId' => 'nw-welcome'],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'news opened from the list is deleted' => [
                 uri_template($news . ',self:doDeleteNews{?form*}', ['newsId' => 'nw-welcome', 'form' => self::form([])]),
                 Code::OK,
@@ -351,6 +382,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'a page is opened from the list and the list is shown again' => [
                 uri_template('page://self/admin/page/page-list#link=self:goPage{?pageId},self:goPageList', ['pageId' => 'pg-company']),
                 Code::OK,
@@ -358,6 +390,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'deleted page leaves the list' => [
                 uri_template('page://self/admin/page/page-list#link=self:doDeletePage{?form*}', ['form' => self::form(['pageId' => 'pg-foo'])]),
                 Code::OK,
@@ -365,6 +398,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'updated block returns to the block list' => [
                 uri_template($block . 'self:doUpdateBlock{?form*}', [
                     'blockId' => 'bk-user',
@@ -375,6 +409,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'deleted block leaves the list' => [
                 uri_template($block . 'self:doDeleteBlock{?form*}', ['blockId' => 'bk-user', 'form' => self::form(['blockId' => 'bk-user'])]),
                 Code::OK,
@@ -382,6 +417,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'trade law is updated' => [
                 uri_template('page://self/admin/trade-law#link=self:doUpdateTradeLaw{?form*}', [
                     'form' => self::form(['tradeLawBody' => "販売業者: Story Company\n所在地: Story City\n連絡先: 03-1234-5678"]),
@@ -404,6 +440,7 @@ final class LinkStories
         $calendar = 'page://self/admin/calendar#link=';
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'base info is updated and shown again' => [
                 uri_template('page://self/admin/base-info#link=self:doUpdateBaseInfo{?form*}', [
                     'form' => self::form([
@@ -425,6 +462,7 @@ final class LinkStories
                 ['shopName' => 'Story Shop'],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'base info leads to a payment method through the list' => [
                 uri_template('page://self/admin/base-info#link=self:goPaymentList,self:goPayment{?paymentId}', ['paymentId' => 'pay-cod']),
                 Code::OK,
@@ -432,6 +470,7 @@ final class LinkStories
                 ['paymentId' => 'pay-cod'],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'delivery opened from the list is updated' => [
                 uri_template('page://self/admin/delivery/delivery-list#link=self:goDelivery{?deliveryId},self:doUpdateDelivery{?form*}', [
                     'deliveryId' => 'del-yamato',
@@ -442,6 +481,7 @@ final class LinkStories
                 ['deliveryId' => 'del-yamato'],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'deleted tax rule leaves the list' => [
                 uri_template('page://self/admin/tax-rule/tax-rule-list#link=self:doDeleteTaxRule{?form*}', ['form' => self::form(['taxRuleId' => 'tax-8'])]),
                 Code::OK,
@@ -449,6 +489,7 @@ final class LinkStories
                 [],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'holiday is added to the calendar' => [
                 uri_template($calendar . 'self:doCreateCalendarHoliday{?form*}', [
                     'form' => self::form(['operation' => 'create', 'title' => 'Story Holiday', 'holiday' => '2027-02-11']),
@@ -458,6 +499,7 @@ final class LinkStories
                 [],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'holiday is updated in the calendar' => [
                 uri_template($calendar . 'self:doUpdateCalendar{?form*}', [
                     'form' => self::form(['operation' => 'update', 'calendarId' => '1', 'title' => 'Story Holiday', 'holiday' => '2027-02-12']),
@@ -467,6 +509,7 @@ final class LinkStories
                 [],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'holiday is deleted from the calendar' => [
                 uri_template($calendar . 'self:doDeleteCalendarHoliday{?form*}', ['form' => self::form(['calendarId' => '1'])]),
                 Code::OK,
@@ -489,6 +532,7 @@ final class LinkStories
         $customerId = '0123456789abcdef0123456789abcdef';
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'class name is updated from the list' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=self:doUpdateClassName{?form*}', [
                     'form' => self::form(['classNameId' => 'cn-color', 'classNameLabel' => 'Story Color']),
@@ -498,6 +542,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'deleted class name leaves the list' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=self:doDeleteClassName{?form*}', ['form' => self::form(['classNameId' => 'cn-color'])]),
                 Code::OK,
@@ -505,6 +550,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'class categories are opened and the class names are shown again' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=self:goClassCategoryList{?classNameId},self:goClassNameList', ['classNameId' => 'cn-color']),
                 Code::OK,
@@ -512,6 +558,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'class category is updated from the list' => [
                 uri_template('page://self/admin/class-category/class-category-list{?classNameId}#link=self:doUpdateClassCategory{?form*}', [
                     'classNameId' => 'cn-color',
@@ -522,6 +569,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'deleted class category leaves the list' => [
                 uri_template('page://self/admin/class-category/class-category-list{?classNameId}#link=self:doDeleteClassCategory{?form*}', [
                     'classNameId' => 'cn-color',
@@ -532,6 +580,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'class category list leads back to the class names' => [
                 uri_template('page://self/admin/class-category/class-category-list{?classNameId}#link=self:goClassNameList', ['classNameId' => 'cn-color']),
                 Code::OK,
@@ -539,6 +588,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'category is opened from the list' => [
                 uri_template($category, ['categoryId' => 'cat-food']),
                 Code::OK,
@@ -546,6 +596,7 @@ final class LinkStories
                 ['categoryId' => 'cat-food'],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'category opened from the list is updated' => [
                 uri_template($category . ',self:doUpdateCategory{?form*}', [
                     'categoryId' => 'cat-food',
@@ -556,6 +607,7 @@ final class LinkStories
                 ['categoryId' => 'cat-food'],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'category opened from the list is deleted' => [
                 uri_template($category . ',self:doDeleteCategory{?form*}', ['categoryId' => 'cat-food', 'form' => self::form(['categoryId' => 'cat-food'])]),
                 Code::OK,
@@ -563,6 +615,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-csv-exchange&tagOnly=1&label=title
             'categories are exported' => [
                 'page://self/admin/category/category-list#link=self:goExportCategory',
                 Code::OK,
@@ -570,6 +623,7 @@ final class LinkStories
                 ['rowCount' => 2],
                 'flow-admin-csv-exchange',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'deleted tag leaves the list' => [
                 uri_template('page://self/admin/tag/tag-list#link=self:doDeleteTag{?form*}', ['form' => self::form(['tagId' => 'tg-new'])]),
                 Code::OK,
@@ -577,6 +631,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-mail-template-maintenance&tagOnly=1&label=title
             'mail template subject is updated' => [
                 uri_template('page://self/admin/mail-template#link=self:doUpdateMailTemplate{?form*}', [
                     'form' => self::form(['mailTemplateId' => '1', 'mailSubject' => 'Story subject']),
@@ -586,6 +641,7 @@ final class LinkStories
                 [],
                 'flow-admin-mail-template-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-mail-template-maintenance&tagOnly=1&label=title
             'deleted mail template leaves the page' => [
                 uri_template('page://self/admin/mail-template#link=self:doDeleteMailTemplate{?form*}', ['form' => self::form(['mailTemplateId' => '1'])]),
                 Code::OK,
@@ -593,6 +649,7 @@ final class LinkStories
                 [],
                 'flow-admin-mail-template-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'mail template leads to the payment methods' => [
                 'page://self/admin/mail-template#link=self:goPaymentList',
                 Code::OK,
@@ -600,6 +657,7 @@ final class LinkStories
                 [],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-customer&tagOnly=1&label=title
             'customer is opened from the list and the list is shown again' => [
                 uri_template('page://self/admin/customer-list#link=self:goCustomer{?customerId},self:goCustomerList', ['customerId' => $customerId]),
                 Code::OK,
@@ -607,6 +665,7 @@ final class LinkStories
                 [],
                 'flow-manage-customer',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-customer&tagOnly=1&label=title
             'customer profile is updated' => [
                 uri_template('page://self/admin/customer{?customerId}#link=self:doUpdateCustomerProfile{?form*}', [
                     'customerId' => $customerId,
@@ -617,6 +676,7 @@ final class LinkStories
                 ['customerId' => $customerId],
                 'flow-manage-customer',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-customer&tagOnly=1&label=title
             'deleted customer leaves the list' => [
                 uri_template('page://self/admin/customer-list#link=self:doDeleteCustomer{?form*}', ['form' => self::form(['customerId' => $customerId])]),
                 Code::OK,
@@ -624,6 +684,7 @@ final class LinkStories
                 [],
                 'flow-manage-customer',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-customer&tagOnly=1&label=title
             'delivery address editor leads back to the customer list' => [
                 uri_template('page://self/admin/customer-delivery-edit{?customerId}#link=self:goCustomerList', ['customerId' => $customerId]),
                 Code::OK,
@@ -642,6 +703,7 @@ final class LinkStories
     private static function adminOrders(): array
     {
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
             'order exports lead to each other and back to the list' => [
                 'page://self/admin/order/export-order#link=self:goExportShipping,self:goOrderList',
                 Code::OK,
@@ -649,6 +711,7 @@ final class LinkStories
                 [],
                 'flow-admin-order-fulfillment',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
             'order pdf leads back to the list' => [
                 'page://self/admin/order/order-pdf#link=self:goOrderList',
                 Code::OK,
@@ -670,6 +733,7 @@ final class LinkStories
         $owner = 'shop-owner';
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'admin logs in and is asked for the second factor' => [
                 uri_template('page://self/admin/login#link=self:doAdminLogin{?form*}', [
                     'form' => self::form(['loginId' => 'test-admin', 'password' => 'local-dev-admin-password']),
@@ -679,6 +743,7 @@ final class LinkStories
                 [],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'admin logs out from the top page' => [
                 uri_template('page://self/admin/index#link=self:doAdminLogout{?form*}', ['form' => self::form([])]),
                 Code::OK,
@@ -686,6 +751,7 @@ final class LinkStories
                 [],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'second factor pages lead back to the login' => [
                 'page://self/admin/two-factor-auth#link=self:goAdminLogin',
                 Code::OK,
@@ -693,6 +759,7 @@ final class LinkStories
                 [],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'second factor setup leads back to the login' => [
                 'page://self/admin/two-factor-auth-set#link=self:goAdminLogin',
                 Code::OK,
@@ -700,6 +767,7 @@ final class LinkStories
                 [],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'admin top leads to the members and a member' => [
                 uri_template('page://self/admin/index#link=self:goMemberList,self:goMember{?loginId}', ['loginId' => $owner]),
                 Code::OK,
@@ -707,6 +775,7 @@ final class LinkStories
                 ['loginId' => $owner],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'member is opened from the list and the list is shown again' => [
                 uri_template($members . 'self:goMember{?loginId},self:goMemberList', ['loginId' => $owner]),
                 Code::OK,
@@ -714,6 +783,7 @@ final class LinkStories
                 [],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'authority role is changed from the member list' => [
                 uri_template($members . 'self:doUpdateAuthorityRole{?form*}', ['form' => self::form(['loginId' => $owner, 'authority' => '0'])]),
                 Code::OK,
@@ -721,6 +791,7 @@ final class LinkStories
                 ['loginId' => $owner],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'member is updated from the list' => [
                 uri_template($members . 'self:doUpdateMember{?form*}', ['form' => self::form(['loginId' => $owner, 'name' => 'Story Owner'])]),
                 Code::OK,
@@ -728,6 +799,7 @@ final class LinkStories
                 ['loginId' => $owner],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'member is deleted from the list' => [
                 uri_template($members . 'self:doDeleteMember{?form*}', ['form' => self::form(['loginId' => $owner])]),
                 Code::OK,
@@ -735,6 +807,7 @@ final class LinkStories
                 ['loginId' => $owner],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'login history leads to the security page which is updated' => [
                 uri_template('page://self/admin/login-history#link=self:goSecurity,self:doUpdateSecurity{?form*}', ['form' => self::form([])]),
                 Code::OK,
@@ -742,6 +815,7 @@ final class LinkStories
                 [],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'maintenance mode is switched on' => [
                 uri_template('page://self/admin/content/maintenance#link=self:doToggleMaintenance{?form*}', ['form' => self::form(['enabled' => '1'])]),
                 Code::OK,
@@ -749,6 +823,7 @@ final class LinkStories
                 [],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'cache is cleared' => [
                 uri_template('page://self/admin/content/cache#link=self:doClearCache{?form*}', ['form' => self::form([])]),
                 Code::OK,
@@ -771,6 +846,7 @@ final class LinkStories
         $product = ['productCode' => 'admin-active-001'];
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'admin top leads to the cache page' => [
                 'page://self/admin/index#link=self:goContentCache',
                 Code::OK,
@@ -778,6 +854,7 @@ final class LinkStories
                 [],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'news opened from the list is shown in the list again' => [
                 uri_template('page://self/admin/news/news-list#link=self:goNews{?newsId},self:goNewsList', ['newsId' => 'nw-welcome']),
                 Code::OK,
@@ -785,6 +862,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'css is updated' => [
                 uri_template('page://self/admin/content/css#link=self:doUpdateContentCss{?form*}', ['form' => self::form(['css' => 'body { color: red; }'])]),
                 Code::OK,
@@ -792,6 +870,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'js is updated' => [
                 uri_template('page://self/admin/content/js#link=self:doUpdateContentJs{?form*}', ['form' => self::form(['js' => 'console.log(1);'])]),
                 Code::OK,
@@ -799,6 +878,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-template-lifecycle&tagOnly=1&label=title
             'template is selected and the install page is opened' => [
                 uri_template($templates . 'self:doSelectTemplate{?form*},self:goTemplateInstall', ['form' => self::form(['templateId' => 'tp-default-sp'])]),
                 Code::OK,
@@ -806,6 +886,7 @@ final class LinkStories
                 [],
                 'flow-admin-template-lifecycle',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-template-lifecycle&tagOnly=1&label=title
             'template is deleted from the list' => [
                 uri_template($templates . 'self:doDeleteTemplate{?form*}', ['form' => self::form(['templateId' => 'tp-default-sp'])]),
                 Code::OK,
@@ -813,6 +894,7 @@ final class LinkStories
                 [],
                 'flow-admin-template-lifecycle',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-template-lifecycle&tagOnly=1&label=title
             'install page leads back to the template list' => [
                 'page://self/admin/template/template-add#link=self:goTemplateList',
                 Code::OK,
@@ -820,6 +902,7 @@ final class LinkStories
                 [],
                 'flow-admin-template-lifecycle',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-master-data-update&tagOnly=1&label=title
             'master data is selected and updated' => [
                 uri_template('page://self/admin/master-data#link=self:doSelectMasterData{?select*},self:doUpdateMasterData{?update*}', [
                     'select' => self::form(['masterType' => 'tag']),
@@ -830,6 +913,7 @@ final class LinkStories
                 [],
                 'flow-admin-master-data-update',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-csv-exchange&tagOnly=1&label=title
             'class names are imported from the exported csv' => [
                 uri_template('page://self/admin/class-name/class-name-export#link=self:doImportClassNameCsv{?form*}', ['form' => self::form(['csv' => "規格名ID,規格名\r\ncn-color,Color\r\n"])]),
                 Code::OK,
@@ -837,6 +921,7 @@ final class LinkStories
                 [],
                 'flow-admin-csv-exchange',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-csv-exchange&tagOnly=1&label=title
             'class categories are imported from the exported csv' => [
                 uri_template('page://self/admin/class-category/class-category-export#link=self:doImportClassCategoryCsv{?form*}', ['form' => self::form(['csv' => "規格分類ID,規格ID,規格分類名\r\ncc-red,cn-color,Red\r\n"])]),
                 Code::OK,
@@ -844,6 +929,7 @@ final class LinkStories
                 [],
                 'flow-admin-csv-exchange',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-csv-exchange&tagOnly=1&label=title
             'customer csv leads to the class name csv' => [
                 'page://self/admin/customer-csv#link=self:goExportClassName',
                 Code::OK,
@@ -851,6 +937,7 @@ final class LinkStories
                 [],
                 'flow-admin-csv-exchange',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-csv-exchange&tagOnly=1&label=title
             'product list leads to the product csv' => [
                 'page://self/admin/product-list#link=self:goExportProduct',
                 Code::OK,
@@ -858,6 +945,7 @@ final class LinkStories
                 [],
                 'flow-admin-csv-exchange',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-product-publish&tagOnly=1&label=title
             'product class page leads to the product and the list' => [
                 uri_template($productClass . 'self:goProduct{?productCode},self:goProductList', $product),
                 Code::OK,
@@ -865,6 +953,7 @@ final class LinkStories
                 [],
                 'flow-admin-product-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-product-publish&tagOnly=1&label=title
             'product classes are registered and the list is shown' => [
                 uri_template($productClass . 'self:doRegisterProductClass{?form*},self:goProductList', $product + ['form' => self::form($product + ['price02' => '1000', 'stock' => '5'])]),
                 Code::OK,
@@ -882,33 +971,48 @@ final class LinkStories
      */
     private static function adminNavigation(): array
     {
-        $rows = [];
-        $top = [
-            'goBaseInfo' => ['shop settings', '/admin/base-info', 'flow-admin-shop-configuration'],
-            'goBlockList' => ['block list', '/admin/block/block-list', 'flow-admin-content-publish'],
-            'goClassCategoryList' => ['class category list', '/admin/class-category/class-category-list', 'flow-manage-product'],
-            'goClassNameList' => ['class name list', '/admin/class-name/class-name-list', 'flow-manage-product'],
-            'goCustomerList' => ['customer list', '/admin/customer-list', 'flow-manage-customer'],
-            'goDeliveryList' => ['delivery list', '/admin/delivery/delivery-list', 'flow-admin-shop-configuration'],
-            'goLayoutList' => ['layout list', '/admin/layout/layout-list', 'flow-admin-content-publish'],
-            'goLoginHistoryList' => ['login history', '/admin/login-history', 'flow-admin-system-operation'],
-            'goMailTemplateList' => ['mail template list', '/admin/mail-template', 'flow-admin-mail-template-maintenance'],
-            'goNewsList' => ['news list', '/admin/news/news-list', 'flow-admin-content-publish'],
-            'goOrderList' => ['order list', '/admin/order-list', 'flow-admin-order-fulfillment'],
-            'goPageList' => ['page list', '/admin/page/page-list', 'flow-admin-content-publish'],
-            'goPaymentList' => ['payment list', '/admin/payment/payment-list', 'flow-admin-shop-configuration'],
-            'goPluginList' => ['plugin list', '/admin/plugin-list', 'flow-manage-plugin'],
-            'goProductList' => ['product list', '/admin/product-list', 'flow-admin-product-publish'],
-            'goTagList' => ['tag list', '/admin/tag/tag-list', 'flow-manage-product'],
-            'goTaxRuleList' => ['tax rule list', '/admin/tax-rule/tax-rule-list', 'flow-admin-shop-configuration'],
-            'goTemplateList' => ['template list', '/admin/template/template-list', 'flow-admin-template-lifecycle'],
-            'goTradeLawList' => ['trade law page', '/admin/trade-law', 'flow-admin-content-publish'],
-        ];
-        foreach ($top as $rel => [$page, $path, $flow]) {
-            $rows['admin top leads to the ' . $page] = ['page://self/admin/index#link=self:' . $rel, Code::OK, $path, [], $flow];
-        }
+        $top = 'page://self/admin/index#link=self:';
 
-        return $rows + [
+        return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
+            'admin top leads to the shop settings' => [$top . 'goBaseInfo', Code::OK, '/admin/base-info', [], 'flow-admin-shop-configuration'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
+            'admin top leads to the block list' => [$top . 'goBlockList', Code::OK, '/admin/block/block-list', [], 'flow-admin-content-publish'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
+            'admin top leads to the class category list' => [$top . 'goClassCategoryList', Code::OK, '/admin/class-category/class-category-list', [], 'flow-manage-product'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
+            'admin top leads to the class name list' => [$top . 'goClassNameList', Code::OK, '/admin/class-name/class-name-list', [], 'flow-manage-product'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-customer&tagOnly=1&label=title
+            'admin top leads to the customer list' => [$top . 'goCustomerList', Code::OK, '/admin/customer-list', [], 'flow-manage-customer'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
+            'admin top leads to the delivery list' => [$top . 'goDeliveryList', Code::OK, '/admin/delivery/delivery-list', [], 'flow-admin-shop-configuration'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
+            'admin top leads to the layout list' => [$top . 'goLayoutList', Code::OK, '/admin/layout/layout-list', [], 'flow-admin-content-publish'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
+            'admin top leads to the login history' => [$top . 'goLoginHistoryList', Code::OK, '/admin/login-history', [], 'flow-admin-system-operation'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-mail-template-maintenance&tagOnly=1&label=title
+            'admin top leads to the mail template list' => [$top . 'goMailTemplateList', Code::OK, '/admin/mail-template', [], 'flow-admin-mail-template-maintenance'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
+            'admin top leads to the news list' => [$top . 'goNewsList', Code::OK, '/admin/news/news-list', [], 'flow-admin-content-publish'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'admin top leads to the order list' => [$top . 'goOrderList', Code::OK, '/admin/order-list', [], 'flow-admin-order-fulfillment'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
+            'admin top leads to the page list' => [$top . 'goPageList', Code::OK, '/admin/page/page-list', [], 'flow-admin-content-publish'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
+            'admin top leads to the payment list' => [$top . 'goPaymentList', Code::OK, '/admin/payment/payment-list', [], 'flow-admin-shop-configuration'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-plugin&tagOnly=1&label=title
+            'admin top leads to the plugin list' => [$top . 'goPluginList', Code::OK, '/admin/plugin-list', [], 'flow-manage-plugin'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-product-publish&tagOnly=1&label=title
+            'admin top leads to the product list' => [$top . 'goProductList', Code::OK, '/admin/product-list', [], 'flow-admin-product-publish'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
+            'admin top leads to the tag list' => [$top . 'goTagList', Code::OK, '/admin/tag/tag-list', [], 'flow-manage-product'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
+            'admin top leads to the tax rule list' => [$top . 'goTaxRuleList', Code::OK, '/admin/tax-rule/tax-rule-list', [], 'flow-admin-shop-configuration'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-template-lifecycle&tagOnly=1&label=title
+            'admin top leads to the template list' => [$top . 'goTemplateList', Code::OK, '/admin/template/template-list', [], 'flow-admin-template-lifecycle'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
+            'admin top leads to the trade law page' => [$top . 'goTradeLawList', Code::OK, '/admin/trade-law', [], 'flow-admin-content-publish'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'product list leads to the category list and its csv' => [
                 'page://self/admin/product-list#link=self:goCategoryList,self:goExportCategory',
                 Code::OK,
@@ -916,6 +1020,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-product-publish&tagOnly=1&label=title
             'category edit leads to the product list' => [
                 'page://self/admin/category/edit#link=self:goProductList',
                 Code::OK,
@@ -923,6 +1028,7 @@ final class LinkStories
                 [],
                 'flow-admin-product-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-csv-exchange&tagOnly=1&label=title
             'category list leads to the order csv' => [
                 'page://self/admin/category/category-list#link=self:goExportOrder',
                 Code::OK,
@@ -930,6 +1036,7 @@ final class LinkStories
                 [],
                 'flow-admin-csv-exchange',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-csv-exchange&tagOnly=1&label=title
             'class name list leads to the class category csv' => [
                 'page://self/admin/class-name/class-name-list#link=self:goExportClassCategory',
                 Code::OK,
@@ -937,6 +1044,7 @@ final class LinkStories
                 [],
                 'flow-admin-csv-exchange',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-csv-exchange&tagOnly=1&label=title
             'order list leads to the customer csv' => [
                 'page://self/admin/order-list#link=self:goExportCustomer',
                 Code::OK,
@@ -944,6 +1052,7 @@ final class LinkStories
                 [],
                 'flow-admin-csv-exchange',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-csv-exchange&tagOnly=1&label=title
             'customer list leads to the class name csv' => [
                 'page://self/admin/customer-list#link=self:goExportClassName',
                 Code::OK,
@@ -951,6 +1060,7 @@ final class LinkStories
                 [],
                 'flow-admin-csv-exchange',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'payment, delivery and tax rule lists follow one another to the calendar' => [
                 'page://self/admin/payment/payment-list#link=self:goDeliveryList,self:goTaxRuleList,self:goCalendar',
                 Code::OK,
@@ -958,6 +1068,7 @@ final class LinkStories
                 [],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'news, page, block and layout lists follow one another' => [
                 'page://self/admin/news/news-list#link=self:goPageList,self:goBlockList,self:goLayoutList',
                 Code::OK,
@@ -965,6 +1076,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'trade law leads to the css page and the js page' => [
                 'page://self/admin/trade-law#link=self:goContentCss,self:goContentJs',
                 Code::OK,
@@ -972,6 +1084,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'cache leads to maintenance and the system information' => [
                 'page://self/admin/content/cache#link=self:goMaintenance,self:goSystemInfo',
                 Code::OK,
@@ -979,6 +1092,7 @@ final class LinkStories
                 [],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'security leads to the second factor setup and back to the verification' => [
                 'page://self/admin/security#link=self:goTwoFactorAuthSet,self:goTwoFactorAuth',
                 Code::OK,
@@ -986,6 +1100,7 @@ final class LinkStories
                 [],
                 'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'authority role leads to the login history' => [
                 'page://self/admin/authority-role#link=self:goLoginHistoryList',
                 Code::OK,
@@ -1006,6 +1121,7 @@ final class LinkStories
         $plugin = self::form(['pluginCode' => 'Sample/DisabledPlugin']);
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'tag is moved in the sort order' => [
                 uri_template('page://self/admin/tag/tag-list#link=self:doSortNoMove{?form*}', ['form' => self::form(['masterType' => 'tag', 'rowId' => 'tg-new', 'sortNo' => '2'])]),
                 Code::OK,
@@ -1013,6 +1129,7 @@ final class LinkStories
                 [],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'delivery is hidden from the list' => [
                 uri_template('page://self/admin/delivery/delivery-list#link=self:doToggleVisible{?form*}', ['form' => self::form(['masterType' => 'delivery', 'rowId' => 'del-yamato', 'visible' => '0'])]),
                 Code::OK,
@@ -1020,6 +1137,7 @@ final class LinkStories
                 [],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'class category is added to the class' => [
                 uri_template('page://self/admin/class-category/class-category-list#link=self:doCreateClassCategory{?form*}', ['form' => self::form(['classNameId' => 'cn-color', 'classCategoryName' => 'Blue'])]),
                 Code::OK,
@@ -1027,6 +1145,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-csv-exchange&tagOnly=1&label=title
             'categories are imported from csv' => [
                 uri_template('page://self/admin/category/category-list#link=self:doImportCategoryCsv{?form*}', ['form' => self::form(['csv' => "categoryId,categoryName\r\ncat-story,Story\r\n"])]),
                 Code::OK,
@@ -1034,6 +1153,7 @@ final class LinkStories
                 [],
                 'flow-admin-csv-exchange',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-plugin&tagOnly=1&label=title
             'plugin is enabled' => [
                 uri_template('page://self/admin/plugin-list#link=self:doEnablePlugin{?form*}', ['form' => $plugin]),
                 Code::OK,
@@ -1041,6 +1161,7 @@ final class LinkStories
                 [],
                 'flow-manage-plugin',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-plugin&tagOnly=1&label=title
             'plugin is disabled' => [
                 uri_template('page://self/admin/plugin-list#link=self:doDisablePlugin{?form*}', ['form' => $plugin]),
                 Code::OK,
@@ -1048,6 +1169,7 @@ final class LinkStories
                 [],
                 'flow-manage-plugin',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-plugin&tagOnly=1&label=title
             'plugin is uninstalled' => [
                 uri_template('page://self/admin/plugin-list#link=self:doUninstallPlugin{?form*}', ['form' => $plugin]),
                 Code::OK,
@@ -1055,6 +1177,7 @@ final class LinkStories
                 [],
                 'flow-manage-plugin',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-csv-exchange&tagOnly=1&label=title
             'shipping csv is imported' => [
                 uri_template('page://self/admin/order/export-shipping#link=self:doImportShippingCsv{?form*}', ['form' => self::form(['csv' => "shippingId,trackingNumber\r\n"])]),
                 Code::OK,
@@ -1088,6 +1211,7 @@ final class LinkStories
         $order = self::PAST_ORDER;
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'order history opens a past order' => [
                 uri_template('page://self/mypage/order-history#link=self:goMypageHistory{?orderNo}', ['orderNo' => $order]),
                 Code::OK,
@@ -1095,6 +1219,7 @@ final class LinkStories
                 ['orderNo' => $order],
                 'flow-customer-account-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'a past order leads to its product' => [
                 uri_template('page://self/mypage/history{?orderNo}#link=self:goProduct{?productCode}', ['orderNo' => $order, 'productCode' => 'sample-001']),
                 Code::OK,
@@ -1102,6 +1227,7 @@ final class LinkStories
                 ['productCode' => 'sample-001'],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'a past order is bought again' => [
                 uri_template('page://self/mypage/history{?orderNo}#link=self:doReorder{?form*}', ['orderNo' => $order, 'form' => self::form(['orderNo' => $order])]),
                 Code::OK,
@@ -1134,6 +1260,7 @@ final class LinkStories
         $favorite = self::form(['productCode' => 'sample-001']);
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'dashboard leads to the order history' => [
                 'page://self/mypage#link=self:goOrderHistory',
                 Code::OK,
@@ -1141,6 +1268,7 @@ final class LinkStories
                 [],
                 'flow-customer-account-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'dashboard leads to the product list' => [
                 'page://self/mypage#link=self:goProductList',
                 Code::OK,
@@ -1148,6 +1276,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'profile change ends on its completion page and returns to the dashboard' => [
                 uri_template('page://self/mypage#link=self:goMypageChange,self:doUpdateCustomer{?form*},self:goMypageChangeComplete,self:goMypage', ['form' => $profile]),
                 Code::OK,
@@ -1155,6 +1284,7 @@ final class LinkStories
                 [],
                 'flow-customer-account-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'profile change page leads back to the dashboard' => [
                 'page://self/mypage/change#link=self:goMypage',
                 Code::OK,
@@ -1162,6 +1292,7 @@ final class LinkStories
                 [],
                 'flow-customer-account-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'favorite is added and removed from the favorite list' => [
                 uri_template('page://self/mypage#link=self:goFavoriteList,self:doAddFavorite{?favorite*},self:doRemoveFavorite{?favorite*}', ['favorite' => $favorite]),
                 Code::OK,
@@ -1169,6 +1300,7 @@ final class LinkStories
                 [],
                 'flow-customer-account-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'withdrawal is confirmed and completed' => [
                 uri_template('page://self/mypage#link=self:goMypageWithdraw,self:goMypageWithdrawConfirm,self:doWithdrawCustomer{?form*}', ['form' => self::form([])]),
                 Code::OK,
@@ -1176,6 +1308,7 @@ final class LinkStories
                 [],
                 'flow-customer-account-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'withdrawal confirmation leads back to the dashboard' => [
                 'page://self/mypage/withdraw-confirm#link=self:goMypage',
                 Code::OK,
@@ -1183,6 +1316,7 @@ final class LinkStories
                 [],
                 'flow-customer-account-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'favorite list leads to the withdrawal' => [
                 'page://self/mypage/favorite-list#link=self:goMypageWithdraw',
                 Code::OK,
@@ -1203,6 +1337,7 @@ final class LinkStories
         $address = ['name01' => '山田', 'name02' => '花子', 'postalCode' => '1500001', 'pref' => '13', 'addr01' => '渋谷区', 'addr02' => '神南1-1', 'phoneNumber' => '0312345678'];
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'profile change leads to the address list and adds an address' => [
                 uri_template(
                     'page://self/mypage/change-complete#link=self:goCustomerAddressList,self:doCreateCustomerAddress{?form*}',
@@ -1213,6 +1348,7 @@ final class LinkStories
                 [],
                 'flow-customer-account-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'address is updated and deleted from the address list' => [
                 uri_template(
                     'page://self/mypage/address-list#link=self:doUpdateCustomerAddress{?update*},self:doDeleteCustomerAddress{?delete*}',
@@ -1223,6 +1359,7 @@ final class LinkStories
                 [],
                 'flow-customer-account-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'address page leads back to the address list' => [
                 uri_template('page://self/mypage/address{?addressId}#link=self:goCustomerAddressList', ['addressId' => self::MEMBER_ADDRESS]),
                 Code::OK,
@@ -1230,6 +1367,7 @@ final class LinkStories
                 [],
                 'flow-customer-account-maintenance',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance&tagOnly=1&label=title
             'address list leads to the dashboard and on to the favorites' => [
                 'page://self/mypage/address-list#link=self:goMypage,self:goFavoriteList',
                 Code::OK,
@@ -1254,6 +1392,7 @@ final class LinkStories
         $entry = 'page://self/cart#link=self:goCheckoutEntry,';
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'dashboard leads to the cart and a product is added' => [
                 uri_template('page://self/mypage#link=self:goCart,self:doAddCartItem{?item*}', ['item' => $item]),
                 Code::OK,
@@ -1261,6 +1400,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'checkout is confirmed and completed' => [
                 uri_template($checkoutChain, ['confirm' => $confirm, 'checkout' => $checkout]),
                 Code::OK,
@@ -1268,6 +1408,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase,flow-customer-account-maintenance&tagOnly=1&label=title
             'completed order leads to the dashboard' => [
                 uri_template($checkoutChain . ',self:goMypage', ['confirm' => $confirm, 'checkout' => $checkout]),
                 Code::OK,
@@ -1275,6 +1416,7 @@ final class LinkStories
                 [],
                 ['flow-customer-purchase', 'flow-customer-account-maintenance'],
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'shipping address is chosen' => [
                 uri_template($entry . 'self:goShoppingShipping,self:doSelectShippingAddress{?form*}', ['form' => self::form(['shippingAddressId' => self::MEMBER_ADDRESS])]),
                 Code::OK,
@@ -1282,6 +1424,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'shipping address is edited' => [
                 uri_template($entry . 'self:goShoppingShippingEdit,self:doUpdateShippingAddress{?form*}', ['form' => self::form(['name01' => '山田', 'name02' => '花子', 'postalCode' => '1500001', 'pref' => '13', 'addr01' => '渋谷区', 'addr02' => '神南1-1', 'phoneNumber' => '0312345678'])]),
                 Code::OK,
@@ -1289,6 +1432,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'shipping choice leads to the multiple shipping page and back to checkout' => [
                 $entry . 'self:goShoppingShipping,self:goShoppingShippingMultiple,self:goShopping',
                 Code::OK,
@@ -1296,6 +1440,7 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'checkout of a signed-in customer ends on the error page and leads back to the cart' => [
                 'page://self/shopping#link=self:goShoppingError,self:goCart',
                 Code::OK,
@@ -1307,65 +1452,84 @@ final class LinkStories
     }
 
     /**
-     * The URI and the exception that stops the story.
+     * The URI, the exception that stops the story, then the `flow-*` tag of alps.json the story tries to walk.
      *
-     * @return array<string, array{string, class-string<\Throwable>}>
+     * @return array<string, array{string, class-string<\Throwable>, string|list<string>}>
      */
     public static function unfollowable(): array
     {
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-inquiry&tagOnly=1&label=title
             'the index has no submit link' => [
                 uri_template('page://self/#link=self:doSubmitContact{?form*}', ['form' => self::form(self::inquiry())]),
                 LinkRelException::class,
+                'flow-customer-inquiry',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'an id made during the story is not in the URI' => [
                 uri_template('page://self/admin/news/news-list#link=self:doUpdateNews{?form*}', ['form' => self::form(['newsTitle' => 'Unreachable'])]),
                 ParameterException::class,
+                'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'a link declared only on write methods is missing from the page that is read' => [
                 uri_template('page://self/admin/delivery/delivery{?deliveryId}#link=self:goDeliveryList', ['deliveryId' => 'del-yamato']),
                 LinkRelException::class,
+                'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
             'the tracking number is declared only on the shipping address write method' => [
                 uri_template('page://self/admin/order/shipping-address{?orderNo}#link=self:doUpdateTrackingNumber{?form*}', [
                     'orderNo' => 'past0000000000000000000000000001',
                     'form' => self::form(['orderNo' => 'past0000000000000000000000000001', 'trackingNumber' => 'TRK0001']),
                 ]),
                 LinkRelException::class,
+                'flow-admin-order-fulfillment',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'the password form does not declare its submit link' => [
                 uri_template('page://self/admin/change-password#link=self:doChangePassword{?form*}', ['form' => self::form(['currentPassword' => 'a', 'newPassword' => 'b'])]),
                 LinkRelException::class,
+                'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'the block list declares the block page only on write methods' => [
                 'page://self/admin/block/block-list#link=self:goBlock',
                 LinkRelException::class,
+                'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-customer&tagOnly=1&label=title
             'the delivery address editor declares the customer page only on write methods' => [
                 uri_template('page://self/admin/customer-delivery-edit{?customerId}#link=self:goCustomer', ['customerId' => '0123456789abcdef0123456789abcdef']),
                 LinkRelException::class,
+                'flow-manage-customer',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'guest checkout is not implemented yet: GET /shopping sends a guest to the login' => [
                 uri_template('page://self/shopping/non-member#link=self:doSubmitNonMember{?form*}', ['form' => self::form(self::nonMember())]),
                 LinkException::class,
+                'flow-customer-purchase',
             ],
         ];
     }
 
     /**
-     * The first request uploads a file: its URI and query, the file, then the code and path the story ends on.
+     * The first request uploads a file: its URI and query, the file, the code and path the story ends on, then the
+     * `flow-*` tag of alps.json the story walks.
      *
-     * @return array<string, array{string, array<string, string>, string, int, string}>
+     * @return array<string, array{string, array<string, string>, string, int, string, string|list<string>}>
      */
     public static function uploads(): array
     {
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-template-lifecycle&tagOnly=1&label=title
             'installed template opens the install form again' => [
                 'page://self/admin/template/template-add#link=self:goTemplateInstall',
                 ['templateCode' => 'story-template', 'templateName' => 'Story Template', 'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN],
                 dirname(__DIR__) . '/fixtures/template-upload.zip',
                 Code::OK,
                 '/admin/template/template-add',
+                'flow-admin-template-lifecycle',
             ],
         ];
     }
@@ -1408,8 +1572,11 @@ final class LinkStories
     private static function persistedNews(array $news, string $created, string $updated): array
     {
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'created news is shown at its location' => [uri_template($created, $news), Code::OK, '/admin/news/news', ['newsTitle' => 'Story News'], 'flow-admin-content-publish'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'news id fills the href template of the next link' => [uri_template($updated, $news), Code::OK, '/admin/news/news', ['newsTitle' => 'Story News Updated'], 'flow-admin-content-publish'],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'deleted news leaves the list' => [
                 uri_template($updated . ',self:doDeleteNews{?deleted*}', $news),
                 Code::OK,
@@ -1417,6 +1584,7 @@ final class LinkStories
                 [],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-registration&tagOnly=1&label=title
             'visitor registers from the top page' => [
                 uri_template('page://self/#link=self:goCustomerRegistration,self:doRegisterCustomer{?form*}', [
                     'form' => self::form([
@@ -1451,6 +1619,7 @@ final class LinkStories
     private static function persistedCreates(): array
     {
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'created page is shown at its location' => [
                 uri_template('page://self/admin/page/page-list#link=self:doCreatePage{?form*}', ['form' => self::form(['pageName' => 'Story Page', 'pageUrl' => 'story-page', 'pageFileName' => 'story_page'])]),
                 Code::OK,
@@ -1458,6 +1627,7 @@ final class LinkStories
                 ['pageName' => 'Story Page'],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'created block is shown at its location' => [
                 uri_template('page://self/admin/block/block-list#link=self:doCreateBlock{?form*}', ['form' => self::form(['blockName' => 'Story Block', 'blockFileName' => 'story_block_new'])]),
                 Code::OK,
@@ -1465,6 +1635,7 @@ final class LinkStories
                 ['blockName' => 'Story Block'],
                 'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-product-publish&tagOnly=1&label=title
             'created product is shown at its location' => [
                 uri_template('page://self/admin/product-new#link=self:doCreateProduct{?form*}', ['form' => self::form(['productCode' => 'story-product', 'productName' => 'Story Product', 'price02' => '2468', 'stock' => '8', 'productStatus' => '1', 'description' => 'Created by a story.'])]),
                 Code::OK,
@@ -1472,6 +1643,7 @@ final class LinkStories
                 ['productName' => 'Story Product'],
                 'flow-admin-product-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'created product is copied and the copy is shown at its location' => [
                 uri_template('page://self/admin/product-new#link=self:doCreateProduct{?created*},self:doCopyProduct{?copy*}', [
                     'created' => self::form(['productCode' => 'story-product', 'productName' => 'Story Product', 'price02' => '2468', 'stock' => '8', 'productStatus' => '1', 'description' => 'Created by a story.']),
@@ -1482,6 +1654,7 @@ final class LinkStories
                 ['productCode' => 'story-product.copy', 'productName' => '(コピー) Story Product'],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'created category is shown at its location' => [
                 uri_template('page://self/admin/category/category-list#link=self:doCreateCategory{?form*}', ['form' => self::form(['categoryName' => 'Story Category', 'sortNo' => '90'])]),
                 Code::OK,
@@ -1489,6 +1662,7 @@ final class LinkStories
                 ['categoryName' => 'Story Category'],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'created class name is shown at its location' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=self:doCreateClassName{?form*}', ['form' => self::form(['classNameLabel' => 'Story Class'])]),
                 Code::OK,
@@ -1496,6 +1670,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'created payment method is shown at its location' => [
                 uri_template('page://self/admin/payment/payment-list#link=self:doCreatePayment{?form*}', ['form' => self::form(['paymentMethodName' => 'Story Pay', 'charge' => '220', 'ruleMin' => '0', 'ruleMax' => '999999', 'visible' => '1'])]),
                 Code::OK,
@@ -1503,6 +1678,7 @@ final class LinkStories
                 ['payment.paymentMethodName' => 'Story Pay'],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'created delivery is shown at its location' => [
                 uri_template('page://self/admin/delivery/delivery-list#link=self:doCreateDelivery{?form*}', ['form' => self::form(['deliveryName' => 'Story Delivery', 'visible' => '1'])]),
                 Code::OK,
@@ -1510,6 +1686,7 @@ final class LinkStories
                 ['delivery.deliveryName' => 'Story Delivery'],
                 'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'created tag is shown at its location' => [
                 uri_template('page://self/admin/tag/tag-list#link=self:doCreateTag{?form*}', ['form' => self::form(['tagName' => 'Story Tag'])]),
                 Code::OK,
@@ -1517,6 +1694,7 @@ final class LinkStories
                 [],
                 'flow-manage-product',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-customer&tagOnly=1&label=title
             'created customer is shown at its location' => [
                 uri_template('page://self/admin/customer-list#link=self:doCreateCustomer{?form*}', ['form' => self::form(['email' => 'story-customer@example.com', 'password' => 'Story-pass-2026', 'name01' => '管理', 'name02' => '顧客', 'kana01' => 'カンリ', 'kana02' => 'コキャク', 'phoneNumber' => '0312345678', 'postalCode' => '1000001', 'pref' => '13', 'addr01' => '千代田区', 'addr02' => '管理1-1'])]),
                 Code::OK,
