@@ -77,6 +77,8 @@ final class AdminProductCopyFormHtmlTest extends TestCase
         }
 
         $this->assertSame(self::PRODUCT_CODE . '.copy', $params['newProductCode'] ?? null);
-        $this->assertSame(Code::CREATED, $this->resource->post('page://self/admin/product-copy', $params)->code);
+        $copy = $this->resource->post('page://self/admin/product-copy', $params);
+        $this->assertSame(Code::SEE_OTHER, $copy->code);
+        $this->assertSame('/admin/product?productCode=' . self::PRODUCT_CODE . '.copy', $copy->headers['Location']);
     }
 }

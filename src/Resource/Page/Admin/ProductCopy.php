@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminProductCopied;
 use MyVendor\BeMart\Be\Input\AdminCopyProductInput;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -29,13 +30,14 @@ use function urlencode;
  * onPost only. CSRF enforced. The Be Final raises (in this order)
  * UnauthorizedAdmin (403), ProductNotFound (404 — source missing),
  * ProductCodeAlreadyInUse (409 — target slot occupied). Success: 201
- * with a Location header pointing at the new product's admin detail
- * URL.
+ * (303 in the HTML context) with a Location header pointing at the new
+ * product's admin detail URL.
  */
 class ProductCopy extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -61,8 +63,7 @@ class ProductCopy extends ResourceObject
 
         assert($final instanceof AdminProductCopied);
 
-        $this->code = Code::CREATED;
-        $this->headers['Location'] = sprintf('/admin/product?productCode=%s', urlencode($final->newProductCode));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/product?productCode=%s', urlencode($final->newProductCode)));
         $this->body = [
             'productCode' => $final->productCode,
             'newProductCode' => $final->newProductCode,
