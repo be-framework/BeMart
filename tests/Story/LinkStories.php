@@ -79,6 +79,12 @@ final class LinkStories
      */
     public static function forAdmins(): array
     {
+        return self::admin() + self::adminContentPublish();
+    }
+
+    /** @return array<string, array{string, int, string, array<string, mixed>}> */
+    private static function admin(): array
+    {
         $product = 'page://self/admin/product{?productCode}#link=';
         $payment = 'page://self/admin/payment/payment{?paymentId}#link=';
 
@@ -170,6 +176,70 @@ final class LinkStories
                 ),
                 Code::OK,
                 '/admin/product-list',
+                [],
+            ],
+        ];
+    }
+
+    /**
+     * flow-admin-content-publish
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function adminContentPublish(): array
+    {
+        $news = 'page://self/admin/news/news-list#link=self:goNews{?newsId}';
+        $block = 'page://self/admin/block/block{?blockId}#link=';
+
+        return [
+            'news is opened from the list and updated' => [
+                uri_template($news . ',self:doUpdateNews{?form*}', [
+                    'newsId' => 'nw-welcome',
+                    'form' => self::form(['newsTitle' => 'Story News', 'publishDate' => '2027-03-02 00:00:00', 'newsDescription' => 'Updated by a story.', 'linkMethod' => '0']),
+                ]),
+                Code::OK,
+                '/admin/news/news',
+                ['newsId' => 'nw-welcome'],
+            ],
+            'news opened from the list is deleted' => [
+                uri_template($news . ',self:doDeleteNews{?form*}', ['newsId' => 'nw-welcome', 'form' => self::form([])]),
+                Code::OK,
+                '/admin/news/news-list',
+                [],
+            ],
+            'a page is opened from the list and the list is shown again' => [
+                uri_template('page://self/admin/page/page-list#link=self:goPage{?pageId},self:goPageList', ['pageId' => 'pg-company']),
+                Code::OK,
+                '/admin/page/page-list',
+                [],
+            ],
+            'deleted page leaves the list' => [
+                uri_template('page://self/admin/page/page-list#link=self:doDeletePage{?form*}', ['form' => self::form(['pageId' => 'pg-foo'])]),
+                Code::OK,
+                '/admin/page/page-list',
+                [],
+            ],
+            'updated block returns to the block list' => [
+                uri_template($block . 'self:doUpdateBlock{?form*}', [
+                    'blockId' => 'bk-user',
+                    'form' => self::form(['blockId' => 'bk-user', 'blockName' => 'Story Block', 'blockFileName' => 'story_block']),
+                ]),
+                Code::OK,
+                '/admin/block/block-list',
+                [],
+            ],
+            'deleted block leaves the list' => [
+                uri_template($block . 'self:doDeleteBlock{?form*}', ['blockId' => 'bk-user', 'form' => self::form(['blockId' => 'bk-user'])]),
+                Code::OK,
+                '/admin/block/block-list',
+                [],
+            ],
+            'trade law is updated' => [
+                uri_template('page://self/admin/trade-law#link=self:doUpdateTradeLaw{?form*}', [
+                    'form' => self::form(['tradeLawBody' => "販売業者: Story Company\n所在地: Story City\n連絡先: 03-1234-5678"]),
+                ]),
+                Code::OK,
+                '/admin/trade-law',
                 [],
             ],
         ];

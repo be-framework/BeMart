@@ -1,0 +1,103 @@
+link_request get 'page://self/admin/news/news-list#link=self:goNews,self:doUpdateNews'
+├── uri: page://self/admin/news/news-list
+├── method: GET
+├── links[0]: self:goNews
+├── links[1]: self:doUpdateNews
+├── resource_request get 'page://self/admin/news/news-list'
+│   ├── uri: page://self/admin/news/news-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminNewsListInput
+│   │   ├── being_final AdminNewsListFetched inject=[adminSession, news]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.news: MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 1
+│   │   │       ├── news[0].newsId: nw-welcome
+│   │   │       ├── news[0].newsTitle: ようこそ
+│   │   │       ├── news[0].newsDescription: BeMart へようこそ。
+│   │   │       ├── news[0].publishDate: 2026-01-01T00:00:00+09:00
+│   │   │       └── news[0].linkMethod: false
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/news/news?newsId=nw-welcome'
+│   ├── uri: page://self/admin/news/news
+│   ├── method: GET
+│   ├── params.newsId: nw-welcome
+│   ├── replayable: true
+│   ├── becoming GetAdminNewsInput
+│   │   ├── newsId: nw-welcome
+│   │   ├── being_final AdminNewsFetched input=[newsId] inject=[adminSession, news]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.news: MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── newsId: nw-welcome
+│   │   │       ├── newsTitle: ようこそ
+│   │   │       ├── newsDescription: BeMart へようこそ。
+│   │   │       ├── publishDate: 2026-01-01T00:00:00+09:00
+│   │   │       └── linkMethod: false
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/news/news?newsId=nw-welcome&newsTitle=Story+News&publishDate=2027-03-02+00%3A00%3A00&newsDescription=Updated+by+a+story.&linkMethod=0&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/news/news
+│   ├── method: PUT
+│   ├── params.newsId: nw-welcome
+│   ├── params.newsTitle: Story News
+│   ├── params.publishDate: 2027-03-02 00:00:00
+│   ├── params.newsDescription: Updated by a story.
+│   ├── params.linkMethod: 0
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateNewsInput
+│   │   ├── newsId: nw-welcome
+│   │   ├── newsTitle: Story News
+│   │   ├── newsDescription: Updated by a story.
+│   │   ├── publishDate: 2027-03-02 00:00:00
+│   │   ├── linkMethod: false
+│   │   ├── being_final NewsUpdated input=[newsId, newsTitle, newsDescription +3 items] inject=[adminSession, news]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.news: MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── newsId: nw-welcome
+│   │   │       ├── newsTitle: Story News
+│   │   │       ├── newsDescription: Updated by a story.
+│   │   │       ├── publishDate: 2027-03-02 00:00:00
+│   │   │       └── linkMethod: false
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/news/news?newsId=nw-welcome'
+│   ├── uri: page://self/admin/news/news
+│   ├── method: GET
+│   ├── params.newsId: nw-welcome
+│   ├── replayable: true
+│   ├── becoming GetAdminNewsInput
+│   │   ├── newsId: nw-welcome
+│   │   ├── being_final AdminNewsFetched input=[newsId] inject=[adminSession, news]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.news: MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── newsId: nw-welcome
+│   │   │       ├── newsTitle: ようこそ
+│   │   │       ├── newsDescription: BeMart へようこそ。
+│   │   │       ├── publishDate: 2026-01-01T00:00:00+09:00
+│   │   │       └── linkMethod: false
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/news/news {"newsId":"nw-welcome","newsTitle":"Story News","publishDate":"2027-03-02 00:00:00","newsDescription":"Updated by a story.","linkMethod":"0","csrfToken":"[FILTERED]"}
