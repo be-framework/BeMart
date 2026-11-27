@@ -1,0 +1,129 @@
+link_request get 'page://self/admin/customer#link=self:doUpdateCustomerProfile'
+├── uri: page://self/admin/customer
+├── method: GET
+├── links[0]: self:doUpdateCustomerProfile
+├── resource_request get 'page://self/admin/customer?customerId=0123456789abcdef0123456789abcdef'
+│   ├── uri: page://self/admin/customer
+│   ├── method: GET
+│   ├── params.customerId: 0123456789abcdef0123456789abcdef
+│   ├── replayable: true
+│   ├── becoming GetAdminCustomerInput
+│   │   ├── selector: 0123456789abcdef0123456789abcdef
+│   │   ├── selectorType: customerId
+│   │   ├── being_final AdminCustomerFetched input=[selector, selectorType] inject=[adminSession, customerQuery, orderQuery +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-3>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── email: alice@example.com
+│   │   │       ├── name01: 山田
+│   │   │       ├── name02: アリス
+│   │   │       ├── kana01: ヤマダ
+│   │   │       ├── kana02: アリス
+│   │   │       ├── phoneNumber: 0312345678
+│   │   │       ├── postalCode: 1500001
+│   │   │       ├── pref: 13
+│   │   │       ├── addr01: 渋谷区
+│   │   │       ├── addr02: 神宮前1-1-1
+│   │   │       ├── birth: 1990-04-01
+│   │   │       ├── sex: 2
+│   │   │       ├── job: 7
+│   │   │       ├── customerStatus: 2
+│   │   │       ├── initialPoint: 0
+│   │   │       ├── orderCount: 0
+│   │   │       ├── totalSpent: 0
+│   │   │       └── favoriteCount: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/admin/customer?customerId=0123456789abcdef0123456789abcdef&email=alice%40example.com&name01=%E6%9B%B4%E6%96%B0&name02=%E9%A1%A7%E5%AE%A2&phoneNumber=0399998888&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/customer
+│   ├── method: POST
+│   ├── params.customerId: 0123456789abcdef0123456789abcdef
+│   ├── params.email: alice@example.com
+│   ├── params.name01: 更新
+│   ├── params.name02: 顧客
+│   ├── params.phoneNumber: 0399998888
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming AdminUpdateCustomerInput
+│   │   ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   ├── email: alice@example.com
+│   │   ├── name01: 更新
+│   │   ├── name02: 顧客
+│   │   ├── phoneNumber: 0399998888
+│   │   ├── password: [FILTERED]
+│   │   ├── being AdminCustomerUpdating input=[customerId, email, name01, name02 +12 items] inject=[adminSession, customerQuery +2 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.uniquenessChecker: MyVendor\BeMart\Be\Reason\Query\EmailUniquenessQueryInterface<Null-4>
+│   │   │   ├── inject.passwordHasher: MyVendor\BeMart\Be\Reason\Service\NativePasswordHasher
+│   │   │   └── close being_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── email: alice@example.com
+│   │   │       ├── name01: 更新
+│   │   │       ├── name02: 顧客
+│   │   │       └── phoneNumber: 0399998888
+│   │   ├── being_final AdminCustomerUpdated input=[customerId, email, name01, name02 +12 items] inject=[customerQuery, customerCommand]
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.customerCommand: MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface<Null-5>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── email: alice@example.com
+│   │   │       ├── name01: 更新
+│   │   │       ├── name02: 顧客
+│   │   │       ├── initialPoint: 0
+│   │   │       └── customerStatus: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/customer?customerId=0123456789abcdef0123456789abcdef'
+│   ├── uri: page://self/admin/customer
+│   ├── method: GET
+│   ├── params.customerId: 0123456789abcdef0123456789abcdef
+│   ├── replayable: true
+│   ├── becoming GetAdminCustomerInput
+│   │   ├── selector: 0123456789abcdef0123456789abcdef
+│   │   ├── selectorType: customerId
+│   │   ├── being_final AdminCustomerFetched input=[selector, selectorType] inject=[adminSession, customerQuery, orderQuery +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-3>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── email: alice@example.com
+│   │   │       ├── name01: 山田
+│   │   │       ├── name02: アリス
+│   │   │       ├── kana01: ヤマダ
+│   │   │       ├── kana02: アリス
+│   │   │       ├── phoneNumber: 0312345678
+│   │   │       ├── postalCode: 1500001
+│   │   │       ├── pref: 13
+│   │   │       ├── addr01: 渋谷区
+│   │   │       ├── addr02: 神宮前1-1-1
+│   │   │       ├── birth: 1990-04-01
+│   │   │       ├── sex: 2
+│   │   │       ├── job: 7
+│   │   │       ├── customerStatus: 2
+│   │   │       ├── initialPoint: 0
+│   │   │       ├── orderCount: 0
+│   │   │       ├── totalSpent: 0
+│   │   │       └── favoriteCount: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+POST page://self/admin/customer {"customerId":"0123456789abcdef0123456789abcdef","email":"alice@example.com","name01":"更新","name02":"顧客","phoneNumber":"0399998888","csrfToken":"[FILTERED]"}

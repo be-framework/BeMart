@@ -79,7 +79,7 @@ final class LinkStories
      */
     public static function forAdmins(): array
     {
-        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration();
+        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance();
     }
 
     /** @return array<string, array{string, int, string, array<string, mixed>}> */
@@ -322,6 +322,145 @@ final class LinkStories
     }
 
     /**
+     * flow-admin-class-maintenance, flow-admin-category-maintenance, flow-admin-tag-maintenance,
+     * flow-admin-mail-template-maintenance, flow-admin-customer-maintenance
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function adminMaintenance(): array
+    {
+        $category = 'page://self/admin/category/category-list#link=self:goCategory{?categoryId}';
+        $customerId = '0123456789abcdef0123456789abcdef';
+
+        return [
+            'class name is updated from the list' => [
+                uri_template('page://self/admin/class-name/class-name-list#link=self:doUpdateClassName{?form*}', [
+                    'form' => self::form(['classNameId' => 'cn-color', 'name' => 'Story Color']),
+                ]),
+                Code::OK,
+                '/admin/class-name/class-name-list',
+                [],
+            ],
+            'deleted class name leaves the list' => [
+                uri_template('page://self/admin/class-name/class-name-list#link=self:doDeleteClassName{?form*}', ['form' => self::form(['classNameId' => 'cn-color'])]),
+                Code::OK,
+                '/admin/class-name/class-name-list',
+                [],
+            ],
+            'class categories are opened and the class names are shown again' => [
+                uri_template('page://self/admin/class-name/class-name-list#link=self:goClassCategoryList{?classNameId},self:goClassNameList', ['classNameId' => 'cn-color']),
+                Code::OK,
+                '/admin/class-name/class-name-list',
+                [],
+            ],
+            'class category is updated from the list' => [
+                uri_template('page://self/admin/class-category/class-category-list{?classNameId}#link=self:doUpdateClassCategory{?form*}', [
+                    'classNameId' => 'cn-color',
+                    'form' => self::form(['classCategoryId' => 'cc-red', 'classNameId' => 'cn-color', 'name' => 'Story Red']),
+                ]),
+                Code::OK,
+                '/admin/class-category/class-category-list',
+                [],
+            ],
+            'deleted class category leaves the list' => [
+                uri_template('page://self/admin/class-category/class-category-list{?classNameId}#link=self:doDeleteClassCategory{?form*}', [
+                    'classNameId' => 'cn-color',
+                    'form' => self::form(['classCategoryId' => 'cc-red', 'classNameId' => 'cn-color']),
+                ]),
+                Code::OK,
+                '/admin/class-category/class-category-list',
+                [],
+            ],
+            'class category list leads back to the class names' => [
+                uri_template('page://self/admin/class-category/class-category-list{?classNameId}#link=self:goClassNameList', ['classNameId' => 'cn-color']),
+                Code::OK,
+                '/admin/class-name/class-name-list',
+                [],
+            ],
+            'category is opened from the list' => [
+                uri_template($category, ['categoryId' => 'cat-food']),
+                Code::OK,
+                '/admin/category/category',
+                ['categoryId' => 'cat-food'],
+            ],
+            'category opened from the list is updated' => [
+                uri_template($category . ',self:doUpdateCategory{?form*}', [
+                    'categoryId' => 'cat-food',
+                    'form' => self::form(['categoryId' => 'cat-food', 'categoryName' => 'Story Food']),
+                ]),
+                Code::OK,
+                '/admin/category/category',
+                ['categoryId' => 'cat-food'],
+            ],
+            'category opened from the list is deleted' => [
+                uri_template($category . ',self:doDeleteCategory{?form*}', ['categoryId' => 'cat-food', 'form' => self::form(['categoryId' => 'cat-food'])]),
+                Code::OK,
+                '/admin/category/category-list',
+                [],
+            ],
+            'categories are exported' => [
+                'page://self/admin/category/category-list#link=self:goExportCategory',
+                Code::OK,
+                '/admin/category/csv',
+                ['rowCount' => 2],
+            ],
+            'deleted tag leaves the list' => [
+                uri_template('page://self/admin/tag/tag-list#link=self:doDeleteTag{?form*}', ['form' => self::form(['tagId' => 'tg-new'])]),
+                Code::OK,
+                '/admin/tag/tag-list',
+                [],
+            ],
+            'mail template subject is updated' => [
+                uri_template('page://self/admin/mail-template#link=self:doUpdateMailTemplate{?form*}', [
+                    'form' => self::form(['mailTemplateId' => '1', 'mailSubject' => 'Story subject']),
+                ]),
+                Code::OK,
+                '/admin/mail-template',
+                [],
+            ],
+            'deleted mail template leaves the page' => [
+                uri_template('page://self/admin/mail-template#link=self:doDeleteMailTemplate{?form*}', ['form' => self::form(['mailTemplateId' => '1'])]),
+                Code::OK,
+                '/admin/mail-template',
+                [],
+            ],
+            'mail template leads to the payment methods' => [
+                'page://self/admin/mail-template#link=self:goPaymentList',
+                Code::OK,
+                '/admin/payment/payment-list',
+                [],
+            ],
+            'customer is opened from the list and the list is shown again' => [
+                uri_template('page://self/admin/customer-list#link=self:goCustomer{?customerId},self:goCustomerList', ['customerId' => $customerId]),
+                Code::OK,
+                '/admin/customer-list',
+                [],
+            ],
+            'customer profile is updated' => [
+                uri_template('page://self/admin/customer{?customerId}#link=self:doUpdateCustomerProfile{?form*}', [
+                    'customerId' => $customerId,
+                    'form' => self::form(['customerId' => $customerId, 'email' => 'alice@example.com', 'name01' => '更新', 'name02' => '顧客', 'phoneNumber' => '0399998888']),
+                ]),
+                Code::OK,
+                '/admin/customer',
+                ['customerId' => $customerId],
+            ],
+            'deleted customer leaves the list' => [
+                uri_template('page://self/admin/customer-list#link=self:doDeleteCustomer{?form*}', ['form' => self::form(['customerId' => $customerId])]),
+                Code::OK,
+                '/admin/customer-list',
+                [],
+            ],
+            'delivery address editor leads back to the customer list' => [
+                uri_template('page://self/admin/customer-delivery-edit{?customerId}#link=self:goCustomerList', ['customerId' => $customerId]),
+                Code::OK,
+                '/admin/customer-list',
+                [],
+            ],
+        ];
+    }
+
+    /**
      * The URI and the exception that stops the story.
      *
      * @return array<string, array{string, class-string<\Throwable>}>
@@ -339,6 +478,10 @@ final class LinkStories
             ],
             'a link declared only on write methods is missing from the page that is read' => [
                 uri_template('page://self/admin/delivery/delivery{?deliveryId}#link=self:goDeliveryList', ['deliveryId' => 'del-yamato']),
+                LinkRelException::class,
+            ],
+            'the delivery address editor declares the customer page only on write methods' => [
+                uri_template('page://self/admin/customer-delivery-edit{?customerId}#link=self:goCustomer', ['customerId' => '0123456789abcdef0123456789abcdef']),
                 LinkRelException::class,
             ],
         ];

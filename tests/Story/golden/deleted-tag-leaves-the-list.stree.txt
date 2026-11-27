@@ -1,0 +1,67 @@
+link_request get 'page://self/admin/tag/tag-list#link=self:doDeleteTag'
+├── uri: page://self/admin/tag/tag-list
+├── method: GET
+├── links[0]: self:doDeleteTag
+├── resource_request get 'page://self/admin/tag/tag-list'
+│   ├── uri: page://self/admin/tag/tag-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminTagListInput
+│   │   ├── being_final AdminTagListFetched inject=[adminSession, tags]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.tags: MyVendor\BeMart\Be\Reason\Query\TagStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── tags[0].tagId: tg-new
+│   │   │       ├── tags[0].tagName: 新商品
+│   │   │       ├── tags[1].tagId: tg-sale
+│   │   │       └── tags[1].tagName: セール
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request delete 'page://self/admin/tag/tag?tagId=tg-new&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/tag/tag
+│   ├── method: DELETE
+│   ├── params.tagId: tg-new
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming DeleteTagInput
+│   │   ├── tagId: tg-new
+│   │   ├── being_final TagDeleted input=[tagId] inject=[adminSession, tags, cacheInvalidator]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.tags: MyVendor\BeMart\Be\Reason\Query\TagStorageInterface<Null-1>
+│   │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
+│   │   │   └── close being_final_close
+│   │   │       └── tagId: tg-new
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/tag/tag-list'
+│   ├── uri: page://self/admin/tag/tag-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminTagListInput
+│   │   ├── being_final AdminTagListFetched inject=[adminSession, tags]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.tags: MyVendor\BeMart\Be\Reason\Query\TagStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── tags[0].tagId: tg-new
+│   │   │       ├── tags[0].tagName: 新商品
+│   │   │       ├── tags[1].tagId: tg-sale
+│   │   │       └── tags[1].tagName: セール
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+DELETE page://self/admin/tag/tag {"tagId":"tg-new","csrfToken":"[FILTERED]"}
