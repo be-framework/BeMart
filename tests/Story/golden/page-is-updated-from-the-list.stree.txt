@@ -32,21 +32,22 @@ link_request get 'page://self/admin/page/page-list#link=self:doUpdatePage'
 │   └── close resource_response
 │       ├── code: 200
 │       └── durationMs: [volatile]
-├── resource_request put 'page://self/admin/page/page?pageId=pg-company&name=Story+Page&csrfToken=%5BFILTERED%5D'
+├── resource_request put 'page://self/admin/page/page?pageId=pg-company&pageName=Story+Page&csrfToken=%5BFILTERED%5D'
 │   ├── uri: page://self/admin/page/page
 │   ├── method: PUT
 │   ├── params.pageId: pg-company
-│   ├── params.name: Story Page
+│   ├── params.pageName: Story Page
 │   ├── params.csrfToken: [FILTERED]
 │   ├── replayable: true
 │   ├── becoming UpdatePageInput
 │   │   ├── pageId: pg-company
+│   │   ├── pageName: Story Page
 │   │   ├── being_final PageUpdated input=[pageId, pageName, pageUrl, pageFileName] inject=[adminSession, pages]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
 │   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
 │   │   │   └── close being_final_close
 │   │   │       ├── pageId: pg-company
-│   │   │       ├── pageName: 会社案内
+│   │   │       ├── pageName: Story Page
 │   │   │       ├── pageUrl: company
 │   │   │       ├── pageFileName: company
 │   │   │       └── pageEditType: 0
@@ -81,4 +82,4 @@ link_request get 'page://self/admin/page/page-list#link=self:doUpdatePage'
     └── durationMs: [volatile]
 
 events:
-PUT page://self/admin/page/page {"pageId":"pg-company","name":"Story Page","csrfToken":"[FILTERED]"}
+PUT page://self/admin/page/page {"pageId":"pg-company","pageName":"Story Page","csrfToken":"[FILTERED]"}

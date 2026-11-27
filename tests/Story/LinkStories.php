@@ -135,7 +135,7 @@ final class LinkStories
                 [],
             ],
             'page is updated from the list' => [
-                uri_template('page://self/admin/page/page-list#link=self:doUpdatePage{?form*}', ['form' => self::form(['pageId' => 'pg-company', 'name' => 'Story Page'])]),
+                uri_template('page://self/admin/page/page-list#link=self:doUpdatePage{?form*}', ['form' => self::form(['pageId' => 'pg-company', 'pageName' => 'Story Page'])]),
                 Code::OK,
                 '/admin/page/page',
                 [],
