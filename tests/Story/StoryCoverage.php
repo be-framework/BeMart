@@ -44,7 +44,7 @@ final class StoryCoverage
     public const FLOWS_MARKDOWN = 'docs/story-flows.md';
 
     private const TRANSITION_TYPES = ['safe', 'unsafe', 'idempotent'];
-    private const DIAGRAM_URL = 'alps.json.html?tag=%s&label=title';
+    private const DIAGRAM_URL = 'alps.json.html?tag=%s&tagOnly=1&label=title';
 
     /** @var array<string, list<string>> flow tags by transition id */
     private array $transitions = [];
