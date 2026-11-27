@@ -71,6 +71,12 @@ class Shopping extends ResourceObject
     #[JsonSchema(schema: 'get-shopping.json', params: 'get-shopping.param.json')]
     #[Link(rel: 'doConfirmOrder', href: 'page://self/shopping/confirm', method: 'post')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
+    #[Link(rel: 'goShopping', href: 'page://self/shopping')]
+    #[Link(rel: 'goShoppingLogin', href: 'page://self/shopping/login')]
+    #[Link(rel: 'goShoppingNonMember', href: 'page://self/shopping/non-member')]
+    #[Link(rel: 'goShoppingError', href: 'page://self/shopping/error')]
+    #[Link(rel: 'goShoppingShipping', href: 'page://self/shopping/shipping')]
+    #[Link(rel: 'goShoppingShippingEdit', href: 'page://self/shopping/shipping-edit')]
     public function onGet(string $sessionPrefix = 'session-prefix-1'): static
     {
         try {

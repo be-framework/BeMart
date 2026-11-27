@@ -48,6 +48,7 @@ class History extends ResourceObject
     #[JsonSchema(schema: 'get-mypage-history.json', params: 'get-mypage-history.param.json')]
     #[Link(rel: 'doReorder', href: 'page://self/mypage/reorder', method: 'post')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
+    #[Link(rel: 'goProduct', href: 'page://self/product')]
     public function onGet(string $orderNo): static
     {
         $final = ($this->becoming)(new GetMypageHistoryInput(orderNo: $orderNo));

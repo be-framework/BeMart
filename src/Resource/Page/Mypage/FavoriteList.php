@@ -43,6 +43,7 @@ class FavoriteList extends ResourceObject
     #[Link(rel: 'doAddFavorite', href: 'page://self/mypage/favorite', method: 'post')]
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
+    #[Link(rel: 'goMypageWithdraw', href: 'page://self/mypage/withdraw')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetFavoriteListInput());

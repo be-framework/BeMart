@@ -44,6 +44,7 @@ class ForgotComplete extends ResourceObject
     #[JsonSchema(schema: 'get-forgot-complete.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[Link(rel: 'goTop', href: 'page://self/')]
+    #[Link(rel: 'doResetPassword', href: 'page://self/reset', method: 'post')]
     public function onGet(): static
     {
         $this->code = Code::OK;

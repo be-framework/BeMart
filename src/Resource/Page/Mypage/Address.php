@@ -90,6 +90,7 @@ class Address extends ResourceObject
     #[Link(rel: 'doCreateCustomerAddress', href: 'page://self/mypage/address-list', method: 'post')]
     #[Link(rel: 'doUpdateCustomerAddress', href: 'page://self/mypage/address', method: 'put')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
+    #[Link(rel: 'doDeleteCustomerAddress', href: 'page://self/mypage/address', method: 'delete')]
     public function onGet(string|null $addressId = null): static
     {
         $customerId = $this->session->customerId;

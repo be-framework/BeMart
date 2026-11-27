@@ -64,6 +64,7 @@ class Withdraw extends ResourceObject
     #[Alps('goMypageWithdraw')]
     #[JsonSchema(schema: 'get-mypage-withdraw.json')]
     #[Link(rel: 'doWithdrawCustomer', href: 'page://self/mypage/withdraw', method: 'post')]
+    #[Link(rel: 'goMypageWithdrawConfirm', href: 'page://self/mypage/withdraw-confirm')]
     public function onGet(): static
     {
         $customerId = $this->session->customerId;
