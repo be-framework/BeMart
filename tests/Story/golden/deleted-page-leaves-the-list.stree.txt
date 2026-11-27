@@ -9,7 +9,7 @@ link_request get 'page://self/admin/page/page-list#link=self:doDeletePage'
 │   ├── becoming GetAdminPageListInput
 │   │   ├── being_final AdminPageListFetched inject=[adminSession, pages]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 3
 │   │   │       ├── pages[0].pageId: pg-homepage
@@ -42,7 +42,7 @@ link_request get 'page://self/admin/page/page-list#link=self:doDeletePage'
 │   │   ├── pageId: pg-foo
 │   │   ├── being_final PageDeleted input=[pageId] inject=[adminSession, pages]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       └── pageId: pg-foo
 │   │   └── close becoming_close
@@ -57,7 +57,7 @@ link_request get 'page://self/admin/page/page-list#link=self:doDeletePage'
 │   ├── becoming GetAdminPageListInput
 │   │   ├── being_final AdminPageListFetched inject=[adminSession, pages]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 3
 │   │   │       ├── pages[0].pageId: pg-homepage

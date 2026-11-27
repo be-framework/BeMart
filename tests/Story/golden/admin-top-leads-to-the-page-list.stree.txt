@@ -16,7 +16,7 @@ link_request get 'page://self/admin/index#link=self:goPageList'
 │   ├── becoming GetAdminPageListInput
 │   │   ├── being_final AdminPageListFetched inject=[adminSession, pages]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 3
 │   │   │       ├── pages[0].pageId: pg-homepage

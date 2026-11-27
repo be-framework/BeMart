@@ -11,7 +11,7 @@ link_request get 'page://self/admin/member-list#link=self:doUpdateAuthorityRole'
 │   │   ├── offset: 0
 │   │   ├── being_final MemberListFetched input=[nameKeyword, limit, offset] inject=[adminSession, adminQuery]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.adminQuery: MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface<Null-1>
+│   │   │   ├── inject.adminQuery: MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── members[0].adminId: ad000000000000000000000000000001
 │   │   │       ├── members[0].loginId: test-admin
@@ -57,8 +57,8 @@ link_request get 'page://self/admin/member-list#link=self:doUpdateAuthorityRole'
 │   │   ├── authority: 0
 │   │   ├── being_final AuthorityRoleUpdated input=[loginId, authority] inject=[adminSession, adminQuery, adminCommand]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.adminQuery: MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface<Null-1>
-│   │   │   ├── inject.adminCommand: MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface<Null-2>
+│   │   │   ├── inject.adminQuery: MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface<Null>
+│   │   │   ├── inject.adminCommand: MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── adminId: ad000000000000000000000000000002
 │   │   │       ├── loginId: shop-owner

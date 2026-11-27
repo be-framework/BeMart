@@ -11,7 +11,7 @@ link_request get 'page://self/mypage/history#link=self:doReorder'
 │   │   ├── orderNo: past0000000000000000000000000001
 │   │   ├── being_final MypageHistoryFetched input=[orderNo] inject=[session, orderQuery]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── orderNo: past0000000000000000000000000001
 │   │   │       ├── customerId: customer-001
@@ -69,9 +69,9 @@ link_request get 'page://self/mypage/history#link=self:doReorder'
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being ReorderResolving input=[orderNo, sessionPrefix] inject=[session, orderQuery, orderItems +1 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
-│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null-3>
-│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null>
 │   │   │   └── close being_close
 │   │   │       ├── customerId: customer-001
 │   │   │       ├── sessionPrefix: session-prefix-1
@@ -96,9 +96,9 @@ link_request get 'page://self/mypage/history#link=self:doReorder'
 │   │   │       ├── included[1].deliveryFee: 0
 │   │   │       └── included[1].stockUnlimited: true
 │   │   ├── being_final Reordered input=[customerId, sessionPrefix, orderNo +2 items] inject=[cartQuery, cartCommand +1 items]
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-4>
-│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null-5>
-│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-1>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
+│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null>
+│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: customer-001
 │   │   │       ├── orderNo: past0000000000000000000000000001
@@ -117,7 +117,7 @@ link_request get 'page://self/mypage/history#link=self:doReorder'
 │   ├── becoming GetCartsInput
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-4>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── carts[0].cartKey: session-prefix-1_1
 │   │   │       ├── carts[0].saleTypeId: 1

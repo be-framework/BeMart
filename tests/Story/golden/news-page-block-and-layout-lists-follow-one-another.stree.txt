@@ -11,7 +11,7 @@ link_request get 'page://self/admin/news/news-list#link=self:goPageList,self:goB
 │   ├── becoming GetAdminNewsListInput
 │   │   ├── being_final AdminNewsListFetched inject=[adminSession, news]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.news: MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface<Null-1>
+│   │   │   ├── inject.news: MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 1
 │   │   │       ├── news[0].newsId: nw-welcome
@@ -31,7 +31,7 @@ link_request get 'page://self/admin/news/news-list#link=self:goPageList,self:goB
 │   ├── becoming GetAdminPageListInput
 │   │   ├── being_final AdminPageListFetched inject=[adminSession, pages]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-2>
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 3
 │   │   │       ├── pages[0].pageId: pg-homepage
@@ -61,7 +61,7 @@ link_request get 'page://self/admin/news/news-list#link=self:goPageList,self:goB
 │   ├── becoming GetAdminBlockListInput
 │   │   ├── being_final AdminBlockListFetched inject=[adminSession, blocks]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null-2>
+│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── blocks[0].blockId: bk-header
@@ -84,7 +84,7 @@ link_request get 'page://self/admin/news/news-list#link=self:goPageList,self:goB
 │   ├── becoming GetAdminLayoutListInput
 │   │   ├── being_final AdminLayoutListFetched inject=[adminSession, layouts]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.layouts: MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface<Null-3>
+│   │   │   ├── inject.layouts: MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── layouts[0].layoutId: lo-pc-default

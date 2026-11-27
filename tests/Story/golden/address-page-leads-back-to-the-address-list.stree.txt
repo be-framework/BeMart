@@ -17,7 +17,7 @@ link_request get 'page://self/mypage/address#link=self:goCustomerAddressList'
 │   ├── becoming GetCustomerAddressListInput
 │   │   ├── being_final CustomerAddressListFetched inject=[session, addresses]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null-1>
+│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── count: 1

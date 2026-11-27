@@ -10,7 +10,7 @@ link_request get 'page://self/admin/trade-law#link=self:goContentCss,self:goCont
 │   ├── becoming GetTradeLawInput
 │   │   ├── being_final TradeLawFetched inject=[adminSession, tradeLawStorage]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.tradeLawStorage: MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface<Null-1>
+│   │   │   ├── inject.tradeLawStorage: MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       └── tradeLawBody: 販売業者: 株式会社BeMart
 所在地: 東京都千代田区神田1-1-1

@@ -17,7 +17,7 @@ link_request get 'page://self/mypage/change-complete#link=self:goCustomerAddress
 │   ├── becoming GetCustomerAddressListInput
 │   │   ├── being_final CustomerAddressListFetched inject=[session, addresses]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null-1>
+│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── count: 1
@@ -59,7 +59,7 @@ link_request get 'page://self/mypage/change-complete#link=self:goCustomerAddress
 │   │   ├── phoneNumber: 0312345678
 │   │   ├── being_final CustomerAddressCreated input=[name01, name02, postalCode, pref, addr01 +5 items] inject=[session, addresses, ids]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null-1>
+│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null>
 │   │   │   ├── inject.ids: MyVendor\BeMart\Be\Reason\Provider\AddressIdProvider
 │   │   │   └── close being_final_close
 │   │   │       ├── addressId: addr-fake-next
@@ -83,7 +83,7 @@ link_request get 'page://self/mypage/change-complete#link=self:goCustomerAddress
 │   ├── becoming GetCustomerAddressListInput
 │   │   ├── being_final CustomerAddressListFetched inject=[session, addresses]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null-1>
+│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── count: 1

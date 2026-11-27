@@ -16,7 +16,7 @@ link_request get 'page://self/admin/index#link=self:goNewsList'
 │   ├── becoming GetAdminNewsListInput
 │   │   ├── being_final AdminNewsListFetched inject=[adminSession, news]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.news: MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface<Null-1>
+│   │   │   ├── inject.news: MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 1
 │   │   │       ├── news[0].newsId: nw-welcome

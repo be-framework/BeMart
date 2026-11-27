@@ -16,7 +16,7 @@ link_request get 'page://self/admin/index#link=self:goTaxRuleList'
 │   ├── becoming GetAdminTaxRuleListInput
 │   │   ├── being_final AdminTaxRuleListFetched inject=[adminSession, taxRules]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.taxRules: MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface<Null-1>
+│   │   │   ├── inject.taxRules: MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── taxRules[0].taxRuleId: tax-10

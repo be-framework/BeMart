@@ -12,7 +12,7 @@ link_request get 'page://self/admin/product-list#link=self:goCategoryList,self:g
 │   │   ├── offset: 0
 │   │   ├── being_final ProductListFetched input=[nameKeyword, limit, offset] inject=[adminSession, productQuery]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── products[0].productCode: sample-001
 │   │   │       ├── products[0].productName: サンプル商品 A
@@ -89,7 +89,7 @@ link_request get 'page://self/admin/product-list#link=self:goCategoryList,self:g
 │   ├── becoming GetAdminCategoryListInput
 │   │   ├── being_final AdminCategoryListFetched inject=[adminSession, categories]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-2>
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── categories[0].categoryId: cat-food
@@ -110,7 +110,7 @@ link_request get 'page://self/admin/product-list#link=self:goCategoryList,self:g
 │   ├── becoming ExportCategoryInput
 │   │   ├── being_final CategoryCsvExported inject=[adminSession, categories]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-2>
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── csv: categoryId,categoryName,parentId,sortNo
 cat-food,Food,,10

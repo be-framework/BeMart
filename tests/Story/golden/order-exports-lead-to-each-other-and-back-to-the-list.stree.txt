@@ -10,8 +10,8 @@ link_request get 'page://self/admin/order/export-order#link=self:goExportShippin
 │   ├── becoming AdminExportOrderInput
 │   │   ├── being_final AdminOrderCsvExported inject=[adminSession, orderQuery +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-1>
-│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null-2>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── csv: orderNo,customerId,orderStatus,orderDate,total,paymentTotal,subtotal,deliveryFeeTotal,charge,discount,tax
 past0000000000000000000000000001,customer-001,1,"2026-04-01 10:00:00",12700,12700,11000,600,0,0,1100
@@ -29,8 +29,8 @@ past0000000000000000000000000001,customer-001,1,"2026-04-01 10:00:00",12700,1270
 │   ├── becoming AdminExportShippingInput
 │   │   ├── being_final AdminShippingCsvExported inject=[adminSession, shippingAddresses +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.shippingAddresses: MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface<Null-3>
-│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null-2>
+│   │   │   ├── inject.shippingAddresses: MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface<Null>
+│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── csv: orderNo,name01,name02,postalCode,pref,addr01,addr02,phoneNumber,trackingNumber
 
@@ -49,7 +49,7 @@ past0000000000000000000000000001,customer-001,1,"2026-04-01 10:00:00",12700,1270
 │   │   ├── offset: 0
 │   │   ├── being_final AdminOrderListFetched input=[limit, offset] inject=[adminSession, orderQuery]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── orders[0].orderNo: past0000000000000000000000000001
 │   │   │       ├── orders[0].customerId: customer-001

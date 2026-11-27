@@ -16,7 +16,7 @@ link_request get 'page://self/admin/index#link=self:goMailTemplateList'
 │   ├── becoming GetMailTemplateListInput
 │   │   ├── being_final MailTemplateListFetched inject=[adminSession, mailTemplateStorage]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.mailTemplateStorage: MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface<Null-1>
+│   │   │   ├── inject.mailTemplateStorage: MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── mailTemplates[0].mailTemplateId: 1
 │   │   │       ├── mailTemplates[0].mailTemplateName: 注文完了メール

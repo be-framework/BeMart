@@ -16,7 +16,7 @@ link_request get 'page://self/admin/index#link=self:goBaseInfo'
 │   ├── becoming GetBaseInfoInput
 │   │   ├── being_final BaseInfoFetched inject=[adminSession, baseInfoStorage]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.baseInfoStorage: MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface<Null-1>
+│   │   │   ├── inject.baseInfoStorage: MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── shopName: BeMart
 │   │   │       ├── shopKana: ビーマート

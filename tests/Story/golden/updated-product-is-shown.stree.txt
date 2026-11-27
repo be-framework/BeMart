@@ -11,7 +11,7 @@ link_request get 'page://self/admin/product#link=self:doUpdateProduct'
 │   │   ├── productCode: admin-active-001
 │   │   ├── being_final AdminProductFetched input=[productCode] inject=[adminSession, productQuery]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── productCode: admin-active-001
 │   │   │       ├── productName: 管理画面用 商品A
@@ -45,8 +45,8 @@ link_request get 'page://self/admin/product#link=self:doUpdateProduct'
 │   │   ├── price02: 1500
 │   │   ├── being_final AdminProductUpdated input=[productCode, productName, price02, stock +4 items] inject=[adminSession, productQuery +2 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
-│   │   │   ├── inject.productCommand: MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface<Null-2>
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null>
+│   │   │   ├── inject.productCommand: MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface<Null>
 │   │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
 │   │   │   └── close being_final_close
 │   │   │       ├── productCode: admin-active-001
@@ -69,7 +69,7 @@ link_request get 'page://self/admin/product#link=self:doUpdateProduct'
 │   │   ├── productCode: admin-active-001
 │   │   ├── being_final AdminProductFetched input=[productCode] inject=[adminSession, productQuery]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── productCode: admin-active-001
 │   │   │       ├── productName: 管理画面用 商品A

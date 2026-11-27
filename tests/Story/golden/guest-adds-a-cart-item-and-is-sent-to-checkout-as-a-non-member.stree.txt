@@ -11,7 +11,7 @@ link_request get 'page://self/cart#link=self:doAddCartItem,self:goCheckoutEntry,
 │   ├── becoming GetCartsInput
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── carts[0].cartKey: session-prefix-1_1
 │   │   │       ├── carts[0].saleTypeId: 1
@@ -51,7 +51,7 @@ link_request get 'page://self/cart#link=self:doAddCartItem,self:goCheckoutEntry,
 │   │   ├── quantity: 1
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being QuantityAdjusted input=[productCode, quantity, sessionPrefix] inject=[productClassQuery]
-│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-2>
+│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null>
 │   │   │   └── close being_close
 │   │   │       ├── productCode: sample-001
 │   │   │       ├── requestedQuantity: 1
@@ -65,8 +65,8 @@ link_request get 'page://self/cart#link=self:doAddCartItem,self:goCheckoutEntry,
 │   │   │       ├── stock: 50
 │   │   │       └── cartKey: session-prefix-1_1
 │   │   ├── being CartMerged input=[productCode, requestedQuantity +8 items] inject=[cartQuery, productClassQuery]
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
-│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-2>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
+│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null>
 │   │   │   └── close being_close
 │   │   │       ├── productCode: sample-001
 │   │   │       ├── requestedQuantity: 1
@@ -87,7 +87,7 @@ link_request get 'page://self/cart#link=self:doAddCartItem,self:goCheckoutEntry,
 │   │   │       ├── mergedCart.deliveryFeeTotal: 0
 │   │   │       └── mergedCart.preOrderId: deadbeefcafe1234567890abcdef01234567890a
 │   │   ├── being_final CartItemAdded input=[productCode, requestedQuantity +5 items] inject=[cartCommand]
-│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null-3>
+│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── cartKey: session-prefix-1_1
 │   │   │       ├── productCode: sample-001
@@ -109,7 +109,7 @@ link_request get 'page://self/cart#link=self:doAddCartItem,self:goCheckoutEntry,
 │   ├── becoming GetCartsInput
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── carts[0].cartKey: session-prefix-1_1
 │   │   │       ├── carts[0].saleTypeId: 1
@@ -145,10 +145,10 @@ link_request get 'page://self/cart#link=self:doAddCartItem,self:goCheckoutEntry,
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +3 items] : Failed
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-4>
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
-│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null-5>
-│   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-6>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
+│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null>
+│   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null>
 │   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
 │   │   │   └── close being_error_close
 │   │   │       ├── error: MyVendor\BeMart\Be\Exception\UnauthenticatedException

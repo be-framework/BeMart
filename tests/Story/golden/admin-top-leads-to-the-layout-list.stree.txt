@@ -16,7 +16,7 @@ link_request get 'page://self/admin/index#link=self:goLayoutList'
 │   ├── becoming GetAdminLayoutListInput
 │   │   ├── being_final AdminLayoutListFetched inject=[adminSession, layouts]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.layouts: MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface<Null-1>
+│   │   │   ├── inject.layouts: MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── layouts[0].layoutId: lo-pc-default
