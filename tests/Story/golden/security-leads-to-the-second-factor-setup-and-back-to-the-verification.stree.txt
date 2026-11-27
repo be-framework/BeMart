@@ -1,0 +1,32 @@
+link_request get 'page://self/admin/security#link=self:goTwoFactorAuthSet,self:goTwoFactorAuth'
+├── uri: page://self/admin/security
+├── method: GET
+├── links[0]: self:goTwoFactorAuthSet
+├── links[1]: self:goTwoFactorAuth
+├── resource_request get 'page://self/admin/security'
+│   ├── uri: page://self/admin/security
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/two-factor-auth-set'
+│   ├── uri: page://self/admin/two-factor-auth-set
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/two-factor-auth'
+│   ├── uri: page://self/admin/two-factor-auth
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

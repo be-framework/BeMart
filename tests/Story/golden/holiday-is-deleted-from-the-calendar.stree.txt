@@ -1,0 +1,62 @@
+link_request get 'page://self/admin/calendar#link=self:doDeleteCalendarHoliday'
+├── uri: page://self/admin/calendar
+├── method: GET
+├── links[0]: self:doDeleteCalendarHoliday
+├── resource_request get 'page://self/admin/calendar'
+│   ├── uri: page://self/admin/calendar
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminCalendarInput
+│   │   ├── being_final AdminCalendarFetched inject=[adminSession, calendars]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── calendars[0].calendarId: 1
+│   │   │       ├── calendars[0].title: 元日
+│   │   │       └── calendars[0].holiday: 2026-01-01
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request delete 'page://self/admin/calendar?calendarId=1&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/calendar
+│   ├── method: DELETE
+│   ├── params.calendarId: 1
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming DeleteCalendarHolidayInput
+│   │   ├── calendarId: 1
+│   │   ├── being_final CalendarHolidayDeleted input=[calendarId] inject=[adminSession, calendars]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       └── calendarId: 1
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/calendar'
+│   ├── uri: page://self/admin/calendar
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminCalendarInput
+│   │   ├── being_final AdminCalendarFetched inject=[adminSession, calendars]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── calendars[0].calendarId: 1
+│   │   │       ├── calendars[0].title: 元日
+│   │   │       └── calendars[0].holiday: 2026-01-01
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+DELETE page://self/admin/calendar {"calendarId":"1","csrfToken":"[FILTERED]"}

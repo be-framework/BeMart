@@ -1,0 +1,45 @@
+link_request get 'page://self/mypage/address#link=self:goCustomerAddressList'
+├── uri: page://self/mypage/address
+├── method: GET
+├── links[0]: self:goCustomerAddressList
+├── resource_request get 'page://self/mypage/address?addressId=addr00000000000000000000000000a1'
+│   ├── uri: page://self/mypage/address
+│   ├── method: GET
+│   ├── params.addressId: addr00000000000000000000000000a1
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/mypage/address-list'
+│   ├── uri: page://self/mypage/address-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCustomerAddressListInput
+│   │   ├── being_final CustomerAddressListFetched inject=[session, addresses]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── count: 1
+│   │   │       ├── addresses[0].addressId: addr00000000000000000000000000a1
+│   │   │       ├── addresses[0].name01: 山田
+│   │   │       ├── addresses[0].name02: アリス
+│   │   │       ├── addresses[0].kana01: ヤマダ
+│   │   │       ├── addresses[0].kana02: アリス
+│   │   │       ├── addresses[0].phoneNumber: 0312345678
+│   │   │       ├── addresses[0].postalCode: 1500001
+│   │   │       ├── addresses[0].pref: 13
+│   │   │       ├── addresses[0].prefName: 東京都
+│   │   │       ├── addresses[0].addr01: 渋谷区
+│   │   │       └── addresses[0].addr02: 神宮前1-1-1
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

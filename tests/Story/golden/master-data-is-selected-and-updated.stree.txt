@@ -1,0 +1,68 @@
+link_request get 'page://self/admin/master-data#link=self:doSelectMasterData,self:doUpdateMasterData'
+├── uri: page://self/admin/master-data
+├── method: GET
+├── links[0]: self:doSelectMasterData
+├── links[1]: self:doUpdateMasterData
+├── resource_request get 'page://self/admin/master-data'
+│   ├── uri: page://self/admin/master-data
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/master-data?masterType=tag&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/master-data
+│   ├── method: PUT
+│   ├── params.masterType: tag
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming SelectMasterDataInput
+│   │   ├── masterType: tag
+│   │   ├── being_final MasterDataSelected input=[masterType] inject=[adminSession, masters]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.masters: MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistry
+│   │   │   └── close being_final_close
+│   │   │       ├── masterType: tag
+│   │   │       ├── rows[0].id: tg-new
+│   │   │       ├── rows[0].name: 新商品
+│   │   │       ├── rows[1].id: tg-sale
+│   │   │       └── rows[1].name: セール
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/master-data-edit?masterType=tag&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/master-data-edit
+│   ├── method: PUT
+│   ├── params.masterType: tag
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateMasterDataInput
+│   │   ├── masterType: tag
+│   │   ├── being_final MasterDataUpdated input=[masterType, rows] inject=[adminSession, writer]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.writer: MyVendor\BeMart\Be\Reason\Fake\Service\FakeMasterDataWriter
+│   │   │   └── close being_final_close
+│   │   │       ├── masterType: tag
+│   │   │       └── count: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/master-data?masterType=tag'
+│   ├── uri: page://self/admin/master-data
+│   ├── method: GET
+│   ├── params.masterType: tag
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/master-data {"masterType":"tag","csrfToken":"[FILTERED]"}
+PUT page://self/admin/master-data-edit {"masterType":"tag","csrfToken":"[FILTERED]"}

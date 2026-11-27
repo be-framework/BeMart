@@ -1,0 +1,69 @@
+link_request get 'page://self/admin/calendar#link=self:doUpdateCalendar'
+├── uri: page://self/admin/calendar
+├── method: GET
+├── links[0]: self:doUpdateCalendar
+├── resource_request get 'page://self/admin/calendar'
+│   ├── uri: page://self/admin/calendar
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminCalendarInput
+│   │   ├── being_final AdminCalendarFetched inject=[adminSession, calendars]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── calendars[0].calendarId: 1
+│   │   │       ├── calendars[0].title: 元日
+│   │   │       └── calendars[0].holiday: 2026-01-01
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/admin/calendar?operation=update&calendarId=1&title=Story+Holiday&holiday=2027-02-12&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/calendar
+│   ├── method: POST
+│   ├── params.operation: update
+│   ├── params.calendarId: 1
+│   ├── params.title: Story Holiday
+│   ├── params.holiday: 2027-02-12
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateCalendarHolidayInput
+│   │   ├── calendarId: 1
+│   │   ├── title: Story Holiday
+│   │   ├── holiday: 2027-02-12
+│   │   ├── being_final CalendarHolidayUpdated input=[calendarId, title, holiday] inject=[adminSession, calendars]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── calendarId: 1
+│   │   │       ├── title: Story Holiday
+│   │   │       └── holiday: 2027-02-12
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/calendar'
+│   ├── uri: page://self/admin/calendar
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminCalendarInput
+│   │   ├── being_final AdminCalendarFetched inject=[adminSession, calendars]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── calendars[0].calendarId: 1
+│   │   │       ├── calendars[0].title: 元日
+│   │   │       └── calendars[0].holiday: 2026-01-01
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+POST page://self/admin/calendar {"operation":"update","calendarId":"1","title":"Story Holiday","holiday":"2027-02-12","csrfToken":"[FILTERED]"}

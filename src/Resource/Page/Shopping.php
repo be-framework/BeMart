@@ -71,6 +71,12 @@ class Shopping extends ResourceObject
     #[JsonSchema(schema: 'get-shopping.json', params: 'get-shopping.param.json')]
     #[Link(rel: 'doConfirmOrder', href: 'page://self/shopping/confirm', method: 'post')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
+    #[Link(rel: 'goShopping', href: 'page://self/shopping')]
+    #[Link(rel: 'goShoppingLogin', href: 'page://self/shopping/login')]
+    #[Link(rel: 'goShoppingNonMember', href: 'page://self/shopping/non-member')]
+    #[Link(rel: 'goShoppingError', href: 'page://self/shopping/error')]
+    #[Link(rel: 'goShoppingShipping', href: 'page://self/shopping/shipping')]
+    #[Link(rel: 'goShoppingShippingEdit', href: 'page://self/shopping/shipping-edit')]
     public function onGet(string $sessionPrefix = 'session-prefix-1'): static
     {
         try {
@@ -121,8 +127,12 @@ class Shopping extends ResourceObject
             'transitionId' => 'goCheckoutEntry',
             'message' => '購入手続きに進むにはログインまたはゲスト購入を選択してください。',
             '_links' => [
-                // Suppress method-level doConfirmOrder for anonymous 303 HAL; entries without href are not rendered.
+                // Suppress the method-level links that need a signed-in customer; entries without href are not rendered.
                 'doConfirmOrder' => [],
+                'goShopping' => [],
+                'goShoppingError' => [],
+                'goShoppingShipping' => [],
+                'goShoppingShippingEdit' => [],
                 'goShoppingLogin' => ['href' => 'page://self/shopping/login'],
                 'goShoppingNonMember' => ['href' => 'page://self/shopping/non-member'],
                 'goCart' => ['href' => 'page://self/cart'],

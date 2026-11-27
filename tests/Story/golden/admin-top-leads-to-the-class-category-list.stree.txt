@@ -1,0 +1,41 @@
+link_request get 'page://self/admin/index#link=self:goClassCategoryList'
+├── uri: page://self/admin/index
+├── method: GET
+├── links[0]: self:goClassCategoryList
+├── resource_request get 'page://self/admin/index'
+│   ├── uri: page://self/admin/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/class-category/class-category-list'
+│   ├── uri: page://self/admin/class-category/class-category-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminClassCategoryListInput
+│   │   ├── being_final AdminClassCategoryListFetched input=[classNameId] inject=[adminSession, classCategories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 3
+│   │   │       ├── classCategories[0].classCategoryId: cc-red
+│   │   │       ├── classCategories[0].classNameId: cn-color
+│   │   │       ├── classCategories[0].name: Red
+│   │   │       ├── classCategories[1].classCategoryId: cc-blue
+│   │   │       ├── classCategories[1].classNameId: cn-color
+│   │   │       ├── classCategories[1].name: Blue
+│   │   │       ├── classCategories[2].classCategoryId: cc-small
+│   │   │       ├── classCategories[2].classNameId: cn-size
+│   │   │       └── classCategories[2].name: S
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

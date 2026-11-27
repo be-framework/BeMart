@@ -1,0 +1,77 @@
+link_request get 'page://self/admin/class-category/class-category-export#link=self:doImportClassCategoryCsv'
+├── uri: page://self/admin/class-category/class-category-export
+├── method: GET
+├── links[0]: self:doImportClassCategoryCsv
+├── resource_request get 'page://self/admin/class-category/class-category-export'
+│   ├── uri: page://self/admin/class-category/class-category-export
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming ExportClassCategoryInput
+│   │   ├── being_final ClassCategoryCsvExported input=[classNameId] inject=[adminSession, csv]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.csv: MyVendor\BeMart\Be\Reason\Fake\Service\FakeClassCsvCompatibility
+│   │   │   └── close being_final_close
+│   │   │       ├── document.size: 65
+│   │   │       ├── document.content: 規格分類ID,規格名ID,規格分類名
+cc-red,cn-color,赤
+
+│   │   │       ├── document.fileName: class_category.csv
+│   │   │       └── document.contentDisposition: attachment; filename="class_category.csv"
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/admin/product/csv-class-category?csv=%E8%A6%8F%E6%A0%BC%E5%88%86%E9%A1%9EID%2C%E8%A6%8F%E6%A0%BCID%2C%E8%A6%8F%E6%A0%BC%E5%88%86%E9%A1%9E%E5%90%8D%0D%0Acc-red%2Ccn-color%2CRed%0D%0A&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/product/csv-class-category
+│   ├── method: POST
+│   ├── params.csv: 規格分類ID,規格ID,規格分類名
+cc-red,cn-color,Red
+
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming ImportClassCategoryCsvInput
+│   │   ├── csv: 規格分類ID,規格ID,規格分類名
+cc-red,cn-color,Red
+
+│   │   ├── being_final ClassCategoryCsvImported input=[csv] inject=[adminSession, csvService +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.csvService: MyVendor\BeMart\Be\Reason\Fake\Service\FakeClassCsvCompatibility
+│   │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
+│   │   │   └── close being_final_close
+│   │   │       └── accepted: 1
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/class-category/class-category-list'
+│   ├── uri: page://self/admin/class-category/class-category-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminClassCategoryListInput
+│   │   ├── being_final AdminClassCategoryListFetched input=[classNameId] inject=[adminSession, classCategories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 3
+│   │   │       ├── classCategories[0].classCategoryId: cc-red
+│   │   │       ├── classCategories[0].classNameId: cn-color
+│   │   │       ├── classCategories[0].name: Red
+│   │   │       ├── classCategories[1].classCategoryId: cc-blue
+│   │   │       ├── classCategories[1].classNameId: cn-color
+│   │   │       ├── classCategories[1].name: Blue
+│   │   │       ├── classCategories[2].classCategoryId: cc-small
+│   │   │       ├── classCategories[2].classNameId: cn-size
+│   │   │       └── classCategories[2].name: S
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+POST page://self/admin/product/csv-class-category {"csv":"規格分類ID,規格ID,規格分類名\r\ncc-red,cn-color,Red\r\n","csrfToken":"[FILTERED]"}

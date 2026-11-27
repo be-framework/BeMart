@@ -1,0 +1,42 @@
+link_request get 'page://self/admin/index#link=self:goPluginList'
+├── uri: page://self/admin/index
+├── method: GET
+├── links[0]: self:goPluginList
+├── resource_request get 'page://self/admin/index'
+│   ├── uri: page://self/admin/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/plugin-list'
+│   ├── uri: page://self/admin/plugin-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetPluginListInput
+│   │   ├── being_final PluginListFetched inject=[adminSession, pluginStorage]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.pluginStorage: MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── plugins[0].pluginCode: Sample/DisabledPlugin
+│   │   │       ├── plugins[0].pluginName: Disabled Sample Plugin
+│   │   │       ├── plugins[0].pluginVersion: 1.0.0
+│   │   │       ├── plugins[0].installed: true
+│   │   │       ├── plugins[0].enabled: false
+│   │   │       ├── plugins[1].pluginCode: Sample/SamplePlugin
+│   │   │       ├── plugins[1].pluginName: Sample Plugin
+│   │   │       ├── plugins[1].pluginVersion: 1.0.0
+│   │   │       ├── plugins[1].installed: true
+│   │   │       ├── plugins[1].enabled: true
+│   │   │       └── count: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

@@ -45,7 +45,7 @@ class OrderPdf extends ResourceObject
      */
     #[Alps('goOrderPdf')]
     #[JsonSchema(schema: 'get-admin-order-order-pdf.json', params: 'get-admin-order-order-pdf.param.json')]
-    #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf', method: 'get')]
+    #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf{?orderNo}', method: 'get')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     public function onGet(string $orderNo = ''): static
     {

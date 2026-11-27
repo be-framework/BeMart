@@ -1,0 +1,92 @@
+link_request get 'page://self/admin/page/page-list#link=self:goPage,self:goPageList'
+├── uri: page://self/admin/page/page-list
+├── method: GET
+├── links[0]: self:goPage
+├── links[1]: self:goPageList
+├── resource_request get 'page://self/admin/page/page-list'
+│   ├── uri: page://self/admin/page/page-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminPageListInput
+│   │   ├── being_final AdminPageListFetched inject=[adminSession, pages]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 3
+│   │   │       ├── pages[0].pageId: pg-homepage
+│   │   │       ├── pages[0].pageName: ホームページ
+│   │   │       ├── pages[0].pageUrl: homepage
+│   │   │       ├── pages[0].pageFileName: index
+│   │   │       ├── pages[0].pageEditType: 2
+│   │   │       ├── pages[1].pageId: pg-company
+│   │   │       ├── pages[1].pageName: 会社案内
+│   │   │       ├── pages[1].pageUrl: company
+│   │   │       ├── pages[1].pageFileName: company
+│   │   │       ├── pages[1].pageEditType: 0
+│   │   │       ├── pages[2].pageId: pg-foo
+│   │   │       ├── pages[2].pageName: Foo
+│   │   │       ├── pages[2].pageUrl: foo
+│   │   │       ├── pages[2].pageFileName: foo
+│   │   │       └── pages[2].pageEditType: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/page/page?pageId=pg-company'
+│   ├── uri: page://self/admin/page/page
+│   ├── method: GET
+│   ├── params.pageId: pg-company
+│   ├── replayable: true
+│   ├── becoming GetAdminPageInput
+│   │   ├── pageId: pg-company
+│   │   ├── being_final AdminPageFetched input=[pageId] inject=[adminSession, pages]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── pageId: pg-company
+│   │   │       ├── pageName: 会社案内
+│   │   │       ├── pageUrl: company
+│   │   │       ├── pageFileName: company
+│   │   │       └── pageEditType: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/page/page-list'
+│   ├── uri: page://self/admin/page/page-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminPageListInput
+│   │   ├── being_final AdminPageListFetched inject=[adminSession, pages]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 3
+│   │   │       ├── pages[0].pageId: pg-homepage
+│   │   │       ├── pages[0].pageName: ホームページ
+│   │   │       ├── pages[0].pageUrl: homepage
+│   │   │       ├── pages[0].pageFileName: index
+│   │   │       ├── pages[0].pageEditType: 2
+│   │   │       ├── pages[1].pageId: pg-company
+│   │   │       ├── pages[1].pageName: 会社案内
+│   │   │       ├── pages[1].pageUrl: company
+│   │   │       ├── pages[1].pageFileName: company
+│   │   │       ├── pages[1].pageEditType: 0
+│   │   │       ├── pages[2].pageId: pg-foo
+│   │   │       ├── pages[2].pageName: Foo
+│   │   │       ├── pages[2].pageUrl: foo
+│   │   │       ├── pages[2].pageFileName: foo
+│   │   │       └── pages[2].pageEditType: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

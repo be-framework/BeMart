@@ -47,6 +47,7 @@ class Security extends ResourceObject
     #[Alps('doUpdateSecurity')]
     #[JsonSchema(schema: 'get-admin-security.json')]
     #[Link(rel: 'doUpdateSecurity', href: 'page://self/admin/security', method: 'put')]
+    #[Link(rel: 'goTwoFactorAuthSet', href: 'page://self/admin/two-factor-auth-set')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

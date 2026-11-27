@@ -45,6 +45,7 @@ class PageList extends ResourceObject
     #[Link(rel: 'goPage', href: 'page://self/admin/page/page', method: 'get')]
     #[Link(rel: 'doUpdatePage', href: 'page://self/admin/page/page', method: 'put')]
     #[Link(rel: 'doDeletePage', href: 'page://self/admin/page/page', method: 'delete')]
+    #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetAdminPageListInput());

@@ -65,6 +65,7 @@ class Change extends ResourceObject
     #[JsonSchema(schema: 'get-mypage-change.json')]
     #[Link(rel: 'doUpdateCustomer', href: 'page://self/mypage/change', method: 'post')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
+    #[Link(rel: 'goMypageChangeComplete', href: 'page://self/mypage/change-complete')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetMypageChangeInput());

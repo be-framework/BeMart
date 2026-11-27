@@ -1,0 +1,76 @@
+link_request get 'page://self/admin/template/template-list#link=self:doDeleteTemplate'
+├── uri: page://self/admin/template/template-list
+├── method: GET
+├── links[0]: self:doDeleteTemplate
+├── resource_request get 'page://self/admin/template/template-list'
+│   ├── uri: page://self/admin/template/template-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminTemplateListInput
+│   │   ├── being_final AdminTemplateListFetched inject=[adminSession, templates +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.templates: MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface<Null-1>
+│   │   │   ├── inject.templateCompatibility: MyVendor\BeMart\Be\Reason\Fake\Service\FakeTemplateCompatibility
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── templates[0].templateId: tp-default-pc
+│   │   │       ├── templates[0].templateName: デフォルト (PC)
+│   │   │       ├── templates[0].deviceType: 10
+│   │   │       ├── templates[0].active: false
+│   │   │       ├── templates[1].templateId: tp-default-sp
+│   │   │       ├── templates[1].templateName: デフォルト (スマホ)
+│   │   │       ├── templates[1].deviceType: 2
+│   │   │       └── templates[1].active: false
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request delete 'page://self/admin/template/template-list?templateId=tp-default-sp&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/template/template-list
+│   ├── method: DELETE
+│   ├── params.templateId: tp-default-sp
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming DeleteTemplateInput
+│   │   ├── templateId: tp-default-sp
+│   │   ├── being_final TemplateDeleted input=[templateId] inject=[adminSession, templates]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.templates: MyVendor\BeMart\Be\Reason\Fake\Service\FakeTemplateCompatibility
+│   │   │   └── close being_final_close
+│   │   │       └── templateId: tp-default-sp
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/template/template-list'
+│   ├── uri: page://self/admin/template/template-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminTemplateListInput
+│   │   ├── being_final AdminTemplateListFetched inject=[adminSession, templates +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.templates: MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface<Null-1>
+│   │   │   ├── inject.templateCompatibility: MyVendor\BeMart\Be\Reason\Fake\Service\FakeTemplateCompatibility
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── templates[0].templateId: tp-default-pc
+│   │   │       ├── templates[0].templateName: デフォルト (PC)
+│   │   │       ├── templates[0].deviceType: 10
+│   │   │       ├── templates[0].active: false
+│   │   │       ├── templates[1].templateId: tp-default-sp
+│   │   │       ├── templates[1].templateName: デフォルト (スマホ)
+│   │   │       ├── templates[1].deviceType: 2
+│   │   │       └── templates[1].active: false
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+DELETE page://self/admin/template/template-list {"templateId":"tp-default-sp","csrfToken":"[FILTERED]"}

@@ -1,4 +1,9 @@
 {
+  "GET page://self/admin/authority-role goLoginHistoryList": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に ログイン履歴 への導線を描画しない",
+    "reason": "target-missing"
+  },
   "GET page://self/admin/block/block doDeleteBlock": {
     "classification": "resourceOnly",
     "note": "削除フォームは blockDeletable な既存ブロックのときだけ描画される。監査は blockId 無しの新規モードを描画するため affordance が無い。admin/payment/payment doUpdatePayment と同じ形",
@@ -19,20 +24,45 @@
     "note": "一覧には削除 form だけがあり PUT form は無い（編集は edit ページ）",
     "reason": "method-mismatch"
   },
-  "GET page://self/admin/category/edit doUpdateCategory": {
+  "GET page://self/admin/category/edit doCreateCategory": {
     "classification": "resourceOnly",
-    "note": "categoryId 無しの新規モードでは PUT form を描画しない",
-    "reason": "target-missing"
+    "note": "作成 form は categoryId 無しの新規モードだけに描画される。監査は categoryId 付きの編集モードを描画する",
+    "reason": "method-mismatch"
   },
   "GET page://self/admin/class-category/class-category-list doDeleteClassCategory": {
     "classification": "resourceOnly",
     "note": "削除 form の action は JS が組み立てる（静的 HTML には無い）。auditor の欠陥ではない",
     "reason": "method-mismatch"
   },
+  "GET page://self/admin/class-category/class-category-list doSortNoMove": {
+    "classification": "resourceOnly",
+    "note": "この一覧の HTML に並び替えの導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/class-category/class-category-list doToggleVisible": {
+    "classification": "resourceOnly",
+    "note": "この一覧の HTML に表示切替の導線を描画しない",
+    "reason": "target-missing"
+  },
   "GET page://self/admin/class-name/class-name-list doDeleteClassName": {
     "classification": "resourceOnly",
     "note": "削除 form の action は JS が組み立てる（静的 HTML には無い）。auditor の欠陥ではない",
     "reason": "method-mismatch"
+  },
+  "GET page://self/admin/class-name/class-name-list doSortNoMove": {
+    "classification": "resourceOnly",
+    "note": "この一覧の HTML に並び替えの導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/class-name/class-name-list goExportClassCategory": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 規格分類 CSV への導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/content/maintenance goSystemInfo": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に システム情報 への導線を描画しない",
+    "reason": "target-missing"
   },
   "GET page://self/admin/customer-delivery-edit doDeleteCustomerDeliveryAddress": {
     "classification": "resourceOnly",
@@ -49,9 +79,29 @@
     "note": "fixture の一覧に行が無く再送 form が描画されない",
     "reason": "target-missing"
   },
+  "GET page://self/admin/customer-list goExportClassName": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 規格 CSV への導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/delivery/delivery doDeleteDelivery": {
+    "classification": "resourceOnly",
+    "note": "削除 form は deliveryId 付きの編集モードだけで、監査は deliveryId 無しの新規モードを描画する",
+    "reason": "target-missing"
+  },
   "GET page://self/admin/delivery/delivery doUpdateDelivery": {
     "classification": "resourceOnly",
     "note": "deliveryId 無しの新規モードでは PUT form を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/delivery/delivery-list doSortNoMove": {
+    "classification": "resourceOnly",
+    "note": "この一覧の HTML に並び替えの導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/delivery/delivery-list doToggleVisible": {
+    "classification": "resourceOnly",
+    "note": "この一覧の HTML に表示切替の導線を描画しない",
     "reason": "target-missing"
   },
   "GET page://self/admin/delivery/delivery-list doUpdateDelivery": {
@@ -59,10 +109,30 @@
     "note": "一覧の編集アイコンリンク（rel=\"goDelivery\", GET, パス /admin/delivery/delivery が一致）が auditor に doUpdateDelivery（PUT）の候補として拾われ method-mismatch になる。一覧に PUT の affordance は元々無く、更新は編集ページ（Delivery.html.twig）の役割 — #130 で Block/Payment の doUpdateBlock/doUpdatePayment に適用したのと同じ再分類",
     "reason": "method-mismatch"
   },
+  "GET page://self/admin/index goLoginHistoryList": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に ログイン履歴 への導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/index goMailTemplateList": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に メールテンプレート一覧 への導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/index goTradeLawList": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 特定商取引法 への導線を描画しない",
+    "reason": "target-missing"
+  },
   "GET page://self/admin/layout/layout doUpdateLayout": {
     "classification": "resourceOnly",
     "note": "layoutId 無しの新規モードでは _method=put のクエリ override 自体が付かない（form action は素の /admin/layout/layout になり method-mismatch）。layoutId 付きの編集モードでは override は機能しており、rel=\"doUpdateLayout\" も付与済み — semantic-token-missing ではなく method-mismatch だったのはこの新規モード限定の話",
     "reason": "method-mismatch"
+  },
+  "GET page://self/admin/layout/layout goTradeLawList": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 特定商取引法 への導線を描画しない",
+    "reason": "target-missing"
   },
   "GET page://self/admin/layout/layout-list doUpdateLayout": {
     "classification": "resourceOnly",
@@ -109,15 +179,35 @@
     "note": "一覧からは GET で登録ページへ遷移する。直接の POST form は無い",
     "reason": "method-mismatch"
   },
+  "GET page://self/admin/news/news-list doToggleVisible": {
+    "classification": "resourceOnly",
+    "note": "この一覧の HTML に表示切替の導線を描画しない",
+    "reason": "target-missing"
+  },
   "GET page://self/admin/news/news-list doUpdateNews": {
     "classification": "resourceOnly",
     "note": "一覧の編集アイコンリンク（rel=\"goNews\", GET, パス /admin/news/news が一致）が auditor に doUpdateNews（PUT）の候補として拾われ method-mismatch になる。一覧に PUT の affordance は元々無く、更新は編集ページ（News.html.twig）の役割 — #130 で Block/Payment の doUpdateBlock/doUpdatePayment に適用したのと同じ再分類",
     "reason": "method-mismatch"
   },
+  "GET page://self/admin/order doSendOrderMail": {
+    "classification": "resourceOnly",
+    "note": "メール送信 form は送信画面（/admin/order/send-mail）にあり、受注ページには描画しない",
+    "reason": "target-missing"
+  },
   "GET page://self/admin/order doUpdateOrderStatus": {
     "classification": "resourceOnly",
     "note": "受注詳細に /admin/order-status への form が無い（リンクのみ）",
     "reason": "method-mismatch"
+  },
+  "GET page://self/admin/order doUpdateTrackingNumber": {
+    "classification": "resourceOnly",
+    "note": "追跡番号の更新 form を受注ページに描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/order goOrderMail": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に メール送信画面 への導線を描画しない",
+    "reason": "target-missing"
   },
   "GET page://self/admin/order-list doCreateOrder": {
     "classification": "resourceOnly",
@@ -127,6 +217,11 @@
   "GET page://self/admin/order/edit doUpdateOrder": {
     "classification": "resourceOnly",
     "note": "orderNo 無しの新規モードでは action が /admin/order/create になり、PUT の target /admin/order 自体が無い。orderNo 付きの編集モードでは PUT に action が変わり rel=\"doUpdateOrder\" も付与済み — 新規モード限定の話",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/order/send-mail goExportOrderPdf": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 受注 PDF への導線を描画しない",
     "reason": "target-missing"
   },
   "GET page://self/admin/order/send-mail goOrderMailConfirm": {
@@ -154,14 +249,34 @@
     "note": "一覧からは GET で登録ページへ遷移する。直接の POST form は無い",
     "reason": "method-mismatch"
   },
+  "GET page://self/admin/payment/payment-list doSortNoMove": {
+    "classification": "resourceOnly",
+    "note": "並び替えは JS の fetch が URL を組み立てる（静的 HTML に form も a も無い）",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/product goCategory": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に カテゴリ への導線を描画しない",
+    "reason": "target-missing"
+  },
   "GET page://self/admin/product-list doBulkUpdateProductStatus": {
     "classification": "resourceOnly",
     "note": "一括ステータス変更 form は fixture 描画に現れない（行が無い）",
     "reason": "target-missing"
   },
+  "GET page://self/admin/product-list doCopyProduct": {
+    "classification": "fail",
+    "note": "一覧のコピー導線は GET の a（data-method=post を POST に変える JS は読み込まれない）で、/admin/product-copy は GET を受けず 405 になる。商品ページの POST form も newProductCode を送らない。一覧・商品ページのどちらからも newProductCode が届かない",
+    "reason": "method-mismatch"
+  },
   "GET page://self/admin/product-list doCreateProduct": {
     "classification": "resourceOnly",
     "note": "一覧には直接の POST form が無く /admin/product-new を経由する",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/product-list goExportCategory": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に カテゴリ CSV への導線を描画しない",
     "reason": "target-missing"
   },
   "GET page://self/admin/product-list goProduct": {
@@ -184,9 +299,44 @@
     "note": "productCode 無しでは商品詳細へのリンクを描画しない",
     "reason": "target-missing"
   },
+  "GET page://self/admin/security goTwoFactorAuthSet": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 二要素認証の設定 への導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/tag/tag-list doSortNoMove": {
+    "classification": "resourceOnly",
+    "note": "並び替えは JS の fetch が URL を組み立てる（静的 HTML に form も a も無い）",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/tax-rule/tax-rule-list goCalendar": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 営業日カレンダー への導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/two-factor-auth goContentCache": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に キャッシュ管理 への導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/admin/two-factor-auth-set goTwoFactorAuth": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 二要素認証 への導線を描画しない",
+    "reason": "target-missing"
+  },
   "GET page://self/entry goCustomerRegistrationConfirm": {
     "classification": "targetOut",
     "note": "確認画面は入力 form の POST 結果として遷移する。GET affordance は描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/forgot-complete doResetPassword": {
+    "classification": "resourceOnly",
+    "note": "パスワード再設定 form は /reset ページにあり、完了ページには描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/index goProduct": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 商品詳細 への導線を描画しない",
     "reason": "target-missing"
   },
   "GET page://self/login doRequestPasswordReset": {
@@ -214,6 +364,11 @@
     "note": "会員ダッシュボードの「すべての履歴を見る」リンクに rel=\"goOrderHistory\" と正しい href（`/mypage/order-history`、従前は誤って `/mypage/history` を指していた）を付与済み。監査対象の会員（Alice）には fake データ上、注文が0件のため注文履歴パネル自体が描画されない — 実際の注文がある会員では表示される",
     "reason": "target-missing"
   },
+  "GET page://self/mypage/address doDeleteCustomerAddress": {
+    "classification": "resourceOnly",
+    "note": "削除 form は一覧（/mypage/address-list）にあり、編集ページには描画しない",
+    "reason": "target-missing"
+  },
   "GET page://self/mypage/address doUpdateCustomerAddress": {
     "classification": "resourceOnly",
     "note": "addressId 無しの新規モードでは PUT form を描画しない",
@@ -234,6 +389,11 @@
     "note": "一覧からは GET で住所編集ページへ遷移する。直接の PUT form は無い",
     "reason": "method-mismatch"
   },
+  "GET page://self/mypage/change goMypageChangeComplete": {
+    "classification": "targetOut",
+    "note": "完了画面は入力 form の POST 結果として遷移する。GET affordance は描画しない",
+    "reason": "target-missing"
+  },
   "GET page://self/mypage/favorite-list doAddFavorite": {
     "classification": "resourceOnly",
     "note": "お気に入り一覧に追加 form は無い（商品ページの affordance）",
@@ -244,6 +404,21 @@
     "note": "fixture のお気に入りが空で削除 form が描画されない",
     "reason": "target-missing"
   },
+  "GET page://self/mypage/favorite-list goMypageWithdraw": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 退会手続き への導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/mypage/history goProduct": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 商品詳細 への導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/mypage/withdraw goMypageWithdrawConfirm": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 退会確認 への導線を描画しない",
+    "reason": "target-missing"
+  },
   "GET page://self/product doAddFavorite": {
     "classification": "resourceOnly",
     "note": "未ログインの fixture ではお気に入り form を描画しない",
@@ -252,6 +427,31 @@
   "GET page://self/product doRemoveFavorite": {
     "classification": "resourceOnly",
     "note": "未ログインの fixture ではお気に入り form を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/shopping goShopping": {
+    "classification": "resourceOnly",
+    "note": "自分自身へのリンクは描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/shopping goShoppingError": {
+    "classification": "targetOut",
+    "note": "エラー画面はサーバ側 redirect で遷移する。GET affordance は描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/shopping goShoppingNonMember": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に ゲスト購入 への導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/shopping goShoppingShipping": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 配送先の選択 への導線を描画しない",
+    "reason": "target-missing"
+  },
+  "GET page://self/shopping goShoppingShippingEdit": {
+    "classification": "resourceOnly",
+    "note": "この画面の HTML に 配送先の編集 への導線を描画しない",
     "reason": "target-missing"
   },
   "GET page://self/shopping/confirm goShoppingError": {

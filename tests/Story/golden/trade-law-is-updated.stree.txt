@@ -1,0 +1,69 @@
+link_request get 'page://self/admin/trade-law#link=self:doUpdateTradeLaw'
+├── uri: page://self/admin/trade-law
+├── method: GET
+├── links[0]: self:doUpdateTradeLaw
+├── resource_request get 'page://self/admin/trade-law'
+│   ├── uri: page://self/admin/trade-law
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetTradeLawInput
+│   │   ├── being_final TradeLawFetched inject=[adminSession, tradeLawStorage]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.tradeLawStorage: MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       └── tradeLawBody: 販売業者: 株式会社BeMart
+所在地: 東京都千代田区神田1-1-1
+連絡先: 03-1234-5678
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/admin/trade-law?tradeLawBody=%E8%B2%A9%E5%A3%B2%E6%A5%AD%E8%80%85%3A+Story+Company%0A%E6%89%80%E5%9C%A8%E5%9C%B0%3A+Story+City%0A%E9%80%A3%E7%B5%A1%E5%85%88%3A+03-1234-5678&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/trade-law
+│   ├── method: POST
+│   ├── params.tradeLawBody: 販売業者: Story Company
+所在地: Story City
+連絡先: 03-1234-5678
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateTradeLawInput
+│   │   ├── tradeLawBody: 販売業者: Story Company
+所在地: Story City
+連絡先: 03-1234-5678
+│   │   ├── being_final TradeLawUpdated input=[tradeLawBody] inject=[adminSession, tradeLawStorage]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.tradeLawStorage: MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── tradeLawBody: 販売業者: Story Company
+所在地: Story City
+連絡先: 03-1234-5678
+│   │   │       └── changed: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/trade-law'
+│   ├── uri: page://self/admin/trade-law
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetTradeLawInput
+│   │   ├── being_final TradeLawFetched inject=[adminSession, tradeLawStorage]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.tradeLawStorage: MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       └── tradeLawBody: 販売業者: 株式会社BeMart
+所在地: 東京都千代田区神田1-1-1
+連絡先: 03-1234-5678
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+POST page://self/admin/trade-law {"tradeLawBody":"販売業者: Story Company\n所在地: Story City\n連絡先: 03-1234-5678","csrfToken":"[FILTERED]"}

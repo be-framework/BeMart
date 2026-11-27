@@ -59,6 +59,7 @@ class Layout extends ResourceObject
     #[JsonSchema(schema: 'get-admin-layout-layout.json', params: 'get-admin-layout-layout.param.json')]
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
     #[Link(rel: 'doUpdateLayout', href: 'page://self/admin/layout/layout', method: 'put')]
+    #[Link(rel: 'goTradeLawList', href: 'page://self/admin/trade-law')]
     public function onGet(string|null $layoutId = null): static
     {
         $form = $this->formFactory->newInstance(AdminLayoutForm::class);

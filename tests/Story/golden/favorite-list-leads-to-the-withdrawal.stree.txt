@@ -1,0 +1,41 @@
+link_request get 'page://self/mypage/favorite-list#link=self:goMypageWithdraw'
+├── uri: page://self/mypage/favorite-list
+├── method: GET
+├── links[0]: self:goMypageWithdraw
+├── resource_request get 'page://self/mypage/favorite-list'
+│   ├── uri: page://self/mypage/favorite-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetFavoriteListInput
+│   │   ├── being_final FavoriteListFetched inject=[session, favorites]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       └── favoriteCount: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/mypage/withdraw'
+│   ├── uri: page://self/mypage/withdraw
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── resource_request get 'app://self/customer/profile?customerId=0123456789abcdef0123456789abcdef'
+│   │   ├── uri: app://self/customer/profile
+│   │   ├── method: GET
+│   │   ├── params.customerId: 0123456789abcdef0123456789abcdef
+│   │   ├── replayable: true
+│   │   └── close resource_response
+│   │       ├── code: 200
+│   │       └── durationMs: [volatile]
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

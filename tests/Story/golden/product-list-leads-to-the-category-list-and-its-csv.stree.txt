@@ -1,0 +1,130 @@
+link_request get 'page://self/admin/product-list#link=self:goCategoryList,self:goExportCategory'
+├── uri: page://self/admin/product-list
+├── method: GET
+├── links[0]: self:goCategoryList
+├── links[1]: self:goExportCategory
+├── resource_request get 'page://self/admin/product-list'
+│   ├── uri: page://self/admin/product-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetProductListInput
+│   │   ├── limit: 50
+│   │   ├── offset: 0
+│   │   ├── being_final ProductListFetched input=[nameKeyword, limit, offset] inject=[adminSession, productQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── products[0].productCode: sample-001
+│   │   │       ├── products[0].productName: サンプル商品 A
+│   │   │       ├── products[0].price02: 1200
+│   │   │       ├── products[0].stock: 50
+│   │   │       ├── products[0].productStatus: 1
+│   │   │       ├── products[1].productCode: sample-002
+│   │   │       ├── products[1].productName: Sample Product B
+│   │   │       ├── products[1].price02: 9800
+│   │   │       ├── products[1].productStatus: 1
+│   │   │       ├── products[1].imagePath: /save_image/img_item01_02.jpg
+│   │   │       ├── products[1].categoryNames[0]: 雑貨
+│   │   │       ├── products[1].tagNames[0]: 送料無料
+│   │   │       ├── products[2].productCode: admin-active-001
+│   │   │       ├── products[2].productName: 管理画面用 商品A
+│   │   │       ├── products[2].price02: 3500
+│   │   │       ├── products[2].stock: 20
+│   │   │       ├── products[2].productStatus: 1
+│   │   │       ├── products[2].imagePath: /save_image/img_item02_01.jpg
+│   │   │       ├── products[2].categoryNames[0]: 管理商品
+│   │   │       ├── products[2].categoryNames[1]: 公開
+│   │   │       ├── products[2].tagNames[0]: 管理
+│   │   │       ├── products[3].productCode: admin-hidden-001
+│   │   │       ├── products[3].productName: 管理画面用 非公開商品B
+│   │   │       ├── products[3].price02: 5000
+│   │   │       ├── products[3].stock: 10
+│   │   │       ├── products[3].productStatus: 2
+│   │   │       ├── products[3].imagePath: /save_image/img_item02_02.jpg
+│   │   │       ├── products[3].categoryNames[0]: 管理商品
+│   │   │       ├── products[3].categoryNames[1]: 非公開
+│   │   │       ├── products[3].tagNames[0]: 管理
+│   │   │       ├── products[4].productCode: admin-withdrawn-001
+│   │   │       ├── products[4].productName: 管理画面用 廃止商品C
+│   │   │       ├── products[4].price02: 800
+│   │   │       ├── products[4].stock: 0
+│   │   │       ├── products[4].productStatus: 3
+│   │   │       ├── products[4].imagePath: /save_image/img_item02_03.jpg
+│   │   │       ├── products[4].categoryNames[0]: 管理商品
+│   │   │       ├── products[4].categoryNames[1]: 廃止
+│   │   │       ├── products[4].tagNames[0]: 管理
+│   │   │       ├── products[5].productCode: api-persist-20260522-001
+│   │   │       ├── products[5].productName: 彩のジェラートセット
+│   │   │       ├── products[5].price02: 2980
+│   │   │       ├── products[5].stock: 7
+│   │   │       ├── products[5].productStatus: 1
+│   │   │       ├── products[5].imagePath: /save_image/img_item01_01.jpg
+│   │   │       ├── products[5].categoryNames[0]: 新入荷
+│   │   │       ├── products[5].categoryNames[1]: ジェラート
+│   │   │       ├── products[5].categoryNames[2]: スイーツ
+│   │   │       ├── products[5].categoryNames[3]: ギフト
+│   │   │       ├── products[5].tagNames[0]: 冷凍
+│   │   │       ├── products[5].tagNames[1]: ギフト
+│   │   │       ├── products[6].productCode: ui-create-20260522-001
+│   │   │       ├── products[6].productName: UI商品登録テスト
+│   │   │       ├── products[6].price02: 1980
+│   │   │       ├── products[6].stock: 5
+│   │   │       ├── products[6].productStatus: 1
+│   │   │       ├── products[6].imagePath: /save_image/img_item02_01.jpg
+│   │   │       ├── products[6].categoryNames[0]: 管理商品
+│   │   │       ├── products[6].categoryNames[1]: テスト
+│   │   │       ├── products[6].tagNames[0]: UI登録
+│   │   │       ├── count: 7
+│   │   │       ├── filters.limit: 50
+│   │   │       └── filters.offset: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/category/category-list'
+│   ├── uri: page://self/admin/category/category-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminCategoryListInput
+│   │   ├── being_final AdminCategoryListFetched inject=[adminSession, categories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-2>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── categories[0].categoryId: cat-food
+│   │   │       ├── categories[0].categoryName: Food
+│   │   │       ├── categories[0].sortNo: 10
+│   │   │       ├── categories[1].categoryId: cat-drinks
+│   │   │       ├── categories[1].categoryName: Drinks
+│   │   │       └── categories[1].sortNo: 20
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/category/csv'
+│   ├── uri: page://self/admin/category/csv
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming ExportCategoryInput
+│   │   ├── being_final CategoryCsvExported inject=[adminSession, categories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-2>
+│   │   │   └── close being_final_close
+│   │   │       ├── csv: categoryId,categoryName,parentId,sortNo
+cat-food,Food,,10
+cat-drinks,Drinks,,20
+
+│   │   │       └── rowCount: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

@@ -67,6 +67,8 @@ class SendMail extends ResourceObject
     #[Link(rel: 'doSendOrderMail', href: 'page://self/admin/order/send-mail', method: 'post')]
     #[Link(rel: 'goOrderMailConfirm', href: 'page://self/admin/order/mail-confirm', method: 'get')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
+    #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order', method: 'get')]
+    #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf{?orderNo}', method: 'get')]
     public function onGet(string $orderNo = ''): static
     {
         if ($this->adminSession->adminId === null) {
@@ -98,7 +100,7 @@ class SendMail extends ResourceObject
     #[Alps('doSendOrderMail')]
     #[JsonSchema(schema: 'post-admin-order-send-mail.json', params: 'post-admin-order-send-mail.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
-    #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf', method: 'get')]
+    #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf{?orderNo}', method: 'get')]
     #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order', method: 'get')]
     #[CsrfToken]
     #[SameOrigin]

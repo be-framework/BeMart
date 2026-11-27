@@ -57,6 +57,9 @@ class ProductList extends ResourceObject
     #[Link(rel: 'doCreateProduct', href: 'page://self/admin/product', method: 'post')]
     #[Link(rel: 'doBulkUpdateProductStatus', href: 'page://self/admin/product-bulk-status', method: 'post')]
     #[Link(rel: 'goExportProduct', href: 'page://self/admin/product-csv', method: 'get')]
+    #[Link(rel: 'doCopyProduct', href: 'page://self/admin/product-copy', method: 'post')]
+    #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
+    #[Link(rel: 'goExportCategory', href: 'page://self/admin/category/csv')]
     public function onGet(
         string|null $nameKeyword = null,
         int $limit = 50,

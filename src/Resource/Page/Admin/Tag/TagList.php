@@ -41,6 +41,7 @@ class TagList extends ResourceObject
     #[JsonSchema(schema: 'get-admin-tag-tag-list.json')]
     #[Link(rel: 'doCreateTag', href: 'page://self/admin/tag/tag-list', method: 'post')]
     #[Link(rel: 'doDeleteTag', href: 'page://self/admin/tag/tag', method: 'delete')]
+    #[Link(rel: 'doSortNoMove', href: 'page://self/admin/sort-no-move', method: 'put')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetAdminTagListInput());

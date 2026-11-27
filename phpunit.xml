@@ -29,6 +29,9 @@
         <testsuite name="smoke">
             <directory>tests/Smoke</directory>
         </testsuite>
+        <testsuite name="story">
+            <directory>tests/Story</directory>
+        </testsuite>
         <testsuite name="sql">
             <!--
                 MySQL-backed boundary contracts that no Fake can answer for:

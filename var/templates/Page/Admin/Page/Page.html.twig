@@ -365,6 +365,7 @@
       <form
         method="post"
         action="/admin/page/page?pageId={{ pageId|url_encode }}&_method=delete"
+        rel="doDeletePage"
         style="display:contents;"
       >
         {{ csrf_field() }}

@@ -1,0 +1,78 @@
+link_request get 'page://self/admin/block/block#link=self:doUpdateBlock'
+├── uri: page://self/admin/block/block
+├── method: GET
+├── links[0]: self:doUpdateBlock
+├── resource_request get 'page://self/admin/block/block?blockId=bk-user'
+│   ├── uri: page://self/admin/block/block
+│   ├── method: GET
+│   ├── params.blockId: bk-user
+│   ├── replayable: true
+│   ├── becoming GetAdminBlockInput
+│   │   ├── blockId: bk-user
+│   │   ├── being_final AdminBlockFetched input=[blockId] inject=[adminSession, blocks]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── blockId: bk-user
+│   │   │       ├── blockName: ユーザーブロック
+│   │   │       ├── blockFileName: user_block
+│   │   │       └── blockDeletable: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/block/block?blockId=bk-user&blockName=Story+Block&blockFileName=story_block&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/block/block
+│   ├── method: PUT
+│   ├── params.blockId: bk-user
+│   ├── params.blockName: Story Block
+│   ├── params.blockFileName: story_block
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateBlockInput
+│   │   ├── blockId: bk-user
+│   │   ├── blockName: Story Block
+│   │   ├── blockFileName: story_block
+│   │   ├── being_final BlockUpdated input=[blockId, blockName, blockFileName] inject=[adminSession, blocks]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── blockId: bk-user
+│   │   │       ├── blockName: Story Block
+│   │   │       ├── blockFileName: story_block
+│   │   │       └── blockDeletable: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/block/block-list'
+│   ├── uri: page://self/admin/block/block-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminBlockListInput
+│   │   ├── being_final AdminBlockListFetched inject=[adminSession, blocks]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── blocks[0].blockId: bk-header
+│   │   │       ├── blocks[0].blockName: ヘッダー
+│   │   │       ├── blocks[0].blockFileName: header
+│   │   │       ├── blocks[0].blockDeletable: false
+│   │   │       ├── blocks[1].blockId: bk-user
+│   │   │       ├── blocks[1].blockName: ユーザーブロック
+│   │   │       ├── blocks[1].blockFileName: user_block
+│   │   │       └── blocks[1].blockDeletable: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/block/block {"blockId":"bk-user","blockName":"Story Block","blockFileName":"story_block","csrfToken":"[FILTERED]"}

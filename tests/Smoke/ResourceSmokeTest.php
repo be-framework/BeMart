@@ -136,7 +136,7 @@ final class ResourceSmokeTest extends TestCase
             'GET page://self/admin/category/category?categoryId=cat-food' => Code::OK,
             'GET page://self/admin/category/category-list' => Code::OK,
             'GET page://self/admin/category/csv' => Code::OK,
-            'GET page://self/admin/category/edit' => Code::OK,
+            'GET page://self/admin/category/edit?categoryId=cat-food' => Code::OK,
             'GET page://self/admin/change-password' => Code::OK,
             'GET page://self/admin/class-category/class-category-export' => Code::OK,
             'GET page://self/admin/class-category/class-category-list' => Code::OK,

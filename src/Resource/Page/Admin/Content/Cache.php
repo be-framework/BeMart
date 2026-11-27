@@ -40,6 +40,7 @@ class Cache extends ResourceObject
     #[Alps('doClearCache')]
     #[JsonSchema(schema: 'get-admin-content-cache.json')]
     #[Link(rel: 'doClearCache', href: 'page://self/admin/content/cache', method: 'put')]
+    #[Link(rel: 'goMaintenance', href: 'page://self/admin/content/maintenance')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

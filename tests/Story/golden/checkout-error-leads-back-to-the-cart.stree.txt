@@ -1,0 +1,52 @@
+link_request get 'page://self/shopping/error#link=self:goCart'
+├── uri: page://self/shopping/error
+├── method: GET
+├── links[0]: self:goCart
+├── resource_request get 'page://self/shopping/error'
+│   ├── uri: page://self/shopping/error
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/cart'
+│   ├── uri: page://self/cart
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCartsInput
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── carts[0].cartKey: session-prefix-1_1
+│   │   │       ├── carts[0].saleTypeId: 1
+│   │   │       ├── carts[0].saleTypeName: 通常販売
+│   │   │       ├── carts[0].items[0].productCode: sample-001
+│   │   │       ├── carts[0].items[0].quantity: 3
+│   │   │       ├── carts[0].items[0].price: 1200
+│   │   │       ├── carts[0].items[0].productClassId: 0
+│   │   │       ├── carts[0].items[0].productId: 0
+│   │   │       ├── carts[0].items[0].productName: サンプル商品 A
+│   │   │       ├── carts[0].totalPrice: 3600
+│   │   │       ├── carts[0].deliveryFeeTotal: 0
+│   │   │       ├── carts[0].preOrderId: deadbeefcafe1234567890abcdef01234567890a
+│   │   │       ├── carts[1].cartKey: session-prefix-1_2
+│   │   │       ├── carts[1].saleTypeId: 2
+│   │   │       ├── carts[1].saleTypeName: 予約販売
+│   │   │       ├── carts[1].totalPrice: 0
+│   │   │       ├── carts[1].deliveryFeeTotal: 0
+│   │   │       ├── carts[1].preOrderId: deadbeefcafe1234567890abcdef01234567890b
+│   │   │       ├── cartCount: 2
+│   │   │       ├── totalPrice: 3600
+│   │   │       └── deliveryFeeTotal: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

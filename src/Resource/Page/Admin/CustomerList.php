@@ -63,6 +63,7 @@ class CustomerList extends ResourceObject
     #[Link(rel: 'doCreateCustomer', href: 'page://self/admin/create-customer', method: 'post')]
     #[Link(rel: 'doDeleteCustomer', href: 'page://self/admin/delete-customer', method: 'post')]
     #[Link(rel: 'doResendActivationMail', href: 'page://self/admin/customer/resend-activation-mail', method: 'post')]
+    #[Link(rel: 'goExportClassName', href: 'page://self/admin/class-name/class-name-export')]
     public function onGet(
         string|null $nameKeyword = null,
         string|null $emailKeyword = null,

@@ -1,0 +1,40 @@
+link_request get 'page://self/admin/index#link=self:goPaymentList'
+├── uri: page://self/admin/index
+├── method: GET
+├── links[0]: self:goPaymentList
+├── resource_request get 'page://self/admin/index'
+│   ├── uri: page://self/admin/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/payment/payment-list'
+│   ├── uri: page://self/admin/payment/payment-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminPaymentListInput
+│   │   ├── being_final AdminPaymentListFetched inject=[adminSession, payments]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.payments: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── payments[0].paymentId: pay-cod
+│   │   │       ├── payments[0].paymentMethodName: 代金引換
+│   │   │       ├── payments[0].charge: 300
+│   │   │       ├── payments[0].visible: true
+│   │   │       ├── payments[1].paymentId: pay-credit
+│   │   │       ├── payments[1].paymentMethodName: クレジットカード
+│   │   │       ├── payments[1].charge: 200
+│   │   │       └── payments[1].visible: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

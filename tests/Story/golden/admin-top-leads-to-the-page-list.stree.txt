@@ -1,0 +1,47 @@
+link_request get 'page://self/admin/index#link=self:goPageList'
+├── uri: page://self/admin/index
+├── method: GET
+├── links[0]: self:goPageList
+├── resource_request get 'page://self/admin/index'
+│   ├── uri: page://self/admin/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/page/page-list'
+│   ├── uri: page://self/admin/page/page-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminPageListInput
+│   │   ├── being_final AdminPageListFetched inject=[adminSession, pages]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 3
+│   │   │       ├── pages[0].pageId: pg-homepage
+│   │   │       ├── pages[0].pageName: ホームページ
+│   │   │       ├── pages[0].pageUrl: homepage
+│   │   │       ├── pages[0].pageFileName: index
+│   │   │       ├── pages[0].pageEditType: 2
+│   │   │       ├── pages[1].pageId: pg-company
+│   │   │       ├── pages[1].pageName: 会社案内
+│   │   │       ├── pages[1].pageUrl: company
+│   │   │       ├── pages[1].pageFileName: company
+│   │   │       ├── pages[1].pageEditType: 0
+│   │   │       ├── pages[2].pageId: pg-foo
+│   │   │       ├── pages[2].pageName: Foo
+│   │   │       ├── pages[2].pageUrl: foo
+│   │   │       ├── pages[2].pageFileName: foo
+│   │   │       └── pages[2].pageEditType: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

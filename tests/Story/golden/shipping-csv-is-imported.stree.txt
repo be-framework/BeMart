@@ -1,0 +1,53 @@
+link_request get 'page://self/admin/order/export-shipping#link=self:doImportShippingCsv'
+├── uri: page://self/admin/order/export-shipping
+├── method: GET
+├── links[0]: self:doImportShippingCsv
+├── resource_request get 'page://self/admin/order/export-shipping'
+│   ├── uri: page://self/admin/order/export-shipping
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming AdminExportShippingInput
+│   │   ├── being_final AdminShippingCsvExported inject=[adminSession, shippingAddresses +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.shippingAddresses: MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface<Null-1>
+│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null-2>
+│   │   │   └── close being_final_close
+│   │   │       ├── csv: orderNo,name01,name02,postalCode,pref,addr01,addr02,phoneNumber,trackingNumber
+
+│   │   │       └── rowCount: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/admin/order/import-shipping?csv=shippingId%2CtrackingNumber%0D%0A&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/order/import-shipping
+│   ├── method: POST
+│   ├── params.csv: shippingId,trackingNumber
+
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming AdminImportShippingCsvInput
+│   │   ├── csv: shippingId,trackingNumber
+
+│   │   ├── being_final AdminShippingCsvImported input=[csv] inject=[adminSession, orderQuery +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-3>
+│   │   │   ├── inject.shippingAddresses: MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── accepted: true
+│   │   │       ├── lineCount: 1
+│   │   │       ├── imported: 0
+│   │   │       ├── skipped: 0
+│   │   │       └── message: 配送CSVを取り込みました（更新 0件・対象外 0件）。
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+POST page://self/admin/order/import-shipping {"csv":"shippingId,trackingNumber\r\n","csrfToken":"[FILTERED]"}

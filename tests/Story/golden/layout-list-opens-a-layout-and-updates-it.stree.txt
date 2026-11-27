@@ -1,0 +1,94 @@
+link_request get 'page://self/admin/layout/layout-list#link=self:goLayout,self:doUpdateLayout'
+├── uri: page://self/admin/layout/layout-list
+├── method: GET
+├── links[0]: self:goLayout
+├── links[1]: self:doUpdateLayout
+├── resource_request get 'page://self/admin/layout/layout-list'
+│   ├── uri: page://self/admin/layout/layout-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminLayoutListInput
+│   │   ├── being_final AdminLayoutListFetched inject=[adminSession, layouts]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.layouts: MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── layouts[0].layoutId: lo-pc-default
+│   │   │       ├── layouts[0].layoutName: PC標準
+│   │   │       ├── layouts[0].deviceType: 10
+│   │   │       ├── layouts[1].layoutId: lo-sp-default
+│   │   │       ├── layouts[1].layoutName: スマホ標準
+│   │   │       └── layouts[1].deviceType: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/layout/layout?layoutId=lo-pc-default'
+│   ├── uri: page://self/admin/layout/layout
+│   ├── method: GET
+│   ├── params.layoutId: lo-pc-default
+│   ├── replayable: true
+│   ├── becoming GetAdminLayoutInput
+│   │   ├── layoutId: lo-pc-default
+│   │   ├── being_final AdminLayoutFetched input=[layoutId] inject=[adminSession, layouts]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.layouts: MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── layoutId: lo-pc-default
+│   │   │       ├── layoutName: PC標準
+│   │   │       └── deviceType: 10
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/layout/layout?layoutId=lo-pc-default&name=Story+Layout&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/layout/layout
+│   ├── method: PUT
+│   ├── params.layoutId: lo-pc-default
+│   ├── params.name: Story Layout
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateLayoutInput
+│   │   ├── layoutId: lo-pc-default
+│   │   ├── layoutName: Story Layout
+│   │   ├── being_final LayoutUpdated input=[layoutId, layoutName] inject=[adminSession, layouts]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.layouts: MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── layoutId: lo-pc-default
+│   │   │       ├── layoutName: Story Layout
+│   │   │       └── deviceType: 10
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/layout/layout-list'
+│   ├── uri: page://self/admin/layout/layout-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminLayoutListInput
+│   │   ├── being_final AdminLayoutListFetched inject=[adminSession, layouts]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.layouts: MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── layouts[0].layoutId: lo-pc-default
+│   │   │       ├── layouts[0].layoutName: PC標準
+│   │   │       ├── layouts[0].deviceType: 10
+│   │   │       ├── layouts[1].layoutId: lo-sp-default
+│   │   │       ├── layouts[1].layoutName: スマホ標準
+│   │   │       └── layouts[1].deviceType: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/layout/layout {"layoutId":"lo-pc-default","name":"Story Layout","csrfToken":"[FILTERED]"}

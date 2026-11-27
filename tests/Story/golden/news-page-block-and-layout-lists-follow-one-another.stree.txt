@@ -1,0 +1,106 @@
+link_request get 'page://self/admin/news/news-list#link=self:goPageList,self:goBlockList,self:goLayoutList'
+├── uri: page://self/admin/news/news-list
+├── method: GET
+├── links[0]: self:goPageList
+├── links[1]: self:goBlockList
+├── links[2]: self:goLayoutList
+├── resource_request get 'page://self/admin/news/news-list'
+│   ├── uri: page://self/admin/news/news-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminNewsListInput
+│   │   ├── being_final AdminNewsListFetched inject=[adminSession, news]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.news: MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 1
+│   │   │       ├── news[0].newsId: nw-welcome
+│   │   │       ├── news[0].newsTitle: ようこそ
+│   │   │       ├── news[0].newsDescription: BeMart へようこそ。
+│   │   │       ├── news[0].publishDate: 2026-01-01T00:00:00+09:00
+│   │   │       └── news[0].linkMethod: false
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/page/page-list'
+│   ├── uri: page://self/admin/page/page-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminPageListInput
+│   │   ├── being_final AdminPageListFetched inject=[adminSession, pages]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-2>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 3
+│   │   │       ├── pages[0].pageId: pg-homepage
+│   │   │       ├── pages[0].pageName: ホームページ
+│   │   │       ├── pages[0].pageUrl: homepage
+│   │   │       ├── pages[0].pageFileName: index
+│   │   │       ├── pages[0].pageEditType: 2
+│   │   │       ├── pages[1].pageId: pg-company
+│   │   │       ├── pages[1].pageName: 会社案内
+│   │   │       ├── pages[1].pageUrl: company
+│   │   │       ├── pages[1].pageFileName: company
+│   │   │       ├── pages[1].pageEditType: 0
+│   │   │       ├── pages[2].pageId: pg-foo
+│   │   │       ├── pages[2].pageName: Foo
+│   │   │       ├── pages[2].pageUrl: foo
+│   │   │       ├── pages[2].pageFileName: foo
+│   │   │       └── pages[2].pageEditType: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/block/block-list'
+│   ├── uri: page://self/admin/block/block-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminBlockListInput
+│   │   ├── being_final AdminBlockListFetched inject=[adminSession, blocks]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null-2>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── blocks[0].blockId: bk-header
+│   │   │       ├── blocks[0].blockName: ヘッダー
+│   │   │       ├── blocks[0].blockFileName: header
+│   │   │       ├── blocks[0].blockDeletable: false
+│   │   │       ├── blocks[1].blockId: bk-user
+│   │   │       ├── blocks[1].blockName: ユーザーブロック
+│   │   │       ├── blocks[1].blockFileName: user_block
+│   │   │       └── blocks[1].blockDeletable: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/layout/layout-list'
+│   ├── uri: page://self/admin/layout/layout-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminLayoutListInput
+│   │   ├── being_final AdminLayoutListFetched inject=[adminSession, layouts]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.layouts: MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface<Null-3>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── layouts[0].layoutId: lo-pc-default
+│   │   │       ├── layouts[0].layoutName: PC標準
+│   │   │       ├── layouts[0].deviceType: 10
+│   │   │       ├── layouts[1].layoutId: lo-sp-default
+│   │   │       ├── layouts[1].layoutName: スマホ標準
+│   │   │       └── layouts[1].deviceType: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

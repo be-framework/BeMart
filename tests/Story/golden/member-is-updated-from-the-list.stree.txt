@@ -1,0 +1,101 @@
+link_request get 'page://self/admin/member-list#link=self:doUpdateMember'
+├── uri: page://self/admin/member-list
+├── method: GET
+├── links[0]: self:doUpdateMember
+├── resource_request get 'page://self/admin/member-list'
+│   ├── uri: page://self/admin/member-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetMemberListInput
+│   │   ├── limit: 50
+│   │   ├── offset: 0
+│   │   ├── being_final MemberListFetched input=[nameKeyword, limit, offset] inject=[adminSession, adminQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.adminQuery: MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── members[0].adminId: ad000000000000000000000000000001
+│   │   │       ├── members[0].loginId: test-admin
+│   │   │       ├── members[0].name: テスト管理者
+│   │   │       ├── members[0].authority: 0
+│   │   │       ├── members[0].work: 1
+│   │   │       ├── members[0].sortNo: 1
+│   │   │       ├── members[1].adminId: ad000000000000000000000000000002
+│   │   │       ├── members[1].loginId: shop-owner
+│   │   │       ├── members[1].name: 店舗オーナー
+│   │   │       ├── members[1].authority: 1
+│   │   │       ├── members[1].work: 1
+│   │   │       ├── members[1].sortNo: 2
+│   │   │       ├── members[2].adminId: ad000000000000000000000000000003
+│   │   │       ├── members[2].loginId: deputy
+│   │   │       ├── members[2].name: 副管理者
+│   │   │       ├── members[2].authority: 1
+│   │   │       ├── members[2].work: 1
+│   │   │       ├── members[2].sortNo: 3
+│   │   │       ├── members[3].adminId: ad000000000000000000000000000004
+│   │   │       ├── members[3].loginId: deleted-admin
+│   │   │       ├── members[3].name: 削除済み管理者
+│   │   │       ├── members[3].authority: 1
+│   │   │       ├── members[3].work: 0
+│   │   │       ├── members[3].sortNo: 4
+│   │   │       ├── count: 4
+│   │   │       ├── filters.limit: 50
+│   │   │       └── filters.offset: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/member?loginId=shop-owner&name=Story+Owner&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/member
+│   ├── method: PUT
+│   ├── params.loginId: shop-owner
+│   ├── params.name: Story Owner
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateMemberInput
+│   │   ├── loginId: shop-owner
+│   │   ├── name: Story Owner
+│   │   ├── being_final MemberUpdated input=[loginId, name] inject=[adminSession, adminQuery, adminCommand]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.adminQuery: MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface<Null-1>
+│   │   │   ├── inject.adminCommand: MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface<Null-2>
+│   │   │   └── close being_final_close
+│   │   │       ├── adminId: ad000000000000000000000000000002
+│   │   │       ├── loginId: shop-owner
+│   │   │       ├── name: Story Owner
+│   │   │       ├── authority: 1
+│   │   │       ├── work: 1
+│   │   │       └── sortNo: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/member?loginId=shop-owner'
+│   ├── uri: page://self/admin/member
+│   ├── method: GET
+│   ├── params.loginId: shop-owner
+│   ├── replayable: true
+│   ├── becoming GetMemberInput
+│   │   ├── loginId: shop-owner
+│   │   ├── being_final MemberFetched input=[loginId] inject=[adminSession, adminQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.adminQuery: MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── adminId: ad000000000000000000000000000002
+│   │   │       ├── loginId: shop-owner
+│   │   │       ├── name: 店舗オーナー
+│   │   │       ├── authority: 1
+│   │   │       ├── work: 1
+│   │   │       └── sortNo: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/member {"loginId":"shop-owner","name":"Story Owner","csrfToken":"[FILTERED]"}

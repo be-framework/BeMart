@@ -56,6 +56,7 @@ class AddressList extends ResourceObject
     #[Link(rel: 'doUpdateCustomerAddress', href: 'page://self/mypage/address', method: 'put')]
     #[Link(rel: 'doDeleteCustomerAddress', href: 'page://self/mypage/address', method: 'delete')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
+    #[Link(rel: 'goFavoriteList', href: 'page://self/mypage/favorite-list')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetCustomerAddressListInput());

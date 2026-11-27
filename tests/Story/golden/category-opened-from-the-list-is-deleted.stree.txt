@@ -1,0 +1,91 @@
+link_request get 'page://self/admin/category/category-list#link=self:goCategory,self:doDeleteCategory'
+├── uri: page://self/admin/category/category-list
+├── method: GET
+├── links[0]: self:goCategory
+├── links[1]: self:doDeleteCategory
+├── resource_request get 'page://self/admin/category/category-list'
+│   ├── uri: page://self/admin/category/category-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminCategoryListInput
+│   │   ├── being_final AdminCategoryListFetched inject=[adminSession, categories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── categories[0].categoryId: cat-food
+│   │   │       ├── categories[0].categoryName: Food
+│   │   │       ├── categories[0].sortNo: 10
+│   │   │       ├── categories[1].categoryId: cat-drinks
+│   │   │       ├── categories[1].categoryName: Drinks
+│   │   │       └── categories[1].sortNo: 20
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/category/category?categoryId=cat-food'
+│   ├── uri: page://self/admin/category/category
+│   ├── method: GET
+│   ├── params.categoryId: cat-food
+│   ├── replayable: true
+│   ├── becoming GetAdminCategoryInput
+│   │   ├── categoryId: cat-food
+│   │   ├── being_final AdminCategoryFetched input=[categoryId] inject=[adminSession, categories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── categoryId: cat-food
+│   │   │       ├── categoryName: Food
+│   │   │       └── sortNo: 10
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request delete 'page://self/admin/category/category?categoryId=cat-food&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/category/category
+│   ├── method: DELETE
+│   ├── params.categoryId: cat-food
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming DeleteCategoryInput
+│   │   ├── categoryId: cat-food
+│   │   ├── being_final CategoryDeleted input=[categoryId] inject=[adminSession, categories +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-1>
+│   │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
+│   │   │   └── close being_final_close
+│   │   │       └── categoryId: cat-food
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/category/category-list'
+│   ├── uri: page://self/admin/category/category-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminCategoryListInput
+│   │   ├── being_final AdminCategoryListFetched inject=[adminSession, categories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── categories[0].categoryId: cat-food
+│   │   │       ├── categories[0].categoryName: Food
+│   │   │       ├── categories[0].sortNo: 10
+│   │   │       ├── categories[1].categoryId: cat-drinks
+│   │   │       ├── categories[1].categoryName: Drinks
+│   │   │       └── categories[1].sortNo: 20
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+DELETE page://self/admin/category/category {"categoryId":"cat-food","csrfToken":"[FILTERED]"}

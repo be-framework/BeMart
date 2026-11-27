@@ -1,0 +1,42 @@
+link_request get 'page://self/admin/content/maintenance#link=self:doToggleMaintenance'
+├── uri: page://self/admin/content/maintenance
+├── method: GET
+├── links[0]: self:doToggleMaintenance
+├── resource_request get 'page://self/admin/content/maintenance'
+│   ├── uri: page://self/admin/content/maintenance
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/content/maintenance?enabled=1&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/content/maintenance
+│   ├── method: PUT
+│   ├── params.enabled: 1
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming ToggleMaintenanceInput
+│   │   ├── enabled: true
+│   │   ├── being_final MaintenanceToggled input=[enabled] inject=[adminSession, maintenance]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.maintenance: MyVendor\BeMart\Be\Reason\Fake\Service\FakeMaintenanceMode
+│   │   │   └── close being_final_close
+│   │   │       └── enabled: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/content/maintenance'
+│   ├── uri: page://self/admin/content/maintenance
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/content/maintenance {"enabled":"1","csrfToken":"[FILTERED]"}

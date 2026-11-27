@@ -49,6 +49,7 @@ class Css extends ResourceObject
     #[Alps('goContentCss')]
     #[JsonSchema(schema: 'get-admin-content-css.json')]
     #[Link(rel: 'doUpdateContentCss', href: 'page://self/admin/content/css', method: 'put')]
+    #[Link(rel: 'goContentJs', href: 'page://self/admin/content/js')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

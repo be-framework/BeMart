@@ -1,0 +1,83 @@
+link_request get 'page://self/admin/class-category/class-category-list#link=self:doCreateClassCategory'
+├── uri: page://self/admin/class-category/class-category-list
+├── method: GET
+├── links[0]: self:doCreateClassCategory
+├── resource_request get 'page://self/admin/class-category/class-category-list'
+│   ├── uri: page://self/admin/class-category/class-category-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminClassCategoryListInput
+│   │   ├── being_final AdminClassCategoryListFetched input=[classNameId] inject=[adminSession, classCategories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 3
+│   │   │       ├── classCategories[0].classCategoryId: cc-red
+│   │   │       ├── classCategories[0].classNameId: cn-color
+│   │   │       ├── classCategories[0].name: Red
+│   │   │       ├── classCategories[1].classCategoryId: cc-blue
+│   │   │       ├── classCategories[1].classNameId: cn-color
+│   │   │       ├── classCategories[1].name: Blue
+│   │   │       ├── classCategories[2].classCategoryId: cc-small
+│   │   │       ├── classCategories[2].classNameId: cn-size
+│   │   │       └── classCategories[2].name: S
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/admin/class-category/class-category-list?classNameId=cn-color&classCategoryName=Blue&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/class-category/class-category-list
+│   ├── method: POST
+│   ├── params.classNameId: cn-color
+│   ├── params.classCategoryName: Blue
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming CreateClassCategoryInput
+│   │   ├── classNameId: cn-color
+│   │   ├── classCategoryName: Blue
+│   │   ├── being_final ClassCategoryCreated input=[classNameId, classCategoryName] inject=[adminSession, classNames +3 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.classNames: MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface<Null-2>
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
+│   │   │   ├── inject.ids: MyVendor\BeMart\Be\Reason\Provider\ClassCategoryIdProvider
+│   │   │   └── close being_final_close
+│   │   │       ├── classCategoryId: cc-fake-next
+│   │   │       ├── classNameId: cn-color
+│   │   │       └── name: Blue
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 201
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/class-category/class-category-list?classNameId=cn-color'
+│   ├── uri: page://self/admin/class-category/class-category-list
+│   ├── method: GET
+│   ├── params.classNameId: cn-color
+│   ├── replayable: true
+│   ├── becoming GetAdminClassCategoryListInput
+│   │   ├── classNameId: cn-color
+│   │   ├── being_final AdminClassCategoryListFetched input=[classNameId] inject=[adminSession, classCategories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── classNameId: cn-color
+│   │   │       ├── count: 2
+│   │   │       ├── classCategories[0].classCategoryId: cc-red
+│   │   │       ├── classCategories[0].classNameId: cn-color
+│   │   │       ├── classCategories[0].name: Red
+│   │   │       ├── classCategories[1].classCategoryId: cc-blue
+│   │   │       ├── classCategories[1].classNameId: cn-color
+│   │   │       └── classCategories[1].name: Blue
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+POST page://self/admin/class-category/class-category-list {"classNameId":"cn-color","classCategoryName":"Blue","csrfToken":"[FILTERED]"}

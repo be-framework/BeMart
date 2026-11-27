@@ -1,0 +1,42 @@
+link_request get 'page://self/admin/index#link=self:goMailTemplateList'
+├── uri: page://self/admin/index
+├── method: GET
+├── links[0]: self:goMailTemplateList
+├── resource_request get 'page://self/admin/index'
+│   ├── uri: page://self/admin/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/mail-template'
+│   ├── uri: page://self/admin/mail-template
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetMailTemplateListInput
+│   │   ├── being_final MailTemplateListFetched inject=[adminSession, mailTemplateStorage]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.mailTemplateStorage: MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── mailTemplates[0].mailTemplateId: 1
+│   │   │       ├── mailTemplates[0].mailTemplateName: 注文完了メール
+│   │   │       ├── mailTemplates[0].fileName: Mail/order.twig
+│   │   │       ├── mailTemplates[0].mailSubject: ご注文ありがとうございます
+│   │   │       ├── mailTemplates[0].isDeletable: false
+│   │   │       ├── mailTemplates[1].mailTemplateId: 2
+│   │   │       ├── mailTemplates[1].mailTemplateName: 会員登録完了メール
+│   │   │       ├── mailTemplates[1].fileName: Mail/entry.twig
+│   │   │       ├── mailTemplates[1].mailSubject: ご登録ありがとうございます
+│   │   │       ├── mailTemplates[1].isDeletable: false
+│   │   │       └── count: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

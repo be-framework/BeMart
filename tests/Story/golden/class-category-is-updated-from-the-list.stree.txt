@@ -1,0 +1,81 @@
+link_request get 'page://self/admin/class-category/class-category-list#link=self:doUpdateClassCategory'
+├── uri: page://self/admin/class-category/class-category-list
+├── method: GET
+├── links[0]: self:doUpdateClassCategory
+├── resource_request get 'page://self/admin/class-category/class-category-list?classNameId=cn-color'
+│   ├── uri: page://self/admin/class-category/class-category-list
+│   ├── method: GET
+│   ├── params.classNameId: cn-color
+│   ├── replayable: true
+│   ├── becoming GetAdminClassCategoryListInput
+│   │   ├── classNameId: cn-color
+│   │   ├── being_final AdminClassCategoryListFetched input=[classNameId] inject=[adminSession, classCategories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── classNameId: cn-color
+│   │   │       ├── count: 2
+│   │   │       ├── classCategories[0].classCategoryId: cc-red
+│   │   │       ├── classCategories[0].classNameId: cn-color
+│   │   │       ├── classCategories[0].name: Red
+│   │   │       ├── classCategories[1].classCategoryId: cc-blue
+│   │   │       ├── classCategories[1].classNameId: cn-color
+│   │   │       └── classCategories[1].name: Blue
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/class-category/class-category?classCategoryId=cc-red&classCategoryName=Story+Red&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/class-category/class-category
+│   ├── method: PUT
+│   ├── params.classCategoryId: cc-red
+│   ├── params.classCategoryName: Story Red
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateClassCategoryInput
+│   │   ├── classCategoryId: cc-red
+│   │   ├── classCategoryName: Story Red
+│   │   ├── being_final ClassCategoryUpdated input=[classCategoryId, classCategoryName] inject=[adminSession, classCategories +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
+│   │   │   └── close being_final_close
+│   │   │       ├── classCategoryId: cc-red
+│   │   │       ├── classNameId: cn-color
+│   │   │       └── name: Story Red
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/class-category/class-category-list?classNameId=cn-color'
+│   ├── uri: page://self/admin/class-category/class-category-list
+│   ├── method: GET
+│   ├── params.classNameId: cn-color
+│   ├── replayable: true
+│   ├── becoming GetAdminClassCategoryListInput
+│   │   ├── classNameId: cn-color
+│   │   ├── being_final AdminClassCategoryListFetched input=[classNameId] inject=[adminSession, classCategories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── classNameId: cn-color
+│   │   │       ├── count: 2
+│   │   │       ├── classCategories[0].classCategoryId: cc-red
+│   │   │       ├── classCategories[0].classNameId: cn-color
+│   │   │       ├── classCategories[0].name: Red
+│   │   │       ├── classCategories[1].classCategoryId: cc-blue
+│   │   │       ├── classCategories[1].classNameId: cn-color
+│   │   │       └── classCategories[1].name: Blue
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/class-category/class-category {"classCategoryId":"cc-red","classCategoryName":"Story Red","csrfToken":"[FILTERED]"}

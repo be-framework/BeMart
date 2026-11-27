@@ -6,6 +6,8 @@ namespace MyVendor\BeMart\Tests\Support\Hypermedia;
 
 use Aura\Sql\ExtendedPdoInterface;
 use BEAR\Csrf\Http\RequestOriginInterface;
+use BEAR\Dev\DeclaredMethodLinker;
+use BEAR\Resource\LinkerInterface;
 use BEAR\Resource\ResourceInterface;
 use Closure;
 use MyVendor\BeMart\Injector;
@@ -58,6 +60,8 @@ final class WorkflowDbSession
                 $this->bind(AdminLoginFormSubmissionInterface::class)->to(ExplicitAdminLoginFormSubmission::class);
                 $this->install(new AllowedOriginModule('http://127.0.0.1'));
                 $this->bind(RequestOriginInterface::class)->toInstance(new FakeRequestOrigin(fetchSite: 'same-origin'));
+                // A workflow follows each link with the method its #[Link] declares
+                $this->bind(LinkerInterface::class)->to(DeclaredMethodLinker::class);
             }
         });
 

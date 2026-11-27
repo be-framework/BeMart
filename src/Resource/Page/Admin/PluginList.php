@@ -57,6 +57,7 @@ class PluginList extends ResourceObject
     #[Link(rel: 'doEnablePlugin', href: 'page://self/admin/plugin-enable', method: 'post')]
     #[Link(rel: 'doDisablePlugin', href: 'page://self/admin/plugin-disable', method: 'post')]
     #[Link(rel: 'doUninstallPlugin', href: 'page://self/admin/plugin', method: 'delete')]
+    #[Link(rel: 'doInstallPlugin', href: 'page://self/admin/plugin-list', method: 'post')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetPluginListInput());

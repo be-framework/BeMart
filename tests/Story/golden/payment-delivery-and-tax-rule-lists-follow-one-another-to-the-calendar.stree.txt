@@ -1,0 +1,96 @@
+link_request get 'page://self/admin/payment/payment-list#link=self:goDeliveryList,self:goTaxRuleList,self:goCalendar'
+├── uri: page://self/admin/payment/payment-list
+├── method: GET
+├── links[0]: self:goDeliveryList
+├── links[1]: self:goTaxRuleList
+├── links[2]: self:goCalendar
+├── resource_request get 'page://self/admin/payment/payment-list'
+│   ├── uri: page://self/admin/payment/payment-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminPaymentListInput
+│   │   ├── being_final AdminPaymentListFetched inject=[adminSession, payments]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.payments: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── payments[0].paymentId: pay-cod
+│   │   │       ├── payments[0].paymentMethodName: 代金引換
+│   │   │       ├── payments[0].charge: 300
+│   │   │       ├── payments[0].visible: true
+│   │   │       ├── payments[1].paymentId: pay-credit
+│   │   │       ├── payments[1].paymentMethodName: クレジットカード
+│   │   │       ├── payments[1].charge: 200
+│   │   │       └── payments[1].visible: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/delivery/delivery-list'
+│   ├── uri: page://self/admin/delivery/delivery-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminDeliveryListInput
+│   │   ├── being_final AdminDeliveryListFetched inject=[adminSession, deliveries]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.deliveries: MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── deliveries[0].deliveryId: del-yamato
+│   │   │       ├── deliveries[0].deliveryName: ヤマト宅急便
+│   │   │       ├── deliveries[0].visible: true
+│   │   │       ├── deliveries[1].deliveryId: del-yupack
+│   │   │       ├── deliveries[1].deliveryName: ゆうパック
+│   │   │       └── deliveries[1].visible: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/tax-rule/tax-rule-list'
+│   ├── uri: page://self/admin/tax-rule/tax-rule-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminTaxRuleListInput
+│   │   ├── being_final AdminTaxRuleListFetched inject=[adminSession, taxRules]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.taxRules: MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface<Null-2>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── taxRules[0].taxRuleId: tax-10
+│   │   │       ├── taxRules[0].taxRate: 10
+│   │   │       ├── taxRules[0].roundingType: 1
+│   │   │       ├── taxRules[0].applyDate: 2024-04-01T00:00:00+09:00
+│   │   │       ├── taxRules[1].taxRuleId: tax-8
+│   │   │       ├── taxRules[1].taxRate: 8
+│   │   │       ├── taxRules[1].roundingType: 1
+│   │   │       └── taxRules[1].applyDate: 2023-10-01T00:00:00+09:00
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/calendar'
+│   ├── uri: page://self/admin/calendar
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminCalendarInput
+│   │   ├── being_final AdminCalendarFetched inject=[adminSession, calendars]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-2>
+│   │   │   └── close being_final_close
+│   │   │       ├── calendars[0].calendarId: 1
+│   │   │       ├── calendars[0].title: 元日
+│   │   │       └── calendars[0].holiday: 2026-01-01
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

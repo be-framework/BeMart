@@ -73,6 +73,7 @@ class TwoFactorAuth extends ResourceObject
     #[JsonSchema(schema: 'get-admin-two-factor-auth.json')]
     #[Link(rel: 'doVerifyTwoFactorAuth', href: 'page://self/admin/two-factor-auth', method: 'post')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
+    #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
     public function onGet(): static
     {
         $this->verificationChallenge();

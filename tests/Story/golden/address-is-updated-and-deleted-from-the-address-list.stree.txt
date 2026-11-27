@@ -1,0 +1,142 @@
+link_request get 'page://self/mypage/address-list#link=self:doUpdateCustomerAddress,self:doDeleteCustomerAddress'
+├── uri: page://self/mypage/address-list
+├── method: GET
+├── links[0]: self:doUpdateCustomerAddress
+├── links[1]: self:doDeleteCustomerAddress
+├── resource_request get 'page://self/mypage/address-list'
+│   ├── uri: page://self/mypage/address-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCustomerAddressListInput
+│   │   ├── being_final CustomerAddressListFetched inject=[session, addresses]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── count: 1
+│   │   │       ├── addresses[0].addressId: addr00000000000000000000000000a1
+│   │   │       ├── addresses[0].name01: 山田
+│   │   │       ├── addresses[0].name02: アリス
+│   │   │       ├── addresses[0].kana01: ヤマダ
+│   │   │       ├── addresses[0].kana02: アリス
+│   │   │       ├── addresses[0].phoneNumber: 0312345678
+│   │   │       ├── addresses[0].postalCode: 1500001
+│   │   │       ├── addresses[0].pref: 13
+│   │   │       ├── addresses[0].prefName: 東京都
+│   │   │       ├── addresses[0].addr01: 渋谷区
+│   │   │       └── addresses[0].addr02: 神宮前1-1-1
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/mypage/address?addressId=addr00000000000000000000000000a1&addr01=%E6%B8%AF%E5%8C%BA&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/mypage/address
+│   ├── method: PUT
+│   ├── params.addressId: addr00000000000000000000000000a1
+│   ├── params.addr01: 港区
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateCustomerAddressInput
+│   │   ├── addressId: addr00000000000000000000000000a1
+│   │   ├── addr01: 港区
+│   │   ├── being_final CustomerAddressUpdated input=[addressId, name01, name02, kana01 +7 items] inject=[session, addresses]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── addressId: addr00000000000000000000000000a1
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── name01: 山田
+│   │   │       ├── name02: アリス
+│   │   │       ├── kana01: ヤマダ
+│   │   │       ├── kana02: アリス
+│   │   │       ├── phoneNumber: 0312345678
+│   │   │       ├── postalCode: 1500001
+│   │   │       ├── pref: 13
+│   │   │       ├── addr01: 港区
+│   │   │       └── addr02: 神宮前1-1-1
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/mypage/address-list'
+│   ├── uri: page://self/mypage/address-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCustomerAddressListInput
+│   │   ├── being_final CustomerAddressListFetched inject=[session, addresses]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── count: 1
+│   │   │       ├── addresses[0].addressId: addr00000000000000000000000000a1
+│   │   │       ├── addresses[0].name01: 山田
+│   │   │       ├── addresses[0].name02: アリス
+│   │   │       ├── addresses[0].kana01: ヤマダ
+│   │   │       ├── addresses[0].kana02: アリス
+│   │   │       ├── addresses[0].phoneNumber: 0312345678
+│   │   │       ├── addresses[0].postalCode: 1500001
+│   │   │       ├── addresses[0].pref: 13
+│   │   │       ├── addresses[0].prefName: 東京都
+│   │   │       ├── addresses[0].addr01: 渋谷区
+│   │   │       └── addresses[0].addr02: 神宮前1-1-1
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request delete 'page://self/mypage/address?addressId=addr00000000000000000000000000a1&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/mypage/address
+│   ├── method: DELETE
+│   ├── params.addressId: addr00000000000000000000000000a1
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming DeleteCustomerAddressInput
+│   │   ├── addressId: addr00000000000000000000000000a1
+│   │   ├── being_final CustomerAddressDeleted input=[addressId] inject=[session, addresses]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── addressId: addr00000000000000000000000000a1
+│   │   │       └── customerId: 0123456789abcdef0123456789abcdef
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/mypage/address-list'
+│   ├── uri: page://self/mypage/address-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCustomerAddressListInput
+│   │   ├── being_final CustomerAddressListFetched inject=[session, addresses]
+│   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
+│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── count: 1
+│   │   │       ├── addresses[0].addressId: addr00000000000000000000000000a1
+│   │   │       ├── addresses[0].name01: 山田
+│   │   │       ├── addresses[0].name02: アリス
+│   │   │       ├── addresses[0].kana01: ヤマダ
+│   │   │       ├── addresses[0].kana02: アリス
+│   │   │       ├── addresses[0].phoneNumber: 0312345678
+│   │   │       ├── addresses[0].postalCode: 1500001
+│   │   │       ├── addresses[0].pref: 13
+│   │   │       ├── addresses[0].prefName: 東京都
+│   │   │       ├── addresses[0].addr01: 渋谷区
+│   │   │       └── addresses[0].addr02: 神宮前1-1-1
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/mypage/address {"addressId":"addr00000000000000000000000000a1","addr01":"港区","csrfToken":"[FILTERED]"}
+DELETE page://self/mypage/address {"addressId":"addr00000000000000000000000000a1","csrfToken":"[FILTERED]"}

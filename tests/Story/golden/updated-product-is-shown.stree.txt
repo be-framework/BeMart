@@ -1,0 +1,97 @@
+link_request get 'page://self/admin/product#link=self:doUpdateProduct'
+├── uri: page://self/admin/product
+├── method: GET
+├── links[0]: self:doUpdateProduct
+├── resource_request get 'page://self/admin/product?productCode=admin-active-001'
+│   ├── uri: page://self/admin/product
+│   ├── method: GET
+│   ├── params.productCode: admin-active-001
+│   ├── replayable: true
+│   ├── becoming GetAdminProductInput
+│   │   ├── productCode: admin-active-001
+│   │   ├── being_final AdminProductFetched input=[productCode] inject=[adminSession, productQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── productCode: admin-active-001
+│   │   │       ├── productName: 管理画面用 商品A
+│   │   │       ├── price02: 3500
+│   │   │       ├── stock: 20
+│   │   │       ├── productStatus: 1
+│   │   │       ├── description: Wave 8 admin grid: visible row
+│   │   │       ├── searchWord: 管理 active
+│   │   │       ├── note: internal note A
+│   │   │       ├── imagePath: /save_image/img_item02_01.jpg
+│   │   │       ├── categoryNames[0]: 管理商品
+│   │   │       ├── categoryNames[1]: 公開
+│   │   │       ├── tagNames[0]: 管理
+│   │   │       └── classNames[0]: 通常
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/product?productCode=admin-active-001&productName=Story+Product&price02=1500&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/product
+│   ├── method: PUT
+│   ├── params.productCode: admin-active-001
+│   ├── params.productName: Story Product
+│   ├── params.price02: 1500
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming AdminUpdateProductInput
+│   │   ├── productCode: admin-active-001
+│   │   ├── productName: Story Product
+│   │   ├── price02: 1500
+│   │   ├── being_final AdminProductUpdated input=[productCode, productName, price02, stock +4 items] inject=[adminSession, productQuery +2 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   │   ├── inject.productCommand: MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface<Null-2>
+│   │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
+│   │   │   └── close being_final_close
+│   │   │       ├── productCode: admin-active-001
+│   │   │       ├── productName: Story Product
+│   │   │       ├── price02: 1500
+│   │   │       ├── stock: 20
+│   │   │       ├── productStatus: 1
+│   │   │       └── description: Wave 8 admin grid: visible row
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/product?productCode=admin-active-001'
+│   ├── uri: page://self/admin/product
+│   ├── method: GET
+│   ├── params.productCode: admin-active-001
+│   ├── replayable: true
+│   ├── becoming GetAdminProductInput
+│   │   ├── productCode: admin-active-001
+│   │   ├── being_final AdminProductFetched input=[productCode] inject=[adminSession, productQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── productCode: admin-active-001
+│   │   │       ├── productName: 管理画面用 商品A
+│   │   │       ├── price02: 3500
+│   │   │       ├── stock: 20
+│   │   │       ├── productStatus: 1
+│   │   │       ├── description: Wave 8 admin grid: visible row
+│   │   │       ├── searchWord: 管理 active
+│   │   │       ├── note: internal note A
+│   │   │       ├── imagePath: /save_image/img_item02_01.jpg
+│   │   │       ├── categoryNames[0]: 管理商品
+│   │   │       ├── categoryNames[1]: 公開
+│   │   │       ├── tagNames[0]: 管理
+│   │   │       └── classNames[0]: 通常
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/product {"productCode":"admin-active-001","productName":"Story Product","price02":"1500","csrfToken":"[FILTERED]"}

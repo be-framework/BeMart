@@ -42,6 +42,8 @@ class NewsList extends ResourceObject
     #[Link(rel: 'goNews', href: 'page://self/admin/news/news', method: 'get')]
     #[Link(rel: 'doUpdateNews', href: 'page://self/admin/news/news', method: 'put')]
     #[Link(rel: 'doDeleteNews', href: 'page://self/admin/news/news', method: 'delete')]
+    #[Link(rel: 'doToggleVisible', href: 'page://self/admin/toggle-visible', method: 'put')]
+    #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetAdminNewsListInput());

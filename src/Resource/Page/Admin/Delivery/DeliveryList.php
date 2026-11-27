@@ -48,6 +48,9 @@ class DeliveryList extends ResourceObject
     #[Link(rel: 'goDelivery', href: 'page://self/admin/delivery/delivery', method: 'get')]
     #[Link(rel: 'doUpdateDelivery', href: 'page://self/admin/delivery/delivery', method: 'put')]
     #[Link(rel: 'doDeleteDelivery', href: 'page://self/admin/delivery/delivery', method: 'delete')]
+    #[Link(rel: 'doSortNoMove', href: 'page://self/admin/sort-no-move', method: 'put')]
+    #[Link(rel: 'doToggleVisible', href: 'page://self/admin/toggle-visible', method: 'put')]
+    #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetAdminDeliveryListInput());
