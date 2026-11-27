@@ -6,7 +6,9 @@ namespace MyVendor\BeMart\Tests\Story;
 
 use function array_diff;
 use function array_filter;
+use function array_intersect;
 use function array_keys;
+use function array_map;
 use function array_unique;
 use function array_values;
 use function assert;
@@ -15,8 +17,10 @@ use function dirname;
 use function explode;
 use function file_exists;
 use function file_get_contents;
+use function implode;
 use function in_array;
 use function is_array;
+use function is_string;
 use function json_decode;
 use function ksort;
 use function preg_match_all;
@@ -32,13 +36,17 @@ use function trim;
 use const JSON_THROW_ON_ERROR;
 
 /**
- * ALPS の遷移の `link`（rel=story）と、ストーリーが辿る rel の突き合わせ。
+ * ALPS の遷移と、ストーリーが辿る rel の突き合わせ。
  *
- * `followable()` の行は golden を持つので、辿る遷移の `link` に golden への href を 1 行ずつ足す。
+ * - `followable()` の行は golden を持つので、辿る遷移の `link` に golden への href（rel=story）を 1 行ずつ足す。
+ * - 行が宣言する `flow-*` は、辿る遷移のタグと突き合わせる。
+ *
+ * @psalm-import-type StoryRow from LinkStories
  */
 final class StoryCoverage
 {
     public const REL = 'story';
+    public const NO_FLOW = '(no flow tag)';
 
     private const GOLDEN_DIR = 'tests/Story/golden/';
     private const TRANSITION_TYPES = ['safe', 'unsafe', 'idempotent'];
@@ -116,42 +124,89 @@ final class StoryCoverage
     }
 
     /**
-     * ストーリーに辿られていない遷移を flow ごとにまとめる。flow タグがないものは `(no flow)`。
+     * `flow-*` タグごとに、そのタグの遷移を、そのフローを宣言したストーリーが辿るかどうか。
+     * フロータグのない遷移は `(no flow tag)` にまとめ、どれかのストーリーが辿るかで分ける。
      *
-     * @return array<string, list<string>>
+     * @return array<string, array{followed: list<string>, unfollowed: list<string>}>
      */
-    public function uncovered(): array
+    public function flowCoverage(): array
     {
-        $followed = array_keys($this->expectedLinks());
-        $byFlow = [];
-        foreach ($this->transitions as $id => $transition) {
-            if (in_array($id, $followed, true)) {
-                continue;
-            }
-
-            foreach ($transition['flows'] ?: ['(no flow)'] as $flow) {
-                $byFlow[$flow][] = $id;
+        $any = [];
+        $declared = [];
+        foreach ($this->rows() as $row) {
+            $rels = $this->relsOf($row[0]);
+            $any = [...$any, ...$rels];
+            foreach ($this->flowsOf($row) as $flow) {
+                $declared[$flow] = [...($declared[$flow] ?? []), ...$rels];
             }
         }
 
-        ksort($byFlow);
+        foreach (LinkStories::uploads() as $upload) {
+            $any = [...$any, ...$this->relsOf($upload[0])];
+        }
 
-        return $byFlow;
+        $coverage = [];
+        foreach ($this->transitions as $id => $transition) {
+            foreach ($transition['flows'] ?: [self::NO_FLOW] as $flow) {
+                $followers = $flow === self::NO_FLOW ? $any : ($declared[$flow] ?? []);
+                $coverage[$flow][in_array($id, $followers, true) ? 'followed' : 'unfollowed'][] = $id;
+            }
+        }
+
+        ksort($coverage);
+
+        return array_map(
+            static fn (array $ids): array => ['followed' => $ids['followed'] ?? [], 'unfollowed' => $ids['unfollowed'] ?? []],
+            $coverage,
+        );
     }
 
     /**
-     * ALPS の `link` とストーリーの食い違い。どれかが空でなければ食い違っている。各要素は `<rel> <href>` か `<rel>`。
+     * 行が宣言した `flow-*` と、`#link=` が辿る遷移のタグの食い違い。宣言がなければ空。
      *
-     * - missing: ストーリーが辿るのに、遷移に golden への `link` がない
-     * - stale: 遷移の `link` の先に golden がない、またはそのストーリーがその rel を辿らない
-     * - unknown: ストーリーが辿る rel が、ALPS の遷移にない
+     * @param list<string> $flows
      *
-     * @return array{missing: list<string>, stale: list<string>, unknown: list<string>}
+     * @return list<string>
+     */
+    public function flowMismatch(string $uri, array $flows): array
+    {
+        $mismatch = [];
+        $carried = [];
+        foreach ($this->relsOf($uri) as $rel) {
+            if (! isset($this->transitions[$rel])) {
+                $mismatch[] = sprintf('%s is not a transition in alps.json', $rel);
+                continue;
+            }
+
+            $tags = array_intersect($flows, $this->transitions[$rel]['flows']);
+            if ($flows !== [] && $tags === []) {
+                $mismatch[] = sprintf('%s has none of %s', $rel, implode(' ', $flows));
+            }
+
+            $carried = [...$carried, ...$tags];
+        }
+
+        foreach (array_diff($flows, $carried) as $flow) {
+            $mismatch[] = sprintf('%s is carried by none of the followed transitions', $flow);
+        }
+
+        return $mismatch;
+    }
+
+    /**
+     * ALPS とストーリーの食い違い。どれかが空でなければ食い違っている。
+     *
+     * - missing: ストーリーが辿るのに、遷移に golden への `link`（`<rel> <href>`）がない
+     * - stale: 遷移の `link` の先に golden がない、またはそのストーリーがその rel を辿らない（`<rel> <href>`）
+     * - unknown: ストーリーが辿る rel が、ALPS の遷移にない（`<rel>`）
+     * - flow: 行が宣言した `flow-*` が、辿る遷移のタグと合わない（`<ストーリー名>: <理由>`）
+     *
+     * @return array{missing: list<string>, stale: list<string>, unknown: list<string>, flow: list<string>}
      */
     public function drift(): array
     {
         $expected = $this->expectedLinks();
-        $drift = ['missing' => [], 'stale' => [], 'unknown' => []];
+        $drift = ['missing' => [], 'stale' => [], 'unknown' => [], 'flow' => []];
         foreach ($expected as $rel => $hrefs) {
             if (! isset($this->transitions[$rel])) {
                 $drift['unknown'][] = $rel;
@@ -171,12 +226,68 @@ final class StoryCoverage
             }
         }
 
+        foreach ($this->rows() as $name => $row) {
+            foreach ($this->flowMismatch($row[0], $this->flowsOf($row)) as $reason) {
+                $drift['flow'][] = sprintf('%s: %s', $name, $reason);
+            }
+        }
+
         return $drift;
     }
 
     public function transitionCount(): int
     {
         return count($this->transitions);
+    }
+
+    /**
+     * 行が辿るのに宣言する `flow-*` を持たない行がある遷移（`uploads()` を含む）。
+     *
+     * @return list<string>
+     */
+    public function followedWithoutFlow(): array
+    {
+        $withFlow = [];
+        $withoutFlow = [];
+        foreach ($this->rows() as $row) {
+            $rels = $this->relsOf($row[0]);
+            if ($this->flowsOf($row) === []) {
+                $withoutFlow = [...$withoutFlow, ...$rels];
+            } else {
+                $withFlow = [...$withFlow, ...$rels];
+            }
+        }
+
+        foreach (LinkStories::uploads() as $upload) {
+            $withoutFlow = [...$withoutFlow, ...$this->relsOf($upload[0])];
+        }
+
+        $rels = array_values(array_diff(array_unique($withoutFlow), $withFlow));
+        sort($rels);
+
+        return $rels;
+    }
+
+    /**
+     * golden を持つ行と、SQL で流す行。
+     *
+     * @return array<string, StoryRow>
+     */
+    private function rows(): array
+    {
+        return LinkStories::followable() + LinkStories::persisted();
+    }
+
+    /**
+     * @param StoryRow $row
+     *
+     * @return list<string>
+     */
+    private function flowsOf(array $row): array
+    {
+        $flow = $row[4] ?? [];
+
+        return is_string($flow) ? [$flow] : $flow;
     }
 
     /** @return list<string> */

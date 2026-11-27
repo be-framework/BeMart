@@ -67,10 +67,14 @@ final class LinkStoryTest extends AbstractLinkStoryCase
         $this->resource = (new Injector($module, dirname(__DIR__, 2) . '/var/tmp/story'))->getInstance(ResourceInterface::class);
     }
 
-    /** @param array<string, mixed> $body */
+    /**
+     * @param array<string, mixed> $body
+     * @param string|list<string> $flow
+     */
     #[DataProviderExternal(LinkStories::class, 'followable')]
-    public function testFollows(string $uri, int $code, string $path, array $body): void
+    public function testFollows(string $uri, int $code, string $path, array $body, string|array $flow = []): void
     {
+        $this->assertFlow($uri, $flow);
         $this->assertEnd($this->resource->get($uri), $code, $path, $body);
         $this->assertTree();
     }

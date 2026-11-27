@@ -11,7 +11,7 @@ class StoryCoverageTest extends TestCase
     public function testTheAlpsStoryLinksAndTheStoriesAgree(): void
     {
         $this->assertSame(
-            ['missing' => [], 'stale' => [], 'unknown' => []],
+            ['missing' => [], 'stale' => [], 'unknown' => [], 'flow' => []],
             StoryCoverage::forRepository()->drift(),
             'Run `composer story:uncovered` and link the stories in alps.json (`rel: story`), or add the story.',
         );

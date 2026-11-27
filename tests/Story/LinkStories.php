@@ -18,13 +18,16 @@ use function uri_template;
  *
  * Each URI is a URI template expanded with the values of its story. A link whose query holds a list writes that query
  * with http_build_query(), the form LinkType::listFromUri() reads.
+ *
+ * A row is the URI, then the code, path and body subset of the response the story ends on, then the `flow-*` tag of
+ * alps.json the story walks (a list when it walks several).
+ *
+ * @psalm-type StoryRow = array{0: string, 1: int, 2: string, 3: array<string, mixed>, 4?: string|list<string>}
  */
 final class LinkStories
 {
     /**
-     * The URI, then the code, path and body subset of the response the story ends on.
-     *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     public static function followable(): array
     {
@@ -34,7 +37,7 @@ final class LinkStories
     /**
      * Stories a guest follows. Same row shape as followable().
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     public static function forGuests(): array
     {
@@ -47,7 +50,7 @@ final class LinkStories
     /**
      * @param array<string, string> $item
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function guest(string $inquiry, array $item): array
     {
@@ -57,18 +60,21 @@ final class LinkStories
                 Code::OK,
                 '/contact/complete',
                 [],
+                'flow-customer-inquiry',
             ],
             'rejected inquiry stops the chain' => [
                 uri_template($inquiry . ',self:goTop', ['form' => self::form(['contactEmail' => 'not-an-email', 'mode' => 'contact'] + self::inquiry())]),
                 Code::BAD_REQUEST,
                 '/contact',
                 [],
+                ['flow-customer-inquiry', 'flow-customer-purchase'],
             ],
             'guest adds a cart item and is sent to checkout as a non-member' => [
                 uri_template('page://self/cart#link=self:doAddCartItem{?item*},self:goCheckoutEntry,self:goShoppingNonMember', ['item' => $item]),
                 Code::OK,
                 '/shopping/non-member',
                 [],
+                'flow-customer-purchase',
             ],
             'guest finds a product in the list and puts it in the cart' => [
                 uri_template(
@@ -78,6 +84,7 @@ final class LinkStories
                 Code::OK,
                 '/cart',
                 [],
+                'flow-customer-purchase',
             ],
         ];
     }
@@ -85,7 +92,7 @@ final class LinkStories
     /**
      * flow-help, flow-register, flow-account (the part a guest reaches)
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function guestAccountAndHelp(): array
     {
@@ -103,18 +110,21 @@ final class LinkStories
                 Code::OK,
                 '/login',
                 [],
+                ['flow-customer-account-maintenance', 'flow-customer-purchase', 'flow-customer-registration'],
             ],
             'login page leads to the registration form' => [
                 'page://self/login#link=self:goCustomerRegistration',
                 Code::OK,
                 '/entry',
                 [],
+                'flow-customer-registration',
             ],
             'password reset is requested from the login page' => [
                 uri_template('page://self/login#link=self:doRequestPasswordReset{?form*},self:goLogin', ['form' => self::form(['email' => 'alice@example.com'])]),
                 Code::OK,
                 '/login',
                 [],
+                'flow-account',
             ],
         ];
     }
@@ -122,7 +132,7 @@ final class LinkStories
     /**
      * flow-browse, flow-purchase (the part a guest reaches)
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function guestPurchase(): array
     {
@@ -132,36 +142,42 @@ final class LinkStories
                 Code::OK,
                 '/cart',
                 [],
+                'flow-customer-purchase',
             ],
             'checkout login leads to the registration form' => [
                 'page://self/shopping/login#link=self:goCustomerRegistration',
                 Code::OK,
                 '/entry',
                 [],
+                'flow-customer-registration',
             ],
             'shipping address pages lead to each other' => [
                 'page://self/shopping/shipping#link=self:goShoppingShippingEdit,self:goShoppingShipping,self:goShoppingShippingMultiple',
                 Code::OK,
                 '/shopping/shipping-multiple',
                 [],
+                'flow-customer-purchase',
             ],
             'multiple shipping editor leads back to the list' => [
                 'page://self/shopping/shipping-multiple-edit#link=self:goShoppingShippingMultiple',
                 Code::OK,
                 '/shopping/shipping-multiple',
                 [],
+                'flow-customer-purchase',
             ],
             'checkout error leads back to the cart' => [
                 'page://self/shopping/error#link=self:goCart',
                 Code::OK,
                 '/cart',
                 [],
+                'flow-customer-purchase',
             ],
             'completed order leads back to the top and on to the cart' => [
                 'page://self/shopping/complete#link=self:goTop,self:goCart',
                 Code::OK,
                 '/cart',
                 [],
+                'flow-customer-purchase',
             ],
         ];
     }
@@ -169,14 +185,14 @@ final class LinkStories
     /**
      * Stories an admin follows. Same row shape as followable().
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     public static function forAdmins(): array
     {
         return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance() + self::adminOrders() + self::adminSystem() + self::adminOperations() + self::adminNavigation() + self::adminActions();
     }
 
-    /** @return array<string, array{string, int, string, array<string, mixed>}> */
+    /** @return array<string, StoryRow> */
     private static function admin(): array
     {
         $product = 'page://self/admin/product{?productCode}#link=';
@@ -191,6 +207,7 @@ final class LinkStories
                 Code::OK,
                 '/admin/product',
                 ['productCode' => 'admin-active-001'],
+                'flow-admin-product-publish',
             ],
             'deleted product leaves the list' => [
                 uri_template($product . 'self:doDeleteProduct{?form*}', [
@@ -200,24 +217,28 @@ final class LinkStories
                 Code::OK,
                 '/admin/product-list',
                 [],
+                'flow-manage-product',
             ],
             'link query fills the href template' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=self:goClassCategoryList{?classNameId}', ['classNameId' => 'cn-color']),
                 Code::OK,
                 '/admin/class-category/class-category-list',
                 [],
+                'flow-manage-product',
             ],
             'a new link puts the category list beside the class names' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=new:goClassCategoryList{?classNameId}', ['classNameId' => 'cn-color']),
                 Code::OK,
                 '/admin/class-name/class-name-list',
                 ['goClassCategoryList.classNameId' => 'cn-color', 'goClassCategoryList.count' => 2],
+                'flow-manage-product',
             ],
             'deleted payment method returns to the list' => [
                 uri_template($payment . 'self:doDeletePayment{?form*}', ['paymentId' => 'pay-cod', 'form' => self::form(['paymentId' => 'pay-cod'])]),
                 Code::OK,
                 '/admin/payment/payment-list',
                 [],
+                'flow-admin-shop-configuration',
             ],
             'updated payment method is shown again' => [
                 uri_template($payment . 'self:doUpdatePayment{?form*}', [
@@ -227,18 +248,21 @@ final class LinkStories
                 Code::OK,
                 '/admin/payment/payment',
                 ['paymentId' => 'pay-cod'],
+                'flow-admin-shop-configuration',
             ],
             'deleted delivery leaves the list' => [
                 uri_template('page://self/admin/delivery/delivery-list#link=self:doDeleteDelivery{?form*}', ['form' => self::form(['deliveryId' => 'del-yamato'])]),
                 Code::OK,
                 '/admin/delivery/delivery-list',
                 [],
+                'flow-admin-shop-configuration',
             ],
             'page is updated from the list' => [
                 uri_template('page://self/admin/page/page-list#link=self:doUpdatePage{?form*}', ['form' => self::form(['pageId' => 'pg-company', 'pageName' => 'Story Page'])]),
                 Code::OK,
                 '/admin/page/page',
                 [],
+                'flow-admin-content-publish',
             ],
             'layout list opens a layout and updates it' => [
                 uri_template('page://self/admin/layout/layout-list#link=self:goLayout{?layoutId},self:doUpdateLayout{?form*}', [
@@ -248,12 +272,14 @@ final class LinkStories
                 Code::OK,
                 '/admin/layout/layout-list',
                 [],
+                'flow-admin-content-publish',
             ],
             'a GET chain goes around the layout list and back' => [
                 uri_template('page://self/admin/layout/layout-list#link=self:goLayout{?layoutId},self:goLayoutList,self:goLayout{?layoutId}', ['layoutId' => 'lo-pc-default']),
                 Code::OK,
                 '/admin/layout/layout',
                 [],
+                'flow-admin-content-publish',
             ],
             'unknown payment method stops the chain' => [
                 uri_template('page://self/admin/payment/payment-list#link=self:goPayment{?paymentId},self:doDeletePayment{?form*}', [
@@ -263,6 +289,7 @@ final class LinkStories
                 Code::NOT_FOUND,
                 '/admin/payment/payment',
                 [],
+                'flow-admin-shop-configuration',
             ],
             'bulk status change sends every product code' => [
                 'page://self/admin/product-list#link=self:doBulkUpdateProductStatus?' . http_build_query(
@@ -271,6 +298,7 @@ final class LinkStories
                 Code::OK,
                 '/admin/product-list',
                 [],
+                'flow-manage-product',
             ],
         ];
     }
@@ -278,7 +306,7 @@ final class LinkStories
     /**
      * flow-admin-content-publish
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function adminContentPublish(): array
     {
@@ -294,24 +322,28 @@ final class LinkStories
                 Code::OK,
                 '/admin/news/news',
                 ['newsId' => 'nw-welcome'],
+                'flow-admin-content-publish',
             ],
             'news opened from the list is deleted' => [
                 uri_template($news . ',self:doDeleteNews{?form*}', ['newsId' => 'nw-welcome', 'form' => self::form([])]),
                 Code::OK,
                 '/admin/news/news-list',
                 [],
+                'flow-admin-content-publish',
             ],
             'a page is opened from the list and the list is shown again' => [
                 uri_template('page://self/admin/page/page-list#link=self:goPage{?pageId},self:goPageList', ['pageId' => 'pg-company']),
                 Code::OK,
                 '/admin/page/page-list',
                 [],
+                'flow-admin-content-publish',
             ],
             'deleted page leaves the list' => [
                 uri_template('page://self/admin/page/page-list#link=self:doDeletePage{?form*}', ['form' => self::form(['pageId' => 'pg-foo'])]),
                 Code::OK,
                 '/admin/page/page-list',
                 [],
+                'flow-admin-content-publish',
             ],
             'updated block returns to the block list' => [
                 uri_template($block . 'self:doUpdateBlock{?form*}', [
@@ -321,12 +353,14 @@ final class LinkStories
                 Code::OK,
                 '/admin/block/block-list',
                 [],
+                'flow-admin-content-publish',
             ],
             'deleted block leaves the list' => [
                 uri_template($block . 'self:doDeleteBlock{?form*}', ['blockId' => 'bk-user', 'form' => self::form(['blockId' => 'bk-user'])]),
                 Code::OK,
                 '/admin/block/block-list',
                 [],
+                'flow-admin-content-publish',
             ],
             'trade law is updated' => [
                 uri_template('page://self/admin/trade-law#link=self:doUpdateTradeLaw{?form*}', [
@@ -335,6 +369,7 @@ final class LinkStories
                 Code::OK,
                 '/admin/trade-law',
                 [],
+                'flow-admin-content-publish',
             ],
         ];
     }
@@ -342,7 +377,7 @@ final class LinkStories
     /**
      * flow-admin-shop-configuration
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function adminShopConfiguration(): array
     {
@@ -368,12 +403,14 @@ final class LinkStories
                 Code::OK,
                 '/admin/base-info',
                 ['shopName' => 'Story Shop'],
+                'flow-admin-shop-configuration',
             ],
             'base info leads to a payment method through the list' => [
                 uri_template('page://self/admin/base-info#link=self:goPaymentList,self:goPayment{?paymentId}', ['paymentId' => 'pay-cod']),
                 Code::OK,
                 '/admin/payment/payment',
                 ['paymentId' => 'pay-cod'],
+                'flow-admin-shop-configuration',
             ],
             'delivery opened from the list is updated' => [
                 uri_template('page://self/admin/delivery/delivery-list#link=self:goDelivery{?deliveryId},self:doUpdateDelivery{?form*}', [
@@ -383,12 +420,14 @@ final class LinkStories
                 Code::OK,
                 '/admin/delivery/delivery',
                 ['deliveryId' => 'del-yamato'],
+                'flow-admin-shop-configuration',
             ],
             'deleted tax rule leaves the list' => [
                 uri_template('page://self/admin/tax-rule/tax-rule-list#link=self:doDeleteTaxRule{?form*}', ['form' => self::form(['taxRuleId' => 'tax-8'])]),
                 Code::OK,
                 '/admin/tax-rule/tax-rule-list',
                 [],
+                'flow-admin-shop-configuration',
             ],
             'holiday is added to the calendar' => [
                 uri_template($calendar . 'self:doCreateCalendarHoliday{?form*}', [
@@ -397,6 +436,7 @@ final class LinkStories
                 Code::OK,
                 '/admin/calendar',
                 [],
+                'flow-admin-shop-configuration',
             ],
             'holiday is updated in the calendar' => [
                 uri_template($calendar . 'self:doUpdateCalendar{?form*}', [
@@ -405,12 +445,14 @@ final class LinkStories
                 Code::OK,
                 '/admin/calendar',
                 [],
+                'flow-admin-shop-configuration',
             ],
             'holiday is deleted from the calendar' => [
                 uri_template($calendar . 'self:doDeleteCalendarHoliday{?form*}', ['form' => self::form(['calendarId' => '1'])]),
                 Code::OK,
                 '/admin/calendar',
                 [],
+                'flow-admin-shop-configuration',
             ],
         ];
     }
@@ -419,7 +461,7 @@ final class LinkStories
      * flow-admin-class-maintenance, flow-admin-category-maintenance, flow-admin-tag-maintenance,
      * flow-admin-mail-template-maintenance, flow-admin-customer-maintenance
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function adminMaintenance(): array
     {
@@ -434,18 +476,21 @@ final class LinkStories
                 Code::OK,
                 '/admin/class-name/class-name-list',
                 [],
+                'flow-manage-product',
             ],
             'deleted class name leaves the list' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=self:doDeleteClassName{?form*}', ['form' => self::form(['classNameId' => 'cn-color'])]),
                 Code::OK,
                 '/admin/class-name/class-name-list',
                 [],
+                'flow-manage-product',
             ],
             'class categories are opened and the class names are shown again' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=self:goClassCategoryList{?classNameId},self:goClassNameList', ['classNameId' => 'cn-color']),
                 Code::OK,
                 '/admin/class-name/class-name-list',
                 [],
+                'flow-manage-product',
             ],
             'class category is updated from the list' => [
                 uri_template('page://self/admin/class-category/class-category-list{?classNameId}#link=self:doUpdateClassCategory{?form*}', [
@@ -455,6 +500,7 @@ final class LinkStories
                 Code::OK,
                 '/admin/class-category/class-category-list',
                 [],
+                'flow-manage-product',
             ],
             'deleted class category leaves the list' => [
                 uri_template('page://self/admin/class-category/class-category-list{?classNameId}#link=self:doDeleteClassCategory{?form*}', [
@@ -464,18 +510,21 @@ final class LinkStories
                 Code::OK,
                 '/admin/class-category/class-category-list',
                 [],
+                'flow-manage-product',
             ],
             'class category list leads back to the class names' => [
                 uri_template('page://self/admin/class-category/class-category-list{?classNameId}#link=self:goClassNameList', ['classNameId' => 'cn-color']),
                 Code::OK,
                 '/admin/class-name/class-name-list',
                 [],
+                'flow-manage-product',
             ],
             'category is opened from the list' => [
                 uri_template($category, ['categoryId' => 'cat-food']),
                 Code::OK,
                 '/admin/category/category',
                 ['categoryId' => 'cat-food'],
+                'flow-manage-product',
             ],
             'category opened from the list is updated' => [
                 uri_template($category . ',self:doUpdateCategory{?form*}', [
@@ -485,24 +534,28 @@ final class LinkStories
                 Code::OK,
                 '/admin/category/category',
                 ['categoryId' => 'cat-food'],
+                'flow-manage-product',
             ],
             'category opened from the list is deleted' => [
                 uri_template($category . ',self:doDeleteCategory{?form*}', ['categoryId' => 'cat-food', 'form' => self::form(['categoryId' => 'cat-food'])]),
                 Code::OK,
                 '/admin/category/category-list',
                 [],
+                'flow-manage-product',
             ],
             'categories are exported' => [
                 'page://self/admin/category/category-list#link=self:goExportCategory',
                 Code::OK,
                 '/admin/category/csv',
                 ['rowCount' => 2],
+                'flow-admin-csv-exchange',
             ],
             'deleted tag leaves the list' => [
                 uri_template('page://self/admin/tag/tag-list#link=self:doDeleteTag{?form*}', ['form' => self::form(['tagId' => 'tg-new'])]),
                 Code::OK,
                 '/admin/tag/tag-list',
                 [],
+                'flow-manage-product',
             ],
             'mail template subject is updated' => [
                 uri_template('page://self/admin/mail-template#link=self:doUpdateMailTemplate{?form*}', [
@@ -511,24 +564,28 @@ final class LinkStories
                 Code::OK,
                 '/admin/mail-template',
                 [],
+                'flow-admin-mail-template-maintenance',
             ],
             'deleted mail template leaves the page' => [
                 uri_template('page://self/admin/mail-template#link=self:doDeleteMailTemplate{?form*}', ['form' => self::form(['mailTemplateId' => '1'])]),
                 Code::OK,
                 '/admin/mail-template',
                 [],
+                'flow-admin-mail-template-maintenance',
             ],
             'mail template leads to the payment methods' => [
                 'page://self/admin/mail-template#link=self:goPaymentList',
                 Code::OK,
                 '/admin/payment/payment-list',
                 [],
+                'flow-admin-shop-configuration',
             ],
             'customer is opened from the list and the list is shown again' => [
                 uri_template('page://self/admin/customer-list#link=self:goCustomer{?customerId},self:goCustomerList', ['customerId' => $customerId]),
                 Code::OK,
                 '/admin/customer-list',
                 [],
+                'flow-manage-customer',
             ],
             'customer profile is updated' => [
                 uri_template('page://self/admin/customer{?customerId}#link=self:doUpdateCustomerProfile{?form*}', [
@@ -538,18 +595,21 @@ final class LinkStories
                 Code::OK,
                 '/admin/customer',
                 ['customerId' => $customerId],
+                'flow-manage-customer',
             ],
             'deleted customer leaves the list' => [
                 uri_template('page://self/admin/customer-list#link=self:doDeleteCustomer{?form*}', ['form' => self::form(['customerId' => $customerId])]),
                 Code::OK,
                 '/admin/customer-list',
                 [],
+                'flow-manage-customer',
             ],
             'delivery address editor leads back to the customer list' => [
                 uri_template('page://self/admin/customer-delivery-edit{?customerId}#link=self:goCustomerList', ['customerId' => $customerId]),
                 Code::OK,
                 '/admin/customer-list',
                 [],
+                'flow-manage-customer',
             ],
         ];
     }
@@ -557,7 +617,7 @@ final class LinkStories
     /**
      * flow-admin-order-fulfillment, flow-manage-order
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function adminOrders(): array
     {
@@ -567,12 +627,14 @@ final class LinkStories
                 Code::OK,
                 '/admin/order-list',
                 [],
+                'flow-admin-order-fulfillment',
             ],
             'order pdf leads back to the list' => [
                 'page://self/admin/order/order-pdf#link=self:goOrderList',
                 Code::OK,
                 '/admin/order-list',
                 [],
+                'flow-admin-order-fulfillment',
             ],
         ];
     }
@@ -580,7 +642,7 @@ final class LinkStories
     /**
      * flow-admin-auth, flow-admin-system-operation, flow-manage-system
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function adminSystem(): array
     {
@@ -595,72 +657,84 @@ final class LinkStories
                 Code::OK,
                 '/admin/two-factor-auth',
                 [],
+                'flow-admin-system-operation',
             ],
             'admin logs out from the top page' => [
                 uri_template('page://self/admin/index#link=self:doAdminLogout{?form*}', ['form' => self::form([])]),
                 Code::OK,
                 '/admin/login',
                 [],
+                'flow-admin-system-operation',
             ],
             'second factor pages lead back to the login' => [
                 'page://self/admin/two-factor-auth#link=self:goAdminLogin',
                 Code::OK,
                 '/admin/login',
                 [],
+                'flow-admin-system-operation',
             ],
             'second factor setup leads back to the login' => [
                 'page://self/admin/two-factor-auth-set#link=self:goAdminLogin',
                 Code::OK,
                 '/admin/login',
                 [],
+                'flow-admin-system-operation',
             ],
             'admin top leads to the members and a member' => [
                 uri_template('page://self/admin/index#link=self:goMemberList,self:goMember{?loginId}', ['loginId' => $owner]),
                 Code::OK,
                 '/admin/member',
                 ['loginId' => $owner],
+                'flow-admin-system-operation',
             ],
             'member is opened from the list and the list is shown again' => [
                 uri_template($members . 'self:goMember{?loginId},self:goMemberList', ['loginId' => $owner]),
                 Code::OK,
                 '/admin/member-list',
                 [],
+                'flow-admin-system-operation',
             ],
             'authority role is changed from the member list' => [
                 uri_template($members . 'self:doUpdateAuthorityRole{?form*}', ['form' => self::form(['loginId' => $owner, 'authority' => '0'])]),
                 Code::OK,
                 '/admin/authority-role',
                 ['loginId' => $owner],
+                'flow-admin-system-operation',
             ],
             'member is updated from the list' => [
                 uri_template($members . 'self:doUpdateMember{?form*}', ['form' => self::form(['loginId' => $owner, 'name' => 'Story Owner', 'authority' => '1'])]),
                 Code::OK,
                 '/admin/member',
                 ['loginId' => $owner],
+                'flow-admin-system-operation',
             ],
             'member is deleted from the list' => [
                 uri_template($members . 'self:doDeleteMember{?form*}', ['form' => self::form(['loginId' => $owner])]),
                 Code::OK,
                 '/admin/member',
                 ['loginId' => $owner],
+                'flow-admin-system-operation',
             ],
             'login history leads to the security page which is updated' => [
                 uri_template('page://self/admin/login-history#link=self:goSecurity,self:doUpdateSecurity{?form*}', ['form' => self::form([])]),
                 Code::OK,
                 '/admin/security',
                 [],
+                'flow-admin-system-operation',
             ],
             'maintenance mode is switched on' => [
                 uri_template('page://self/admin/content/maintenance#link=self:doToggleMaintenance{?form*}', ['form' => self::form(['enabled' => '1'])]),
                 Code::OK,
                 '/admin/content/maintenance',
                 [],
+                'flow-admin-system-operation',
             ],
             'cache is cleared' => [
                 uri_template('page://self/admin/content/cache#link=self:doClearCache{?form*}', ['form' => self::form([])]),
                 Code::OK,
                 '/admin/content/cache',
                 [],
+                'flow-admin-system-operation',
             ],
         ];
     }
@@ -668,7 +742,7 @@ final class LinkStories
     /**
      * flow-admin-template-lifecycle, flow-admin-master-data-update, flow-admin-csv-exchange, flow-admin-content-publish, flow-admin-product-publish
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function adminOperations(): array
     {
@@ -682,42 +756,49 @@ final class LinkStories
                 Code::OK,
                 '/admin/content/cache',
                 [],
+                'flow-admin-system-operation',
             ],
             'news opened from the list is shown in the list again' => [
                 uri_template('page://self/admin/news/news-list#link=self:goNews{?newsId},self:goNewsList', ['newsId' => 'nw-welcome']),
                 Code::OK,
                 '/admin/news/news-list',
                 [],
+                'flow-admin-content-publish',
             ],
             'css is updated' => [
                 uri_template('page://self/admin/content/css#link=self:doUpdateContentCss{?form*}', ['form' => self::form(['css' => 'body { color: red; }'])]),
                 Code::OK,
                 '/admin/content/css',
                 [],
+                'flow-admin-content-publish',
             ],
             'js is updated' => [
                 uri_template('page://self/admin/content/js#link=self:doUpdateContentJs{?form*}', ['form' => self::form(['js' => 'console.log(1);'])]),
                 Code::OK,
                 '/admin/content/js',
                 [],
+                'flow-admin-content-publish',
             ],
             'template is selected and the install page is opened' => [
                 uri_template($templates . 'self:doSelectTemplate{?form*},self:goTemplateInstall', ['form' => self::form(['templateId' => 'tp-default-sp'])]),
                 Code::OK,
                 '/admin/template/template-add',
                 [],
+                'flow-admin-template-lifecycle',
             ],
             'template is deleted from the list' => [
                 uri_template($templates . 'self:doDeleteTemplate{?form*}', ['form' => self::form(['templateId' => 'tp-default-sp'])]),
                 Code::OK,
                 '/admin/template/template-list',
                 [],
+                'flow-admin-template-lifecycle',
             ],
             'install page leads back to the template list' => [
                 'page://self/admin/template/template-add#link=self:goTemplateList',
                 Code::OK,
                 '/admin/template/template-list',
                 [],
+                'flow-admin-template-lifecycle',
             ],
             'master data is selected and updated' => [
                 uri_template('page://self/admin/master-data#link=self:doSelectMasterData{?select*},self:doUpdateMasterData{?update*}', [
@@ -727,42 +808,49 @@ final class LinkStories
                 Code::OK,
                 '/admin/master-data',
                 [],
+                'flow-admin-master-data-update',
             ],
             'class names are imported from the exported csv' => [
                 uri_template('page://self/admin/class-name/class-name-export#link=self:doImportClassNameCsv{?form*}', ['form' => self::form(['csv' => "規格名ID,規格名\r\ncn-color,Color\r\n"])]),
                 Code::OK,
                 '/admin/class-name/class-name-list',
                 [],
+                'flow-admin-csv-exchange',
             ],
             'class categories are imported from the exported csv' => [
                 uri_template('page://self/admin/class-category/class-category-export#link=self:doImportClassCategoryCsv{?form*}', ['form' => self::form(['csv' => "規格分類ID,規格ID,規格分類名\r\ncc-red,cn-color,Red\r\n"])]),
                 Code::OK,
                 '/admin/class-category/class-category-list',
                 [],
+                'flow-admin-csv-exchange',
             ],
             'customer csv leads to the class name csv' => [
                 'page://self/admin/customer-csv#link=self:goExportClassName',
                 Code::OK,
                 '/admin/class-name/class-name-export',
                 [],
+                'flow-admin-csv-exchange',
             ],
             'product list leads to the product csv' => [
                 'page://self/admin/product-list#link=self:goExportProduct',
                 Code::OK,
                 '/admin/product-csv',
                 [],
+                'flow-admin-csv-exchange',
             ],
             'product class page leads to the product and the list' => [
                 uri_template($productClass . 'self:goProduct{?productCode},self:goProductList', $product),
                 Code::OK,
                 '/admin/product-list',
                 [],
+                'flow-admin-product-publish',
             ],
             'product classes are registered and the list is shown' => [
                 uri_template($productClass . 'self:doRegisterProductClass{?form*},self:goProductList', $product + ['form' => self::form($product + ['price02' => '1000', 'stock' => '5'])]),
                 Code::OK,
                 '/admin/product-list',
                 [],
+                'flow-admin-product-publish',
             ],
         ];
     }
@@ -770,34 +858,34 @@ final class LinkStories
     /**
      * flow-admin-shop-configuration, flow-admin-content-publish, flow-admin-csv-exchange, flow-admin-security-management
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function adminNavigation(): array
     {
         $rows = [];
         $top = [
-            'goBaseInfo' => ['shop settings', '/admin/base-info'],
-            'goBlockList' => ['block list', '/admin/block/block-list'],
-            'goClassCategoryList' => ['class category list', '/admin/class-category/class-category-list'],
-            'goClassNameList' => ['class name list', '/admin/class-name/class-name-list'],
-            'goCustomerList' => ['customer list', '/admin/customer-list'],
-            'goDeliveryList' => ['delivery list', '/admin/delivery/delivery-list'],
-            'goLayoutList' => ['layout list', '/admin/layout/layout-list'],
-            'goLoginHistoryList' => ['login history', '/admin/login-history'],
-            'goMailTemplateList' => ['mail template list', '/admin/mail-template'],
-            'goNewsList' => ['news list', '/admin/news/news-list'],
-            'goOrderList' => ['order list', '/admin/order-list'],
-            'goPageList' => ['page list', '/admin/page/page-list'],
-            'goPaymentList' => ['payment list', '/admin/payment/payment-list'],
-            'goPluginList' => ['plugin list', '/admin/plugin-list'],
-            'goProductList' => ['product list', '/admin/product-list'],
-            'goTagList' => ['tag list', '/admin/tag/tag-list'],
-            'goTaxRuleList' => ['tax rule list', '/admin/tax-rule/tax-rule-list'],
-            'goTemplateList' => ['template list', '/admin/template/template-list'],
-            'goTradeLawList' => ['trade law page', '/admin/trade-law'],
+            'goBaseInfo' => ['shop settings', '/admin/base-info', 'flow-admin-shop-configuration'],
+            'goBlockList' => ['block list', '/admin/block/block-list', 'flow-admin-content-publish'],
+            'goClassCategoryList' => ['class category list', '/admin/class-category/class-category-list', 'flow-manage-product'],
+            'goClassNameList' => ['class name list', '/admin/class-name/class-name-list', 'flow-manage-product'],
+            'goCustomerList' => ['customer list', '/admin/customer-list', 'flow-manage-customer'],
+            'goDeliveryList' => ['delivery list', '/admin/delivery/delivery-list', 'flow-admin-shop-configuration'],
+            'goLayoutList' => ['layout list', '/admin/layout/layout-list', 'flow-admin-content-publish'],
+            'goLoginHistoryList' => ['login history', '/admin/login-history', 'flow-admin-system-operation'],
+            'goMailTemplateList' => ['mail template list', '/admin/mail-template', 'flow-admin-mail-template-maintenance'],
+            'goNewsList' => ['news list', '/admin/news/news-list', 'flow-admin-content-publish'],
+            'goOrderList' => ['order list', '/admin/order-list', 'flow-admin-order-fulfillment'],
+            'goPageList' => ['page list', '/admin/page/page-list', 'flow-admin-content-publish'],
+            'goPaymentList' => ['payment list', '/admin/payment/payment-list', 'flow-admin-shop-configuration'],
+            'goPluginList' => ['plugin list', '/admin/plugin-list', 'flow-manage-plugin'],
+            'goProductList' => ['product list', '/admin/product-list', 'flow-admin-product-publish'],
+            'goTagList' => ['tag list', '/admin/tag/tag-list', 'flow-manage-product'],
+            'goTaxRuleList' => ['tax rule list', '/admin/tax-rule/tax-rule-list', 'flow-admin-shop-configuration'],
+            'goTemplateList' => ['template list', '/admin/template/template-list', 'flow-admin-template-lifecycle'],
+            'goTradeLawList' => ['trade law page', '/admin/trade-law', 'flow-admin-content-publish'],
         ];
-        foreach ($top as $rel => [$page, $path]) {
-            $rows['admin top leads to the ' . $page] = ['page://self/admin/index#link=self:' . $rel, Code::OK, $path, []];
+        foreach ($top as $rel => [$page, $path, $flow]) {
+            $rows['admin top leads to the ' . $page] = ['page://self/admin/index#link=self:' . $rel, Code::OK, $path, [], $flow];
         }
 
         return $rows + [
@@ -806,72 +894,84 @@ final class LinkStories
                 Code::OK,
                 '/admin/category/csv',
                 [],
+                'flow-manage-product',
             ],
             'category edit leads to the product list' => [
                 'page://self/admin/category/edit#link=self:goProductList',
                 Code::OK,
                 '/admin/product-list',
                 [],
+                'flow-admin-product-publish',
             ],
             'category list leads to the order csv' => [
                 'page://self/admin/category/category-list#link=self:goExportOrder',
                 Code::OK,
                 '/admin/order/export-order',
                 [],
+                'flow-admin-csv-exchange',
             ],
             'class name list leads to the class category csv' => [
                 'page://self/admin/class-name/class-name-list#link=self:goExportClassCategory',
                 Code::OK,
                 '/admin/class-category/class-category-export',
                 [],
+                'flow-admin-csv-exchange',
             ],
             'order list leads to the customer csv' => [
                 'page://self/admin/order-list#link=self:goExportCustomer',
                 Code::OK,
                 '/admin/customer-csv',
                 [],
+                'flow-admin-csv-exchange',
             ],
             'customer list leads to the class name csv' => [
                 'page://self/admin/customer-list#link=self:goExportClassName',
                 Code::OK,
                 '/admin/class-name/class-name-export',
                 [],
+                'flow-admin-csv-exchange',
             ],
             'payment, delivery and tax rule lists follow one another to the calendar' => [
                 'page://self/admin/payment/payment-list#link=self:goDeliveryList,self:goTaxRuleList,self:goCalendar',
                 Code::OK,
                 '/admin/calendar',
                 [],
+                'flow-admin-shop-configuration',
             ],
             'news, page, block and layout lists follow one another' => [
                 'page://self/admin/news/news-list#link=self:goPageList,self:goBlockList,self:goLayoutList',
                 Code::OK,
                 '/admin/layout/layout-list',
                 [],
+                'flow-admin-content-publish',
             ],
             'trade law leads to the css page and the js page' => [
                 'page://self/admin/trade-law#link=self:goContentCss,self:goContentJs',
                 Code::OK,
                 '/admin/content/js',
                 [],
+                'flow-admin-content-publish',
             ],
             'cache leads to maintenance and the system information' => [
                 'page://self/admin/content/cache#link=self:goMaintenance,self:goSystemInfo',
                 Code::OK,
                 '/admin/system',
                 [],
+                'flow-admin-system-operation',
             ],
             'security leads to the second factor setup and back to the verification' => [
                 'page://self/admin/security#link=self:goTwoFactorAuthSet,self:goTwoFactorAuth',
                 Code::OK,
                 '/admin/two-factor-auth',
                 [],
+                'flow-admin-system-operation',
             ],
             'authority role leads to the login history' => [
                 uri_template('page://self/admin/authority-role{?loginId,authority}#link=self:goLoginHistoryList', ['loginId' => 'shop-owner', 'authority' => '1']),
                 Code::OK,
                 '/admin/login-history',
                 [],
+                'flow-admin-system-operation',
             ],
         ];
     }
@@ -879,7 +979,7 @@ final class LinkStories
     /**
      * flow-admin-shop-configuration, flow-manage-plugin, flow-admin-template-lifecycle, flow-admin-csv-exchange, flow-admin-system-operation
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function adminActions(): array
     {
@@ -891,48 +991,56 @@ final class LinkStories
                 Code::OK,
                 '/admin/sort-no-move',
                 [],
+                'flow-admin-shop-configuration',
             ],
             'delivery is hidden from the list' => [
                 uri_template('page://self/admin/delivery/delivery-list#link=self:doToggleVisible{?form*}', ['form' => self::form(['masterType' => 'delivery', 'rowId' => 'del-yamato', 'visible' => '0'])]),
                 Code::OK,
                 '/admin/toggle-visible',
                 [],
+                'flow-admin-shop-configuration',
             ],
             'class category is added to the class' => [
                 uri_template('page://self/admin/class-category/class-category-list#link=self:doCreateClassCategory{?form*}', ['form' => self::form(['classNameId' => 'cn-color', 'classCategoryName' => 'Blue'])]),
                 Code::OK,
                 '/admin/class-category/class-category-list',
                 [],
+                'flow-manage-product',
             ],
             'categories are imported from csv' => [
                 uri_template('page://self/admin/category/category-list#link=self:doImportCategoryCsv{?form*}', ['form' => self::form(['csv' => "categoryId,categoryName\r\ncat-story,Story\r\n"])]),
                 Code::OK,
                 '/admin/category/category-list',
                 [],
+                'flow-admin-csv-exchange',
             ],
             'plugin is enabled' => [
                 uri_template('page://self/admin/plugin-list#link=self:doEnablePlugin{?form*}', ['form' => $plugin]),
                 Code::OK,
                 '/admin/plugin-enable',
                 [],
+                'flow-manage-plugin',
             ],
             'plugin is disabled' => [
                 uri_template('page://self/admin/plugin-list#link=self:doDisablePlugin{?form*}', ['form' => $plugin]),
                 Code::OK,
                 '/admin/plugin-disable',
                 [],
+                'flow-manage-plugin',
             ],
             'plugin is uninstalled' => [
                 uri_template('page://self/admin/plugin-list#link=self:doUninstallPlugin{?form*}', ['form' => $plugin]),
                 Code::OK,
                 '/admin/plugin',
                 [],
+                'flow-manage-plugin',
             ],
             'shipping csv is imported' => [
                 uri_template('page://self/admin/order/export-shipping#link=self:doImportShippingCsv{?form*}', ['form' => self::form(['csv' => "shippingId,trackingNumber\r\n"])]),
                 Code::OK,
                 '/admin/order/import-shipping',
                 [],
+                'flow-admin-csv-exchange',
             ],
         ];
     }
@@ -1000,7 +1108,7 @@ final class LinkStories
     /**
      * Stories that read back what they wrote, so they need the SQL context. Same row shape as followable().
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     public static function persisted(): array
     {
@@ -1030,18 +1138,19 @@ final class LinkStories
     /**
      * @param array<string, array<string, string>> $news
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function persistedNews(array $news, string $created, string $updated): array
     {
         return [
-            'created news is shown at its location' => [uri_template($created, $news), Code::OK, '/admin/news/news', ['newsTitle' => 'Story News']],
-            'news id fills the href template of the next link' => [uri_template($updated, $news), Code::OK, '/admin/news/news', ['newsTitle' => 'Story News Updated']],
+            'created news is shown at its location' => [uri_template($created, $news), Code::OK, '/admin/news/news', ['newsTitle' => 'Story News'], 'flow-admin-content-publish'],
+            'news id fills the href template of the next link' => [uri_template($updated, $news), Code::OK, '/admin/news/news', ['newsTitle' => 'Story News Updated'], 'flow-admin-content-publish'],
             'deleted news leaves the list' => [
                 uri_template($updated . ',self:doDeleteNews{?deleted*}', $news),
                 Code::OK,
                 '/admin/news/news-list',
                 [],
+                'flow-admin-content-publish',
             ],
             'visitor registers from the top page' => [
                 uri_template('page://self/#link=self:goCustomerRegistration,self:doRegisterCustomer{?form*}', [
@@ -1064,6 +1173,7 @@ final class LinkStories
                 Code::OK,
                 '/entry/complete',
                 [],
+                'flow-customer-registration',
             ],
         ];
     }
@@ -1071,7 +1181,7 @@ final class LinkStories
     /**
      * flow-manage-*: every create transition reads the created resource back at its Location.
      *
-     * @return array<string, array{string, int, string, array<string, mixed>}>
+     * @return array<string, StoryRow>
      */
     private static function persistedCreates(): array
     {
@@ -1081,54 +1191,63 @@ final class LinkStories
                 Code::OK,
                 '/admin/page/page',
                 ['pageName' => 'Story Page'],
+                'flow-admin-content-publish',
             ],
             'created block is shown at its location' => [
                 uri_template('page://self/admin/block/block-list#link=self:doCreateBlock{?form*}', ['form' => self::form(['blockName' => 'Story Block', 'blockFileName' => 'story_block_new'])]),
                 Code::OK,
                 '/admin/block/block',
                 ['blockName' => 'Story Block'],
+                'flow-admin-content-publish',
             ],
             'created product is shown at its location' => [
                 uri_template('page://self/admin/product-new#link=self:doCreateProduct{?form*}', ['form' => self::form(['productCode' => 'story-product', 'productName' => 'Story Product', 'price02' => '2468', 'stock' => '8', 'productStatus' => '1', 'description' => 'Created by a story.'])]),
                 Code::OK,
                 '/admin/product',
                 ['productName' => 'Story Product'],
+                'flow-admin-product-publish',
             ],
             'created category is shown at its location' => [
                 uri_template('page://self/admin/category/category-list#link=self:doCreateCategory{?form*}', ['form' => self::form(['categoryName' => 'Story Category', 'sortNo' => '90'])]),
                 Code::OK,
                 '/admin/category/category',
                 ['categoryName' => 'Story Category'],
+                'flow-manage-product',
             ],
             'created class name is shown at its location' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=self:doCreateClassName{?form*}', ['form' => self::form(['classNameLabel' => 'Story Class'])]),
                 Code::OK,
                 '/admin/class-name/class-name-list',
                 [],
+                'flow-manage-product',
             ],
             'created payment method is shown at its location' => [
                 uri_template('page://self/admin/payment/payment-list#link=self:doCreatePayment{?form*}', ['form' => self::form(['paymentMethodName' => 'Story Pay', 'charge' => '220', 'ruleMin' => '0', 'ruleMax' => '999999', 'visible' => '1'])]),
                 Code::OK,
                 '/admin/payment/payment',
                 ['payment.paymentMethodName' => 'Story Pay'],
+                'flow-admin-shop-configuration',
             ],
             'created delivery is shown at its location' => [
                 uri_template('page://self/admin/delivery/delivery-list#link=self:doCreateDelivery{?form*}', ['form' => self::form(['deliveryName' => 'Story Delivery', 'visible' => '1'])]),
                 Code::OK,
                 '/admin/delivery/delivery',
                 ['delivery.deliveryName' => 'Story Delivery'],
+                'flow-admin-shop-configuration',
             ],
             'created tag is shown at its location' => [
                 uri_template('page://self/admin/tag/tag-list#link=self:doCreateTag{?form*}', ['form' => self::form(['tagName' => 'Story Tag'])]),
                 Code::OK,
                 '/admin/tag/tag-list',
                 [],
+                'flow-manage-product',
             ],
             'created customer is shown at its location' => [
                 uri_template('page://self/admin/customer-list#link=self:doCreateCustomer{?form*}', ['form' => self::form(['email' => 'story-customer@example.com', 'password' => 'Story-pass-2026', 'name01' => '管理', 'name02' => '顧客', 'kana01' => 'カンリ', 'kana02' => 'コキャク', 'phoneNumber' => '0312345678', 'postalCode' => '1000001', 'pref' => '13', 'addr01' => '千代田区', 'addr02' => '管理1-1'])]),
                 Code::OK,
                 '/admin/customer',
                 ['email' => 'story-customer@example.com'],
+                'flow-manage-customer',
             ],
         ];
     }

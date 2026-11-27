@@ -27,10 +27,14 @@ final class HtmlLinkStoryTest extends AbstractLinkStoryCase
         $this->resource = new HttpResource(self::HOST, $http . '/index.php', $http . '/log', ['Sec-Fetch-Site' => 'same-origin']);
     }
 
-    /** @param array<string, mixed> $body */
+    /**
+     * @param array<string, mixed> $body
+     * @param string|list<string> $flow
+     */
     #[DataProviderExternal(LinkStories::class, 'forGuests')]
-    public function testFollows(string $uri, int $code, string $path, array $body): void
+    public function testFollows(string $uri, int $code, string $path, array $body, string|array $flow = []): void
     {
+        $this->assertFlow($uri, $flow);
         $this->assertEnd($this->resource->get($uri), $code, $path, $body);
     }
 }

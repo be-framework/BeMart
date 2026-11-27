@@ -28,10 +28,14 @@ final class PersistedLinkStoryTest extends AbstractLinkStoryCase
         $this->db = null;
     }
 
-    /** @param array<string, mixed> $body */
+    /**
+     * @param array<string, mixed> $body
+     * @param string|list<string> $flow
+     */
     #[DataProviderExternal(LinkStories::class, 'persisted')]
-    public function testFollows(string $uri, int $code, string $path, array $body): void
+    public function testFollows(string $uri, int $code, string $path, array $body, string|array $flow = []): void
     {
+        $this->assertFlow($uri, $flow);
         $this->assertNotNull($this->db);
         $this->assertEnd($this->db->resource()->get($uri), $code, $path, $body);
     }
