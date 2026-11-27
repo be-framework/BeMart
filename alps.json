@@ -1634,13 +1634,13 @@
         "descriptor": [{"href": "#goExportOrder"}]},
 
       {"id": "goCategoryList", "title": "カテゴリ一覧を見る", "type": "safe", "rt": "#CategoryList",
-        "tag": "catalog flow-browse src-router feature-browse",
+        "tag": "catalog flow-browse src-router feature-browse flow-manage-product",
         "link": [
           {"rel": "story", "href": "tests/Story/golden/product-list-leads-to-the-category-list-and-its-csv.stree.txt"}
         ],
         "doc": {"value": "カテゴリ一覧をツリー構造で表示する。並べ替え・編集・削除・新規追加の起点。"}},
       {"id": "goCategory", "title": "カテゴリ詳細を見る", "type": "safe", "rt": "#Category",
-        "tag": "catalog flow-browse src-router feature-browse",
+        "tag": "catalog flow-browse src-router feature-browse flow-manage-product",
         "link": [
           {"rel": "story", "href": "tests/Story/golden/category-is-opened-from-the-list.stree.txt"},
           {"rel": "story", "href": "tests/Story/golden/category-opened-from-the-list-is-updated.stree.txt"},
