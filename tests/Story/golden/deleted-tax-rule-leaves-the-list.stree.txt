@@ -1,0 +1,74 @@
+link_request get 'page://self/admin/tax-rule/tax-rule-list#link=self:doDeleteTaxRule'
+├── uri: page://self/admin/tax-rule/tax-rule-list
+├── method: GET
+├── links[0]: self:doDeleteTaxRule
+├── resource_request get 'page://self/admin/tax-rule/tax-rule-list'
+│   ├── uri: page://self/admin/tax-rule/tax-rule-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminTaxRuleListInput
+│   │   ├── being_final AdminTaxRuleListFetched inject=[adminSession, taxRules]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.taxRules: MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── taxRules[0].taxRuleId: tax-10
+│   │   │       ├── taxRules[0].taxRate: 10
+│   │   │       ├── taxRules[0].roundingType: 1
+│   │   │       ├── taxRules[0].applyDate: 2024-04-01T00:00:00+09:00
+│   │   │       ├── taxRules[1].taxRuleId: tax-8
+│   │   │       ├── taxRules[1].taxRate: 8
+│   │   │       ├── taxRules[1].roundingType: 1
+│   │   │       └── taxRules[1].applyDate: 2023-10-01T00:00:00+09:00
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request delete 'page://self/admin/tax-rule/tax-rule?taxRuleId=tax-8&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/tax-rule/tax-rule
+│   ├── method: DELETE
+│   ├── params.taxRuleId: tax-8
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming DeleteTaxRuleInput
+│   │   ├── taxRuleId: tax-8
+│   │   ├── being_final TaxRuleDeleted input=[taxRuleId] inject=[adminSession, taxRules]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.taxRules: MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       └── taxRuleId: tax-8
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/tax-rule/tax-rule-list'
+│   ├── uri: page://self/admin/tax-rule/tax-rule-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminTaxRuleListInput
+│   │   ├── being_final AdminTaxRuleListFetched inject=[adminSession, taxRules]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.taxRules: MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── taxRules[0].taxRuleId: tax-10
+│   │   │       ├── taxRules[0].taxRate: 10
+│   │   │       ├── taxRules[0].roundingType: 1
+│   │   │       ├── taxRules[0].applyDate: 2024-04-01T00:00:00+09:00
+│   │   │       ├── taxRules[1].taxRuleId: tax-8
+│   │   │       ├── taxRules[1].taxRate: 8
+│   │   │       ├── taxRules[1].roundingType: 1
+│   │   │       └── taxRules[1].applyDate: 2023-10-01T00:00:00+09:00
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+DELETE page://self/admin/tax-rule/tax-rule {"taxRuleId":"tax-8","csrfToken":"[FILTERED]"}

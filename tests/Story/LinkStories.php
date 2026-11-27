@@ -79,7 +79,7 @@ final class LinkStories
      */
     public static function forAdmins(): array
     {
-        return self::admin() + self::adminContentPublish();
+        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration();
     }
 
     /** @return array<string, array{string, int, string, array<string, mixed>}> */
@@ -246,6 +246,82 @@ final class LinkStories
     }
 
     /**
+     * flow-admin-shop-configuration
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function adminShopConfiguration(): array
+    {
+        $calendar = 'page://self/admin/calendar#link=';
+
+        return [
+            'base info is updated and shown again' => [
+                uri_template('page://self/admin/base-info#link=self:doUpdateBaseInfo{?form*}', [
+                    'form' => self::form([
+                        'shopName' => 'Story Shop',
+                        'shopKana' => 'ストーリーショップ',
+                        'shopNameEng' => 'Story Shop',
+                        'companyName' => 'Story Company',
+                        'postalCode' => '1500001',
+                        'pref' => '13',
+                        'addr01' => '渋谷区',
+                        'addr02' => '1-1',
+                        'phoneNumber' => '0312345678',
+                        'businessHour' => '10:00-18:00',
+                        'shopEmail01' => 'shop@example.com',
+                    ]),
+                ]),
+                Code::OK,
+                '/admin/base-info',
+                ['shopName' => 'Story Shop'],
+            ],
+            'base info leads to a payment method through the list' => [
+                uri_template('page://self/admin/base-info#link=self:goPaymentList,self:goPayment{?paymentId}', ['paymentId' => 'pay-cod']),
+                Code::OK,
+                '/admin/payment/payment',
+                ['paymentId' => 'pay-cod'],
+            ],
+            'delivery opened from the list is updated' => [
+                uri_template('page://self/admin/delivery/delivery-list#link=self:goDelivery{?deliveryId},self:doUpdateDelivery{?form*}', [
+                    'deliveryId' => 'del-yamato',
+                    'form' => self::form(['deliveryId' => 'del-yamato', 'deliveryName' => 'Story Delivery', 'visible' => '1']),
+                ]),
+                Code::OK,
+                '/admin/delivery/delivery',
+                ['deliveryId' => 'del-yamato'],
+            ],
+            'deleted tax rule leaves the list' => [
+                uri_template('page://self/admin/tax-rule/tax-rule-list#link=self:doDeleteTaxRule{?form*}', ['form' => self::form(['taxRuleId' => 'tax-8'])]),
+                Code::OK,
+                '/admin/tax-rule/tax-rule-list',
+                [],
+            ],
+            'holiday is added to the calendar' => [
+                uri_template($calendar . 'self:doCreateCalendarHoliday{?form*}', [
+                    'form' => self::form(['operation' => 'create', 'title' => 'Story Holiday', 'holiday' => '2027-02-11']),
+                ]),
+                Code::OK,
+                '/admin/calendar',
+                [],
+            ],
+            'holiday is updated in the calendar' => [
+                uri_template($calendar . 'self:doUpdateCalendar{?form*}', [
+                    'form' => self::form(['operation' => 'update', 'calendarId' => '1', 'title' => 'Story Holiday', 'holiday' => '2027-02-12']),
+                ]),
+                Code::OK,
+                '/admin/calendar',
+                [],
+            ],
+            'holiday is deleted from the calendar' => [
+                uri_template($calendar . 'self:doDeleteCalendarHoliday{?form*}', ['form' => self::form(['calendarId' => '1'])]),
+                Code::OK,
+                '/admin/calendar',
+                [],
+            ],
+        ];
+    }
+
+    /**
      * The URI and the exception that stops the story.
      *
      * @return array<string, array{string, class-string<\Throwable>}>
@@ -260,6 +336,10 @@ final class LinkStories
             'an id made during the story is not in the URI' => [
                 uri_template('page://self/admin/news/news-list#link=self:doUpdateNews{?form*}', ['form' => self::form(['newsTitle' => 'Unreachable'])]),
                 ParameterException::class,
+            ],
+            'a link declared only on write methods is missing from the page that is read' => [
+                uri_template('page://self/admin/delivery/delivery{?deliveryId}#link=self:goDeliveryList', ['deliveryId' => 'del-yamato']),
+                LinkRelException::class,
             ],
         ];
     }

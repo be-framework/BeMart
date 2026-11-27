@@ -1,0 +1,85 @@
+link_request get 'page://self/admin/base-info#link=self:doUpdateBaseInfo'
+├── uri: page://self/admin/base-info
+├── method: GET
+├── links[0]: self:doUpdateBaseInfo
+├── resource_request get 'page://self/admin/base-info'
+│   ├── uri: page://self/admin/base-info
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetBaseInfoInput
+│   │   ├── being_final BaseInfoFetched inject=[adminSession, baseInfoStorage]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.baseInfoStorage: MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── shopName: BeMart
+│   │   │       ├── shopKana: ビーマート
+│   │   │       ├── shopNameEng: BeMart
+│   │   │       ├── companyName: 株式会社BeMart
+│   │   │       ├── postalCode: 1010047
+│   │   │       ├── pref: 13
+│   │   │       ├── addr01: 東京都千代田区
+│   │   │       ├── addr02: 神田1-1-1
+│   │   │       ├── phoneNumber: 0312345678
+│   │   │       ├── businessHour: 10:00-19:00
+│   │   │       ├── shopEmail01: shop@example.com
+│   │   │       └── shopMessage: ようこそ、BeMart へ。
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/admin/base-info?shopName=Story+Shop&shopKana=%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AA%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%83%E3%83%97&shopNameEng=Story+Shop&companyName=Story+Company&postalCode=1500001&pref=13&addr01=%E6%B8%8B%E8%B0%B7%E5%8C%BA&addr02=1-1&phoneNumber=0312345678&businessHour=10%3A00-18%3A00&shopEmail01=shop%40example.com&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/base-info
+│   ├── method: POST
+│   ├── params.shopName: Story Shop
+│   ├── params.shopKana: ストーリーショップ
+│   ├── params.shopNameEng: Story Shop
+│   ├── params.companyName: Story Company
+│   ├── params.postalCode: 1500001
+│   ├── params.pref: 13
+│   ├── params.addr01: 渋谷区
+│   ├── params.addr02: 1-1
+│   ├── params.phoneNumber: 0312345678
+│   ├── params.businessHour: 10:00-18:00
+│   ├── params.shopEmail01: shop@example.com
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateBaseInfoInput
+│   │   ├── shopName: Story Shop
+│   │   ├── shopKana: ストーリーショップ
+│   │   ├── shopNameEng: Story Shop
+│   │   ├── companyName: Story Company
+│   │   ├── postalCode: 1500001
+│   │   ├── pref: 13
+│   │   ├── addr01: 渋谷区
+│   │   ├── addr02: 1-1
+│   │   ├── phoneNumber: 0312345678
+│   │   ├── businessHour: 10:00-18:00
+│   │   ├── shopEmail01: shop@example.com
+│   │   ├── being_final BaseInfoUpdated input=[shopName, shopKana, shopNameEng +9 items] inject=[adminSession, baseInfoStorage]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.baseInfoStorage: MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── shopName: Story Shop
+│   │   │       ├── shopKana: ストーリーショップ
+│   │   │       ├── shopNameEng: Story Shop
+│   │   │       ├── companyName: Story Company
+│   │   │       ├── postalCode: 1500001
+│   │   │       ├── pref: 13
+│   │   │       ├── addr01: 渋谷区
+│   │   │       ├── addr02: 1-1
+│   │   │       ├── phoneNumber: 0312345678
+│   │   │       ├── businessHour: 10:00-18:00
+│   │   │       ├── shopEmail01: shop@example.com
+│   │   │       └── changed: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+POST page://self/admin/base-info {"shopName":"Story Shop","shopKana":"ストーリーショップ","shopNameEng":"Story Shop","companyName":"Story Company","postalCode":"1500001","pref":"13","addr01":"渋谷区","addr02":"1-1","phoneNumber":"0312345678","businessHour":"10:00-18:00","shopEmail01":"shop@example.com","csrfToken":"[FILTERED]"}
