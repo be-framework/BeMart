@@ -5,9 +5,9 @@ EC-CUBE goExportOrderPdf — 帳票PDFをエクスポートする.
 
 GET /admin/order/export-order-pdf?orderNos[]=…
 
-The Resource only normalizes EC-CUBE's `ids[]`/legacy `orderNo`
-request shape, then calls the Be Final. TCPDF/FPDI rendering is kept
-behind OrderPdfCompatibilityInterface.
+The Resource only normalizes the `orderNos[]`/legacy `orderNo` request
+shape, then calls the Be Final. TCPDF/FPDI rendering is kept behind
+OrderPdfCompatibilityInterface.
 
 Failure mapping:
   - SemanticVariableException             → 400 (orderNos format)
