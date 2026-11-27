@@ -117,7 +117,7 @@ final class AdminTagResourceTest extends TestCase
         $ro = $this->resource->delete('page://self/admin/tag/tag', [
             'tagId' => $id,
         ]);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
     }
 
     public function testDeleteHtmlContextRedirectsToTagList(): void

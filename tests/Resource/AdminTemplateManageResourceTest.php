@@ -60,7 +60,7 @@ final class AdminTemplateManageResourceTest extends TestCase
             'templateId' => $templateId,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doSelectTemplate', $ro->body['transitionId']);
 
         $list = $this->resource->get('page://self/admin/template/template-list');
@@ -91,7 +91,7 @@ final class AdminTemplateManageResourceTest extends TestCase
             'templateId' => 'default',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doDeleteTemplate', $ro->body['transitionId']);
     }
 
@@ -113,7 +113,7 @@ final class AdminTemplateManageResourceTest extends TestCase
             'file' => FileUpload::fromFile(__DIR__ . '/../fixtures/template-upload.zip'),
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doInstallTemplate', $ro->body['transitionId']);
         $this->assertSame('template-upload.zip', $ro->body['archiveName']);
         $this->assertGreaterThan(0, $ro->body['archiveSize']);

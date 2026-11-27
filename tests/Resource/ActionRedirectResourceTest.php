@@ -62,7 +62,7 @@ final class ActionRedirectResourceTest extends TestCase
     {
         $ro = $this->resource->get($uri, ['returnTo' => '/\evil.example']);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame($fallback, $ro->headers['Location']);
     }
 

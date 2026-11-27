@@ -74,7 +74,7 @@ final class AdminDeleteCustomerResourceTest extends TestCase
             'customerId' => self::ALICE_ID,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
         $this->assertSame(self::ALICE_EMAIL, $ro->body['originalEmail']);
         $this->assertFalse($ro->body['alreadyDeleted']);
@@ -93,7 +93,7 @@ final class AdminDeleteCustomerResourceTest extends TestCase
             'customerId' => self::WITHDRAWN_ID,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertTrue($ro->body['alreadyDeleted']);
         $this->assertStringContainsString('既に削除', $ro->body['message']);
         $this->assertCount(

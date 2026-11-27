@@ -117,7 +117,7 @@ final class AdminTaxRuleResourceTest extends TestCase
             'taxRuleId' => $id,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame($id, $ro->body['taxRuleId']);
     }
 

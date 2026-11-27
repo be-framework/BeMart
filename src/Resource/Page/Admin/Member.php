@@ -294,7 +294,7 @@ class Member extends ResourceObject
 
         assert($final instanceof MemberUpdated);
 
-        $this->code = $browserForm ? Code::SEE_OTHER : Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = sprintf('/admin/member?loginId=%s', urlencode($final->loginId));
         $this->body = [
             'adminId' => $final->adminId,

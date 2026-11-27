@@ -68,7 +68,7 @@ final class AdminLoginResourceSqlTest extends AbstractResourceSqlTestCase
             'password' => self::ADMIN_PASSWORD,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         // adminId is the numeric dtb_member.id (SQL) vs the Fake's
         // hard-coded hex — assert it is a non-empty numeric string.
         $this->assertNotEmpty($ro->body['adminId']);

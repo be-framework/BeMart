@@ -79,7 +79,7 @@ final class CartItemResourceTest extends TestCase
             'quantity' => 5,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('sample-001', $ro->body['productCode']);
         $this->assertSame(5, $ro->body['adjustedQuantity']);
         // sample-001 unitPrice is 1200; 5 * 1200 = 6000.
@@ -162,7 +162,7 @@ final class CartItemResourceTest extends TestCase
             'productCode' => 'sample-001',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('sample-001', $ro->body['productCode']);
         $this->assertSame(0, $ro->body['totalPrice']);
     }

@@ -123,7 +123,7 @@ class ChangePassword extends ResourceObject
 
         assert($final instanceof AdminPasswordChanged);
 
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/change-password';
         $this->body = [
             'transitionId' => 'doChangePassword',

@@ -78,7 +78,7 @@ final class AdminMasterDataEditResourceTest extends TestCase
             'rows' => [['id' => 't1', 'name' => '新タグ', 'sortNo' => 1]],
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doUpdateMasterData', $ro->body['transitionId']);
         $this->assertSame(1, $ro->body['count']);
     }

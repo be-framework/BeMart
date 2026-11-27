@@ -62,6 +62,8 @@ class BulkDelete extends ResourceObject
         array $ids = [],
         string|null $mode = null,
     ): static {
+        unset($mode);
+
         $targetOrderNos = $orderNos === [] ? $ids : $orderNos;
         $final = ($this->becoming)(new AdminBulkDeleteOrderInput(
             orderNos: $targetOrderNos,
@@ -69,7 +71,7 @@ class BulkDelete extends ResourceObject
 
         assert($final instanceof AdminOrdersBulkDeleted);
 
-        $this->code = $mode === 'order_bulk_delete_form' ? Code::SEE_OTHER : Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/order-list';
         $this->body = [
             'orderNos' => $final->orderNos,

@@ -114,7 +114,7 @@ class Security extends ResourceObject
 
         assert($final instanceof SecuritySettingsUpdated);
 
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/security';
         $this->body = [
             'transitionId' => 'doUpdateSecurity',

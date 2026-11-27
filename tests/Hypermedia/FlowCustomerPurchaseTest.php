@@ -128,7 +128,7 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame(self::$updatedProductName, $this->bodyValue($updated, 'productName'));
 
         return $updated;
@@ -347,7 +347,7 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $loggedIn->code);
+        $this->assertSame(Code::SEE_OTHER, $loggedIn->code);
         $this->assertSame(self::$email, $this->bodyValue($loggedIn, 'email'));
 
         assert(self::$dbSession instanceof WorkflowDbSession);

@@ -63,7 +63,7 @@ final class AdminProductBulkStatusResourceTest extends TestCase
             'productStatus' => 3,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame(2, $ro->body['requestedCount']);
         $this->assertSame(2, $ro->body['changedCount']);
     }
@@ -88,7 +88,7 @@ final class AdminProductBulkStatusResourceTest extends TestCase
             'productStatus' => 2,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame(2, $ro->body['requestedCount']);
         $this->assertSame(1, $ro->body['changedCount']);
     }

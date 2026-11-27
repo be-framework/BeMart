@@ -85,7 +85,7 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $submitted->code);
+        $this->assertSame(Code::SEE_OTHER, $submitted->code);
         $ticketId = $this->bodyValue($submitted, 'ticketId');
         $this->assertIsString($ticketId);
         $this->assertNotSame('', $ticketId);

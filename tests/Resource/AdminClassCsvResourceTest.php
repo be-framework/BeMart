@@ -87,7 +87,7 @@ final class AdminClassCsvResourceTest extends TestCase
             'csv' => "規格名ID,規格名\r\ncn-x,新\r\n",
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doImportClassNameCsv', $ro->body['transitionId']);
         $this->assertSame(1, $ro->body['accepted']);
     }
@@ -98,7 +98,7 @@ final class AdminClassCsvResourceTest extends TestCase
             'csv' => "規格分類ID,規格名ID,規格分類名\r\ncc-x,cn-color,新\r\n",
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doImportClassCategoryCsv', $ro->body['transitionId']);
     }
 

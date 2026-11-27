@@ -81,7 +81,7 @@ final class AdminSecurityResourceTest extends TestCase
             'trustedHosts' => '^example\\.com$',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('doUpdateSecurity', $ro->body['transitionId']);
     }
 

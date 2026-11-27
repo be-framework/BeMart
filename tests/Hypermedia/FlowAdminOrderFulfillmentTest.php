@@ -161,7 +161,7 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame(self::$updatedProductName, $this->bodyValue($updated, 'productName'));
 
         return $updated;

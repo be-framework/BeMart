@@ -73,7 +73,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
         $this->assertSame(1, $this->bodyValue($updated, 'csvType'));
         $this->assertSame(3, $this->bodyValue($updated, 'count'));
 
@@ -97,7 +97,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $imported->code);
+        $this->assertSame(Code::SEE_OTHER, $imported->code);
         $this->assertSame('doImportProductCsv', $this->bodyValue($imported, 'transitionId'));
         $this->assertSame(1, $this->bodyValue($imported, 'count'));
 
@@ -120,7 +120,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $imported->code);
+        $this->assertSame(Code::SEE_OTHER, $imported->code);
         $this->assertSame('doImportCategoryCsv', $this->bodyValue($imported, 'transitionId'));
 
         return $imported;
@@ -179,7 +179,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $imported->code);
+        $this->assertSame(Code::SEE_OTHER, $imported->code);
         $this->assertSame('doImportClassNameCsv', $this->bodyValue($imported, 'transitionId'));
         $this->assertSame(1, $this->bodyValue($imported, 'accepted'));
 
@@ -226,7 +226,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $imported->code);
+        $this->assertSame(Code::SEE_OTHER, $imported->code);
         $this->assertSame('doImportClassCategoryCsv', $this->bodyValue($imported, 'transitionId'));
         $this->assertSame(1, $this->bodyValue($imported, 'accepted'));
 

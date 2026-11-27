@@ -112,7 +112,7 @@ final class AdminDeliveryResourceTest extends TestCase
             'visible' => false,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('ヤマト宅急便', $ro->body['deliveryName']);
         $this->assertFalse($ro->body['visible']);
     }
@@ -135,7 +135,7 @@ final class AdminDeliveryResourceTest extends TestCase
             'deliveryId' => $id,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame($id, $ro->body['deliveryId']);
     }
 

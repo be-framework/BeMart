@@ -55,7 +55,7 @@ class UnsupportedRoute extends ResourceObject
             return $this;
         }
 
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = $this->safeReturnTo($returnTo);
         $this->body = [
             'routeName' => $routeName,

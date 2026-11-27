@@ -99,7 +99,7 @@ final class AdminBlockResourceTest extends TestCase
             'blockId' => $id,
             'blockName' => 'New',
         ]);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('New', $ro->body['blockName']);
     }
 
@@ -109,7 +109,7 @@ final class AdminBlockResourceTest extends TestCase
         $ro = $this->resource->delete('page://self/admin/block/block', [
             'blockId' => $id,
         ]);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
     }
 
     public function testDeleteSystemBlockIsRefused(): void

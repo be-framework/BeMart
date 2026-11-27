@@ -82,11 +82,13 @@ class Css extends ResourceObject
     #[SameOrigin]
     public function onPut(string $css = '', string|null $mode = null): static
     {
+        unset($mode);
+
         $final = ($this->becoming)(new UpdateContentCssInput(css: $css));
 
         assert($final instanceof ContentCssUpdated);
 
-        $this->code = $mode === 'content_operation_form' ? Code::SEE_OTHER : Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/content/css';
         $this->body = [
             'transitionId' => 'doUpdateContentCss',

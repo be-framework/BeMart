@@ -63,11 +63,13 @@ class Cache extends ResourceObject
     #[SameOrigin]
     public function onPut(string|null $mode = null): static
     {
+        unset($mode);
+
         $final = ($this->becoming)(new ClearCacheInput());
 
         assert($final instanceof CacheCleared);
 
-        $this->code = $mode === 'content_operation_form' ? Code::SEE_OTHER : Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/content/cache';
         $this->body = [
             'transitionId' => 'doClearCache',

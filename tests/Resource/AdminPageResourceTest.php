@@ -126,7 +126,7 @@ final class AdminPageResourceTest extends TestCase
             'pageId' => $id,
             'pageName' => 'Foo!',
         ]);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('Foo!', $ro->body['pageName']);
         $this->assertSame('foo', $ro->body['pageUrl']);
     }
@@ -137,7 +137,7 @@ final class AdminPageResourceTest extends TestCase
         $ro = $this->resource->delete('page://self/admin/page/page', [
             'pageId' => $id,
         ]);
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame($id, $ro->body['pageId']);
     }
 

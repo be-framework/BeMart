@@ -223,7 +223,7 @@ final class EventSourcingExtractionTest extends TestCase
             'password' => 'local-dev-admin-password',
             'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN,
         ]);
-        $this->assertSame(200, $ro->code, 'fixture must actually succeed for this test to mean anything');
+        $this->assertSame(303, $ro->code, 'fixture must actually succeed for this test to mean anything');
 
         $log = $logger->flush();
         $tree = json_decode(json_encode($log->toArray()), true);

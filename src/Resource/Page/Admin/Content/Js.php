@@ -82,11 +82,13 @@ class Js extends ResourceObject
     #[SameOrigin]
     public function onPut(string $js = '', string|null $mode = null): static
     {
+        unset($mode);
+
         $final = ($this->becoming)(new UpdateContentJsInput(js: $js));
 
         assert($final instanceof ContentJsUpdated);
 
-        $this->code = $mode === 'content_operation_form' ? Code::SEE_OTHER : Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/content/js';
         $this->body = [
             'transitionId' => 'doUpdateContentJs',

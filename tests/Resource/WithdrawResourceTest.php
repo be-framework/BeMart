@@ -96,7 +96,7 @@ final class WithdrawResourceTest extends TestCase
         $ro = $this->resource->post('page://self/mypage/withdraw', [
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
         $this->assertArrayNotHasKey('dummyEmail', $ro->body);
         $this->assertTrue($ro->body['cleared']);
@@ -110,7 +110,7 @@ final class WithdrawResourceTest extends TestCase
         $ro = $this->resource->post('page://self/mypage/withdraw', [
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertTrue($this->sessionWriter->cleared);
     }
 
@@ -180,7 +180,7 @@ final class WithdrawResourceTest extends TestCase
             'sessionPrefix' => 'victim-session',
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame(['alice-own-session'], $cartCommand->clearedPrefixes);
     }
 }

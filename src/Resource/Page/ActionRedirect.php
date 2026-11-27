@@ -42,7 +42,7 @@ class ActionRedirect extends ResourceObject
 
     private function redirect(string|null $returnTo): void
     {
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = $this->safeReturnTo($returnTo);
         $this->body = ['message' => '操作を受け付けました。'];
     }
