@@ -6,6 +6,9 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use DOMDocument;
+use DOMElement;
+use DOMXPath;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Tests\Fake\Csrf\FakeCsrfToken;
@@ -13,6 +16,7 @@ use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 
+use function assert;
 use function preg_quote;
 
 /**
@@ -35,7 +39,7 @@ use function preg_quote;
  *        must match the resource-layer contracts declared in
  *        src/Resource/Page/Admin/ProductList.php (#[Link] annotations).
  *
- * EC-CUBE rendering comparison tests are archived with @group ec-cube-parity-archived
+ * EC-CUBE rendering comparison tests are archived in the ec-cube-parity-archived group
  * because the template no longer targets EC-CUBE DOM parity.
  */
 final class AdminProductListHtmlRenderTest extends TestCase
@@ -212,15 +216,25 @@ final class AdminProductListHtmlRenderTest extends TestCase
         );
     }
 
-    public function testProductListExposesProductCopyAffordances(): void
+    /** The copy dialog's fields reach the copy, though the dialog sits inside form_bulk. */
+    public function testProductListCopyFormReachesTheCopy(): void
     {
         $html = $this->resource->get('page://self/admin/product-list')->toString();
+        $code = 'admin-active-001';
+        $formId = 'productCopy-' . $code;
 
-        // Copy link: POST /admin/product-copy?productCode=... with CSRF token
-        $this->assertMatchesRegularExpression(
-            '#href="/admin/product-copy\?productCode=[^"]+"[^>]+data-method="post"[^>]+token-for-anchor="' . preg_quote(FakeCsrfToken::DEFAULT_TOKEN, '#') . '"#',
-            $html,
-        );
+        $this->assertStringContainsString('<form id="' . $formId . '" method="post" action="/admin/product-copy" rel="doCopyProduct">', $html);
+        $dom = new DOMDocument();
+        @$dom->loadHTML($html);
+        $params = [];
+        foreach ((new DOMXPath($dom))->query('//form[@id="' . $formId . '"]//input | //input[@form="' . $formId . '"]') ?: [] as $input) {
+            assert($input instanceof DOMElement);
+            $params[$input->getAttribute('name')] = $input->getAttribute('value');
+        }
+
+        $this->assertSame($code, $params['productCode'] ?? null);
+        $this->assertSame($code . '.copy', $params['newProductCode'] ?? null);
+        $this->assertSame(Code::CREATED, $this->resource->post('page://self/admin/product-copy', $params)->code);
     }
 
     public function testBulkStatusButtonsExposeThreeStatusValues(): void

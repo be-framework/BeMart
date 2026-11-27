@@ -264,11 +264,6 @@
     "note": "一括ステータス変更 form は fixture 描画に現れない（行が無い）",
     "reason": "target-missing"
   },
-  "GET page://self/admin/product-list doCopyProduct": {
-    "classification": "fail",
-    "note": "一覧のコピー導線は GET の a（data-method=post を POST に変える JS は読み込まれない）で、/admin/product-copy は GET を受けず 405 になる。商品ページの POST form も newProductCode を送らない。一覧・商品ページのどちらからも newProductCode が届かない",
-    "reason": "method-mismatch"
-  },
   "GET page://self/admin/product-list doCreateProduct": {
     "classification": "resourceOnly",
     "note": "一覧には直接の POST form が無く /admin/product-new を経由する",

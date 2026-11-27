@@ -23,7 +23,7 @@
   ACTIONS derived from resource #[Link] declarations:
     PUT    /admin/product?productCode=<code>  — doUpdateProduct
     DELETE /admin/product?productCode=<code>  — doDeleteProduct
-    POST   /admin/product-copy?…             — doCopyProduct
+    POST   /admin/product-copy               — doCopyProduct
     GET    /admin/product-list               — goProductList (back link)
 
   IdeaStore admin design vocabulary (idea-admin-*):
@@ -411,6 +411,8 @@
       <form method="post" action="/admin/product-copy" rel="doCopyProduct" style="display:inline;">
         <input type="hidden" name="productCode" value="{{ productCode }}">
         {{ csrf_field() }}
+        <label for="copy_new_product_code">複製先の商品コード</label>
+        <input type="text" id="copy_new_product_code" name="newProductCode" value="{{ productCode }}.copy" required>
         <button type="submit" class="idea-admin-action idea-admin-action--primary" rel="doCopyProduct">
           <i class="fa fa-copy" aria-hidden="true"></i>
           複製する

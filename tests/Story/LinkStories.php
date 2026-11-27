@@ -1472,6 +1472,16 @@ final class LinkStories
                 ['productName' => 'Story Product'],
                 'flow-admin-product-publish',
             ],
+            'created product is copied and the copy is shown at its location' => [
+                uri_template('page://self/admin/product-new#link=self:doCreateProduct{?created*},self:doCopyProduct{?copy*}', [
+                    'created' => self::form(['productCode' => 'story-product', 'productName' => 'Story Product', 'price02' => '2468', 'stock' => '8', 'productStatus' => '1', 'description' => 'Created by a story.']),
+                    'copy' => self::form(['productCode' => 'story-product', 'newProductCode' => 'story-product.copy']),
+                ]),
+                Code::OK,
+                '/admin/product',
+                ['productCode' => 'story-product.copy', 'productName' => '(コピー) Story Product'],
+                'flow-manage-product',
+            ],
             'created category is shown at its location' => [
                 uri_template('page://self/admin/category/category-list#link=self:doCreateCategory{?form*}', ['form' => self::form(['categoryName' => 'Story Category', 'sortNo' => '90'])]),
                 Code::OK,
