@@ -8,12 +8,12 @@ use PHPUnit\Framework\TestCase;
 
 class StoryCoverageTest extends TestCase
 {
-    public function testTheAlpsTagAndTheStoriesAgree(): void
+    public function testTheAlpsStoryLinksAndTheStoriesAgree(): void
     {
         $this->assertSame(
-            ['untagged' => [], 'stale' => [], 'unknown' => []],
+            ['missing' => [], 'stale' => [], 'unknown' => []],
             StoryCoverage::forRepository()->drift(),
-            'Run `composer story:uncovered` and tag the transitions in alps.json, or add the story.',
+            'Run `composer story:uncovered` and link the stories in alps.json (`rel: story`), or add the story.',
         );
     }
 }

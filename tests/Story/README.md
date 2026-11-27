@@ -44,17 +44,25 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 
 ## ALPS との突き合わせ
 
-ストーリーが辿る遷移には、`alps.json` の `tag` に `story-covered` を付ける。付けるのは `followable()`・`uploads()`・`persisted()` の `#link=` が通る rel で、`unfollowable()` の行は数えない。`flow-*` タグは PHP 側の行のコメントに書く。
+`followable()` の行が辿る遷移には、`alps.json` のその遷移の `link` に、行の golden を指す `rel: story` を 1 行ずつ足す。1 つの遷移を複数のストーリーが辿るなら、ストーリーの数だけ足す（`describedby` はそのまま残す）。PHP 側に足すものはなく、行の `#link=type:rel` の rel が ALPS の id になる。
+
+```json
+"link": [
+  {"rel": "story", "href": "tests/Story/golden/admin-top-leads-to-the-shop-settings.stree.txt"}
+]
+```
 
 ```bash
-composer story:uncovered   # ストーリーのない遷移を flow ごとに列挙し、ALPS のタグとストーリーが食い違えば失敗する
+composer story:uncovered   # ストーリーのない遷移を flow ごとに列挙し、ALPS の link とストーリーが食い違えば失敗する
 ```
 
 食い違いは `composer cs`（`cs:story`）と `StoryCoverageTest` でも失敗する。
 
-- ストーリーが辿るのにタグがない: `alps.json` の遷移にタグを足す
-- タグがあるのにどのストーリーも辿らない: タグを外すか、ストーリーを戻す
+- ストーリーが辿るのに `story` link がない: 遷移の `link` に、そのストーリーの golden を足す
+- `story` link の golden がない、またはそのストーリーがその rel を辿らない: link を直すか、ストーリーを戻す
 - ストーリーが辿る rel が `alps.json` にない: rel の綴りか、ALPS の遷移を直す
+
+`unfollowable()` の行は辿れないことを示すので、`uploads()`・`persisted()` の行は golden がないので、`link` に足さない。
 
 ## 書けないとき
 
