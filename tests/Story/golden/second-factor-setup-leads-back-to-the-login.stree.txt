@@ -1,0 +1,24 @@
+link_request get 'page://self/admin/two-factor-auth-set#link=self:goAdminLogin'
+├── uri: page://self/admin/two-factor-auth-set
+├── method: GET
+├── links[0]: self:goAdminLogin
+├── resource_request get 'page://self/admin/two-factor-auth-set'
+│   ├── uri: page://self/admin/two-factor-auth-set
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/login'
+│   ├── uri: page://self/admin/login
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

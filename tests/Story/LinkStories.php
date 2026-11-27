@@ -173,7 +173,7 @@ final class LinkStories
      */
     public static function forAdmins(): array
     {
-        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance() + self::adminOrders();
+        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance() + self::adminOrders() + self::adminSystem();
     }
 
     /** @return array<string, array{string, int, string, array<string, mixed>}> */
@@ -578,6 +578,94 @@ final class LinkStories
     }
 
     /**
+     * flow-admin-auth, flow-admin-system-operation, flow-manage-system
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function adminSystem(): array
+    {
+        $members = 'page://self/admin/member-list#link=';
+        $owner = 'shop-owner';
+
+        return [
+            'admin logs in and is asked for the second factor' => [
+                uri_template('page://self/admin/login#link=self:doAdminLogin{?form*}', [
+                    'form' => self::form(['loginId' => 'test-admin', 'password' => 'local-dev-admin-password']),
+                ]),
+                Code::OK,
+                '/admin/two-factor-auth',
+                [],
+            ],
+            'admin logs out from the top page' => [
+                uri_template('page://self/admin/index#link=self:doAdminLogout{?form*}', ['form' => self::form([])]),
+                Code::OK,
+                '/admin/login',
+                [],
+            ],
+            'second factor pages lead back to the login' => [
+                'page://self/admin/two-factor-auth#link=self:goAdminLogin',
+                Code::OK,
+                '/admin/login',
+                [],
+            ],
+            'second factor setup leads back to the login' => [
+                'page://self/admin/two-factor-auth-set#link=self:goAdminLogin',
+                Code::OK,
+                '/admin/login',
+                [],
+            ],
+            'admin top leads to the members and a member' => [
+                uri_template('page://self/admin/index#link=self:goMemberList,self:goMember{?loginId}', ['loginId' => $owner]),
+                Code::OK,
+                '/admin/member',
+                ['loginId' => $owner],
+            ],
+            'member is opened from the list and the list is shown again' => [
+                uri_template($members . 'self:goMember{?loginId},self:goMemberList', ['loginId' => $owner]),
+                Code::OK,
+                '/admin/member-list',
+                [],
+            ],
+            'authority role is changed from the member list' => [
+                uri_template($members . 'self:doUpdateAuthorityRole{?form*}', ['form' => self::form(['loginId' => $owner, 'authority' => '0'])]),
+                Code::OK,
+                '/admin/authority-role',
+                ['loginId' => $owner],
+            ],
+            'member is updated from the list' => [
+                uri_template($members . 'self:doUpdateMember{?form*}', ['form' => self::form(['loginId' => $owner, 'name' => 'Story Owner', 'authority' => '1'])]),
+                Code::OK,
+                '/admin/member',
+                ['loginId' => $owner],
+            ],
+            'member is deleted from the list' => [
+                uri_template($members . 'self:doDeleteMember{?form*}', ['form' => self::form(['loginId' => $owner])]),
+                Code::OK,
+                '/admin/member',
+                ['loginId' => $owner],
+            ],
+            'login history leads to the security page which is updated' => [
+                uri_template('page://self/admin/login-history#link=self:goSecurity,self:doUpdateSecurity{?form*}', ['form' => self::form([])]),
+                Code::OK,
+                '/admin/security',
+                [],
+            ],
+            'maintenance mode is switched on' => [
+                uri_template('page://self/admin/content/maintenance#link=self:doToggleMaintenance{?form*}', ['form' => self::form(['enabled' => '1'])]),
+                Code::OK,
+                '/admin/content/maintenance',
+                [],
+            ],
+            'cache is cleared' => [
+                uri_template('page://self/admin/content/cache#link=self:doClearCache{?form*}', ['form' => self::form([])]),
+                Code::OK,
+                '/admin/content/cache',
+                [],
+            ],
+        ];
+    }
+
+    /**
      * The URI and the exception that stops the story.
      *
      * @return array<string, array{string, class-string<\Throwable>}>
@@ -602,6 +690,18 @@ final class LinkStories
                     'orderNo' => 'past0000000000000000000000000001',
                     'form' => self::form(['orderNo' => 'past0000000000000000000000000001', 'trackingNumber' => 'TRK0001']),
                 ]),
+                LinkRelException::class,
+            ],
+            'the login history link is declared only on the authority role write methods' => [
+                uri_template('page://self/admin/authority-role{?loginId,authority}#link=self:goLoginHistoryList', ['loginId' => 'shop-owner', 'authority' => '1']),
+                LinkRelException::class,
+            ],
+            'the second factor setup link is declared only on the security write method' => [
+                'page://self/admin/security#link=self:goTwoFactorAuthSet',
+                LinkRelException::class,
+            ],
+            'the password form does not declare its submit link' => [
+                uri_template('page://self/admin/change-password#link=self:doChangePassword{?form*}', ['form' => self::form(['currentPassword' => 'a', 'newPassword' => 'b'])]),
                 LinkRelException::class,
             ],
             'the delivery address editor declares the customer page only on write methods' => [
