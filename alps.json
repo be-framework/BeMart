@@ -30,7 +30,7 @@
       {"id": "productNote", "title": "商品備考","tag": "src-entity", "doc": {"value": "管理者のみが参照する内部メモ。フロントには表示されない"}},
       {"id": "productStatus", "title": "商品ステータス","tag": "src-entity", "doc": {"value": "1=公開（フロント表示）, 2=非公開（フロント非表示）, 3=廃止（論理削除、管理画面でもデフォルト非表示）"}},
       {"id": "productCode", "title": "商品コード","def": "https://schema.org/sku", "tag": "src-entity", "doc": {"value": "SKU/品番。在庫管理や受注明細での識別に使用"}},
-      {"id": "newProductCode", "title": "複製先の商品コード","def": "https://schema.org/sku", "tag": "src-entity", "doc": {"value": "商品を複製して作る新しい商品の商品コード。既存の商品コードと重複できない"}},
+      {"id": "newProductCode", "title": "複製先の商品コード","def": "https://schema.org/sku", "doc": {"value": "商品を複製して作る新しい商品の商品コード。既存の商品コードと重複できない"}},
       {"id": "stock", "title": "在庫数","tag": "src-entity", "doc": {"value": "物理在庫数。stockUnlimited=trueの場合は無視される。注文確定時に引き当てが行われる"}},
       {"id": "stockUnlimited", "title": "在庫無制限","tag": "src-entity", "doc": {"value": "trueの場合、在庫数に関係なく在庫チェックをスキップ"}},
       {"id": "saleLimit", "title": "購入制限数","tag": "src-entity", "doc": {"value": "1回の注文で購入できる最大数量。未設定時は制限なし"}},
