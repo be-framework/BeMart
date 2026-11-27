@@ -265,8 +265,8 @@
     "reason": "target-missing"
   },
   "GET page://self/admin/product-list doCopyProduct": {
-    "classification": "resourceOnly",
-    "note": "一覧のコピー導線は GET の a（/admin/product-copy?productCode=…）。POST form は商品ページにある",
+    "classification": "fail",
+    "note": "一覧のコピー導線は GET の a（data-method=post を POST に変える JS は読み込まれない）で、/admin/product-copy は GET を受けず 405 になる。商品ページの POST form も newProductCode を送らない。一覧・商品ページのどちらからも newProductCode が届かない",
     "reason": "method-mismatch"
   },
   "GET page://self/admin/product-list doCreateProduct": {

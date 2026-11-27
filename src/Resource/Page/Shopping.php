@@ -127,8 +127,12 @@ class Shopping extends ResourceObject
             'transitionId' => 'goCheckoutEntry',
             'message' => '購入手続きに進むにはログインまたはゲスト購入を選択してください。',
             '_links' => [
-                // Suppress method-level doConfirmOrder for anonymous 303 HAL; entries without href are not rendered.
+                // Suppress the method-level links that need a signed-in customer; entries without href are not rendered.
                 'doConfirmOrder' => [],
+                'goShopping' => [],
+                'goShoppingError' => [],
+                'goShoppingShipping' => [],
+                'goShoppingShippingEdit' => [],
                 'goShoppingLogin' => ['href' => 'page://self/shopping/login'],
                 'goShoppingNonMember' => ['href' => 'page://self/shopping/non-member'],
                 'goCart' => ['href' => 'page://self/cart'],

@@ -309,7 +309,7 @@
             </a>
             <a
               class="idea-admin-action"
-              href="/admin/order/export-order-pdf?orderNos={{ orderNo }}"
+              href="/admin/order/export-order-pdf?orderNo={{ orderNo|url_encode }}"
               rel="goExportOrderPdf"
             >
               <i class="fa fa-file-pdf" aria-hidden="true"></i>

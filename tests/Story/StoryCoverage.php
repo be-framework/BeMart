@@ -179,7 +179,7 @@ final class StoryCoverage
     }
 
     /**
-     * `flow-*` タグごとの、公開の ALPS 図の URL・そのフローを宣言したストーリーの行・どのストーリーも辿らない遷移。
+     * `flow-*` タグごとの、公開の ALPS 図の URL・そのフローを宣言したストーリーの行・そのフローを宣言したストーリーが辿らない遷移。
      * `docs/` に置くので、図へのリンクは相対にする。
      */
     public function flowsMarkdown(): string
@@ -198,7 +198,7 @@ final class StoryCoverage
             '',
             'ストーリーは `tests/Story/LinkStories.php` の行で、末尾の `flow-*` が、その行が辿る ALPS のフローを示す。',
             '',
-            '| フロー | ALPS の図 | ストーリー | どのストーリーも辿らない遷移 |',
+            '| フロー | ALPS の図 | ストーリー | 宣言したストーリーが辿らない遷移 |',
             '|---|---|---|---|',
         ];
         foreach ($this->flowCoverage() as $flow => $transitions) {

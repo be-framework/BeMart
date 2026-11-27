@@ -70,7 +70,7 @@ class Product extends ResourceObject
     #[Link(rel: 'doUpdateProduct', href: 'page://self/admin/product', method: 'put')]
     #[Link(rel: 'doDeleteProduct', href: 'page://self/admin/product', method: 'delete')]
     #[Link(rel: 'doCopyProduct', href: 'page://self/admin/product-copy', method: 'post')]
-    #[Link(rel: 'goCategory', href: 'page://self/admin/category/category')]
+    #[Link(rel: 'goCategory', href: 'page://self/admin/category/category{?categoryId}')]
     public function onGet(string $productCode): static
     {
         $final = ($this->becoming)(new GetAdminProductInput(productCode: $productCode));

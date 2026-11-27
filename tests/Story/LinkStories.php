@@ -185,6 +185,20 @@ final class LinkStories
                 [],
                 'flow-customer-purchase',
             ],
+            'completed order leads back to the cart' => [
+                'page://self/shopping/complete#link=self:goCart',
+                Code::OK,
+                '/cart',
+                [],
+                'flow-customer-purchase',
+            ],
+            'shipping edit leads back to the shipping choice' => [
+                'page://self/shopping/shipping-edit#link=self:goShoppingShipping',
+                Code::OK,
+                '/shopping/shipping',
+                [],
+                'flow-customer-purchase',
+            ],
         ];
     }
 
@@ -1261,13 +1275,6 @@ final class LinkStories
                 [],
                 ['flow-customer-purchase', 'flow-customer-account-maintenance'],
             ],
-            'completed order leads back to the cart' => [
-                'page://self/shopping/complete#link=self:goCart',
-                Code::OK,
-                '/cart',
-                [],
-                'flow-customer-purchase',
-            ],
             'shipping address is chosen' => [
                 uri_template($entry . 'self:goShoppingShipping,self:doSelectShippingAddress{?form*}', ['form' => self::form(['shippingAddressId' => self::MEMBER_ADDRESS])]),
                 Code::OK,
@@ -1286,13 +1293,6 @@ final class LinkStories
                 $entry . 'self:goShoppingShipping,self:goShoppingShippingMultiple,self:goShopping',
                 Code::OK,
                 '/shopping',
-                [],
-                'flow-customer-purchase',
-            ],
-            'shipping edit leads back to the shipping choice' => [
-                'page://self/shopping/shipping-edit#link=self:goShoppingShipping',
-                Code::OK,
-                '/shopping/shipping',
                 [],
                 'flow-customer-purchase',
             ],
@@ -1345,7 +1345,7 @@ final class LinkStories
                 uri_template('page://self/admin/customer-delivery-edit{?customerId}#link=self:goCustomer', ['customerId' => '0123456789abcdef0123456789abcdef']),
                 LinkRelException::class,
             ],
-            'the guest checkout location is a page that redirects a guest to the login' => [
+            'guest checkout is not implemented yet: GET /shopping sends a guest to the login' => [
                 uri_template('page://self/shopping/non-member#link=self:doSubmitNonMember{?form*}', ['form' => self::form(self::nonMember())]),
                 LinkException::class,
             ],

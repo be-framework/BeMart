@@ -49,7 +49,7 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 
 行の最後の要素は、そのストーリーが辿るフローの `flow-*` タグ（`alps.json` の遷移の `tag` にある）。どのフローの、どの遷移をそのストーリーが見せるのかを、読む人に伝える。`alps.json` はテストを知らず、ストーリーが `flow-*` で ALPS を指す。
 
-テストは次の 2 つを確かめる。どちらも、各 `testFollows*` と `composer cs:story` が見る。
+テストは次の 2 つを確かめる。どちらも、6 本の `testFollows*`（`LinkStoryTest` に 3 本、`HttpLinkStoryTest`・`HtmlLinkStoryTest`・`PersistedLinkStoryTest` に 1 本ずつ）と `composer cs:story` が見る。
 
 - 宣言したタグが `alps.json` にある
 - URI の `#link=` が辿る rel がすべて、宣言したタグのどれかを持つ遷移である（複数宣言したときは、宣言したタグのどれもが、どれかの rel に付いている）
@@ -61,7 +61,7 @@ composer story:uncovered   # flow タグごとに、そのフローを宣言し�
 composer story:flows       # docs/story-flows.md を作り直す
 ```
 
-[`docs/story-flows.md`](../../docs/story-flows.md) は、`flow-*` ごとの ALPS の図の URL、そのフローを宣言した行、どの行も辿らない遷移の表。`composer cs`（`cs:story`）と `StoryCoverageTest` は、この表が古いと失敗する。
+[`docs/story-flows.md`](../../docs/story-flows.md) は、`flow-*` ごとの ALPS の図の URL、そのフローを宣言した行、そのフローを宣言した行が辿らない遷移の表（別のフローを宣言した行が辿る遷移も載る）。`composer cs`（`cs:story`）と `StoryCoverageTest` は、この表が古いと失敗する。
 
 ## 書けないとき
 
@@ -69,6 +69,7 @@ composer story:flows       # docs/story-flows.md を作り直す
 |---|---|---|
 | `LinkRelException` | 今いるリソースのメソッドに、その rel の `#[Link]` がない | リソースの宣言の問題。行で回避せず、止めて報告する |
 | `ParameterException` | 必要な値（実行中にできる ID など）が URI に書けない | 同上 |
+| `LinkException` | 辿った先の 201・303 の Location が、さらに転送する（リンクが辿る Location は 1 つ） | 実装の欠けなら報告する。決まった扱いなら `unfollowable()` に行を足し、キーに理由を書く |
 | golden が毎回変わる | 実行ごとに変わる値がツリーに出ている | `LinkStoryTest::VOLATILE` に足す前に報告する |
 
 `src/` の `#[Link]` の追加と、`LinkStoryTest`・`StoryModule` の変更は設計の判断になる。行と golden を足す作業の中ではしない。
