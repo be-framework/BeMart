@@ -42,6 +42,20 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 
 辿れないことを示すストーリーは `unfollowable()`（URI と例外）に、最初のリクエストでファイルを送るストーリーは `uploads()` に書く。作ったものを読み戻すストーリー（201 の Location など）は Fake では保存されないので `persisted()` に書く（DB が付ける ID が毎回変わるので、ツリーは照合しない）。
 
+## ALPS との突き合わせ
+
+ストーリーが辿る遷移には、`alps.json` の `tag` に `story-covered` を付ける。付けるのは `followable()`・`uploads()`・`persisted()` の `#link=` が通る rel で、`unfollowable()` の行は数えない。`flow-*` タグは PHP 側の行のコメントに書く。
+
+```bash
+composer story:uncovered   # ストーリーのない遷移を flow ごとに列挙し、ALPS のタグとストーリーが食い違えば失敗する
+```
+
+食い違いは `composer cs`（`cs:story`）と `StoryCoverageTest` でも失敗する。
+
+- ストーリーが辿るのにタグがない: `alps.json` の遷移にタグを足す
+- タグがあるのにどのストーリーも辿らない: タグを外すか、ストーリーを戻す
+- ストーリーが辿る rel が `alps.json` にない: rel の綴りか、ALPS の遷移を直す
+
 ## 書けないとき
 
 | 起きたこと | 意味 | 対応 |

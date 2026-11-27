@@ -15,6 +15,7 @@ EC-CUBE 4.3 ALPSプロファイルのタグ命名規則。
 | `actor-` | アクター | actor-admin, actor-customer |
 | `page` / `page-` | HTML画面状態 | page-admin, page-list, page-edit |
 | `route-` | 外部/EC-CUBEルート対応 | route-ec-cube |
+| `story-covered` | リンクのストーリーが辿る遷移（`tests/Story/LinkStories.php`）。`composer story:uncovered` が突き合わせる | story-covered |
 | （なし） | ドメイン | catalog, order, checkout |
 
 ## 機能領域（Feature area、現行 `flow-*` と `feature-*` の移行期間）

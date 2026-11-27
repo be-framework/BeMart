@@ -90,10 +90,13 @@
         ],
         "cs": [
             "@cs:alps",
+            "@cs:story",
             "@cs:php"
         ],
         "cs:alps": "PATH=${PATH#$PWD/vendor/bin:} asd --validate alps.json",
+        "cs:story": "php bin/story-coverage.php --check",
         "cs:php": "./vendor/bin/phpcs",
+        "story:uncovered": "php bin/story-coverage.php",
         "psalm": "./vendor/bin/psalm --no-cache --no-progress",
         "psalm-taint": "./vendor/bin/psalm --taint-analysis --ignore-baseline --no-cache --no-progress",
         "sql:quality": "vendor/bin/sql-quality analyze --sql-dir=var/sql --params=var/sql-quality/sql_params.php --dsn=\"mysql:host=127.0.0.1;port=3306;dbname=eccubedb_test;charset=utf8mb4\" --user=root --password= --format=markdown --output=build/sql-quality --lang=ja",
@@ -160,6 +163,8 @@
         "sa": "Run static analysis.",
         "cs": "Run lightweight consistency checks.",
         "cs:alps": "Validate the canonical ALPS profile with asd.",
+        "cs:story": "Fail when the story-covered tag in alps.json and the link stories disagree.",
+        "story:uncovered": "List the ALPS transitions no link story follows, and fail when the story-covered tag and the stories disagree.",
         "psalm": "Run Psalm without cache/progress output.",
         "psalm-taint": "Run Psalm taint analysis.",
         "sql:quality": "Analyze var/sql SELECT queries with Koriym.SqlQuality (standalone, on-demand; requires a live MySQL prepared by sql/setup-db.sh + sql/seed/analysis-sample.sql). Not part of sa/tests/build.",
