@@ -39,38 +39,27 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 1. `LinkStories::forGuests()`（ゲストが辿る）か `forAdmins()`（管理者が辿る）に行を足す。`followable()` はこの 2 つを合わせたもの。キーは、そのストーリーが示すことを書いた文にする。値は URI、終点の code、終点の path、終点の body の部分一致（キーの `.` で入れ子の配列を指す）、**そのストーリーが辿る `flow-*` タグ**。タグは `alps.json` の遷移に付いたもので、2 つのフローを辿るなら配列で書く。
 2. `UPDATE_GOLDEN=1 vendor/bin/phpunit tests/Story` でツリーを記録する。
 3. 新しい golden を読み、辿った順と各ステップの code が意図どおりかを確かめてから commit する。`followable()` の行は、golden がないと失敗する。
-4. `alps.json` の、辿る遷移の `link` に golden への `rel: story` を足す（次の節）。
+4. `composer story:flows` で `docs/story-flows.md` を作り直す。
 
 辿れないことを示すストーリーは `unfollowable()`（URI と例外）に、最初のリクエストでファイルを送るストーリーは `uploads()` に書く。作ったものを読み戻すストーリー（201 の Location など）は Fake では保存されないので `persisted()` に書く（DB が付ける ID が毎回変わるので、ツリーは照合しない）。
 
 ## ALPS との突き合わせ
 
-### 行が宣言する flow
+行の最後の要素は、そのストーリーが辿るフローの `flow-*` タグ（`alps.json` の遷移の `tag` にある）。どのフローの、どの遷移をそのストーリーが見せるのかを、読む人に伝える。`alps.json` はテストを知らず、ストーリーが `flow-*` で ALPS を指す。
 
-行の最後の要素は、そのストーリーが辿るフローの `flow-*` タグ（`alps.json` の遷移の `tag` にある）。どのフローの、どの遷移をそのストーリーが見せるのかを、読む人に伝える。テストは、URI の `#link=` が辿る rel がすべて、宣言したタグを持つ遷移であることを確かめる（複数宣言したときは、各 rel がどれか 1 つを持ち、宣言したタグはどれかの rel が持つ）。食い違えば、行か `alps.json` のタグの正しい方を直す。タグのない行は照合しない（ALPS にフロータグのない遷移だけを辿る行など）。
+テストは次の 2 つを確かめる。どちらも、4 つの `testFollows` と `composer story:uncovered --check` が見る。
 
-### golden への link
+- 宣言したタグが `alps.json` にある
+- URI の `#link=` が辿る rel がすべて、宣言したタグのどれかを持つ遷移である（複数宣言したときは、宣言したタグのどれもが、どれかの rel に付いている）
 
-`followable()` の行が辿る遷移には、`alps.json` のその遷移の `link` に、行の golden を指す `rel: story` を 1 行ずつ足す。1 つの遷移を複数のストーリーが辿るなら、ストーリーの数だけ足す（`describedby` はそのまま残す）。PHP 側に足すものはなく、行の `#link=type:rel` の rel が ALPS の id になる。
-
-```json
-"link": [
-  {"rel": "story", "href": "tests/Story/golden/admin-top-leads-to-the-shop-settings.stree.txt"}
-]
-```
+食い違えば、行か `alps.json` のタグの正しい方を直す。タグのない行は照合しない（ALPS にフロータグのない遷移だけを辿る行など）。
 
 ```bash
-composer story:uncovered   # flow タグごとに、そのフローを宣言したストーリーが辿る遷移・辿らない遷移を列挙し、食い違えば失敗する
+composer story:uncovered   # flow タグごとに、そのフローを宣言したストーリーが辿らない遷移を列挙し、食い違えば失敗する
+composer story:flows       # docs/story-flows.md を作り直す
 ```
 
-食い違いは `composer cs`（`cs:story`）と `StoryCoverageTest` でも失敗する。
-
-- ストーリーが辿るのに `story` link がない: 遷移の `link` に、そのストーリーの golden を足す
-- `story` link の golden がない、またはそのストーリーがその rel を辿らない: link を直すか、ストーリーを戻す
-- ストーリーが辿る rel が `alps.json` にない: rel の綴りか、ALPS の遷移を直す
-- 行の `flow-*` が、辿る遷移のタグと合わない: 行のタグか、`alps.json` の遷移のタグを直す
-
-`unfollowable()`（辿れないことを示す）・`uploads()`・`persisted()`（golden がない）の行は、`link` に足さない。
+[`docs/story-flows.md`](../../docs/story-flows.md) は、`flow-*` ごとの ALPS の図の URL、そのフローを宣言した行、どの行も辿らない遷移の表。`composer cs`（`cs:story`）と `StoryCoverageTest` は、この表が古いと失敗する。
 
 ## 書けないとき
 

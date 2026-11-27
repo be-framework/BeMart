@@ -8,12 +8,17 @@ use PHPUnit\Framework\TestCase;
 
 class StoryCoverageTest extends TestCase
 {
-    public function testTheAlpsStoryLinksAndTheStoriesAgree(): void
+    public function testTheFlowTagsOfTheStoriesAndAlpsAgree(): void
     {
         $this->assertSame(
-            ['missing' => [], 'stale' => [], 'unknown' => [], 'flow' => []],
+            ['unknown' => [], 'flow' => []],
             StoryCoverage::forRepository()->drift(),
-            'Run `composer story:uncovered` and link the stories in alps.json (`rel: story`), or add the story.',
+            'Fix the flow tag of the row, or the flow-* tags in alps.json.',
         );
+    }
+
+    public function testTheFlowTableIsCurrent(): void
+    {
+        $this->assertTrue(StoryCoverage::forRepository()->isFlowsMarkdownCurrent(), 'Run `composer story:flows`.');
     }
 }
