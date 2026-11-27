@@ -1,0 +1,88 @@
+link_request get 'page://self/index#link=self:goHelpAbout,self:goTop,self:goHelpGuide,self:goTop,self:goHelpAgreement,self:goTop,self:goHelpPrivacy,self:goTop,self:goHelpTradeLaw'
+├── uri: page://self/index
+├── method: GET
+├── links[0]: self:goHelpAbout
+├── links[1]: self:goTop
+├── links[2]: self:goHelpGuide
+├── links[3]: self:goTop
+├── links[4]: self:goHelpAgreement
+├── links[5]: self:goTop
+├── links[6]: self:goHelpPrivacy
+├── links[7]: self:goTop
+├── links[8]: self:goHelpTradeLaw
+├── resource_request get 'page://self/index'
+│   ├── uri: page://self/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/help/about'
+│   ├── uri: page://self/help/about
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/index'
+│   ├── uri: page://self/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/help/guide'
+│   ├── uri: page://self/help/guide
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/index'
+│   ├── uri: page://self/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/help/agreement'
+│   ├── uri: page://self/help/agreement
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/index'
+│   ├── uri: page://self/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/help/privacy'
+│   ├── uri: page://self/help/privacy
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/index'
+│   ├── uri: page://self/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/help/trade-law'
+│   ├── uri: page://self/help/trade-law
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

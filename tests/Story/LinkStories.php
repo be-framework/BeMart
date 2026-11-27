@@ -41,6 +41,16 @@ final class LinkStories
         $inquiry = 'page://self/#link=self:goContactForm,self:doSubmitContact{?form*}';
         $item = self::form(['productCode' => 'sample-001', 'quantity' => '1']);
 
+        return self::guest($inquiry, $item) + self::guestAccountAndHelp() + self::guestPurchase();
+    }
+
+    /**
+     * @param array<string, string> $item
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function guest(string $inquiry, array $item): array
+    {
         return [
             'inquiry is answered with a ticket' => [
                 uri_template($inquiry, ['form' => self::form(self::inquiry())]),
@@ -65,6 +75,112 @@ final class LinkStories
                     'page://self/#link=self:goProductList{?nameKeyword},self:goProduct{?productCode},self:doAddCartItem{?item*}',
                     ['nameKeyword' => 'sample', 'productCode' => 'sample-001', 'item' => $item],
                 ),
+                Code::OK,
+                '/cart',
+                [],
+            ],
+        ];
+    }
+
+    /**
+     * flow-help, flow-register, flow-account (the part a guest reaches)
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function guestAccountAndHelp(): array
+    {
+        $help = static fn (string $rel): string => 'self:' . $rel . ',self:goTop,';
+
+        return [
+            'every help page leads back to the top' => [
+                'page://self/#link=' . $help('goHelpAbout') . $help('goHelpGuide') . $help('goHelpAgreement') . $help('goHelpPrivacy') . 'self:goHelpTradeLaw',
+                Code::OK,
+                '/help/trade-law',
+                [],
+            ],
+            'visitor registers from the top page' => [
+                uri_template('page://self/#link=self:goCustomerRegistration,self:doRegisterCustomer{?form*}', [
+                    'form' => self::form([
+                        'email' => 'story@example.com',
+                        'email_confirm' => 'story@example.com',
+                        'password' => 'Story-pass-2026',
+                        'password_confirm' => 'Story-pass-2026',
+                        'name01' => '物語',
+                        'name02' => '太郎',
+                        'kana01' => 'モノガタリ',
+                        'kana02' => 'タロウ',
+                        'phoneNumber' => '0312345678',
+                        'postalCode' => '1000001',
+                        'pref' => '13',
+                        'addr01' => '千代田区',
+                        'addr02' => '千代田1-1',
+                    ]),
+                ]),
+                Code::OK,
+                '/entry/complete',
+                [],
+            ],
+            'registration confirmation leads back to the top and on to the login' => [
+                'page://self/entry#link=self:goCustomerRegistrationConfirm,self:goTop,self:goLogin',
+                Code::OK,
+                '/login',
+                [],
+            ],
+            'login page leads to the registration form' => [
+                'page://self/login#link=self:goCustomerRegistration',
+                Code::OK,
+                '/entry',
+                [],
+            ],
+            'password reset is requested from the login page' => [
+                uri_template('page://self/login#link=self:doRequestPasswordReset{?form*},self:goLogin', ['form' => self::form(['email' => 'alice@example.com'])]),
+                Code::OK,
+                '/login',
+                [],
+            ],
+        ];
+    }
+
+    /**
+     * flow-browse, flow-purchase (the part a guest reaches)
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function guestPurchase(): array
+    {
+        return [
+            'a product page leads back to the list and on to the cart' => [
+                uri_template('page://self/products#link=self:goProduct{?productCode},self:goProductList,self:goCart', ['productCode' => 'sample-001']),
+                Code::OK,
+                '/cart',
+                [],
+            ],
+            'checkout login leads to the registration form' => [
+                'page://self/shopping/login#link=self:goCustomerRegistration',
+                Code::OK,
+                '/entry',
+                [],
+            ],
+            'shipping address pages lead to each other' => [
+                'page://self/shopping/shipping#link=self:goShoppingShippingEdit,self:goShoppingShipping,self:goShoppingShippingMultiple',
+                Code::OK,
+                '/shopping/shipping-multiple',
+                [],
+            ],
+            'multiple shipping editor leads back to the list' => [
+                'page://self/shopping/shipping-multiple-edit#link=self:goShoppingShippingMultiple',
+                Code::OK,
+                '/shopping/shipping-multiple',
+                [],
+            ],
+            'checkout error leads back to the cart' => [
+                'page://self/shopping/error#link=self:goCart',
+                Code::OK,
+                '/cart',
+                [],
+            ],
+            'completed order leads back to the top and on to the cart' => [
+                'page://self/shopping/complete#link=self:goTop,self:goCart',
                 Code::OK,
                 '/cart',
                 [],
