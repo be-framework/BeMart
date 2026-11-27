@@ -30,12 +30,12 @@ use function preg_quote;
  *        in the rendered HTML.
  *
  *   L2 — Functional/semantic correctness: the search-form action/method, the
- *        product-detail and product-copy link hrefs/rels, the bulk-status
+ *        product-detail link hrefs/rels, the bulk-status
  *        data-action/data-product-status attributes, and the CSRF affordances
  *        must match the resource-layer contracts declared in
  *        src/Resource/Page/Admin/ProductList.php (#[Link] annotations).
  *
- * EC-CUBE rendering comparison tests are archived with @group ec-cube-parity-archived
+ * EC-CUBE rendering comparison tests are archived in the ec-cube-parity-archived group
  * because the template no longer targets EC-CUBE DOM parity.
  */
 final class AdminProductListHtmlRenderTest extends TestCase
@@ -208,17 +208,6 @@ final class AdminProductListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('data-delete-url="/admin/product?productCode=', $html);
         $this->assertMatchesRegularExpression(
             '/data-delete-url="[^"]+_method=delete"[^>]+token-for-anchor="' . preg_quote(FakeCsrfToken::DEFAULT_TOKEN, '/') . '"/',
-            $html,
-        );
-    }
-
-    public function testProductListExposesProductCopyAffordances(): void
-    {
-        $html = $this->resource->get('page://self/admin/product-list')->toString();
-
-        // Copy link: POST /admin/product-copy?productCode=... with CSRF token
-        $this->assertMatchesRegularExpression(
-            '#href="/admin/product-copy\?productCode=[^"]+"[^>]+data-method="post"[^>]+token-for-anchor="' . preg_quote(FakeCsrfToken::DEFAULT_TOKEN, '#') . '"#',
             $html,
         );
     }

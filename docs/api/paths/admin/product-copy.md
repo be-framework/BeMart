@@ -6,8 +6,8 @@ EC-CUBE doCopyProduct — 商品をコピーする (Wave 8 admin).
 onPost only. CSRF enforced. The Be Final raises (in this order)
 UnauthorizedAdmin (403), ProductNotFound (404 — source missing),
 ProductCodeAlreadyInUse (409 — target slot occupied). Success: 201
-with a Location header pointing at the new product's admin detail
-URL.
+(303 in the HTML context) with a Location header pointing at the new
+product's admin detail URL.
 
 
 

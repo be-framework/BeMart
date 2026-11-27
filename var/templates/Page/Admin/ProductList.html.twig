@@ -360,19 +360,24 @@
                                 </div>
                                 <div class="idea-admin-dialog__body">
                                     <p>{{ Product.productName }} を複製します。続けてよろしいですか？</p>
+                                    <label for="newProductCode-{{ Product.productCode }}">複製先の商品コード</label>
+                                    <input type="text"
+                                           id="newProductCode-{{ Product.productCode }}"
+                                           name="newProductCode"
+                                           value="{{ Product.productCode }}.copy"
+                                           form="productCopy-{{ Product.productCode }}"
+                                           required>
                                 </div>
                                 <div class="idea-admin-dialog__foot">
                                     <button type="button" class="idea-admin-action"
                                             onclick="document.getElementById('confirmModal-{{ Product.productCode }}').hidden=true">
                                         キャンセル
                                     </button>
-                                    <a href="/admin/product-copy?productCode={{ Product.productCode }}"
-                                       class="idea-admin-action idea-admin-action--primary"
-                                       data-confirm="false"
-                                       data-method="post"
-                                       token-for-anchor="{{ csrf_token() }}">
+                                    <button type="submit"
+                                            class="idea-admin-action idea-admin-action--primary"
+                                            form="productCopy-{{ Product.productCode }}">
                                         複製
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -384,6 +389,14 @@
     </div>
 
 </form>
+
+{# Outside form_bulk: HTML forbids nested forms, so each copy dialog reaches its form by id. #}
+{% for Product in products %}
+<form id="productCopy-{{ Product.productCode }}" method="post" action="/admin/product-copy" rel="doCopyProduct">
+    <input type="hidden" name="productCode" value="{{ Product.productCode }}">
+    {{ csrf_field() }}
+</form>
+{% endfor %}
 
 {# ── Bulk-delete confirmation dialog ── #}
 <div id="bulkDeleteModal" class="idea-admin-dialog-backdrop" hidden>

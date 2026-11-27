@@ -232,11 +232,10 @@
     </div>
     <div class="idea-admin-toolbar__actions">
       {% if isEdit %}
-        <a
-          class="idea-admin-action"
-          href="/admin/product-copy?productCode={{ productCode }}"
-          rel="doCopyProduct"
-        >複製</a>
+        <label for="copy_new_product_code">複製先の商品コード</label>
+        <input type="text" id="copy_new_product_code" name="newProductCode"
+               value="{{ productCode }}.copy" form="product-copy-form" required>
+        <button class="idea-admin-action" type="submit" form="product-copy-form">複製</button>
         <button
           class="idea-admin-action idea-admin-action--destructive"
           type="submit"
@@ -252,9 +251,16 @@
 
 </form>
 
-{# Outside the edit form: HTML forbids nested forms, so the delete button above
-   reaches this one by id. The router honours _method only on POST. #}
+{# Outside the edit form: HTML forbids nested forms, so the copy and delete buttons
+   above reach these by id. The router honours _method only on POST. #}
 {% if isEdit %}
+<form id="product-copy-form"
+      method="post"
+      action="/admin/product-copy"
+      rel="doCopyProduct">
+  <input type="hidden" name="productCode" value="{{ productCode }}">
+  {{ csrf_field() }}
+</form>
 <form id="product-delete-form"
       method="post"
       action="/admin/product"
