@@ -54,6 +54,9 @@ final class LinkStoryTest extends AbstractLinkStoryCase
         '/(?<=Interface)[0-9a-f]{8}Null\d+/' => 'Null', // classes generated for null bindings get suffixes per checkout and run
     ];
 
+    /** The line a throw sits on moves with any edit above it in that file; the file it names stays */
+    private const string SOURCE_LINE = '/(\bline: )\d+$/m';
+
     private ResourceInterface $resource;
     private SemanticLogger $logger;
 
@@ -127,6 +130,7 @@ final class LinkStoryTest extends AbstractLinkStoryCase
     private function stabilize(string $tree): string
     {
         $tree = str_replace(dirname(__DIR__, 2), '<root>', $tree);
+        $tree = (string) preg_replace(self::SOURCE_LINE, '$1[line]', $tree);
         foreach (self::VOLATILE as $pattern => $name) {
             $seen = [];
             $tree = (string) preg_replace_callback($pattern, static function (array $match) use (&$seen, $name): string {

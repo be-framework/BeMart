@@ -154,13 +154,13 @@ link_request get 'page://self/cart#link=self:doAddCartItem,self:goCheckoutEntry,
 │   │   │       ├── error: MyVendor\BeMart\Be\Exception\UnauthenticatedException
 │   │   │       ├── message: 
 │   │   │       ├── file: <root>/be/src/Final/ShoppingFetched.php
-│   │   │       └── line: 115
+│   │   │       └── line: [line]
 │   │   └── close becoming_close
 │   │       ├── exit: error
 │   │       ├── error: MyVendor\BeMart\Be\Exception\UnauthenticatedException
 │   │       ├── message: 
 │   │       ├── file: <root>/be/src/Final/ShoppingFetched.php
-│   │       └── line: 115
+│   │       └── line: [line]
 │   └── close resource_response
 │       ├── code: 303
 │       └── durationMs: [volatile]

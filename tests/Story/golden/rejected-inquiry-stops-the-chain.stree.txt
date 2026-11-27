@@ -42,9 +42,9 @@ link_request get 'page://self/index#link=self:goContactForm,self:doSubmitContact
 │   │       ├── errors[0].error: MyVendor\BeMart\Be\Exception\EmailFormatException
 │   │       ├── errors[0].message: 
 │   │       ├── errors[0].file: <root>/be/src/Semantic/ContactEmail.php
-│   │       ├── errors[0].line: 19
+│   │       ├── errors[0].line: [line]
 │   │       ├── file: <root>/be/src/Semantic/ContactEmail.php
-│   │       └── line: 19
+│   │       └── line: [line]
 │   └── close resource_response
 │       ├── code: 400
 │       └── durationMs: [volatile]

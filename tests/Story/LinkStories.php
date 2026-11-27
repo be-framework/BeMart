@@ -111,7 +111,7 @@ final class LinkStories
                 uri_template('page://self/admin/class-name/class-name-list#link=new:goClassCategoryList{?classNameId}', ['classNameId' => 'cn-color']),
                 Code::OK,
                 '/admin/class-name/class-name-list',
-                [],
+                ['goClassCategoryList.classNameId' => 'cn-color', 'goClassCategoryList.count' => 2],
             ],
             'deleted payment method returns to the list' => [
                 uri_template($payment . 'self:doDeletePayment{?form*}', ['paymentId' => 'pay-cod', 'form' => self::form(['paymentId' => 'pay-cod'])]),
