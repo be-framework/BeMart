@@ -45,12 +45,11 @@ link_request get 'page://self/admin/member-list#link=self:doUpdateMember'
 │   └── close resource_response
 │       ├── code: 200
 │       └── durationMs: [volatile]
-├── resource_request put 'page://self/admin/member?loginId=shop-owner&name=Story+Owner&authority=1&csrfToken=%5BFILTERED%5D'
+├── resource_request put 'page://self/admin/member?loginId=shop-owner&name=Story+Owner&csrfToken=%5BFILTERED%5D'
 │   ├── uri: page://self/admin/member
 │   ├── method: PUT
 │   ├── params.loginId: shop-owner
 │   ├── params.name: Story Owner
-│   ├── params.authority: 1
 │   ├── params.csrfToken: [FILTERED]
 │   ├── replayable: true
 │   ├── becoming UpdateMemberInput
@@ -99,4 +98,4 @@ link_request get 'page://self/admin/member-list#link=self:doUpdateMember'
     └── durationMs: [volatile]
 
 events:
-PUT page://self/admin/member {"loginId":"shop-owner","name":"Story Owner","authority":"1","csrfToken":"[FILTERED]"}
+PUT page://self/admin/member {"loginId":"shop-owner","name":"Story Owner","csrfToken":"[FILTERED]"}

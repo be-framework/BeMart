@@ -165,6 +165,14 @@ final class StoryCoverage
             }
         }
 
+        foreach (LinkStories::uploads() as $upload) {
+            foreach ($this->relsOf($upload[0]) as $rel) {
+                if (! isset($this->transitions[$rel])) {
+                    $drift['unknown'][] = $rel;
+                }
+            }
+        }
+
         $drift['unknown'] = array_values(array_unique($drift['unknown']));
 
         return $drift;

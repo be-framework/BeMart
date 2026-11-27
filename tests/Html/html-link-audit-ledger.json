@@ -24,15 +24,10 @@
     "note": "一覧には削除 form だけがあり PUT form は無い（編集は edit ページ）",
     "reason": "method-mismatch"
   },
-  "GET page://self/admin/category/edit doDeleteCategory": {
+  "GET page://self/admin/category/edit doCreateCategory": {
     "classification": "resourceOnly",
-    "note": "削除 form は categoryId 付きの編集モードだけで、監査は categoryId 無しの新規モードを描画する",
-    "reason": "target-missing"
-  },
-  "GET page://self/admin/category/edit doUpdateCategory": {
-    "classification": "resourceOnly",
-    "note": "categoryId 無しの新規モードでは PUT form を描画しない",
-    "reason": "target-missing"
+    "note": "作成 form は categoryId 無しの新規モードだけに描画される。監査は categoryId 付きの編集モードを描画する",
+    "reason": "method-mismatch"
   },
   "GET page://self/admin/class-category/class-category-list doDeleteClassCategory": {
     "classification": "resourceOnly",

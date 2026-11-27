@@ -26,16 +26,16 @@ link_request get 'page://self/admin/class-category/class-category-list#link=self
 │   └── close resource_response
 │       ├── code: 200
 │       └── durationMs: [volatile]
-├── resource_request put 'page://self/admin/class-category/class-category?classCategoryId=cc-red&classNameId=cn-color&name=Story+Red&csrfToken=%5BFILTERED%5D'
+├── resource_request put 'page://self/admin/class-category/class-category?classCategoryId=cc-red&classCategoryName=Story+Red&csrfToken=%5BFILTERED%5D'
 │   ├── uri: page://self/admin/class-category/class-category
 │   ├── method: PUT
 │   ├── params.classCategoryId: cc-red
-│   ├── params.classNameId: cn-color
-│   ├── params.name: Story Red
+│   ├── params.classCategoryName: Story Red
 │   ├── params.csrfToken: [FILTERED]
 │   ├── replayable: true
 │   ├── becoming UpdateClassCategoryInput
 │   │   ├── classCategoryId: cc-red
+│   │   ├── classCategoryName: Story Red
 │   │   ├── being_final ClassCategoryUpdated input=[classCategoryId, classCategoryName] inject=[adminSession, classCategories +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
 │   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
@@ -43,7 +43,7 @@ link_request get 'page://self/admin/class-category/class-category-list#link=self
 │   │   │   └── close being_final_close
 │   │   │       ├── classCategoryId: cc-red
 │   │   │       ├── classNameId: cn-color
-│   │   │       └── name: Red
+│   │   │       └── name: Story Red
 │   │   └── close becoming_close
 │   │       └── exit: success
 │   └── close resource_response
@@ -78,4 +78,4 @@ link_request get 'page://self/admin/class-category/class-category-list#link=self
     └── durationMs: [volatile]
 
 events:
-PUT page://self/admin/class-category/class-category {"classCategoryId":"cc-red","classNameId":"cn-color","name":"Story Red","csrfToken":"[FILTERED]"}
+PUT page://self/admin/class-category/class-category {"classCategoryId":"cc-red","classCategoryName":"Story Red","csrfToken":"[FILTERED]"}

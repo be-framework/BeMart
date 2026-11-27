@@ -26,11 +26,10 @@ link_request get 'page://self/admin/class-category/class-category-list#link=self
 │   └── close resource_response
 │       ├── code: 200
 │       └── durationMs: [volatile]
-├── resource_request delete 'page://self/admin/class-category/class-category?classCategoryId=cc-red&classNameId=cn-color&csrfToken=%5BFILTERED%5D'
+├── resource_request delete 'page://self/admin/class-category/class-category?classCategoryId=cc-red&csrfToken=%5BFILTERED%5D'
 │   ├── uri: page://self/admin/class-category/class-category
 │   ├── method: DELETE
 │   ├── params.classCategoryId: cc-red
-│   ├── params.classNameId: cn-color
 │   ├── params.csrfToken: [FILTERED]
 │   ├── replayable: true
 │   ├── becoming DeleteClassCategoryInput
@@ -76,4 +75,4 @@ link_request get 'page://self/admin/class-category/class-category-list#link=self
     └── durationMs: [volatile]
 
 events:
-DELETE page://self/admin/class-category/class-category {"classCategoryId":"cc-red","classNameId":"cn-color","csrfToken":"[FILTERED]"}
+DELETE page://self/admin/class-category/class-category {"classCategoryId":"cc-red","csrfToken":"[FILTERED]"}

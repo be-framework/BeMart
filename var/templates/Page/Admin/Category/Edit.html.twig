@@ -74,7 +74,7 @@
   role="form"
   method="post"
   action="{{ isEdit ? '/admin/category/category?_method=put' : '/admin/category/category-list' }}"
-  rel="doCreateCategory"
+  rel="{{ isEdit ? 'doUpdateCategory' : 'doCreateCategory' }}"
   novalidate
 >
   {{ csrf_field() }}
@@ -327,6 +327,7 @@
 {# Hidden DELETE form — separate so method routing is clean #}
 <form
   id="category-delete-form"
+  rel="doDeleteCategory"
   method="post"
   action="/admin/category/category?categoryId={{ categoryId|url_encode }}&amp;_method=delete"
   aria-hidden="true"

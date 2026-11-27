@@ -21,22 +21,23 @@ link_request get 'page://self/admin/class-name/class-name-list#link=self:doUpdat
 │   └── close resource_response
 │       ├── code: 200
 │       └── durationMs: [volatile]
-├── resource_request put 'page://self/admin/class-name/class-name?classNameId=cn-color&name=Story+Color&csrfToken=%5BFILTERED%5D'
+├── resource_request put 'page://self/admin/class-name/class-name?classNameId=cn-color&classNameLabel=Story+Color&csrfToken=%5BFILTERED%5D'
 │   ├── uri: page://self/admin/class-name/class-name
 │   ├── method: PUT
 │   ├── params.classNameId: cn-color
-│   ├── params.name: Story Color
+│   ├── params.classNameLabel: Story Color
 │   ├── params.csrfToken: [FILTERED]
 │   ├── replayable: true
 │   ├── becoming UpdateClassNameInput
 │   │   ├── classNameId: cn-color
+│   │   ├── classNameLabel: Story Color
 │   │   ├── being_final ClassNameUpdated input=[classNameId, classNameLabel] inject=[adminSession, classNames +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
 │   │   │   ├── inject.classNames: MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface<Null-1>
 │   │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
 │   │   │   └── close being_final_close
 │   │   │       ├── classNameId: cn-color
-│   │   │       └── name: Color
+│   │   │       └── name: Story Color
 │   │   └── close becoming_close
 │   │       └── exit: success
 │   └── close resource_response
@@ -66,4 +67,4 @@ link_request get 'page://self/admin/class-name/class-name-list#link=self:doUpdat
     └── durationMs: [volatile]
 
 events:
-PUT page://self/admin/class-name/class-name {"classNameId":"cn-color","name":"Story Color","csrfToken":"[FILTERED]"}
+PUT page://self/admin/class-name/class-name {"classNameId":"cn-color","classNameLabel":"Story Color","csrfToken":"[FILTERED]"}

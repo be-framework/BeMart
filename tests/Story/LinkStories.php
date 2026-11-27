@@ -477,7 +477,7 @@ final class LinkStories
         return [
             'class name is updated from the list' => [
                 uri_template('page://self/admin/class-name/class-name-list#link=self:doUpdateClassName{?form*}', [
-                    'form' => self::form(['classNameId' => 'cn-color', 'name' => 'Story Color']),
+                    'form' => self::form(['classNameId' => 'cn-color', 'classNameLabel' => 'Story Color']),
                 ]),
                 Code::OK,
                 '/admin/class-name/class-name-list',
@@ -501,7 +501,7 @@ final class LinkStories
             'class category is updated from the list' => [
                 uri_template('page://self/admin/class-category/class-category-list{?classNameId}#link=self:doUpdateClassCategory{?form*}', [
                     'classNameId' => 'cn-color',
-                    'form' => self::form(['classCategoryId' => 'cc-red', 'classNameId' => 'cn-color', 'name' => 'Story Red']),
+                    'form' => self::form(['classCategoryId' => 'cc-red', 'classCategoryName' => 'Story Red']),
                 ]),
                 Code::OK,
                 '/admin/class-category/class-category-list',
@@ -511,7 +511,7 @@ final class LinkStories
             'deleted class category leaves the list' => [
                 uri_template('page://self/admin/class-category/class-category-list{?classNameId}#link=self:doDeleteClassCategory{?form*}', [
                     'classNameId' => 'cn-color',
-                    'form' => self::form(['classCategoryId' => 'cc-red', 'classNameId' => 'cn-color']),
+                    'form' => self::form(['classCategoryId' => 'cc-red']),
                 ]),
                 Code::OK,
                 '/admin/class-category/class-category-list',
@@ -708,7 +708,7 @@ final class LinkStories
                 'flow-admin-system-operation',
             ],
             'member is updated from the list' => [
-                uri_template($members . 'self:doUpdateMember{?form*}', ['form' => self::form(['loginId' => $owner, 'name' => 'Story Owner', 'authority' => '1'])]),
+                uri_template($members . 'self:doUpdateMember{?form*}', ['form' => self::form(['loginId' => $owner, 'name' => 'Story Owner'])]),
                 Code::OK,
                 '/admin/member',
                 ['loginId' => $owner],
@@ -973,7 +973,7 @@ final class LinkStories
                 'flow-admin-system-operation',
             ],
             'authority role leads to the login history' => [
-                uri_template('page://self/admin/authority-role{?loginId,authority}#link=self:goLoginHistoryList', ['loginId' => 'shop-owner', 'authority' => '1']),
+                'page://self/admin/authority-role#link=self:goLoginHistoryList',
                 Code::OK,
                 '/admin/login-history',
                 [],
