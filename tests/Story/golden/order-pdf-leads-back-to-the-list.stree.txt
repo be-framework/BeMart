@@ -1,0 +1,42 @@
+link_request get 'page://self/admin/order/order-pdf#link=self:goOrderList'
+├── uri: page://self/admin/order/order-pdf
+├── method: GET
+├── links[0]: self:goOrderList
+├── resource_request get 'page://self/admin/order/order-pdf'
+│   ├── uri: page://self/admin/order/order-pdf
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/order-list'
+│   ├── uri: page://self/admin/order-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminOrderListInput
+│   │   ├── limit: 50
+│   │   ├── offset: 0
+│   │   ├── being_final AdminOrderListFetched input=[limit, offset] inject=[adminSession, orderQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── orders[0].orderNo: past0000000000000000000000000001
+│   │   │       ├── orders[0].customerId: customer-001
+│   │   │       ├── orders[0].total: 12700
+│   │   │       ├── orders[0].paymentTotal: 12700
+│   │   │       ├── orders[0].orderDate: 2026-04-01 10:00:00
+│   │   │       ├── orders[0].orderStatus: 1
+│   │   │       ├── count: 1
+│   │   │       ├── limit: 50
+│   │   │       └── offset: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

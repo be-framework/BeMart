@@ -98,28 +98,6 @@ final class LinkStories
                 '/help/trade-law',
                 [],
             ],
-            'visitor registers from the top page' => [
-                uri_template('page://self/#link=self:goCustomerRegistration,self:doRegisterCustomer{?form*}', [
-                    'form' => self::form([
-                        'email' => 'story@example.com',
-                        'email_confirm' => 'story@example.com',
-                        'password' => 'Story-pass-2026',
-                        'password_confirm' => 'Story-pass-2026',
-                        'name01' => '物語',
-                        'name02' => '太郎',
-                        'kana01' => 'モノガタリ',
-                        'kana02' => 'タロウ',
-                        'phoneNumber' => '0312345678',
-                        'postalCode' => '1000001',
-                        'pref' => '13',
-                        'addr01' => '千代田区',
-                        'addr02' => '千代田1-1',
-                    ]),
-                ]),
-                Code::OK,
-                '/entry/complete',
-                [],
-            ],
             'registration confirmation leads back to the top and on to the login' => [
                 'page://self/entry#link=self:goCustomerRegistrationConfirm,self:goTop,self:goLogin',
                 Code::OK,
@@ -195,7 +173,7 @@ final class LinkStories
      */
     public static function forAdmins(): array
     {
-        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance();
+        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance() + self::adminOrders();
     }
 
     /** @return array<string, array{string, int, string, array<string, mixed>}> */
@@ -577,6 +555,29 @@ final class LinkStories
     }
 
     /**
+     * flow-admin-order-fulfillment, flow-manage-order
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function adminOrders(): array
+    {
+        return [
+            'order exports lead to each other and back to the list' => [
+                'page://self/admin/order/export-order#link=self:goExportShipping,self:goOrderList',
+                Code::OK,
+                '/admin/order-list',
+                [],
+            ],
+            'order pdf leads back to the list' => [
+                'page://self/admin/order/order-pdf#link=self:goOrderList',
+                Code::OK,
+                '/admin/order-list',
+                [],
+            ],
+        ];
+    }
+
+    /**
      * The URI and the exception that stops the story.
      *
      * @return array<string, array{string, class-string<\Throwable>}>
@@ -594,6 +595,13 @@ final class LinkStories
             ],
             'a link declared only on write methods is missing from the page that is read' => [
                 uri_template('page://self/admin/delivery/delivery{?deliveryId}#link=self:goDeliveryList', ['deliveryId' => 'del-yamato']),
+                LinkRelException::class,
+            ],
+            'the tracking number is declared only on the shipping address write method' => [
+                uri_template('page://self/admin/order/shipping-address{?orderNo}#link=self:doUpdateTrackingNumber{?form*}', [
+                    'orderNo' => 'past0000000000000000000000000001',
+                    'form' => self::form(['orderNo' => 'past0000000000000000000000000001', 'trackingNumber' => 'TRK0001']),
+                ]),
                 LinkRelException::class,
             ],
             'the delivery address editor declares the customer page only on write methods' => [
@@ -648,6 +656,16 @@ final class LinkStories
             'deleted' => self::form([]),
         ];
 
+        return self::persistedNews($news, $created, $updated) + self::persistedCreates();
+    }
+
+    /**
+     * @param array<string, array<string, string>> $news
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function persistedNews(array $news, string $created, string $updated): array
+    {
         return [
             'created news is shown at its location' => [uri_template($created, $news), Code::OK, '/admin/news/news', ['newsTitle' => 'Story News']],
             'news id fills the href template of the next link' => [uri_template($updated, $news), Code::OK, '/admin/news/news', ['newsTitle' => 'Story News Updated']],
@@ -656,6 +674,93 @@ final class LinkStories
                 Code::OK,
                 '/admin/news/news-list',
                 [],
+            ],
+            'visitor registers from the top page' => [
+                uri_template('page://self/#link=self:goCustomerRegistration,self:doRegisterCustomer{?form*}', [
+                    'form' => self::form([
+                        'email' => 'story@example.com',
+                        'email_confirm' => 'story@example.com',
+                        'password' => 'Story-pass-2026',
+                        'password_confirm' => 'Story-pass-2026',
+                        'name01' => '物語',
+                        'name02' => '太郎',
+                        'kana01' => 'モノガタリ',
+                        'kana02' => 'タロウ',
+                        'phoneNumber' => '0312345678',
+                        'postalCode' => '1000001',
+                        'pref' => '13',
+                        'addr01' => '千代田区',
+                        'addr02' => '千代田1-1',
+                    ]),
+                ]),
+                Code::OK,
+                '/entry/complete',
+                [],
+            ],
+        ];
+    }
+
+    /**
+     * flow-manage-*: every create transition reads the created resource back at its Location.
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function persistedCreates(): array
+    {
+        return [
+            'created page is shown at its location' => [
+                uri_template('page://self/admin/page/page-list#link=self:doCreatePage{?form*}', ['form' => self::form(['pageName' => 'Story Page', 'pageUrl' => 'story-page', 'pageFileName' => 'story_page'])]),
+                Code::OK,
+                '/admin/page/page',
+                ['pageName' => 'Story Page'],
+            ],
+            'created block is shown at its location' => [
+                uri_template('page://self/admin/block/block-list#link=self:doCreateBlock{?form*}', ['form' => self::form(['blockName' => 'Story Block', 'blockFileName' => 'story_block_new'])]),
+                Code::OK,
+                '/admin/block/block',
+                ['blockName' => 'Story Block'],
+            ],
+            'created product is shown at its location' => [
+                uri_template('page://self/admin/product-new#link=self:doCreateProduct{?form*}', ['form' => self::form(['productCode' => 'story-product', 'productName' => 'Story Product', 'price02' => '2468', 'stock' => '8', 'productStatus' => '1', 'description' => 'Created by a story.'])]),
+                Code::OK,
+                '/admin/product',
+                ['productName' => 'Story Product'],
+            ],
+            'created category is shown at its location' => [
+                uri_template('page://self/admin/category/category-list#link=self:doCreateCategory{?form*}', ['form' => self::form(['categoryName' => 'Story Category', 'sortNo' => '90'])]),
+                Code::OK,
+                '/admin/category/category',
+                ['categoryName' => 'Story Category'],
+            ],
+            'created class name is shown at its location' => [
+                uri_template('page://self/admin/class-name/class-name-list#link=self:doCreateClassName{?form*}', ['form' => self::form(['classNameLabel' => 'Story Class'])]),
+                Code::OK,
+                '/admin/class-name/class-name-list',
+                [],
+            ],
+            'created payment method is shown at its location' => [
+                uri_template('page://self/admin/payment/payment-list#link=self:doCreatePayment{?form*}', ['form' => self::form(['paymentMethodName' => 'Story Pay', 'charge' => '220', 'ruleMin' => '0', 'ruleMax' => '999999', 'visible' => '1'])]),
+                Code::OK,
+                '/admin/payment/payment',
+                ['payment.paymentMethodName' => 'Story Pay'],
+            ],
+            'created delivery is shown at its location' => [
+                uri_template('page://self/admin/delivery/delivery-list#link=self:doCreateDelivery{?form*}', ['form' => self::form(['deliveryName' => 'Story Delivery', 'visible' => '1'])]),
+                Code::OK,
+                '/admin/delivery/delivery',
+                ['delivery.deliveryName' => 'Story Delivery'],
+            ],
+            'created tag is shown at its location' => [
+                uri_template('page://self/admin/tag/tag-list#link=self:doCreateTag{?form*}', ['form' => self::form(['tagName' => 'Story Tag'])]),
+                Code::OK,
+                '/admin/tag/tag-list',
+                [],
+            ],
+            'created customer is shown at its location' => [
+                uri_template('page://self/admin/customer-list#link=self:doCreateCustomer{?form*}', ['form' => self::form(['email' => 'story-customer@example.com', 'password' => 'Story-pass-2026', 'name01' => '管理', 'name02' => '顧客', 'kana01' => 'カンリ', 'kana02' => 'コキャク', 'phoneNumber' => '0312345678', 'postalCode' => '1000001', 'pref' => '13', 'addr01' => '千代田区', 'addr02' => '管理1-1'])]),
+                Code::OK,
+                '/admin/customer',
+                ['email' => 'story-customer@example.com'],
             ],
         ];
     }
