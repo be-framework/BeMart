@@ -11,10 +11,10 @@ link_request get 'page://self/mypage#link=self:goCart,self:doAddCartItem'
 │   │   ├── orderLimit: 5
 │   │   ├── being_final MypageFetched input=[orderLimit] inject=[session, customerQuery, orderQuery +2 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
-│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null-3>
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com
@@ -34,7 +34,7 @@ link_request get 'page://self/mypage#link=self:goCart,self:doAddCartItem'
 │   ├── becoming GetCartsInput
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-5>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── carts[0].cartKey: session-prefix-1_1
 │   │   │       ├── carts[0].saleTypeId: 1
@@ -74,7 +74,7 @@ link_request get 'page://self/mypage#link=self:goCart,self:doAddCartItem'
 │   │   ├── quantity: 1
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being QuantityAdjusted input=[productCode, quantity, sessionPrefix] inject=[productClassQuery]
-│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-6>
+│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null>
 │   │   │   └── close being_close
 │   │   │       ├── productCode: sample-001
 │   │   │       ├── requestedQuantity: 1
@@ -88,8 +88,8 @@ link_request get 'page://self/mypage#link=self:goCart,self:doAddCartItem'
 │   │   │       ├── stock: 50
 │   │   │       └── cartKey: session-prefix-1_1
 │   │   ├── being CartMerged input=[productCode, requestedQuantity +8 items] inject=[cartQuery, productClassQuery]
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-5>
-│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-6>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
+│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null>
 │   │   │   └── close being_close
 │   │   │       ├── productCode: sample-001
 │   │   │       ├── requestedQuantity: 1
@@ -110,7 +110,7 @@ link_request get 'page://self/mypage#link=self:goCart,self:doAddCartItem'
 │   │   │       ├── mergedCart.deliveryFeeTotal: 0
 │   │   │       └── mergedCart.preOrderId: deadbeefcafe1234567890abcdef01234567890a
 │   │   ├── being_final CartItemAdded input=[productCode, requestedQuantity +5 items] inject=[cartCommand]
-│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null-7>
+│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── cartKey: session-prefix-1_1
 │   │   │       ├── productCode: sample-001
@@ -132,7 +132,7 @@ link_request get 'page://self/mypage#link=self:goCart,self:doAddCartItem'
 │   ├── becoming GetCartsInput
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-5>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── carts[0].cartKey: session-prefix-1_1
 │   │   │       ├── carts[0].saleTypeId: 1

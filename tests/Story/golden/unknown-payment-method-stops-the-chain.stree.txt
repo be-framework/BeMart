@@ -10,7 +10,7 @@ link_request get 'page://self/admin/payment/payment-list#link=self:goPayment,sel
 │   ├── becoming GetAdminPaymentListInput
 │   │   ├── being_final AdminPaymentListFetched inject=[adminSession, payments]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.payments: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-1>
+│   │   │   ├── inject.payments: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── payments[0].paymentId: pay-cod
@@ -34,7 +34,7 @@ link_request get 'page://self/admin/payment/payment-list#link=self:goPayment,sel
 │   ├── becoming GetAdminPaymentListInput
 │   │   ├── being_final AdminPaymentListFetched inject=[adminSession, payments]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.payments: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-1>
+│   │   │   ├── inject.payments: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── payments[0].paymentId: pay-cod

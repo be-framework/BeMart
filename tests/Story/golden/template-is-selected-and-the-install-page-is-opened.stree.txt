@@ -10,7 +10,7 @@ link_request get 'page://self/admin/template/template-list#link=self:doSelectTem
 │   ├── becoming GetAdminTemplateListInput
 │   │   ├── being_final AdminTemplateListFetched inject=[adminSession, templates +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.templates: MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface<Null-1>
+│   │   │   ├── inject.templates: MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface<Null>
 │   │   │   ├── inject.templateCompatibility: MyVendor\BeMart\Be\Reason\Fake\Service\FakeTemplateCompatibility
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
@@ -52,7 +52,7 @@ link_request get 'page://self/admin/template/template-list#link=self:doSelectTem
 │   ├── becoming GetAdminTemplateListInput
 │   │   ├── being_final AdminTemplateListFetched inject=[adminSession, templates +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.templates: MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface<Null-1>
+│   │   │   ├── inject.templates: MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface<Null>
 │   │   │   ├── inject.templateCompatibility: MyVendor\BeMart\Be\Reason\Fake\Service\FakeTemplateCompatibility
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2

@@ -16,7 +16,7 @@ link_request get 'page://self/admin/index#link=self:goClassCategoryList'
 │   ├── becoming GetAdminClassCategoryListInput
 │   │   ├── being_final AdminClassCategoryListFetched input=[classNameId] inject=[adminSession, classCategories]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 3
 │   │   │       ├── classCategories[0].classCategoryId: cc-red

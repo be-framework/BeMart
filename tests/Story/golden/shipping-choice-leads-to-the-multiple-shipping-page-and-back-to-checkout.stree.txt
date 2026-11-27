@@ -12,7 +12,7 @@ link_request get 'page://self/cart#link=self:goCheckoutEntry,self:goShoppingShip
 │   ├── becoming GetCartsInput
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── carts[0].cartKey: session-prefix-1_1
 │   │   │       ├── carts[0].saleTypeId: 1
@@ -48,10 +48,10 @@ link_request get 'page://self/cart#link=self:goCheckoutEntry,self:goShoppingShip
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +3 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-2>
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
-│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null-3>
-│   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-4>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
+│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null>
+│   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null>
 │   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
@@ -111,10 +111,10 @@ link_request get 'page://self/cart#link=self:goCheckoutEntry,self:goShoppingShip
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +3 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-2>
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-1>
-│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null-3>
-│   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-4>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
+│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null>
+│   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null>
 │   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef

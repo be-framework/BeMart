@@ -21,15 +21,21 @@ use function count;
 use function dirname;
 use function file_put_contents;
 use function getenv;
+use function glob;
 use function implode;
+use function is_dir;
+use function is_file;
+use function is_string;
 use function json_decode;
 use function json_encode;
+use function mkdir;
 use function preg_replace;
 use function preg_replace_callback;
 use function sprintf;
 use function str_replace;
 use function strtolower;
 use function trim;
+use function unlink;
 
 use const JSON_THROW_ON_ERROR;
 use const JSON_UNESCAPED_SLASHES;
@@ -51,7 +57,6 @@ final class LinkStoryTest extends AbstractLinkStoryCase
      */
     private const array VOLATILE = [
         '/INQ-[0-9a-f]+\.[0-9]+/' => 'INQ', // ContactSubmitted makes the ticket id with uniqid()
-        '/(?<=Interface)[0-9a-f]{8}Null\d+/' => 'Null', // classes generated for null bindings get suffixes per checkout and run
         '/(?<=orderNo: |orderNo=)[0-9a-f]{32}/' => 'OrderNo', // OrderNoProvider draws the number of a placed order at random
         '/(?<=orderDate: |paymentDate: )\d{4}-\d\d-\d\dT\S+/' => 'Now', // a placed order is stamped with the clock
     ];
@@ -59,8 +64,19 @@ final class LinkStoryTest extends AbstractLinkStoryCase
     /** The line a throw sits on moves with any edit above it in that file; the file it names stays */
     private const string SOURCE_LINE = '/(\bline: )\d+$/m';
 
+    /** The class generated for a null binding; the interface before it names the binding */
+    private const string NULL_BINDING = '/(?<=Interface)[0-9a-f]{8}Null\d+/';
+
     private ResourceInterface $resource;
     private SemanticLogger $logger;
+
+    /** Each run weaves the null bindings under new class names, so the files of earlier runs would only pile up */
+    public static function setUpBeforeClass(): void
+    {
+        foreach ((array) glob(dirname(__DIR__, 2) . '/var/tmp/story*/*') as $file) {
+            is_string($file) && is_file($file) && unlink($file);
+        }
+    }
 
     protected function setUp(): void
     {
@@ -120,6 +136,8 @@ final class LinkStoryTest extends AbstractLinkStoryCase
         $this->logger = new SemanticLogger();
         $module = new StoryModule($this->logger, new TestModule(new Meta('MyVendor\\BeMart', 'test')), $customerId);
         $tmp = dirname(__DIR__, 2) . '/var/tmp/story' . ($customerId === null ? '' : '-' . $customerId);
+        // Ray.Di falls back to sys_get_temp_dir(), shared by every checkout, when the dir is missing
+        is_dir($tmp) || mkdir($tmp, 0777, true);
         $this->resource = (new Injector($module, $tmp))->getInstance(ResourceInterface::class);
     }
 
@@ -174,6 +192,7 @@ final class LinkStoryTest extends AbstractLinkStoryCase
     {
         $tree = str_replace(dirname(__DIR__, 2), '<root>', $tree);
         $tree = (string) preg_replace(self::SOURCE_LINE, '$1[line]', $tree);
+        $tree = (string) preg_replace(self::NULL_BINDING, '<Null>', $tree);
         foreach (self::VOLATILE as $pattern => $name) {
             $seen = [];
             $tree = (string) preg_replace_callback($pattern, static function (array $match) use (&$seen, $name): string {

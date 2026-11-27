@@ -12,10 +12,10 @@ link_request get 'page://self/mypage#link=self:goFavoriteList,self:doAddFavorite
 │   │   ├── orderLimit: 5
 │   │   ├── being_final MypageFetched input=[orderLimit] inject=[session, customerQuery, orderQuery +2 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
-│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null-3>
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com
@@ -35,7 +35,7 @@ link_request get 'page://self/mypage#link=self:goFavoriteList,self:doAddFavorite
 │   ├── becoming GetFavoriteListInput
 │   │   ├── being_final FavoriteListFetched inject=[session, favorites]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       └── favoriteCount: 0
@@ -54,8 +54,8 @@ link_request get 'page://self/mypage#link=self:goFavoriteList,self:doAddFavorite
 │   │   ├── productCode: sample-001
 │   │   ├── being_final FavoriteAdded input=[productCode] inject=[session, productQuery, favorites]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-5>
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── productCode: sample-001
@@ -74,7 +74,7 @@ link_request get 'page://self/mypage#link=self:goFavoriteList,self:doAddFavorite
 │   ├── becoming GetFavoriteListInput
 │   │   ├── being_final FavoriteListFetched inject=[session, favorites]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       └── favoriteCount: 0
@@ -93,7 +93,7 @@ link_request get 'page://self/mypage#link=self:goFavoriteList,self:doAddFavorite
 │   │   ├── productCode: sample-001
 │   │   ├── being_final FavoriteRemoved input=[productCode] inject=[session, favorites]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── productCode: sample-001
@@ -110,7 +110,7 @@ link_request get 'page://self/mypage#link=self:goFavoriteList,self:doAddFavorite
 │   ├── becoming GetFavoriteListInput
 │   │   ├── being_final FavoriteListFetched inject=[session, favorites]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       └── favoriteCount: 0

@@ -9,7 +9,7 @@ link_request get 'page://self/admin/plugin-list#link=self:doEnablePlugin'
 │   ├── becoming GetPluginListInput
 │   │   ├── being_final PluginListFetched inject=[adminSession, pluginStorage]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.pluginStorage: MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface<Null-1>
+│   │   │   ├── inject.pluginStorage: MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── plugins[0].pluginCode: Sample/DisabledPlugin
 │   │   │       ├── plugins[0].pluginName: Disabled Sample Plugin
@@ -37,7 +37,7 @@ link_request get 'page://self/admin/plugin-list#link=self:doEnablePlugin'
 │   │   ├── pluginCode: Sample/DisabledPlugin
 │   │   ├── being_final PluginEnabled input=[pluginCode] inject=[adminSession, pluginStorage]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.pluginStorage: MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface<Null-1>
+│   │   │   ├── inject.pluginStorage: MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── pluginCode: Sample/DisabledPlugin
 │   │   │       ├── enabled: true

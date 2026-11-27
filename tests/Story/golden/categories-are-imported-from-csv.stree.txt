@@ -9,7 +9,7 @@ link_request get 'page://self/admin/category/category-list#link=self:doImportCat
 │   ├── becoming GetAdminCategoryListInput
 │   │   ├── being_final AdminCategoryListFetched inject=[adminSession, categories]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-1>
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── categories[0].categoryId: cat-food
@@ -37,9 +37,9 @@ cat-story,Story
 
 │   │   ├── being_final CategoryCsvImported input=[csv] inject=[adminSession, categories +2 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-1>
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null>
 │   │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
-│   │   │   ├── inject.categoryIds: MyVendor\BeMart\Be\Reason\Query\CategoryIdQueryInterface<Null-2>
+│   │   │   ├── inject.categoryIds: MyVendor\BeMart\Be\Reason\Query\CategoryIdQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── accepted: true
 │   │   │       ├── lineCount: 2
@@ -58,7 +58,7 @@ cat-story,Story
 │   ├── becoming GetAdminCategoryListInput
 │   │   ├── being_final AdminCategoryListFetched inject=[adminSession, categories]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-1>
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── categories[0].categoryId: cat-food

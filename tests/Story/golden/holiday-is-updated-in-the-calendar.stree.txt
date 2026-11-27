@@ -9,7 +9,7 @@ link_request get 'page://self/admin/calendar#link=self:doUpdateCalendar'
 │   ├── becoming GetAdminCalendarInput
 │   │   ├── being_final AdminCalendarFetched inject=[adminSession, calendars]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── calendars[0].calendarId: 1
 │   │   │       ├── calendars[0].title: 元日
@@ -34,7 +34,7 @@ link_request get 'page://self/admin/calendar#link=self:doUpdateCalendar'
 │   │   ├── holiday: 2027-02-12
 │   │   ├── being_final CalendarHolidayUpdated input=[calendarId, title, holiday] inject=[adminSession, calendars]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── calendarId: 1
 │   │   │       ├── title: Story Holiday
@@ -51,7 +51,7 @@ link_request get 'page://self/admin/calendar#link=self:doUpdateCalendar'
 │   ├── becoming GetAdminCalendarInput
 │   │   ├── being_final AdminCalendarFetched inject=[adminSession, calendars]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── calendars[0].calendarId: 1
 │   │   │       ├── calendars[0].title: 元日

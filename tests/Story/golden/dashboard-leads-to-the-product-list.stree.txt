@@ -10,10 +10,10 @@ link_request get 'page://self/mypage#link=self:goProductList'
 │   │   ├── orderLimit: 5
 │   │   ├── being_final MypageFetched input=[orderLimit] inject=[session, customerQuery, orderQuery +2 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
-│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null-3>
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com

@@ -10,7 +10,7 @@ link_request get 'page://self/admin/page/page-list#link=self:goPage,self:goPageL
 │   ├── becoming GetAdminPageListInput
 │   │   ├── being_final AdminPageListFetched inject=[adminSession, pages]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 3
 │   │   │       ├── pages[0].pageId: pg-homepage
@@ -42,7 +42,7 @@ link_request get 'page://self/admin/page/page-list#link=self:goPage,self:goPageL
 │   │   ├── pageId: pg-company
 │   │   ├── being_final AdminPageFetched input=[pageId] inject=[adminSession, pages]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── pageId: pg-company
 │   │   │       ├── pageName: 会社案内
@@ -61,7 +61,7 @@ link_request get 'page://self/admin/page/page-list#link=self:goPage,self:goPageL
 │   ├── becoming GetAdminPageListInput
 │   │   ├── being_final AdminPageListFetched inject=[adminSession, pages]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null-1>
+│   │   │   ├── inject.pages: MyVendor\BeMart\Be\Reason\Query\PageStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 3
 │   │   │       ├── pages[0].pageId: pg-homepage

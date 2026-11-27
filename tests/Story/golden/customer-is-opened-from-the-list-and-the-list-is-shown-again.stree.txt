@@ -11,7 +11,7 @@ link_request get 'page://self/admin/customer-list#link=self:goCustomer,self:goCu
 │   │   ├── limit: 50
 │   │   ├── being_final CustomerListFetched input=[nameKeyword, emailKeyword, limit] inject=[adminSession, customerQuery]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customers[0].customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── customers[0].email: alice@example.com
@@ -56,9 +56,9 @@ link_request get 'page://self/admin/customer-list#link=self:goCustomer,self:goCu
 │   │   ├── selectorType: customerId
 │   │   ├── being_final AdminCustomerFetched input=[selector, selectorType] inject=[adminSession, customerQuery, orderQuery +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-3>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com
@@ -92,7 +92,7 @@ link_request get 'page://self/admin/customer-list#link=self:goCustomer,self:goCu
 │   │   ├── limit: 50
 │   │   ├── being_final CustomerListFetched input=[nameKeyword, emailKeyword, limit] inject=[adminSession, customerQuery]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customers[0].customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── customers[0].email: alice@example.com

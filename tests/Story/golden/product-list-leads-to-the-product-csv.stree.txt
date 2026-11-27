@@ -11,7 +11,7 @@ link_request get 'page://self/admin/product-list#link=self:goExportProduct'
 │   │   ├── offset: 0
 │   │   ├── being_final ProductListFetched input=[nameKeyword, limit, offset] inject=[adminSession, productQuery]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── products[0].productCode: sample-001
 │   │   │       ├── products[0].productName: サンプル商品 A
@@ -88,8 +88,8 @@ link_request get 'page://self/admin/product-list#link=self:goExportProduct'
 │   ├── becoming AdminExportProductInput
 │   │   ├── being_final AdminProductCsvExported inject=[adminSession, productQuery +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
-│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null-2>
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null>
+│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── csv: productCode,productName,price02,stock,productStatus,description,searchWord,note
 sample-001,"サンプル商品 A",1200,50,1,,,

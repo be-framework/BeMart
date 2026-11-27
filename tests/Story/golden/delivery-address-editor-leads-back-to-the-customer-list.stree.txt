@@ -18,7 +18,7 @@ link_request get 'page://self/admin/customer-delivery-edit#link=self:goCustomerL
 │   │   ├── limit: 50
 │   │   ├── being_final CustomerListFetched input=[nameKeyword, emailKeyword, limit] inject=[adminSession, customerQuery]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customers[0].customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── customers[0].email: alice@example.com

@@ -20,7 +20,7 @@ link_request get 'page://self/admin/login#link=self:doAdminLogin'
 │   │   ├── loginId: test-admin
 │   │   ├── password: [FILTERED]
 │   │   ├── being_final AdminAuthenticated input=[loginId, password] inject=[adminQuery, passwordHasher, history +2 items]
-│   │   │   ├── inject.adminQuery: MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface<Null-1>
+│   │   │   ├── inject.adminQuery: MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface<Null>
 │   │   │   ├── inject.passwordHasher: MyVendor\BeMart\Be\Reason\Service\NativePasswordHasher
 │   │   │   ├── inject.history: MyVendor\BeMart\Be\Reason\Fake\Query\InMemoryLoginHistoryStorage
 │   │   │   ├── inject.gate: MyVendor\BeMart\Be\Reason\Fake\Query\InMemoryLoginHistoryStorage

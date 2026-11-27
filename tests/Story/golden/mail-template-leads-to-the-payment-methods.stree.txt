@@ -9,7 +9,7 @@ link_request get 'page://self/admin/mail-template#link=self:goPaymentList'
 │   ├── becoming GetMailTemplateListInput
 │   │   ├── being_final MailTemplateListFetched inject=[adminSession, mailTemplateStorage]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.mailTemplateStorage: MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface<Null-1>
+│   │   │   ├── inject.mailTemplateStorage: MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── mailTemplates[0].mailTemplateId: 1
 │   │   │       ├── mailTemplates[0].mailTemplateName: 注文完了メール
@@ -34,7 +34,7 @@ link_request get 'page://self/admin/mail-template#link=self:goPaymentList'
 │   ├── becoming GetAdminPaymentListInput
 │   │   ├── being_final AdminPaymentListFetched inject=[adminSession, payments]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.payments: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-2>
+│   │   │   ├── inject.payments: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── payments[0].paymentId: pay-cod

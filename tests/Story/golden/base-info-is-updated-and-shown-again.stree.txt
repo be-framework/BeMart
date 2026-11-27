@@ -9,7 +9,7 @@ link_request get 'page://self/admin/base-info#link=self:doUpdateBaseInfo'
 │   ├── becoming GetBaseInfoInput
 │   │   ├── being_final BaseInfoFetched inject=[adminSession, baseInfoStorage]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.baseInfoStorage: MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface<Null-1>
+│   │   │   ├── inject.baseInfoStorage: MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── shopName: BeMart
 │   │   │       ├── shopKana: ビーマート
@@ -58,7 +58,7 @@ link_request get 'page://self/admin/base-info#link=self:doUpdateBaseInfo'
 │   │   ├── shopEmail01: shop@example.com
 │   │   ├── being_final BaseInfoUpdated input=[shopName, shopKana, shopNameEng +9 items] inject=[adminSession, baseInfoStorage]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.baseInfoStorage: MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface<Null-1>
+│   │   │   ├── inject.baseInfoStorage: MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── shopName: Story Shop
 │   │   │       ├── shopKana: ストーリーショップ
