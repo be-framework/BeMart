@@ -43,18 +43,20 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 
 会員のストーリーは in-process だけで流す（HTTP の 2 つのアプリには会員のログイン状態がない）。`forMembers()` は `StoryModule::MEMBER_ID`（プロフィール・住所・カート・購入前の注文がある会員）、`forBuyers()` は `StoryModule::BUYER_ID`（注文履歴だけがある会員。プロフィールがないので `/mypage` には入れず、履歴のページから始める）としてログインして辿る。
 
-辿れないことを示すストーリーは `unfollowable()`（URI と例外）に、最初のリクエストでファイルを送るストーリーは `uploads()` に書く。作ったものを読み戻すストーリー（201 の Location など）は Fake では保存されないので `persisted()` に書く（DB が付ける ID が毎回変わるので、ツリーは照合しない）。
+辿れないことを示すストーリーは `unfollowable()`（URI、例外、`flow-*`）に、最初のリクエストでファイルを送るストーリーは `uploads()`（URI、query、ファイル、code、path、`flow-*`）に書く。作ったものを読み戻すストーリー（201 の Location など）は Fake では保存されないので `persisted()` に書く（DB が付ける ID が毎回変わるので、ツリーは照合しない）。
 
 ## ALPS との突き合わせ
 
 行の最後の要素は、そのストーリーが辿るフローの `flow-*` タグ（`alps.json` の遷移の `tag` にある）。どのフローの、どの遷移をそのストーリーが見せるのかを、読む人に伝える。`alps.json` はテストを知らず、ストーリーが `flow-*` で ALPS を指す。
 
-テストは次の 2 つを確かめる。どちらも、6 本の `testFollows*`（`LinkStoryTest` に 3 本、`HttpLinkStoryTest`・`HtmlLinkStoryTest`・`PersistedLinkStoryTest` に 1 本ずつ）と `composer cs:story` が見る。
+テストは次を確かめる。`composer cs:story` はすべての行を、`testFollows*`・`testRefuses`・`testUploads` は流す行の上の 3 つを見る。
 
 - 宣言したタグが `alps.json` にある
-- URI の `#link=` が辿る rel がすべて、宣言したタグのどれかを持つ遷移である（複数宣言したときは、宣言したタグのどれもが、どれかの rel に付いている）
+- URI の `#link=` が辿る rel のうち `flow-*` タグを持つものはすべて、宣言したタグのどれかを持つ（複数宣言したときは、宣言したタグのどれもが、どれかの rel に付いている）
+- `flow-*` タグを持たない遷移（`goHelp*` など）はどのフローにも属さないので、照合では中立に扱う
+- 辿る遷移に `flow-*` タグがあれば、行はフローを宣言する。フローを宣言しない（図のリンクも付かない）のは、辿る遷移のどれにも `flow-*` タグがない行だけ
 
-食い違えば、行か `alps.json` のタグの正しい方を直す。タグのない行は照合しない（ALPS にフロータグのない遷移だけを辿る行など）。
+食い違えば、行か `alps.json` のタグの正しい方を直す。
 
 ```bash
 composer story:uncovered   # flow タグごとに、そのフローを宣言したストーリーが辿らない遷移を列挙し、食い違えば失敗する

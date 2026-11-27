@@ -38,10 +38,14 @@ final class HttpLinkStoryTest extends AbstractLinkStoryCase
         $this->assertEnd($this->resource->get($uri), $code, $path, $body);
     }
 
-    /** @param class-string<\Throwable> $exception */
+    /**
+     * @param class-string<\Throwable> $exception
+     * @param string|list<string> $flow
+     */
     #[DataProviderExternal(LinkStories::class, 'unfollowable')]
-    public function testRefuses(string $uri, string $exception): void
+    public function testRefuses(string $uri, string $exception, string|array $flow): void
     {
+        $this->assertFlow($uri, $flow);
         if ($exception === ParameterException::class) {
             // The server answers a request it cannot invoke with 400 instead of throwing to the client
             $this->assertSame(Code::BAD_REQUEST, $this->resource->get($uri)->code);
@@ -54,10 +58,14 @@ final class HttpLinkStoryTest extends AbstractLinkStoryCase
         $this->resource->get($uri);
     }
 
-    /** @param array<string, string> $query */
+    /**
+     * @param array<string, string> $query
+     * @param string|list<string> $flow
+     */
     #[DataProviderExternal(LinkStories::class, 'uploads')]
-    public function testUploads(string $uri, array $query, string $file, int $code, string $path): void
+    public function testUploads(string $uri, array $query, string $file, int $code, string $path, string|array $flow): void
     {
+        $this->assertFlow($uri, $flow);
         $this->assertEnd($this->resource->post($uri, $query + ['file' => FileUpload::fromFile($file)]), $code, $path, []);
     }
 }

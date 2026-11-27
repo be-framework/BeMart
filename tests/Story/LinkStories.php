@@ -109,11 +109,13 @@ final class LinkStories
         $help = static fn (string $rel): string => 'self:' . $rel . ',self:goTop,';
 
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-browse&tagOnly=1&label=title
             'every help page leads back to the top' => [
                 'page://self/#link=' . $help('goHelpAbout') . $help('goHelpGuide') . $help('goHelpAgreement') . $help('goHelpPrivacy') . 'self:goHelpTradeLaw',
                 Code::OK,
                 '/help/trade-law',
                 [],
+                'flow-browse',
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance,flow-customer-purchase,flow-customer-registration&tagOnly=1&label=title
             'registration confirmation leads back to the top and on to the login' => [
@@ -1450,65 +1452,84 @@ final class LinkStories
     }
 
     /**
-     * The URI and the exception that stops the story.
+     * The URI, the exception that stops the story, then the `flow-*` tag of alps.json whose link the story shows missing.
      *
-     * @return array<string, array{string, class-string<\Throwable>}>
+     * @return array<string, array{string, class-string<\Throwable>, string|list<string>}>
      */
     public static function unfollowable(): array
     {
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-inquiry&tagOnly=1&label=title
             'the index has no submit link' => [
                 uri_template('page://self/#link=self:doSubmitContact{?form*}', ['form' => self::form(self::inquiry())]),
                 LinkRelException::class,
+                'flow-customer-inquiry',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'an id made during the story is not in the URI' => [
                 uri_template('page://self/admin/news/news-list#link=self:doUpdateNews{?form*}', ['form' => self::form(['newsTitle' => 'Unreachable'])]),
                 ParameterException::class,
+                'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-shop-configuration&tagOnly=1&label=title
             'a link declared only on write methods is missing from the page that is read' => [
                 uri_template('page://self/admin/delivery/delivery{?deliveryId}#link=self:goDeliveryList', ['deliveryId' => 'del-yamato']),
                 LinkRelException::class,
+                'flow-admin-shop-configuration',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
             'the tracking number is declared only on the shipping address write method' => [
                 uri_template('page://self/admin/order/shipping-address{?orderNo}#link=self:doUpdateTrackingNumber{?form*}', [
                     'orderNo' => 'past0000000000000000000000000001',
                     'form' => self::form(['orderNo' => 'past0000000000000000000000000001', 'trackingNumber' => 'TRK0001']),
                 ]),
                 LinkRelException::class,
+                'flow-admin-order-fulfillment',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-system-operation&tagOnly=1&label=title
             'the password form does not declare its submit link' => [
                 uri_template('page://self/admin/change-password#link=self:doChangePassword{?form*}', ['form' => self::form(['currentPassword' => 'a', 'newPassword' => 'b'])]),
                 LinkRelException::class,
+                'flow-admin-system-operation',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'the block list declares the block page only on write methods' => [
                 'page://self/admin/block/block-list#link=self:goBlock',
                 LinkRelException::class,
+                'flow-admin-content-publish',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-customer&tagOnly=1&label=title
             'the delivery address editor declares the customer page only on write methods' => [
                 uri_template('page://self/admin/customer-delivery-edit{?customerId}#link=self:goCustomer', ['customerId' => '0123456789abcdef0123456789abcdef']),
                 LinkRelException::class,
+                'flow-manage-customer',
             ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'guest checkout is not implemented yet: GET /shopping sends a guest to the login' => [
                 uri_template('page://self/shopping/non-member#link=self:doSubmitNonMember{?form*}', ['form' => self::form(self::nonMember())]),
                 LinkException::class,
+                'flow-customer-purchase',
             ],
         ];
     }
 
     /**
-     * The first request uploads a file: its URI and query, the file, then the code and path the story ends on.
+     * The first request uploads a file: its URI and query, the file, the code and path the story ends on, then the
+     * `flow-*` tag of alps.json the story walks.
      *
-     * @return array<string, array{string, array<string, string>, string, int, string}>
+     * @return array<string, array{string, array<string, string>, string, int, string, string|list<string>}>
      */
     public static function uploads(): array
     {
         return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-template-lifecycle&tagOnly=1&label=title
             'installed template opens the install form again' => [
                 'page://self/admin/template/template-add#link=self:goTemplateInstall',
                 ['templateCode' => 'story-template', 'templateName' => 'Story Template', 'csrfToken' => FakeCsrfToken::DEFAULT_TOKEN],
                 dirname(__DIR__) . '/fixtures/template-upload.zip',
                 Code::OK,
                 '/admin/template/template-add',
+                'flow-admin-template-lifecycle',
             ],
         ];
     }

@@ -115,19 +115,27 @@ final class LinkStoryTest extends AbstractLinkStoryCase
         $this->assertStory($uri, $code, $path, $body, $flow);
     }
 
-    /** @param class-string<\Throwable> $exception */
+    /**
+     * @param class-string<\Throwable> $exception
+     * @param string|list<string> $flow
+     */
     #[DataProviderExternal(LinkStories::class, 'unfollowable')]
-    public function testRefuses(string $uri, string $exception): void
+    public function testRefuses(string $uri, string $exception, string|array $flow): void
     {
+        $this->assertFlow($uri, $flow);
         $this->expectException($exception);
 
         $this->resource->get($uri);
     }
 
-    /** @param array<string, string> $query */
+    /**
+     * @param array<string, string> $query
+     * @param string|list<string> $flow
+     */
     #[DataProviderExternal(LinkStories::class, 'uploads')]
-    public function testUploads(string $uri, array $query, string $file, int $code, string $path): void
+    public function testUploads(string $uri, array $query, string $file, int $code, string $path, string|array $flow): void
     {
+        $this->assertFlow($uri, $flow);
         $this->assertEnd($this->resource->post($uri, $query + ['file' => FileUpload::fromFile($file)]), $code, $path, []);
     }
 
