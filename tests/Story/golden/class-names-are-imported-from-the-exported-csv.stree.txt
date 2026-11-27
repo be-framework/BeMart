@@ -52,7 +52,7 @@ cn-color,Color
 │   ├── becoming GetAdminClassNameListInput
 │   │   ├── being_final AdminClassNameListFetched inject=[adminSession, classNames]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.classNames: MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface<Null-1>
+│   │   │   ├── inject.classNames: MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── classNames[0].classNameId: cn-color

@@ -9,7 +9,7 @@ link_request get 'page://self/admin/calendar#link=self:doDeleteCalendarHoliday'
 │   ├── becoming GetAdminCalendarInput
 │   │   ├── being_final AdminCalendarFetched inject=[adminSession, calendars]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── calendars[0].calendarId: 1
 │   │   │       ├── calendars[0].title: 元日
@@ -29,7 +29,7 @@ link_request get 'page://self/admin/calendar#link=self:doDeleteCalendarHoliday'
 │   │   ├── calendarId: 1
 │   │   ├── being_final CalendarHolidayDeleted input=[calendarId] inject=[adminSession, calendars]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       └── calendarId: 1
 │   │   └── close becoming_close
@@ -44,7 +44,7 @@ link_request get 'page://self/admin/calendar#link=self:doDeleteCalendarHoliday'
 │   ├── becoming GetAdminCalendarInput
 │   │   ├── being_final AdminCalendarFetched inject=[adminSession, calendars]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null-1>
+│   │   │   ├── inject.calendars: MyVendor\BeMart\Be\Reason\Query\CalendarHolidayStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── calendars[0].calendarId: 1
 │   │   │       ├── calendars[0].title: 元日

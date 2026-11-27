@@ -9,7 +9,7 @@ link_request get 'page://self/mypage/favorite-list#link=self:goMypageWithdraw'
 │   ├── becoming GetFavoriteListInput
 │   │   ├── being_final FavoriteListFetched inject=[session, favorites]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-1>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       └── favoriteCount: 0

@@ -11,7 +11,7 @@ link_request get 'page://self/mypage/order-history#link=self:goMypageHistory'
 │   │   ├── offset: 0
 │   │   ├── being_final OrderHistoryFetched input=[historyLimit, offset] inject=[session, orderQuery]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: customer-001
 │   │   │       ├── orders[0].orderNo: past0000000000000000000000000001
@@ -37,7 +37,7 @@ link_request get 'page://self/mypage/order-history#link=self:goMypageHistory'
 │   │   ├── orderNo: past0000000000000000000000000001
 │   │   ├── being_final MypageHistoryFetched input=[orderNo] inject=[session, orderQuery]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface<Null-2>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── orderNo: past0000000000000000000000000001
 │   │   │       ├── customerId: customer-001

@@ -18,7 +18,7 @@ link_request get 'page://self/admin/index#link=self:goOrderList'
 │   │   ├── offset: 0
 │   │   ├── being_final AdminOrderListFetched input=[limit, offset] inject=[adminSession, orderQuery]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── orders[0].orderNo: past0000000000000000000000000001
 │   │   │       ├── orders[0].customerId: customer-001

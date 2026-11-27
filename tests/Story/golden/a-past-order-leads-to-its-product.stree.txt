@@ -11,7 +11,7 @@ link_request get 'page://self/mypage/history#link=self:goProduct'
 │   │   ├── orderNo: past0000000000000000000000000001
 │   │   ├── being_final MypageHistoryFetched input=[orderNo] inject=[session, orderQuery]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── orderNo: past0000000000000000000000000001
 │   │   │       ├── customerId: customer-001
@@ -66,7 +66,7 @@ link_request get 'page://self/mypage/history#link=self:goProduct'
 │   ├── becoming GetProductInput
 │   │   ├── productCode: sample-001
 │   │   ├── being_final ProductFetched input=[productCode] inject=[productQuery]
-│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-2>
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── productCode: sample-001
 │   │   │       ├── productName: サンプル商品 A

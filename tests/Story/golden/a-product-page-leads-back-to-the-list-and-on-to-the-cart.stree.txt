@@ -26,7 +26,7 @@ link_request get 'page://self/products#link=self:goProduct,self:goProductList,se
 │   ├── becoming GetProductInput
 │   │   ├── productCode: sample-001
 │   │   ├── being_final ProductFetched input=[productCode] inject=[productQuery]
-│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── productCode: sample-001
 │   │   │       ├── productName: サンプル商品 A
@@ -58,7 +58,7 @@ link_request get 'page://self/products#link=self:goProduct,self:goProductList,se
 │   ├── becoming GetCartsInput
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-2>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── carts[0].cartKey: session-prefix-1_1
 │   │   │       ├── carts[0].saleTypeId: 1

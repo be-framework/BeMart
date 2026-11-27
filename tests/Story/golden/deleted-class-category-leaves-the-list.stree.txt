@@ -11,7 +11,7 @@ link_request get 'page://self/admin/class-category/class-category-list#link=self
 │   │   ├── classNameId: cn-color
 │   │   ├── being_final AdminClassCategoryListFetched input=[classNameId] inject=[adminSession, classCategories]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── classNameId: cn-color
 │   │   │       ├── count: 2
@@ -36,7 +36,7 @@ link_request get 'page://self/admin/class-category/class-category-list#link=self
 │   │   ├── classCategoryId: cc-red
 │   │   ├── being_final ClassCategoryDeleted input=[classCategoryId] inject=[adminSession, classCategories +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null>
 │   │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
 │   │   │   └── close being_final_close
 │   │   │       ├── classCategoryId: cc-red
@@ -55,7 +55,7 @@ link_request get 'page://self/admin/class-category/class-category-list#link=self
 │   │   ├── classNameId: cn-color
 │   │   ├── being_final AdminClassCategoryListFetched input=[classNameId] inject=[adminSession, classCategories]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-1>
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── classNameId: cn-color
 │   │   │       ├── count: 2

@@ -16,7 +16,7 @@ link_request get 'page://self/admin/index#link=self:goTagList'
 │   ├── becoming GetAdminTagListInput
 │   │   ├── being_final AdminTagListFetched inject=[adminSession, tags]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.tags: MyVendor\BeMart\Be\Reason\Query\TagStorageInterface<Null-1>
+│   │   │   ├── inject.tags: MyVendor\BeMart\Be\Reason\Query\TagStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── tags[0].tagId: tg-new

@@ -9,7 +9,7 @@ link_request get 'page://self/admin/class-name/class-name-list#link=self:doDelet
 │   ├── becoming GetAdminClassNameListInput
 │   │   ├── being_final AdminClassNameListFetched inject=[adminSession, classNames]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.classNames: MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface<Null-1>
+│   │   │   ├── inject.classNames: MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── classNames[0].classNameId: cn-color
@@ -31,8 +31,8 @@ link_request get 'page://self/admin/class-name/class-name-list#link=self:doDelet
 │   │   ├── classNameId: cn-color
 │   │   ├── being_final ClassNameDeleted input=[classNameId] inject=[adminSession, classCategories +2 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null-2>
-│   │   │   ├── inject.classNames: MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface<Null-1>
+│   │   │   ├── inject.classCategories: MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface<Null>
+│   │   │   ├── inject.classNames: MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface<Null>
 │   │   │   ├── inject.cacheInvalidator: MyVendor\BeMart\Cache\ProductCacheInvalidator
 │   │   │   └── close being_final_close
 │   │   │       └── classNameId: cn-color
@@ -48,7 +48,7 @@ link_request get 'page://self/admin/class-name/class-name-list#link=self:doDelet
 │   ├── becoming GetAdminClassNameListInput
 │   │   ├── being_final AdminClassNameListFetched inject=[adminSession, classNames]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.classNames: MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface<Null-1>
+│   │   │   ├── inject.classNames: MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── classNames[0].classNameId: cn-color

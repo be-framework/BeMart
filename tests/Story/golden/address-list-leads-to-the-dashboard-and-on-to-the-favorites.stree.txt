@@ -10,7 +10,7 @@ link_request get 'page://self/mypage/address-list#link=self:goMypage,self:goFavo
 │   ├── becoming GetCustomerAddressListInput
 │   │   ├── being_final CustomerAddressListFetched inject=[session, addresses]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null-1>
+│   │   │   ├── inject.addresses: MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── count: 1
@@ -38,10 +38,10 @@ link_request get 'page://self/mypage/address-list#link=self:goMypage,self:goFavo
 │   │   ├── orderLimit: 5
 │   │   ├── being_final MypageFetched input=[orderLimit] inject=[session, customerQuery, orderQuery +2 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-2>
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-3>
-│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null-4>
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-5>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com
@@ -61,7 +61,7 @@ link_request get 'page://self/mypage/address-list#link=self:goMypage,self:goFavo
 │   ├── becoming GetFavoriteListInput
 │   │   ├── being_final FavoriteListFetched inject=[session, favorites]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-5>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       └── favoriteCount: 0

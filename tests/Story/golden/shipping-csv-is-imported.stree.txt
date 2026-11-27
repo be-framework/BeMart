@@ -9,8 +9,8 @@ link_request get 'page://self/admin/order/export-shipping#link=self:doImportShip
 │   ├── becoming AdminExportShippingInput
 │   │   ├── being_final AdminShippingCsvExported inject=[adminSession, shippingAddresses +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.shippingAddresses: MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface<Null-1>
-│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null-2>
+│   │   │   ├── inject.shippingAddresses: MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface<Null>
+│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── csv: orderNo,name01,name02,postalCode,pref,addr01,addr02,phoneNumber,trackingNumber
 
@@ -32,8 +32,8 @@ link_request get 'page://self/admin/order/export-shipping#link=self:doImportShip
 
 │   │   ├── being_final AdminShippingCsvImported input=[csv] inject=[adminSession, orderQuery +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-3>
-│   │   │   ├── inject.shippingAddresses: MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface<Null-1>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.shippingAddresses: MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── accepted: true
 │   │   │       ├── lineCount: 1

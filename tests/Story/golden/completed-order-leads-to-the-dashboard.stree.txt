@@ -14,10 +14,10 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   │   ├── orderLimit: 5
 │   │   ├── being_final MypageFetched input=[orderLimit] inject=[session, customerQuery, orderQuery +2 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
-│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null-3>
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com
@@ -37,7 +37,7 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   ├── becoming GetCartsInput
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-5>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── carts[0].cartKey: session-prefix-1_1
 │   │   │       ├── carts[0].saleTypeId: 1
@@ -73,10 +73,10 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   │   ├── sessionPrefix: session-prefix-1
 │   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +3 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null-5>
-│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null-6>
-│   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null-7>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
+│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null>
+│   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null>
 │   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
@@ -125,7 +125,7 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   │   ├── preOrderId: aceface0000000000000000000000000000a11ce
 │   │   ├── paymentMethodId: 2
 │   │   ├── being PreOrderResolved input=[preOrderId, paymentMethodId] inject=[orderQuery, session]
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
 │   │   │   └── close being_close
 │   │   │       ├── order.preOrderId: aceface0000000000000000000000000000a11ce
@@ -237,8 +237,8 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   │   │       ├── order.items[1].productName: 
 │   │   │       └── order.deliveryFeeTotal: 800
 │   │   ├── being_final OrderConfirmed input=[being, preOrderId, paymentMethodId +1 items] inject=[customerQuery, productClasses +1 items]
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.productClasses: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-8>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.productClasses: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null>
 │   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
 │   │   │   └── close being_final_close
 │   │   │       ├── preOrderId: aceface0000000000000000000000000000a11ce
@@ -296,7 +296,7 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   ├── becoming CheckoutInput
 │   │   ├── preOrderId: aceface0000000000000000000000000000a11ce
 │   │   ├── being CheckoutPrepared input=[preOrderId] inject=[orderQuery, session, purchaseFlow]
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
 │   │   │   ├── inject.purchaseFlow: MyVendor\BeMart\Be\Reason\Fake\Service\FakePurchaseFlow
 │   │   │   └── close being_close
@@ -362,11 +362,11 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   │   │       ├── totals.addPoint: 182
 │   │   │       └── totals.usePoint: 0
 │   │   ├── being_final CheckoutCompleted input=[preOrderId, order, totals, orderNo +2 items] inject=[orderCommand, orderItemCommand +3 items]
-│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null-6>
-│   │   │   ├── inject.orderItemCommand: MyVendor\BeMart\Be\Reason\Query\OrderItemCommandInterface<Null-9>
-│   │   │   ├── inject.productClasses: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null-8>
+│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null>
+│   │   │   ├── inject.orderItemCommand: MyVendor\BeMart\Be\Reason\Query\OrderItemCommandInterface<Null>
+│   │   │   ├── inject.productClasses: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null>
 │   │   │   ├── inject.mailer: MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer
-│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null-10>
+│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── orderNo: <OrderNo-1>
 │   │   │       ├── completeMessage: 
@@ -406,10 +406,10 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   │   ├── orderLimit: 5
 │   │   ├── being_final MypageFetched input=[orderLimit] inject=[session, customerQuery, orderQuery +2 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
-│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null-3>
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-4>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com

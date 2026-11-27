@@ -9,7 +9,7 @@ link_request get 'page://self/admin/delivery/delivery-list#link=self:doDeleteDel
 │   ├── becoming GetAdminDeliveryListInput
 │   │   ├── being_final AdminDeliveryListFetched inject=[adminSession, deliveries]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.deliveries: MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface<Null-1>
+│   │   │   ├── inject.deliveries: MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── deliveries[0].deliveryId: del-yamato
@@ -33,7 +33,7 @@ link_request get 'page://self/admin/delivery/delivery-list#link=self:doDeleteDel
 │   │   ├── deliveryId: del-yamato
 │   │   ├── being_final DeliveryDeleted input=[deliveryId] inject=[adminSession, deliveries]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.deliveries: MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface<Null-1>
+│   │   │   ├── inject.deliveries: MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       └── deliveryId: del-yamato
 │   │   └── close becoming_close
@@ -48,7 +48,7 @@ link_request get 'page://self/admin/delivery/delivery-list#link=self:doDeleteDel
 │   ├── becoming GetAdminDeliveryListInput
 │   │   ├── being_final AdminDeliveryListFetched inject=[adminSession, deliveries]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.deliveries: MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface<Null-1>
+│   │   │   ├── inject.deliveries: MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── deliveries[0].deliveryId: del-yamato

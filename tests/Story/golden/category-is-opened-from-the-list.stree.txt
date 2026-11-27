@@ -9,7 +9,7 @@ link_request get 'page://self/admin/category/category-list#link=self:goCategory'
 │   ├── becoming GetAdminCategoryListInput
 │   │   ├── being_final AdminCategoryListFetched inject=[adminSession, categories]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-1>
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── categories[0].categoryId: cat-food
@@ -32,7 +32,7 @@ link_request get 'page://self/admin/category/category-list#link=self:goCategory'
 │   │   ├── categoryId: cat-food
 │   │   ├── being_final AdminCategoryFetched input=[categoryId] inject=[adminSession, categories]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-1>
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── categoryId: cat-food
 │   │   │       ├── categoryName: Food

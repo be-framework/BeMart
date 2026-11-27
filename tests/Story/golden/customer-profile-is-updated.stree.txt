@@ -12,9 +12,9 @@ link_request get 'page://self/admin/customer#link=self:doUpdateCustomerProfile'
 │   │   ├── selectorType: customerId
 │   │   ├── being_final AdminCustomerFetched input=[selector, selectorType] inject=[adminSession, customerQuery, orderQuery +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-3>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com
@@ -59,8 +59,8 @@ link_request get 'page://self/admin/customer#link=self:doUpdateCustomerProfile'
 │   │   ├── password: [FILTERED]
 │   │   ├── being AdminCustomerUpdating input=[customerId, email, name01, name02 +12 items] inject=[adminSession, customerQuery +2 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.uniquenessChecker: MyVendor\BeMart\Be\Reason\Query\EmailUniquenessQueryInterface<Null-4>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.uniquenessChecker: MyVendor\BeMart\Be\Reason\Query\EmailUniquenessQueryInterface<Null>
 │   │   │   ├── inject.passwordHasher: MyVendor\BeMart\Be\Reason\Service\NativePasswordHasher
 │   │   │   └── close being_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
@@ -69,8 +69,8 @@ link_request get 'page://self/admin/customer#link=self:doUpdateCustomerProfile'
 │   │   │       ├── name02: 顧客
 │   │   │       └── phoneNumber: 0399998888
 │   │   ├── being_final AdminCustomerUpdated input=[customerId, email, name01, name02 +12 items] inject=[customerQuery, customerCommand]
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.customerCommand: MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface<Null-5>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.customerCommand: MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com
@@ -93,9 +93,9 @@ link_request get 'page://self/admin/customer#link=self:doUpdateCustomerProfile'
 │   │   ├── selectorType: customerId
 │   │   ├── being_final AdminCustomerFetched input=[selector, selectorType] inject=[adminSession, customerQuery, orderQuery +1 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
-│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
-│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null-3>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com

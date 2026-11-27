@@ -11,7 +11,7 @@ link_request get 'page://self/admin/block/block#link=self:doUpdateBlock'
 │   │   ├── blockId: bk-user
 │   │   ├── being_final AdminBlockFetched input=[blockId] inject=[adminSession, blocks]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null-1>
+│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── blockId: bk-user
 │   │   │       ├── blockName: ユーザーブロック
@@ -36,7 +36,7 @@ link_request get 'page://self/admin/block/block#link=self:doUpdateBlock'
 │   │   ├── blockFileName: story_block
 │   │   ├── being_final BlockUpdated input=[blockId, blockName, blockFileName] inject=[adminSession, blocks]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null-1>
+│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── blockId: bk-user
 │   │   │       ├── blockName: Story Block
@@ -54,7 +54,7 @@ link_request get 'page://self/admin/block/block#link=self:doUpdateBlock'
 │   ├── becoming GetAdminBlockListInput
 │   │   ├── being_final AdminBlockListFetched inject=[adminSession, blocks]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
-│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null-1>
+│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null>
 │   │   │   └── close being_final_close
 │   │   │       ├── count: 2
 │   │   │       ├── blocks[0].blockId: bk-header
