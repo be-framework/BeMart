@@ -10,8 +10,8 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 $coverage = StoryCoverage::forRepository();
 
 if (in_array('--write', $argv, true)) {
-    $coverage->writeFlowsMarkdown();
     $coverage->writeLinkedStories();
+    $coverage->writeFlowsMarkdown();
     echo StoryCoverage::FLOWS_MARKDOWN . ' and the diagram links in ' . StoryCoverage::STORIES . " written.\n";
     exit(0);
 }

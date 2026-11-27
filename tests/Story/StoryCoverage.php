@@ -238,7 +238,7 @@ final class StoryCoverage
      * `LinkStories.php` に、`flow-*` を宣言した行ごとに、その行のフローで絞った公開の ALPS 図へのリンクを書いたもの。
      * 行は `'<ストーリー名>' => [` の形で書く。
      *
-     * @throws LogicException 行がその形で書かれていない
+     * @throws LogicException 行がその形で 1 つだけ書かれていない
      */
     public function linkedStories(): string
     {
@@ -255,11 +255,11 @@ final class StoryCoverage
                 '/^([ \t]*)' . preg_quote($key, '/') . '/m',
                 static fn (array $match): string => $match[1] . $link . "\n" . $match[0],
                 $source,
-                1,
+                -1,
                 $count,
             );
-            if ($count === 0) {
-                throw new LogicException(sprintf('Write the story "%s" as a row %s in %s.', $name, $key, self::STORIES));
+            if ($count !== 1) {
+                throw new LogicException(sprintf('Write the story "%s" as exactly one row %s in %s; found %d.', $name, $key, self::STORIES, $count));
             }
         }
 
