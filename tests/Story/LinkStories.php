@@ -1452,7 +1452,7 @@ final class LinkStories
     }
 
     /**
-     * The URI, the exception that stops the story, then the `flow-*` tag of alps.json whose link the story shows missing.
+     * The URI, the exception that stops the story, then the `flow-*` tag of alps.json the story tries to walk.
      *
      * @return array<string, array{string, class-string<\Throwable>, string|list<string>}>
      */

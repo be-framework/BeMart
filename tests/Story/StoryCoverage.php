@@ -47,9 +47,8 @@ final class StoryCoverage
 
     private const TRANSITION_TYPES = ['safe', 'unsafe', 'idempotent'];
     private const DIAGRAM_URL = 'alps.json.html?tag=%s&tagOnly=1&label=title';
-    /** Where GitHub Pages publishes `docs/` */
-    private const PUBLIC_DIAGRAM = 'https://be-framework.github.io/BeMart/';
-    private const SEE = '// @see ';
+    /** The comment above a row: GitHub Pages publishes `docs/` there */
+    private const ROW_LINK = '// @see https://be-framework.github.io/BeMart/' . self::DIAGRAM_URL;
 
     /** @var array<string, list<string>> flow tags by transition id */
     private array $transitions = [];
@@ -108,7 +107,7 @@ final class StoryCoverage
     }
 
     /**
-     * 行が宣言した `flow-*` と、`#link=` が辿る遷移のタグの食い違い。宣言がなければ空。
+     * 行が宣言した `flow-*` と、`#link=` が辿る遷移のタグの食い違い。宣言のない行は、ALPS にない rel だけを見る。
      *
      * @param list<string> $flows
      *
@@ -233,10 +232,11 @@ final class StoryCoverage
      */
     public function linkedStories(): string
     {
-        $source = (string) preg_replace('/^[ \t]*' . preg_quote(self::SEE . self::PUBLIC_DIAGRAM, '/') . '.*\n/m', '', (string) file_get_contents($this->root . '/' . self::STORIES));
+        $stale = '/^[ \t]*' . preg_quote((string) strstr(self::ROW_LINK, '%s', true), '/') . '.*\n/m';
+        $source = (string) preg_replace($stale, '', (string) file_get_contents($this->root . '/' . self::STORIES));
         foreach ($this->stories() as $name => [, $flows]) {
             $key = sprintf("'%s' => [", str_replace(['\\', "'"], ['\\\\', "\\'"], $name));
-            $link = $flows === [] ? '' : self::SEE . self::PUBLIC_DIAGRAM . sprintf(self::DIAGRAM_URL, implode(',', $flows));
+            $link = $flows === [] ? '' : sprintf(self::ROW_LINK, implode(',', $flows));
             $source = (string) preg_replace_callback(
                 '/^([ \t]*)' . preg_quote($key, '/') . '/m',
                 static fn (array $match): string => $link === '' ? $match[0] : $match[1] . $link . "\n" . $match[0],
