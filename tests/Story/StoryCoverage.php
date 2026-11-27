@@ -236,10 +236,10 @@ final class StoryCoverage
         $source = (string) preg_replace('/^[ \t]*' . preg_quote(self::SEE . self::PUBLIC_DIAGRAM, '/') . '.*\n/m', '', (string) file_get_contents($this->root . '/' . self::STORIES));
         foreach ($this->stories() as $name => [, $flows]) {
             $key = sprintf("'%s' => [", str_replace(['\\', "'"], ['\\\\', "\\'"], $name));
-            $link = $flows === [] ? '' : self::SEE . self::PUBLIC_DIAGRAM . sprintf(self::DIAGRAM_URL, implode(',', $flows)) . "\n";
+            $link = $flows === [] ? '' : self::SEE . self::PUBLIC_DIAGRAM . sprintf(self::DIAGRAM_URL, implode(',', $flows));
             $source = (string) preg_replace_callback(
                 '/^([ \t]*)' . preg_quote($key, '/') . '/m',
-                static fn (array $match): string => $match[1] . $link . $match[0],
+                static fn (array $match): string => $link === '' ? $match[0] : $match[1] . $link . "\n" . $match[0],
                 $source,
                 -1,
                 $count,
