@@ -203,6 +203,23 @@ final class AdminOrderListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('href="/admin/order/export-shipping"', $html);
     }
 
+    /** Each row's PDF link reaches the export (501 in the Fake build). */
+    public function testOrderListPdfLinksReachTheExport(): void
+    {
+        $ro = $this->resource->get('page://self/admin/order-list');
+        $html = $ro->toString();
+        $this->assertGreaterThan(0, $ro->body['count']);
+
+        preg_match_all('#href="/admin/order/export-order-pdf\?([^"]+)"#', $html, $matches);
+        $this->assertCount($ro->body['count'], $matches[1]);
+        foreach ($matches[1] as $query) {
+            parse_str(html_entity_decode($query), $params);
+            $export = $this->resource->get('page://self/admin/order/export-order-pdf', $params);
+
+            $this->assertSame(501, $export->code, $query);
+        }
+    }
+
     // ------------------------------------------------------------------ EC-CUBE parity (archived)
 
     /**

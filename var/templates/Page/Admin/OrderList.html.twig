@@ -113,7 +113,7 @@
                                 <i class="fa fa-pencil fa-fw" aria-hidden="true"></i>
                             </a>
                             <a class="idea-admin-icon-btn"
-                               href="/admin/order/export-order-pdf?ids[]={{ Order.orderNo }}"
+                               href="/admin/order/export-order-pdf?orderNos[]={{ Order.orderNo|url_encode }}"
                                title="納品書出力">
                                 <i class="fa fa-file-text fa-fw" aria-hidden="true"></i>
                             </a>
