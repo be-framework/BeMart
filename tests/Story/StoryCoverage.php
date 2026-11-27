@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Story;
 
+use LogicException;
+
 use function array_diff;
 use function array_filter;
 use function array_intersect;
@@ -24,6 +26,9 @@ use function is_string;
 use function json_decode;
 use function ksort;
 use function preg_match_all;
+use function preg_quote;
+use function preg_replace;
+use function preg_replace_callback;
 use function sort;
 use function sprintf;
 use function str_starts_with;
@@ -42,9 +47,13 @@ final class StoryCoverage
 {
     public const NO_FLOW = '(no flow tag)';
     public const FLOWS_MARKDOWN = 'docs/story-flows.md';
+    public const STORIES = 'tests/Story/LinkStories.php';
 
     private const TRANSITION_TYPES = ['safe', 'unsafe', 'idempotent'];
     private const DIAGRAM_URL = 'alps.json.html?tag=%s&tagOnly=1&label=title';
+    /** Where GitHub Pages publishes `docs/` */
+    private const PUBLIC_DIAGRAM = 'https://be-framework.github.io/BeMart/';
+    private const SEE = '// @see ';
 
     /** @var array<string, list<string>> flow tags by transition id */
     private array $transitions = [];
@@ -223,6 +232,48 @@ final class StoryCoverage
     public function writeFlowsMarkdown(): void
     {
         file_put_contents($this->root . '/' . self::FLOWS_MARKDOWN, $this->flowsMarkdown());
+    }
+
+    /**
+     * `LinkStories.php` に、`flow-*` を宣言した行ごとに、その行のフローで絞った公開の ALPS 図へのリンクを書いたもの。
+     * 行は `'<ストーリー名>' => [` の形で書く。
+     *
+     * @throws LogicException 行がその形で書かれていない
+     */
+    public function linkedStories(): string
+    {
+        $source = (string) preg_replace('/^[ \t]*' . preg_quote(self::SEE . self::PUBLIC_DIAGRAM, '/') . '.*\n/m', '', (string) file_get_contents($this->root . '/' . self::STORIES));
+        foreach ($this->rows() as $name => $row) {
+            $flows = $this->flowsOf($row);
+            if ($flows === []) {
+                continue;
+            }
+
+            $key = sprintf("'%s' => [", str_replace(['\\', "'"], ['\\\\', "\\'"], $name));
+            $link = self::SEE . self::PUBLIC_DIAGRAM . sprintf(self::DIAGRAM_URL, implode(',', $flows));
+            $source = (string) preg_replace_callback(
+                '/^([ \t]*)' . preg_quote($key, '/') . '/m',
+                static fn (array $match): string => $match[1] . $link . "\n" . $match[0],
+                $source,
+                1,
+                $count,
+            );
+            if ($count === 0) {
+                throw new LogicException(sprintf('Write the story "%s" as a row %s in %s.', $name, $key, self::STORIES));
+            }
+        }
+
+        return $source;
+    }
+
+    public function isLinkedStoriesCurrent(): bool
+    {
+        return file_get_contents($this->root . '/' . self::STORIES) === $this->linkedStories();
+    }
+
+    public function writeLinkedStories(): void
+    {
+        file_put_contents($this->root . '/' . self::STORIES, $this->linkedStories());
     }
 
     public function transitionCount(): int

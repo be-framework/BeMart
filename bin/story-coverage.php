@@ -11,7 +11,8 @@ $coverage = StoryCoverage::forRepository();
 
 if (in_array('--write', $argv, true)) {
     $coverage->writeFlowsMarkdown();
-    echo StoryCoverage::FLOWS_MARKDOWN . " written.\n";
+    $coverage->writeLinkedStories();
+    echo StoryCoverage::FLOWS_MARKDOWN . ' and the diagram links in ' . StoryCoverage::STORIES . " written.\n";
     exit(0);
 }
 
@@ -38,6 +39,11 @@ foreach (array_filter($coverage->drift()) as $kind => $items) {
 
 if (! $coverage->isFlowsMarkdownCurrent()) {
     fwrite(STDERR, StoryCoverage::FLOWS_MARKDOWN . " is stale. Run `composer story:flows`.\n");
+    $failed = true;
+}
+
+if (! $coverage->isLinkedStoriesCurrent()) {
+    fwrite(STDERR, 'The diagram links in ' . StoryCoverage::STORIES . " are missing or stale. Run `composer story:flows`.\n");
     $failed = true;
 }
 

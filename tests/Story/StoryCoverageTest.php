@@ -21,4 +21,9 @@ class StoryCoverageTest extends TestCase
     {
         $this->assertTrue(StoryCoverage::forRepository()->isFlowsMarkdownCurrent(), 'Run `composer story:flows`.');
     }
+
+    public function testEachRowLinksToTheDiagramOfItsFlows(): void
+    {
+        $this->assertTrue(StoryCoverage::forRepository()->isLinkedStoriesCurrent(), 'Run `composer story:flows`.');
+    }
 }

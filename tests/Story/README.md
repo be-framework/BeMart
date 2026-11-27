@@ -39,7 +39,7 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 1. `LinkStories::forGuests()`（ゲストが辿る）か `forAdmins()`（管理者が辿る）に行を足す。`followable()` はこの 2 つを合わせたもの。会員として辿る行は `forMembers()`・`forBuyers()` に足す。キーは、そのストーリーが示すことを書いた文にする。値は URI、終点の code、終点の path、終点の body の部分一致（キーの `.` で入れ子の配列を指す）、**そのストーリーが辿る `flow-*` タグ**。タグは `alps.json` の遷移に付いたもので、2 つのフローを辿るなら配列で書く。
 2. `UPDATE_GOLDEN=1 vendor/bin/phpunit tests/Story` でツリーを記録する。
 3. 新しい golden を読み、辿った順と各ステップの code が意図どおりかを確かめてから commit する。`followable()`・`forMembers()`・`forBuyers()` の行は、golden がないと失敗する。
-4. `composer story:flows` で `docs/story-flows.md` を作り直す。
+4. `composer story:flows` で `docs/story-flows.md` と、行の上の図のリンクを作り直す。行は `'<ストーリー名>' => [` の形で書く（ループで組み立てた行にはリンクを付けられず、`composer cs:story` が失敗する）。
 
 会員のストーリーは in-process だけで流す（HTTP の 2 つのアプリには会員のログイン状態がない）。`forMembers()` は `StoryModule::MEMBER_ID`（プロフィール・住所・カート・購入前の注文がある会員）、`forBuyers()` は `StoryModule::BUYER_ID`（注文履歴だけがある会員。プロフィールがないので `/mypage` には入れず、履歴のページから始める）としてログインして辿る。
 
@@ -58,10 +58,10 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 
 ```bash
 composer story:uncovered   # flow タグごとに、そのフローを宣言したストーリーが辿らない遷移を列挙し、食い違えば失敗する
-composer story:flows       # docs/story-flows.md を作り直す
+composer story:flows       # docs/story-flows.md と、行の上の図のリンクを作り直す
 ```
 
-[`docs/story-flows.md`](../../docs/story-flows.md) は、`flow-*` ごとの ALPS の図の URL、そのフローを宣言した行、そのフローを宣言した行が辿らない遷移の表（別のフローを宣言した行が辿る遷移も載る）。`composer cs`（`cs:story`）と `StoryCoverageTest` は、この表が古いと失敗する。
+[`docs/story-flows.md`](../../docs/story-flows.md) は、`flow-*` ごとの ALPS の図の URL、そのフローを宣言した行、そのフローを宣言した行が辿らない遷移の表（別のフローを宣言した行が辿る遷移も載る）。`flow-*` を宣言した行には、その行のフローで絞った公開の図へのリンク（`// @see https://be-framework.github.io/BeMart/alps.json.html?tag=…`）が真上に付く。`composer cs`（`cs:story`）と `StoryCoverageTest` は、この表かリンクが古いか、リンクが無いと失敗する。
 
 ## 書けないとき
 
