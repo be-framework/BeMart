@@ -173,7 +173,7 @@ final class LinkStories
      */
     public static function forAdmins(): array
     {
-        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance() + self::adminOrders() + self::adminSystem() + self::adminOperations() + self::adminNavigation();
+        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance() + self::adminOrders() + self::adminSystem() + self::adminOperations() + self::adminNavigation() + self::adminActions();
     }
 
     /** @return array<string, array{string, int, string, array<string, mixed>}> */
@@ -871,6 +871,67 @@ final class LinkStories
                 uri_template('page://self/admin/authority-role{?loginId,authority}#link=self:goLoginHistoryList', ['loginId' => 'shop-owner', 'authority' => '1']),
                 Code::OK,
                 '/admin/login-history',
+                [],
+            ],
+        ];
+    }
+
+    /**
+     * flow-admin-shop-configuration, flow-manage-plugin, flow-admin-template-lifecycle, flow-admin-csv-exchange, flow-admin-system-operation
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function adminActions(): array
+    {
+        $plugin = self::form(['pluginCode' => 'Sample/DisabledPlugin']);
+
+        return [
+            'tag is moved in the sort order' => [
+                uri_template('page://self/admin/tag/tag-list#link=self:doSortNoMove{?form*}', ['form' => self::form(['masterType' => 'tag', 'rowId' => 'tg-new', 'sortNo' => '2'])]),
+                Code::OK,
+                '/admin/sort-no-move',
+                [],
+            ],
+            'delivery is hidden from the list' => [
+                uri_template('page://self/admin/delivery/delivery-list#link=self:doToggleVisible{?form*}', ['form' => self::form(['masterType' => 'delivery', 'rowId' => 'del-yamato', 'visible' => '0'])]),
+                Code::OK,
+                '/admin/toggle-visible',
+                [],
+            ],
+            'class category is added to the class' => [
+                uri_template('page://self/admin/class-category/class-category-list#link=self:doCreateClassCategory{?form*}', ['form' => self::form(['classNameId' => 'cn-color', 'classCategoryName' => 'Blue'])]),
+                Code::OK,
+                '/admin/class-category/class-category-list',
+                [],
+            ],
+            'categories are imported from csv' => [
+                uri_template('page://self/admin/category/category-list#link=self:doImportCategoryCsv{?form*}', ['form' => self::form(['csv' => "categoryId,categoryName\r\ncat-story,Story\r\n"])]),
+                Code::OK,
+                '/admin/category/category-list',
+                [],
+            ],
+            'plugin is enabled' => [
+                uri_template('page://self/admin/plugin-list#link=self:doEnablePlugin{?form*}', ['form' => $plugin]),
+                Code::OK,
+                '/admin/plugin-enable',
+                [],
+            ],
+            'plugin is disabled' => [
+                uri_template('page://self/admin/plugin-list#link=self:doDisablePlugin{?form*}', ['form' => $plugin]),
+                Code::OK,
+                '/admin/plugin-disable',
+                [],
+            ],
+            'plugin is uninstalled' => [
+                uri_template('page://self/admin/plugin-list#link=self:doUninstallPlugin{?form*}', ['form' => $plugin]),
+                Code::OK,
+                '/admin/plugin',
+                [],
+            ],
+            'shipping csv is imported' => [
+                uri_template('page://self/admin/order/export-shipping#link=self:doImportShippingCsv{?form*}', ['form' => self::form(['csv' => "shippingId,trackingNumber\r\n"])]),
+                Code::OK,
+                '/admin/order/import-shipping',
                 [],
             ],
         ];

@@ -1,0 +1,53 @@
+link_request get 'page://self/admin/tag/tag-list#link=self:doSortNoMove'
+├── uri: page://self/admin/tag/tag-list
+├── method: GET
+├── links[0]: self:doSortNoMove
+├── resource_request get 'page://self/admin/tag/tag-list'
+│   ├── uri: page://self/admin/tag/tag-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminTagListInput
+│   │   ├── being_final AdminTagListFetched inject=[adminSession, tags]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.tags: MyVendor\BeMart\Be\Reason\Query\TagStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── tags[0].tagId: tg-new
+│   │   │       ├── tags[0].tagName: 新商品
+│   │   │       ├── tags[1].tagId: tg-sale
+│   │   │       └── tags[1].tagName: セール
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/sort-no-move?masterType=tag&rowId=tg-new&sortNo=2&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/sort-no-move
+│   ├── method: PUT
+│   ├── params.masterType: tag
+│   ├── params.rowId: tg-new
+│   ├── params.sortNo: 2
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming SortNoMoveInput
+│   │   ├── masterType: tag
+│   │   ├── rowId: tg-new
+│   │   ├── sortNo: 2
+│   │   ├── being_final SortNoMoved input=[masterType, rowId, sortNo] inject=[adminSession, masters]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.masters: MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistry
+│   │   │   └── close being_final_close
+│   │   │       ├── masterType: tag
+│   │   │       ├── rowId: tg-new
+│   │   │       └── sortNo: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/sort-no-move {"masterType":"tag","rowId":"tg-new","sortNo":"2","csrfToken":"[FILTERED]"}
