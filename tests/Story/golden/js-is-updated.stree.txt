@@ -1,0 +1,42 @@
+link_request get 'page://self/admin/content/js#link=self:doUpdateContentJs'
+├── uri: page://self/admin/content/js
+├── method: GET
+├── links[0]: self:doUpdateContentJs
+├── resource_request get 'page://self/admin/content/js'
+│   ├── uri: page://self/admin/content/js
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/content/js?js=console.log%281%29%3B&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/content/js
+│   ├── method: PUT
+│   ├── params.js: console.log(1);
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateContentJsInput
+│   │   ├── js: console.log(1);
+│   │   ├── being_final ContentJsUpdated input=[js] inject=[adminSession, assetWriter]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.assetWriter: MyVendor\BeMart\Be\Reason\Fake\Service\FakeCustomizeAssetWriter
+│   │   │   └── close being_final_close
+│   │   │       └── length: 15
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/content/js'
+│   ├── uri: page://self/admin/content/js
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/content/js {"js":"console.log(1);","csrfToken":"[FILTERED]"}

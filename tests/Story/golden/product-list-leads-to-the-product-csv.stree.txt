@@ -1,0 +1,116 @@
+link_request get 'page://self/admin/product-list#link=self:goExportProduct'
+├── uri: page://self/admin/product-list
+├── method: GET
+├── links[0]: self:goExportProduct
+├── resource_request get 'page://self/admin/product-list'
+│   ├── uri: page://self/admin/product-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetProductListInput
+│   │   ├── limit: 50
+│   │   ├── offset: 0
+│   │   ├── being_final ProductListFetched input=[nameKeyword, limit, offset] inject=[adminSession, productQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── products[0].productCode: sample-001
+│   │   │       ├── products[0].productName: サンプル商品 A
+│   │   │       ├── products[0].price02: 1200
+│   │   │       ├── products[0].stock: 50
+│   │   │       ├── products[0].productStatus: 1
+│   │   │       ├── products[1].productCode: sample-002
+│   │   │       ├── products[1].productName: Sample Product B
+│   │   │       ├── products[1].price02: 9800
+│   │   │       ├── products[1].productStatus: 1
+│   │   │       ├── products[1].imagePath: /save_image/img_item01_02.jpg
+│   │   │       ├── products[1].categoryNames[0]: 雑貨
+│   │   │       ├── products[1].tagNames[0]: 送料無料
+│   │   │       ├── products[2].productCode: admin-active-001
+│   │   │       ├── products[2].productName: 管理画面用 商品A
+│   │   │       ├── products[2].price02: 3500
+│   │   │       ├── products[2].stock: 20
+│   │   │       ├── products[2].productStatus: 1
+│   │   │       ├── products[2].imagePath: /save_image/img_item02_01.jpg
+│   │   │       ├── products[2].categoryNames[0]: 管理商品
+│   │   │       ├── products[2].categoryNames[1]: 公開
+│   │   │       ├── products[2].tagNames[0]: 管理
+│   │   │       ├── products[3].productCode: admin-hidden-001
+│   │   │       ├── products[3].productName: 管理画面用 非公開商品B
+│   │   │       ├── products[3].price02: 5000
+│   │   │       ├── products[3].stock: 10
+│   │   │       ├── products[3].productStatus: 2
+│   │   │       ├── products[3].imagePath: /save_image/img_item02_02.jpg
+│   │   │       ├── products[3].categoryNames[0]: 管理商品
+│   │   │       ├── products[3].categoryNames[1]: 非公開
+│   │   │       ├── products[3].tagNames[0]: 管理
+│   │   │       ├── products[4].productCode: admin-withdrawn-001
+│   │   │       ├── products[4].productName: 管理画面用 廃止商品C
+│   │   │       ├── products[4].price02: 800
+│   │   │       ├── products[4].stock: 0
+│   │   │       ├── products[4].productStatus: 3
+│   │   │       ├── products[4].imagePath: /save_image/img_item02_03.jpg
+│   │   │       ├── products[4].categoryNames[0]: 管理商品
+│   │   │       ├── products[4].categoryNames[1]: 廃止
+│   │   │       ├── products[4].tagNames[0]: 管理
+│   │   │       ├── products[5].productCode: api-persist-20260522-001
+│   │   │       ├── products[5].productName: 彩のジェラートセット
+│   │   │       ├── products[5].price02: 2980
+│   │   │       ├── products[5].stock: 7
+│   │   │       ├── products[5].productStatus: 1
+│   │   │       ├── products[5].imagePath: /save_image/img_item01_01.jpg
+│   │   │       ├── products[5].categoryNames[0]: 新入荷
+│   │   │       ├── products[5].categoryNames[1]: ジェラート
+│   │   │       ├── products[5].categoryNames[2]: スイーツ
+│   │   │       ├── products[5].categoryNames[3]: ギフト
+│   │   │       ├── products[5].tagNames[0]: 冷凍
+│   │   │       ├── products[5].tagNames[1]: ギフト
+│   │   │       ├── products[6].productCode: ui-create-20260522-001
+│   │   │       ├── products[6].productName: UI商品登録テスト
+│   │   │       ├── products[6].price02: 1980
+│   │   │       ├── products[6].stock: 5
+│   │   │       ├── products[6].productStatus: 1
+│   │   │       ├── products[6].imagePath: /save_image/img_item02_01.jpg
+│   │   │       ├── products[6].categoryNames[0]: 管理商品
+│   │   │       ├── products[6].categoryNames[1]: テスト
+│   │   │       ├── products[6].tagNames[0]: UI登録
+│   │   │       ├── count: 7
+│   │   │       ├── filters.limit: 50
+│   │   │       └── filters.offset: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/product-csv'
+│   ├── uri: page://self/admin/product-csv
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming AdminExportProductInput
+│   │   ├── being_final AdminProductCsvExported inject=[adminSession, productQuery +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.productQuery: MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface<Null-1>
+│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null-2>
+│   │   │   └── close being_final_close
+│   │   │       ├── csv: productCode,productName,price02,stock,productStatus,description,searchWord,note
+sample-001,"サンプル商品 A",1200,50,1,,,
+sample-002,"Sample Product B",9800,,1,"Stock-unlimited fixture",,
+admin-active-001,"管理画面用 商品A",3500,20,1,"Wave 8 admin grid: visible row","管理 active","internal note A"
+admin-hidden-001,"管理画面用 非公開商品B",5000,10,2,"Wave 8 admin grid: hidden row","管理 hidden","internal note B"
+admin-withdrawn-001,"管理画面用 廃止商品C",800,0,3,"Wave 8 admin grid: withdrawn row","管理 withdrawn","internal note C"
+api-persist-20260522-001,彩のジェラートセット,2980,7,1,管理画面から名称変更した、彩り豊かなジェラートセットです。,"ジェラート ギフト 彩 api","管理画面名称変更 smoke 2026-05-23"
+ui-create-20260522-001,UI商品登録テスト,1980,5,1,管理画面から作成した商品,"ui create","Codex smoke"
+admin-active-001.copy,"(コピー) 管理画面用 商品A",3500,20,1,"Wave 8 admin grid: visible row","管理 active","internal note A"
+admin-withdrawn-001.copy,"(コピー) 管理画面用 廃止商品C",800,0,1,"Wave 8 admin grid: withdrawn row","管理 withdrawn","internal note C"
+
+│   │   │       └── count: 9
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

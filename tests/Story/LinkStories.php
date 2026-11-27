@@ -173,7 +173,7 @@ final class LinkStories
      */
     public static function forAdmins(): array
     {
-        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance() + self::adminOrders() + self::adminSystem();
+        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance() + self::adminOrders() + self::adminSystem() + self::adminOperations();
     }
 
     /** @return array<string, array{string, int, string, array<string, mixed>}> */
@@ -660,6 +660,108 @@ final class LinkStories
                 uri_template('page://self/admin/content/cache#link=self:doClearCache{?form*}', ['form' => self::form([])]),
                 Code::OK,
                 '/admin/content/cache',
+                [],
+            ],
+        ];
+    }
+
+    /**
+     * flow-admin-template-lifecycle, flow-admin-master-data-update, flow-admin-csv-exchange, flow-admin-content-publish, flow-admin-product-publish
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function adminOperations(): array
+    {
+        $templates = 'page://self/admin/template/template-list#link=';
+        $productClass = 'page://self/admin/product/product-class{?productCode}#link=';
+        $product = ['productCode' => 'admin-active-001'];
+
+        return [
+            'admin top leads to the cache page' => [
+                'page://self/admin/index#link=self:goContentCache',
+                Code::OK,
+                '/admin/content/cache',
+                [],
+            ],
+            'news opened from the list is shown in the list again' => [
+                uri_template('page://self/admin/news/news-list#link=self:goNews{?newsId},self:goNewsList', ['newsId' => 'nw-welcome']),
+                Code::OK,
+                '/admin/news/news-list',
+                [],
+            ],
+            'css is updated' => [
+                uri_template('page://self/admin/content/css#link=self:doUpdateContentCss{?form*}', ['form' => self::form(['css' => 'body { color: red; }'])]),
+                Code::OK,
+                '/admin/content/css',
+                [],
+            ],
+            'js is updated' => [
+                uri_template('page://self/admin/content/js#link=self:doUpdateContentJs{?form*}', ['form' => self::form(['js' => 'console.log(1);'])]),
+                Code::OK,
+                '/admin/content/js',
+                [],
+            ],
+            'template is selected and the install page is opened' => [
+                uri_template($templates . 'self:doSelectTemplate{?form*},self:goTemplateInstall', ['form' => self::form(['templateId' => 'tp-default-sp'])]),
+                Code::OK,
+                '/admin/template/template-add',
+                [],
+            ],
+            'template is deleted from the list' => [
+                uri_template($templates . 'self:doDeleteTemplate{?form*}', ['form' => self::form(['templateId' => 'tp-default-sp'])]),
+                Code::OK,
+                '/admin/template/template-list',
+                [],
+            ],
+            'install page leads back to the template list' => [
+                'page://self/admin/template/template-add#link=self:goTemplateList',
+                Code::OK,
+                '/admin/template/template-list',
+                [],
+            ],
+            'master data is selected and updated' => [
+                uri_template('page://self/admin/master-data#link=self:doSelectMasterData{?select*},self:doUpdateMasterData{?update*}', [
+                    'select' => self::form(['masterType' => 'tag']),
+                    'update' => self::form(['masterType' => 'tag']),
+                ]),
+                Code::OK,
+                '/admin/master-data',
+                [],
+            ],
+            'class names are imported from the exported csv' => [
+                uri_template('page://self/admin/class-name/class-name-export#link=self:doImportClassNameCsv{?form*}', ['form' => self::form(['csv' => "規格名ID,規格名\r\ncn-color,Color\r\n"])]),
+                Code::OK,
+                '/admin/class-name/class-name-list',
+                [],
+            ],
+            'class categories are imported from the exported csv' => [
+                uri_template('page://self/admin/class-category/class-category-export#link=self:doImportClassCategoryCsv{?form*}', ['form' => self::form(['csv' => "規格分類ID,規格ID,規格分類名\r\ncc-red,cn-color,Red\r\n"])]),
+                Code::OK,
+                '/admin/class-category/class-category-list',
+                [],
+            ],
+            'customer csv leads to the class name csv' => [
+                'page://self/admin/customer-csv#link=self:goExportClassName',
+                Code::OK,
+                '/admin/class-name/class-name-export',
+                [],
+            ],
+            'product list leads to the product csv' => [
+                'page://self/admin/product-list#link=self:goExportProduct',
+                Code::OK,
+                '/admin/product-csv',
+                [],
+            ],
+            'product class page leads to the product and the list' => [
+                uri_template($productClass . 'self:goProduct{?productCode},self:goProductList', $product),
+                Code::OK,
+                '/admin/product-list',
+                [],
+            ],
+            'product classes are registered and the list is shown' => [
+                uri_template($productClass . 'self:doRegisterProductClass{?form*},self:goProductList', $product + ['form' => self::form($product + ['price02' => '1000', 'stock' => '5'])]),
+                Code::OK,
+                '/admin/product-list',
                 [],
             ],
         ];
