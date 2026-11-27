@@ -1,0 +1,58 @@
+link_request get 'page://self/admin/order-list#link=self:goExportCustomer'
+├── uri: page://self/admin/order-list
+├── method: GET
+├── links[0]: self:goExportCustomer
+├── resource_request get 'page://self/admin/order-list'
+│   ├── uri: page://self/admin/order-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminOrderListInput
+│   │   ├── limit: 50
+│   │   ├── offset: 0
+│   │   ├── being_final AdminOrderListFetched input=[limit, offset] inject=[adminSession, orderQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── orders[0].orderNo: past0000000000000000000000000001
+│   │   │       ├── orders[0].customerId: customer-001
+│   │   │       ├── orders[0].total: 12700
+│   │   │       ├── orders[0].paymentTotal: 12700
+│   │   │       ├── orders[0].orderDate: 2026-04-01 10:00:00
+│   │   │       ├── orders[0].orderStatus: 1
+│   │   │       ├── count: 1
+│   │   │       ├── limit: 50
+│   │   │       └── offset: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/customer-csv'
+│   ├── uri: page://self/admin/customer-csv
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming AdminExportCustomerInput
+│   │   ├── being_final AdminCustomerCsvExported inject=[adminSession, customerQuery +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-2>
+│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null-3>
+│   │   │   └── close being_final_close
+│   │   │       ├── csv: customerId,email,name01,name02,kana01,kana02,companyName,phoneNumber,postalCode,pref,addr01,addr02,customerStatus
+0123456789abcdef0123456789abcdef,alice@example.com,山田,アリス,ヤマダ,アリス,,0312345678,1500001,13,渋谷区,神宮前1-1-1,2
+fedcba9876543210fedcba9876543210,bob@example.com,鈴木,太郎,,,"Acme Corp.",,,,,,2
+aaaaaaaa00000000bbbbbbbb11111111,carol@example.com,佐藤,花子,サトウ,ハナコ,,0901234567,1000005,13,千代田区,丸の内2-2-2,2
+10000000aaaa1111bbbb2222cccc3333,login-test@example.com,鈴木,次郎,,,,,,,,,2
+20000000dddd2222eeee3333ffff4444,provisional@example.com,高橋,三郎,,,,,,,,,1
+
+│   │   │       └── rowCount: 5
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

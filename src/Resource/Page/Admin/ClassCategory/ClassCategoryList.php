@@ -57,6 +57,8 @@ class ClassCategoryList extends ResourceObject
     #[Link(rel: 'doUpdateClassCategory', href: 'page://self/admin/class-category/class-category', method: 'put')]
     #[Link(rel: 'doDeleteClassCategory', href: 'page://self/admin/class-category/class-category', method: 'delete')]
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
+    #[Link(rel: 'doSortNoMove', href: 'page://self/admin/sort-no-move', method: 'put')]
+    #[Link(rel: 'doToggleVisible', href: 'page://self/admin/toggle-visible', method: 'put')]
     public function onGet(string|null $classNameId = null): static
     {
         $final = ($this->becoming)(new GetAdminClassCategoryListInput(classNameId: $classNameId));

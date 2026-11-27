@@ -50,6 +50,8 @@ class PaymentList extends ResourceObject
     #[Link(rel: 'doToggleVisible', href: 'page://self/admin/toggle-visible', method: 'put')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
+    #[Link(rel: 'doSortNoMove', href: 'page://self/admin/sort-no-move', method: 'put')]
+    #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetAdminPaymentListInput());

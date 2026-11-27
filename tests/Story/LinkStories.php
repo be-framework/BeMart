@@ -173,7 +173,7 @@ final class LinkStories
      */
     public static function forAdmins(): array
     {
-        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance() + self::adminOrders() + self::adminSystem() + self::adminOperations();
+        return self::admin() + self::adminContentPublish() + self::adminShopConfiguration() + self::adminMaintenance() + self::adminOrders() + self::adminSystem() + self::adminOperations() + self::adminNavigation();
     }
 
     /** @return array<string, array{string, int, string, array<string, mixed>}> */
@@ -768,6 +768,115 @@ final class LinkStories
     }
 
     /**
+     * flow-admin-shop-configuration, flow-admin-content-publish, flow-admin-csv-exchange, flow-admin-security-management
+     *
+     * @return array<string, array{string, int, string, array<string, mixed>}>
+     */
+    private static function adminNavigation(): array
+    {
+        $rows = [];
+        $top = [
+            'goBaseInfo' => ['shop settings', '/admin/base-info'],
+            'goBlockList' => ['block list', '/admin/block/block-list'],
+            'goClassCategoryList' => ['class category list', '/admin/class-category/class-category-list'],
+            'goClassNameList' => ['class name list', '/admin/class-name/class-name-list'],
+            'goCustomerList' => ['customer list', '/admin/customer-list'],
+            'goDeliveryList' => ['delivery list', '/admin/delivery/delivery-list'],
+            'goLayoutList' => ['layout list', '/admin/layout/layout-list'],
+            'goLoginHistoryList' => ['login history', '/admin/login-history'],
+            'goMailTemplateList' => ['mail template list', '/admin/mail-template'],
+            'goNewsList' => ['news list', '/admin/news/news-list'],
+            'goOrderList' => ['order list', '/admin/order-list'],
+            'goPageList' => ['page list', '/admin/page/page-list'],
+            'goPaymentList' => ['payment list', '/admin/payment/payment-list'],
+            'goPluginList' => ['plugin list', '/admin/plugin-list'],
+            'goProductList' => ['product list', '/admin/product-list'],
+            'goTagList' => ['tag list', '/admin/tag/tag-list'],
+            'goTaxRuleList' => ['tax rule list', '/admin/tax-rule/tax-rule-list'],
+            'goTemplateList' => ['template list', '/admin/template/template-list'],
+            'goTradeLawList' => ['trade law page', '/admin/trade-law'],
+        ];
+        foreach ($top as $rel => [$page, $path]) {
+            $rows['admin top leads to the ' . $page] = ['page://self/admin/index#link=self:' . $rel, Code::OK, $path, []];
+        }
+
+        return $rows + [
+            'product list leads to the category list and its csv' => [
+                'page://self/admin/product-list#link=self:goCategoryList,self:goExportCategory',
+                Code::OK,
+                '/admin/category/csv',
+                [],
+            ],
+            'category edit leads to the product list' => [
+                'page://self/admin/category/edit#link=self:goProductList',
+                Code::OK,
+                '/admin/product-list',
+                [],
+            ],
+            'category list leads to the order csv' => [
+                'page://self/admin/category/category-list#link=self:goExportOrder',
+                Code::OK,
+                '/admin/order/export-order',
+                [],
+            ],
+            'class name list leads to the class category csv' => [
+                'page://self/admin/class-name/class-name-list#link=self:goExportClassCategory',
+                Code::OK,
+                '/admin/class-category/class-category-export',
+                [],
+            ],
+            'order list leads to the customer csv' => [
+                'page://self/admin/order-list#link=self:goExportCustomer',
+                Code::OK,
+                '/admin/customer-csv',
+                [],
+            ],
+            'customer list leads to the class name csv' => [
+                'page://self/admin/customer-list#link=self:goExportClassName',
+                Code::OK,
+                '/admin/class-name/class-name-export',
+                [],
+            ],
+            'payment, delivery and tax rule lists follow one another to the calendar' => [
+                'page://self/admin/payment/payment-list#link=self:goDeliveryList,self:goTaxRuleList,self:goCalendar',
+                Code::OK,
+                '/admin/calendar',
+                [],
+            ],
+            'news, page, block and layout lists follow one another' => [
+                'page://self/admin/news/news-list#link=self:goPageList,self:goBlockList,self:goLayoutList',
+                Code::OK,
+                '/admin/layout/layout-list',
+                [],
+            ],
+            'trade law leads to the css page and the js page' => [
+                'page://self/admin/trade-law#link=self:goContentCss,self:goContentJs',
+                Code::OK,
+                '/admin/content/js',
+                [],
+            ],
+            'cache leads to maintenance and the system information' => [
+                'page://self/admin/content/cache#link=self:goMaintenance,self:goSystemInfo',
+                Code::OK,
+                '/admin/system',
+                [],
+            ],
+            'security leads to the second factor setup and back to the verification' => [
+                'page://self/admin/security#link=self:goTwoFactorAuthSet,self:goTwoFactorAuth',
+                Code::OK,
+                '/admin/two-factor-auth',
+                [],
+            ],
+            'authority role leads to the login history' => [
+                uri_template('page://self/admin/authority-role{?loginId,authority}#link=self:goLoginHistoryList', ['loginId' => 'shop-owner', 'authority' => '1']),
+                Code::OK,
+                '/admin/login-history',
+                [],
+            ],
+        ];
+    }
+
+    /**
      * The URI and the exception that stops the story.
      *
      * @return array<string, array{string, class-string<\Throwable>}>
@@ -794,24 +903,12 @@ final class LinkStories
                 ]),
                 LinkRelException::class,
             ],
-            'the login history link is declared only on the authority role write methods' => [
-                uri_template('page://self/admin/authority-role{?loginId,authority}#link=self:goLoginHistoryList', ['loginId' => 'shop-owner', 'authority' => '1']),
-                LinkRelException::class,
-            ],
-            'the second factor setup link is declared only on the security write method' => [
-                'page://self/admin/security#link=self:goTwoFactorAuthSet',
-                LinkRelException::class,
-            ],
             'the password form does not declare its submit link' => [
                 uri_template('page://self/admin/change-password#link=self:doChangePassword{?form*}', ['form' => self::form(['currentPassword' => 'a', 'newPassword' => 'b'])]),
                 LinkRelException::class,
             ],
             'the block list declares the block page only on write methods' => [
                 'page://self/admin/block/block-list#link=self:goBlock',
-                LinkRelException::class,
-            ],
-            'the css page declares the js page only on the write method' => [
-                'page://self/admin/content/css#link=self:goContentJs',
                 LinkRelException::class,
             ],
             'the delivery address editor declares the customer page only on write methods' => [

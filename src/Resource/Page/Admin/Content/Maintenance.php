@@ -43,6 +43,7 @@ class Maintenance extends ResourceObject
     #[Alps('goMaintenance')]
     #[JsonSchema(schema: 'get-admin-content-maintenance.json')]
     #[Link(rel: 'doToggleMaintenance', href: 'page://self/admin/content/maintenance', method: 'put')]
+    #[Link(rel: 'goSystemInfo', href: 'page://self/admin/system')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

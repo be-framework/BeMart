@@ -57,6 +57,7 @@ class TaxRuleList extends ResourceObject
     #[JsonSchema(schema: 'get-admin-tax-rule-tax-rule-list.json')]
     #[Link(rel: 'doCreateTaxRule', href: 'page://self/admin/tax-rule/tax-rule-list', method: 'post')]
     #[Link(rel: 'doDeleteTaxRule', href: 'page://self/admin/tax-rule/tax-rule', method: 'delete')]
+    #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetAdminTaxRuleListInput());

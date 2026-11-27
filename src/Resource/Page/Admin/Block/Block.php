@@ -65,6 +65,7 @@ class Block extends ResourceObject
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[Link(rel: 'doUpdateBlock', href: 'page://self/admin/block/block', method: 'put')]
     #[Link(rel: 'doDeleteBlock', href: 'page://self/admin/block/block', method: 'delete')]
+    #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
     public function onGet(string|null $blockId = null): static
     {
         if ($blockId === null || $blockId === '') {

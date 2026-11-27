@@ -51,6 +51,8 @@ class ClassNameList extends ResourceObject
     #[Link(rel: 'doUpdateClassName', href: 'page://self/admin/class-name/class-name', method: 'put')]
     #[Link(rel: 'doDeleteClassName', href: 'page://self/admin/class-name/class-name', method: 'delete')]
     #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list{?classNameId}')]
+    #[Link(rel: 'doSortNoMove', href: 'page://self/admin/sort-no-move', method: 'put')]
+    #[Link(rel: 'goExportClassCategory', href: 'page://self/admin/class-category/class-category-export')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetAdminClassNameListInput());

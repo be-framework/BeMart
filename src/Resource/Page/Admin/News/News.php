@@ -63,6 +63,7 @@ class News extends ResourceObject
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
     #[Link(rel: 'doUpdateNews', href: 'page://self/admin/news/news{?newsId}', method: 'put')]
     #[Link(rel: 'doDeleteNews', href: 'page://self/admin/news/news{?newsId}', method: 'delete')]
+    #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
     public function onGet(string|null $newsId = null): static
     {
         if ($newsId === null || $newsId === '') {

@@ -1,0 +1,49 @@
+link_request get 'page://self/admin/class-name/class-name-list#link=self:goExportClassCategory'
+├── uri: page://self/admin/class-name/class-name-list
+├── method: GET
+├── links[0]: self:goExportClassCategory
+├── resource_request get 'page://self/admin/class-name/class-name-list'
+│   ├── uri: page://self/admin/class-name/class-name-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminClassNameListInput
+│   │   ├── being_final AdminClassNameListFetched inject=[adminSession, classNames]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.classNames: MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── classNames[0].classNameId: cn-color
+│   │   │       ├── classNames[0].name: Color
+│   │   │       ├── classNames[1].classNameId: cn-size
+│   │   │       └── classNames[1].name: Size
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/class-category/class-category-export'
+│   ├── uri: page://self/admin/class-category/class-category-export
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming ExportClassCategoryInput
+│   │   ├── being_final ClassCategoryCsvExported input=[classNameId] inject=[adminSession, csv]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.csv: MyVendor\BeMart\Be\Reason\Fake\Service\FakeClassCsvCompatibility
+│   │   │   └── close being_final_close
+│   │   │       ├── document.size: 65
+│   │   │       ├── document.content: 規格分類ID,規格名ID,規格分類名
+cc-red,cn-color,赤
+
+│   │   │       ├── document.fileName: class_category.csv
+│   │   │       └── document.contentDisposition: attachment; filename="class_category.csv"
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

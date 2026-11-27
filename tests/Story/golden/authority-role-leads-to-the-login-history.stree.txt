@@ -1,0 +1,51 @@
+link_request get 'page://self/admin/authority-role#link=self:goLoginHistoryList'
+├── uri: page://self/admin/authority-role
+├── method: GET
+├── links[0]: self:goLoginHistoryList
+├── resource_request get 'page://self/admin/authority-role?loginId=shop-owner&authority=1'
+│   ├── uri: page://self/admin/authority-role
+│   ├── method: GET
+│   ├── params.loginId: shop-owner
+│   ├── params.authority: 1
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/login-history'
+│   ├── uri: page://self/admin/login-history
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetLoginHistoryListInput
+│   │   ├── limit: 50
+│   │   ├── being_final LoginHistoryListFetched input=[limit] inject=[adminSession, history]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.history: MyVendor\BeMart\Be\Reason\Fake\Query\InMemoryLoginHistoryStorage
+│   │   │   └── close being_final_close
+│   │   │       ├── entries[0].timestamp: 2026-05-19T09:12:34+09:00
+│   │   │       ├── entries[0].loginId: test-admin
+│   │   │       ├── entries[0].success: true
+│   │   │       ├── entries[0].clientIp: 192.0.2.10
+│   │   │       ├── entries[1].timestamp: 2026-05-18T22:08:01+09:00
+│   │   │       ├── entries[1].loginId: test-admin
+│   │   │       ├── entries[1].success: false
+│   │   │       ├── entries[1].clientIp: 203.0.113.45
+│   │   │       ├── entries[2].timestamp: 2026-05-18T18:55:12+09:00
+│   │   │       ├── entries[2].loginId: shop-owner
+│   │   │       ├── entries[2].success: true
+│   │   │       ├── entries[2].clientIp: 198.51.100.7
+│   │   │       ├── entries[3].timestamp: 2026-05-18T08:00:00+09:00
+│   │   │       ├── entries[3].loginId: unknown-user
+│   │   │       ├── entries[3].success: false
+│   │   │       ├── entries[3].clientIp: 203.0.113.99
+│   │   │       └── count: 4
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

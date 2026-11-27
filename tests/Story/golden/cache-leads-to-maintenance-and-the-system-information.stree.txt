@@ -1,0 +1,32 @@
+link_request get 'page://self/admin/content/cache#link=self:goMaintenance,self:goSystemInfo'
+├── uri: page://self/admin/content/cache
+├── method: GET
+├── links[0]: self:goMaintenance
+├── links[1]: self:goSystemInfo
+├── resource_request get 'page://self/admin/content/cache'
+│   ├── uri: page://self/admin/content/cache
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/content/maintenance'
+│   ├── uri: page://self/admin/content/maintenance
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/system'
+│   ├── uri: page://self/admin/system
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

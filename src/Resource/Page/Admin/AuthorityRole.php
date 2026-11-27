@@ -83,6 +83,7 @@ class AuthorityRole extends ResourceObject
     #[JsonSchema(schema: 'get-admin-authority-role.json')]
     #[Link(rel: 'doUpdateAuthorityRole', href: 'page://self/admin/authority-role', method: 'post')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
+    #[Link(rel: 'goLoginHistoryList', href: 'page://self/admin/login-history')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

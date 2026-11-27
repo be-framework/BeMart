@@ -60,6 +60,7 @@ class CategoryList extends ResourceObject
     #[Link(rel: 'doDeleteCategory', href: 'page://self/admin/category/category', method: 'delete')]
     #[Link(rel: 'doImportCategoryCsv', href: 'page://self/admin/category/csv', method: 'post')]
     #[Link(rel: 'goExportCategory', href: 'page://self/admin/category/csv', method: 'get')]
+    #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order', method: 'get')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetAdminCategoryListInput());

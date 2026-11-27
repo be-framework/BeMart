@@ -59,6 +59,7 @@ class Delivery extends ResourceObject
     #[Alps('doUpdateDelivery')]
     #[JsonSchema(schema: 'get-admin-delivery-delivery.json', params: 'get-admin-delivery-delivery.param.json')]
     #[Link(rel: 'doUpdateDelivery', href: 'page://self/admin/delivery/delivery', method: 'put')]
+    #[Link(rel: 'doDeleteDelivery', href: 'page://self/admin/delivery/delivery', method: 'delete')]
     public function onGet(string $deliveryId = ''): static
     {
         $final = ($this->becoming)(new GetAdminDeliveryListInput());

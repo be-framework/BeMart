@@ -1,0 +1,43 @@
+link_request get 'page://self/admin/index#link=self:goBaseInfo'
+├── uri: page://self/admin/index
+├── method: GET
+├── links[0]: self:goBaseInfo
+├── resource_request get 'page://self/admin/index'
+│   ├── uri: page://self/admin/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/base-info'
+│   ├── uri: page://self/admin/base-info
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetBaseInfoInput
+│   │   ├── being_final BaseInfoFetched inject=[adminSession, baseInfoStorage]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.baseInfoStorage: MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── shopName: BeMart
+│   │   │       ├── shopKana: ビーマート
+│   │   │       ├── shopNameEng: BeMart
+│   │   │       ├── companyName: 株式会社BeMart
+│   │   │       ├── postalCode: 1010047
+│   │   │       ├── pref: 13
+│   │   │       ├── addr01: 東京都千代田区
+│   │   │       ├── addr02: 神田1-1-1
+│   │   │       ├── phoneNumber: 0312345678
+│   │   │       ├── businessHour: 10:00-19:00
+│   │   │       ├── shopEmail01: shop@example.com
+│   │   │       └── shopMessage: ようこそ、BeMart へ。
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

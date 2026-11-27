@@ -60,6 +60,8 @@ class Edit extends ResourceObject
     #[Link(rel: 'doCreateCategory', href: 'page://self/admin/category/category-list', method: 'post')]
     #[Link(rel: 'doUpdateCategory', href: 'page://self/admin/category/category', method: 'put')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
+    #[Link(rel: 'doDeleteCategory', href: 'page://self/admin/category/category', method: 'delete')]
+    #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     public function onGet(string $categoryId = ''): static
     {
         $listFinal = ($this->becoming)(new GetAdminCategoryListInput());

@@ -57,6 +57,7 @@ class TradeLaw extends ResourceObject
     #[Alps('goTradeLawList')]
     #[JsonSchema(schema: 'get-admin-trade-law.json')]
     #[Link(rel: 'doUpdateTradeLaw', href: 'page://self/admin/trade-law', method: 'post')]
+    #[Link(rel: 'goContentCss', href: 'page://self/admin/content/css')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

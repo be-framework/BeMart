@@ -1,0 +1,40 @@
+link_request get 'page://self/admin/index#link=self:goBlockList'
+├── uri: page://self/admin/index
+├── method: GET
+├── links[0]: self:goBlockList
+├── resource_request get 'page://self/admin/index'
+│   ├── uri: page://self/admin/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/block/block-list'
+│   ├── uri: page://self/admin/block/block-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminBlockListInput
+│   │   ├── being_final AdminBlockListFetched inject=[adminSession, blocks]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.blocks: MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── blocks[0].blockId: bk-header
+│   │   │       ├── blocks[0].blockName: ヘッダー
+│   │   │       ├── blocks[0].blockFileName: header
+│   │   │       ├── blocks[0].blockDeletable: false
+│   │   │       ├── blocks[1].blockId: bk-user
+│   │   │       ├── blocks[1].blockName: ユーザーブロック
+│   │   │       ├── blocks[1].blockFileName: user_block
+│   │   │       └── blocks[1].blockDeletable: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

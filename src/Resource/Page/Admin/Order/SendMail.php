@@ -67,6 +67,8 @@ class SendMail extends ResourceObject
     #[Link(rel: 'doSendOrderMail', href: 'page://self/admin/order/send-mail', method: 'post')]
     #[Link(rel: 'goOrderMailConfirm', href: 'page://self/admin/order/mail-confirm', method: 'get')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
+    #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order', method: 'get')]
+    #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf', method: 'get')]
     public function onGet(string $orderNo = ''): static
     {
         if ($this->adminSession->adminId === null) {

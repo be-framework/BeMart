@@ -1,0 +1,34 @@
+link_request get 'page://self/admin/index#link=self:goTradeLawList'
+├── uri: page://self/admin/index
+├── method: GET
+├── links[0]: self:goTradeLawList
+├── resource_request get 'page://self/admin/index'
+│   ├── uri: page://self/admin/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/trade-law'
+│   ├── uri: page://self/admin/trade-law
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetTradeLawInput
+│   │   ├── being_final TradeLawFetched inject=[adminSession, tradeLawStorage]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.tradeLawStorage: MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       └── tradeLawBody: 販売業者: 株式会社BeMart
+所在地: 東京都千代田区神田1-1-1
+連絡先: 03-1234-5678
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

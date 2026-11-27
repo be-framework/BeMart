@@ -1,0 +1,50 @@
+link_request get 'page://self/admin/category/category-list#link=self:goExportOrder'
+├── uri: page://self/admin/category/category-list
+├── method: GET
+├── links[0]: self:goExportOrder
+├── resource_request get 'page://self/admin/category/category-list'
+│   ├── uri: page://self/admin/category/category-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminCategoryListInput
+│   │   ├── being_final AdminCategoryListFetched inject=[adminSession, categories]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.categories: MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 2
+│   │   │       ├── categories[0].categoryId: cat-food
+│   │   │       ├── categories[0].categoryName: Food
+│   │   │       ├── categories[0].sortNo: 10
+│   │   │       ├── categories[1].categoryId: cat-drinks
+│   │   │       ├── categories[1].categoryName: Drinks
+│   │   │       └── categories[1].sortNo: 20
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/order/export-order'
+│   ├── uri: page://self/admin/order/export-order
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming AdminExportOrderInput
+│   │   ├── being_final AdminOrderCsvExported inject=[adminSession, orderQuery +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null-2>
+│   │   │   ├── inject.csvColumnConfig: MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface<Null-3>
+│   │   │   └── close being_final_close
+│   │   │       ├── csv: orderNo,customerId,orderStatus,orderDate,total,paymentTotal,subtotal,deliveryFeeTotal,charge,discount,tax
+past0000000000000000000000000001,customer-001,1,"2026-04-01 10:00:00",12700,12700,11000,600,0,0,1100
+
+│   │   │       └── rowCount: 1
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

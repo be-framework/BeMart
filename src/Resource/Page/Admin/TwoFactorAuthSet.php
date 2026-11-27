@@ -75,6 +75,7 @@ class TwoFactorAuthSet extends ResourceObject
     #[JsonSchema(schema: 'get-admin-two-factor-auth-set.json')]
     #[Link(rel: 'doSetTwoFactorAuth', href: 'page://self/admin/two-factor-auth-set', method: 'put')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
+    #[Link(rel: 'goTwoFactorAuth', href: 'page://self/admin/two-factor-auth')]
     public function onGet(): static
     {
         $challenge = $this->setupChallenge();

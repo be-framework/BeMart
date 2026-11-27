@@ -1,0 +1,73 @@
+link_request get 'page://self/admin/customer-list#link=self:goExportClassName'
+├── uri: page://self/admin/customer-list
+├── method: GET
+├── links[0]: self:goExportClassName
+├── resource_request get 'page://self/admin/customer-list'
+│   ├── uri: page://self/admin/customer-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCustomerListInput
+│   │   ├── limit: 50
+│   │   ├── being_final CustomerListFetched input=[nameKeyword, emailKeyword, limit] inject=[adminSession, customerQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── customers[0].customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── customers[0].email: alice@example.com
+│   │   │       ├── customers[0].name01: 山田
+│   │   │       ├── customers[0].name02: アリス
+│   │   │       ├── customers[0].customerStatus: 2
+│   │   │       ├── customers[0].postalCode: 1500001
+│   │   │       ├── customers[1].customerId: fedcba9876543210fedcba9876543210
+│   │   │       ├── customers[1].email: bob@example.com
+│   │   │       ├── customers[1].name01: 鈴木
+│   │   │       ├── customers[1].name02: 太郎
+│   │   │       ├── customers[1].customerStatus: 2
+│   │   │       ├── customers[2].customerId: aaaaaaaa00000000bbbbbbbb11111111
+│   │   │       ├── customers[2].email: carol@example.com
+│   │   │       ├── customers[2].name01: 佐藤
+│   │   │       ├── customers[2].name02: 花子
+│   │   │       ├── customers[2].customerStatus: 2
+│   │   │       ├── customers[2].postalCode: 1000005
+│   │   │       ├── customers[3].customerId: 10000000aaaa1111bbbb2222cccc3333
+│   │   │       ├── customers[3].email: login-test@example.com
+│   │   │       ├── customers[3].name01: 鈴木
+│   │   │       ├── customers[3].name02: 次郎
+│   │   │       ├── customers[3].customerStatus: 2
+│   │   │       ├── customers[4].customerId: 20000000dddd2222eeee3333ffff4444
+│   │   │       ├── customers[4].email: provisional@example.com
+│   │   │       ├── customers[4].name01: 高橋
+│   │   │       ├── customers[4].name02: 三郎
+│   │   │       ├── customers[4].customerStatus: 1
+│   │   │       └── count: 5
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/class-name/class-name-export'
+│   ├── uri: page://self/admin/class-name/class-name-export
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming ExportClassNameInput
+│   │   ├── being_final ClassNameCsvExported inject=[adminSession, csv]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.csv: MyVendor\BeMart\Be\Reason\Fake\Service\FakeClassCsvCompatibility
+│   │   │   └── close being_final_close
+│   │   │       ├── document.size: 43
+│   │   │       ├── document.content: 規格名ID,規格名
+cn-color,カラー
+
+│   │   │       ├── document.fileName: class_name.csv
+│   │   │       └── document.contentDisposition: attachment; filename="class_name.csv"
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

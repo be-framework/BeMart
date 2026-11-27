@@ -1,0 +1,37 @@
+link_request get 'page://self/admin/index#link=self:goNewsList'
+├── uri: page://self/admin/index
+├── method: GET
+├── links[0]: self:goNewsList
+├── resource_request get 'page://self/admin/index'
+│   ├── uri: page://self/admin/index
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/news/news-list'
+│   ├── uri: page://self/admin/news/news-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminNewsListInput
+│   │   ├── being_final AdminNewsListFetched inject=[adminSession, news]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.news: MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface<Null-1>
+│   │   │   └── close being_final_close
+│   │   │       ├── count: 1
+│   │   │       ├── news[0].newsId: nw-welcome
+│   │   │       ├── news[0].newsTitle: ようこそ
+│   │   │       ├── news[0].newsDescription: BeMart へようこそ。
+│   │   │       ├── news[0].publishDate: 2026-01-01T00:00:00+09:00
+│   │   │       └── news[0].linkMethod: false
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)
