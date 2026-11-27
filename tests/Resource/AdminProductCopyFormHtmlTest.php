@@ -17,6 +17,7 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 
 use function assert;
+use function preg_match_all;
 
 /** Submits the rendered doCopyProduct form of each admin screen the way a browser would. */
 final class AdminProductCopyFormHtmlTest extends TestCase
@@ -55,11 +56,18 @@ final class AdminProductCopyFormHtmlTest extends TestCase
     #[DataProvider('screens')]
     public function testCopyFormReachesTheCopy(string $uri): void
     {
+        $html = $this->resource->get($uri)->toString();
+        // A browser drops a form nested in another; libxml repairs some nestings, so count the raw tags
+        preg_match_all('#<(/?)form\b#i', $html, $tags);
+        $depth = 0;
+        foreach ($tags[1] as $close) {
+            $depth += $close === '' ? 1 : -1;
+            $this->assertLessThanOrEqual(1, $depth, 'nested form');
+        }
+
         $dom = new DOMDocument();
-        @$dom->loadHTML($this->resource->get($uri)->toString());
+        @$dom->loadHTML($html);
         $xpath = new DOMXPath($dom);
-        // DOMDocument keeps a nested form that a browser drops, so it is checked here
-        $this->assertSame(0, $xpath->query('//form//form')?->length);
 
         $form = $xpath->query('//form[@rel="doCopyProduct"][.//input[@name="productCode"][@value="' . self::PRODUCT_CODE . '"]]')?->item(0);
         $this->assertInstanceOf(DOMElement::class, $form);
