@@ -44,7 +44,7 @@ title: "Context composition plan"
 | `dev-fake-hal-app` | alias / direct test use | Fake + dev logging。 |
 | `cli-dev-fake-hal-app` | `bin/dev.php` | CLI 版 Fake + dev logging。 |
 | `test-hal-app` | PHPUnit / `tests/Http/json-index.php` | Test + Fake + dev diagnostics + HAL。 |
-| `admin-test-hal-app` | `tests/Http/admin-json-index.php` | Test + HAL + logged-in admin session。 |
+| `admin-test-hal-app` | `tests/Http/story-json-index.php` | Test + HAL + logged-in admin session。リンクのストーリーは FakeQuery と、ヘッダで決まる顧客で上書きする。 |
 | `html-test-hal-app` | `tests/Http/index.php` | Test + HTML presentation。 |
 
 ## 削除済みの旧 wrapper / boundary

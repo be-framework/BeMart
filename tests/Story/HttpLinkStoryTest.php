@@ -14,7 +14,8 @@ use PHPUnit\Framework\Attributes\DataProviderExternal;
 use function dirname;
 
 /**
- * Follows the stories over HTTP on the Fake HAL app with an admin signed in, from the links the representations carry.
+ * Follows the stories over HTTP on the Fake HAL app with an admin signed in, from the links the representations carry,
+ * as a guest unless a test signs a customer in.
  */
 final class HttpLinkStoryTest extends AbstractLinkStoryCase
 {
@@ -22,8 +23,7 @@ final class HttpLinkStoryTest extends AbstractLinkStoryCase
 
     protected function setUp(): void
     {
-        $http = dirname(__DIR__) . '/Http';
-        $this->resource = new HttpResource(LocalServerHost::for(self::class)->host, $http . '/admin-json-index.php', $http . '/log', ['Sec-Fetch-Site' => 'same-origin']);
+        $this->signIn(null);
     }
 
     /**
@@ -33,6 +33,41 @@ final class HttpLinkStoryTest extends AbstractLinkStoryCase
     #[DataProviderExternal(LinkStories::class, 'followable')]
     public function testFollows(string $uri, int $code, string $path, array $body, string|array $flow = []): void
     {
+        $this->assertFlow($uri, $flow);
+        $this->assertEnd($this->resource->get($uri), $code, $path, $body);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     * @param string|list<string> $flow
+     */
+    #[DataProviderExternal(LinkStories::class, 'forAdminOrders')]
+    public function testFollowsAdminOrders(string $uri, int $code, string $path, array $body, string|array $flow = []): void
+    {
+        $this->assertFlow($uri, $flow);
+        $this->assertEnd($this->resource->get($uri), $code, $path, $body);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     * @param string|list<string> $flow
+     */
+    #[DataProviderExternal(LinkStories::class, 'forMembers')]
+    public function testFollowsAsMember(string $uri, int $code, string $path, array $body, string|array $flow = []): void
+    {
+        $this->signIn(StoryModule::MEMBER_ID);
+        $this->assertFlow($uri, $flow);
+        $this->assertEnd($this->resource->get($uri), $code, $path, $body);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     * @param string|list<string> $flow
+     */
+    #[DataProviderExternal(LinkStories::class, 'forBuyers')]
+    public function testFollowsAsBuyer(string $uri, int $code, string $path, array $body, string|array $flow = []): void
+    {
+        $this->signIn(StoryModule::BUYER_ID);
         $this->assertFlow($uri, $flow);
         $this->assertEnd($this->resource->get($uri), $code, $path, $body);
     }
@@ -66,5 +101,17 @@ final class HttpLinkStoryTest extends AbstractLinkStoryCase
     {
         $this->assertFlow($uri, $flow);
         $this->assertEnd($this->resource->post($uri, $query + ['file' => FileUpload::fromFile($file)]), $code, $path, []);
+    }
+
+    /** @param non-empty-string|null $customerId sent as the header tests/Http/story-json-index.php signs the customer in with */
+    private function signIn(string|null $customerId): void
+    {
+        $http = dirname(__DIR__) . '/Http';
+        $headers = ['Sec-Fetch-Site' => 'same-origin'];
+        if ($customerId !== null) {
+            $headers['X-BeMart-Test-Customer-Id'] = $customerId;
+        }
+
+        $this->resource = new HttpResource(LocalServerHost::for(self::class)->host, $http . '/story-json-index.php', $http . '/log', $headers);
     }
 }
