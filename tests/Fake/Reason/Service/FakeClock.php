@@ -10,7 +10,7 @@ use Override;
 
 final class FakeClock implements ClockInterface
 {
-    public const string NOW = '2026-04-01T10:00:00+09:00';
+    public const string NOW = '2026-05-15T12:34:56+09:00';
 
     #[Override]
     public function now(): DateTimeImmutable

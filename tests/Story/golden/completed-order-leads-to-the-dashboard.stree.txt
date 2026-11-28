@@ -335,8 +335,8 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   │   │   ├── inject.clock: MyVendor\BeMart\Be\Reason\Fake\Service\FakeClock
 │   │   │   └── close being_close
 │   │   │       ├── orderNo: 00000000000000000000000000000001
-│   │   │       ├── orderDate: 2026-04-01T10:00:00+09:00
-│   │   │       ├── paymentDate: 2026-04-01T10:00:00+09:00
+│   │   │       ├── orderDate: 2026-05-15T12:34:56+09:00
+│   │   │       ├── paymentDate: 2026-05-15T12:34:56+09:00
 │   │   │       ├── preOrderId: aceface0000000000000000000000000000a11ce
 │   │   │       ├── order.preOrderId: aceface0000000000000000000000000000a11ce
 │   │   │       ├── order.customerId: 0123456789abcdef0123456789abcdef
@@ -377,8 +377,8 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   │   │       ├── paymentTotal: 18290
 │   │   │       ├── addPoint: 182
 │   │   │       ├── orderStatus: 1
-│   │   │       ├── orderDate: 2026-04-01T10:00:00+09:00
-│   │   │       └── paymentDate: 2026-04-01T10:00:00+09:00
+│   │   │       ├── orderDate: 2026-05-15T12:34:56+09:00
+│   │   │       └── paymentDate: 2026-05-15T12:34:56+09:00
 │   │   └── close becoming_close
 │   │       └── exit: success
 │   └── close resource_response
