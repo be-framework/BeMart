@@ -13,6 +13,8 @@ golden では、リクエストの順、method、params、becoming、応答の c
 
 ツリーの後の `events:` は、bear/event-sourcing の抽出器がこのログからイベントとして取り出すリクエスト（再生で再び実行されるもの）。連鎖の途中で成功した POST・PUT・DELETE が 1 件ずつ並び、GET だけの連鎖と、状態を変えるリクエストが成功する前に止まった連鎖は `(none)` になる。
 
+遷移を「辿った」と数えるのは、golden に記録されたステップだけ（`composer story:flows`・`composer story:uncovered`）。400 などで連鎖が止まった行は、止まった所までを数え、その先の rel は辿っていない。行が宣言する `flow-*` と辿る遷移の照合も同じ rel を使うので、止まった先の rel だけが持つフローは宣言できない。201・303 の Location の GET はリンクを消費しない。`persisted()`・`uploads()`・`unfollowable()` の行と、まだ golden を記録していない行は、URI の rel を数える。`UPDATE_GOLDEN=1` で記録する間は、宣言の照合を飛ばす（記録のあとの `composer cs` が照合する）。
+
 ## URI の書き方
 
 URI は `uri_template()`（RFC 6570）で組み、値は行ごとに渡す。文字列の値は `{?form*}` のように書く。フォームの値は `LinkStories::form()` で CSRF トークンを足す。
@@ -52,7 +54,7 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 テストは次を確かめる。`composer cs:story` はすべての行を、`testFollows*`・`testRefuses`・`testUploads` は流す行の上の 3 つを見る。
 
 - 宣言したタグが `alps.json` にある
-- URI の `#link=` が辿る rel のうち `flow-*` タグを持つものはすべて、宣言したタグのどれかを持つ（複数宣言したときは、宣言したタグのどれもが、どれかの rel に付いている）
+- 行が辿る rel（golden のある行は golden が記録したもの、ない行は URI の `#link=`）のうち `flow-*` タグを持つものはすべて、宣言したタグのどれかを持つ（複数宣言したときは、宣言したタグのどれもが、どれかの rel に付いている）
 - `flow-*` タグを持たない遷移（`goHelp*` など）はどのフローにも属さないので、照合では中立に扱う
 - 辿る遷移に `flow-*` タグがあれば、行はフローを宣言する。フローを宣言しない（図のリンクも付かない）のは、辿る遷移のどれにも `flow-*` タグがない行だけ
 
