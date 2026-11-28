@@ -1467,6 +1467,22 @@ final class LinkStories
                 'flow-customer-purchase',
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
+            'cart quantity is changed' => [
+                uri_template('page://self/cart#link=self:doUpdateCartItemQuantity{?form*}', ['form' => self::form(['productCode' => 'sample-001', 'quantity' => '2'])]),
+                Code::OK,
+                '/cart',
+                [],
+                'flow-customer-purchase',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
+            'a cart item is added and removed' => [
+                uri_template('page://self/cart#link=self:doAddCartItem{?item*},self:doRemoveCartItem{?remove*}', ['item' => $item, 'remove' => self::form(['productCode' => 'sample-001'])]),
+                Code::OK,
+                '/cart',
+                [],
+                'flow-customer-purchase',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'checkout is confirmed and completed' => [
                 uri_template($checkoutChain, ['confirm' => $confirm, 'checkout' => $checkout]),
                 Code::OK,
