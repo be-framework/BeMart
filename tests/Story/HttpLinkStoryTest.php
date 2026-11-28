@@ -8,6 +8,7 @@ use BEAR\Dev\Http\HttpResource;
 use BEAR\Resource\Code;
 use BEAR\Resource\Exception\ParameterException;
 use Koriym\FileUpload\FileUpload;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 use PHPUnit\Framework\Attributes\DataProviderExternal;
 
 use function dirname;
@@ -17,14 +18,12 @@ use function dirname;
  */
 final class HttpLinkStoryTest extends AbstractLinkStoryCase
 {
-    private const string HOST = '127.0.0.1:18491';
-
     private HttpResource $resource;
 
     protected function setUp(): void
     {
         $http = dirname(__DIR__) . '/Http';
-        $this->resource = new HttpResource(self::HOST, $http . '/admin-json-index.php', $http . '/log', ['Sec-Fetch-Site' => 'same-origin']);
+        $this->resource = new HttpResource(LocalServerHost::for(self::class)->host, $http . '/admin-json-index.php', $http . '/log', ['Sec-Fetch-Site' => 'same-origin']);
     }
 
     /**

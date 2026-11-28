@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Http;
 
 use Koriym\PhpServer\PhpServer;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 use PHPUnit\Framework\TestCase;
 
 use function dirname;
@@ -35,7 +36,6 @@ use function unlink;
  */
 final class HttpSqlAdminContentOperationFormTest extends TestCase
 {
-    private const HOST = '127.0.0.1:18189';
     private const ADMIN_ID = '1';
     private const CSRF_TOKEN = 'admin-content-operation-csrf-token';
 
@@ -46,7 +46,7 @@ final class HttpSqlAdminContentOperationFormTest extends TestCase
     {
         self::removeMaintenanceFlag();
         self::removeCustomizeAssetState();
-        self::$server = new PhpServer(self::HOST, __DIR__ . '/html-sql-index.php');
+        self::$server = new PhpServer(LocalServerHost::for(self::class)->host, __DIR__ . '/html-sql-index.php');
         self::$server->start();
     }
 
@@ -176,7 +176,7 @@ final class HttpSqlAdminContentOperationFormTest extends TestCase
             escapeshellarg('Sec-Fetch-Site: same-origin'),
             escapeshellarg($method),
             escapeshellarg(http_build_query($fields)),
-            escapeshellarg('http://' . self::HOST . $path),
+            escapeshellarg('http://' . LocalServerHost::for(self::class)->host . $path),
         );
         $raw = shell_exec($curl);
         $this->assertIsString($raw);
@@ -196,7 +196,7 @@ final class HttpSqlAdminContentOperationFormTest extends TestCase
             escapeshellarg('X-BeMart-Test-Csrf-Token: ' . self::CSRF_TOKEN),
             escapeshellarg('Sec-Fetch-Site: same-origin'),
             escapeshellarg($method),
-            escapeshellarg('http://' . self::HOST . $path),
+            escapeshellarg('http://' . LocalServerHost::for(self::class)->host . $path),
         );
         $raw = shell_exec($curl);
         $this->assertIsString($raw);

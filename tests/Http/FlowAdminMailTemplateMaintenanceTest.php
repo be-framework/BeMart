@@ -6,13 +6,14 @@ namespace MyVendor\BeMart\Tests\Http;
 
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Tests\Hypermedia\FlowAdminMailTemplateMaintenanceTest as Workflow;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 
 final class FlowAdminMailTemplateMaintenanceTest extends Workflow
 {
     protected function newResource(): ResourceInterface
     {
         return new HttpResource(
-            '127.0.0.1:18086',
+            LocalServerHost::for(self::class)->host,
             __DIR__ . '/prod-json-index.php',
             __DIR__ . '/log/' . self::FLOW_ID . '.log',
         );

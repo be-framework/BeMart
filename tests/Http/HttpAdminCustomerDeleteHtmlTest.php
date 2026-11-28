@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Tests\Http;
 use BEAR\Csrf\CsrfSessionKey;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 use PHPUnit\Framework\TestCase;
 
 use function bin2hex;
@@ -21,7 +22,6 @@ use const ENT_QUOTES;
 
 final class HttpAdminCustomerDeleteHtmlTest extends TestCase
 {
-    private const HOST = '127.0.0.1:8102';
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'http-admin-delete-customer-csrf-token';
 
@@ -31,7 +31,7 @@ final class HttpAdminCustomerDeleteHtmlTest extends TestCase
         $_SESSION[CsrfSessionKey::DEFAULT_NAME] = self::CSRF_TOKEN;
 
         $resource = new HttpResource(
-            self::HOST,
+            LocalServerHost::for(self::class)->host,
             __DIR__ . '/html-sql-index.php',
             __DIR__ . '/log/admin-customer-delete-html.log',
         );
