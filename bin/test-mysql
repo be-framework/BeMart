@@ -8,7 +8,7 @@
 # Its config, data and socket live under var/mysql, so worktrees never share a server.
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 DIR="$ROOT/var/mysql"
 CONFIG="$DIR/malt.json"
 DATABASE=${TEST_MYSQL_DATABASE:-eccubedb_test}
@@ -28,7 +28,7 @@ url() {
 
 # True only when the server on that port keeps its data under this worktree: nothing else is ever written to
 ours() {
-    [ "$(mysql --protocol=tcp -h127.0.0.1 -P"$1" -uroot -N -e 'SELECT @@datadir' 2>/dev/null)" = "$DIR/malt/var/mysql_0/" ]
+    [ "$(mysql --protocol=tcp --connect-timeout=2 -h127.0.0.1 -P"$1" -uroot -N -e 'SELECT @@datadir' 2>/dev/null)" = "$DIR/malt/var/mysql_0/" ]
 }
 
 listening() {
@@ -90,7 +90,11 @@ start() {
 }
 
 stop() {
-    [ ! -f "$CONFIG" ] || malt stop --config="$CONFIG"
+    # malt.next.json is left when a start was interrupted after its server came up
+    for config in "$CONFIG" "$DIR/malt.next.json"; do
+        [ ! -f "$config" ] || malt stop --config="$config"
+    done
+    rm -f "$DIR/malt.next.json"
 }
 
 case "${1:-}" in
