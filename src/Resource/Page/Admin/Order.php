@@ -76,6 +76,7 @@ class Order extends ResourceObject
     #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf{?orderNo}', method: 'get')]
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
     #[Link(rel: 'doUpdateTrackingNumber', href: 'page://self/admin/order/tracking-number', method: 'put')]
+    #[Link(rel: 'doSendShippingNotifyMail', href: 'page://self/admin/order/shipping-notify-mail', method: 'post')]
     public function onGet(string $orderNo): static
     {
         $final = ($this->becoming)(new GetAdminOrderInput(orderNo: $orderNo));
