@@ -43,13 +43,14 @@ if (getenv('BEMART_TEST_CONTEXTS_COMPILED') === '1') {
 
 putenv('BEMART_TEST_CONTEXTS_COMPILED=1');
 
-// Twig compiles each template once and does not notice an edit; a cache left by an earlier run would show the old markup.
-foreach ((array) glob(dirname(__DIR__) . '/var/tmp/*/twig') as $twigCache) {
-    if (! is_string($twigCache) || ! is_dir($twigCache)) {
+// Compiled output that an earlier run left behind: Twig does not notice a template edit, and a compiled prod graph
+// built before a constructor changed fails with ArgumentCountError.
+foreach ([...(array) glob(dirname(__DIR__) . '/var/tmp/*/twig'), dirname(__DIR__) . '/var/build'] as $compiled) {
+    if (! is_string($compiled) || ! is_dir($compiled)) {
         continue;
     }
 
-    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($twigCache, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($compiled, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
     foreach ($files as $file) {
         $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
     }

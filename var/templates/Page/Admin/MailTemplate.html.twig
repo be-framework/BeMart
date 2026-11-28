@@ -160,9 +160,9 @@ document.addEventListener('DOMContentLoaded', function () {
       <summary class="idea-admin-action"><i class="fa fa-plus" aria-hidden="true"></i> 新規作成</summary>
       <form method="post" action="/admin/mail-template/create" rel="doCreateMailTemplate">
         {{ csrf_field() }}
-        <input type="text" name="mailTemplateName" placeholder="テンプレート名" required>
-        <input type="text" name="fileName" placeholder="ファイル名" required>
-        <input type="text" name="mailSubject" placeholder="件名" required>
+        <input type="text" name="mailTemplateName" placeholder="テンプレート名" aria-label="テンプレート名" required>
+        <input type="text" name="fileName" placeholder="ファイル名" aria-label="ファイル名" required>
+        <input type="text" name="mailSubject" placeholder="件名" aria-label="件名" required>
         <button type="submit" class="idea-admin-action">作成</button>
       </form>
     </details>

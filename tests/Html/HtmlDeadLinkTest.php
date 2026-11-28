@@ -90,9 +90,10 @@ final class HtmlDeadLinkTest extends TestCase
     private function hrefs(string $html): array
     {
         $dom = new DOMDocument();
-        libxml_use_internal_errors(true);
+        $previous = libxml_use_internal_errors(true);
         $dom->loadHTML('<?xml encoding="utf-8" ?>' . $html);
         libxml_clear_errors();
+        libxml_use_internal_errors($previous);
 
         $targets = [];
         foreach ($dom->getElementsByTagName('a') as $anchor) {
@@ -120,6 +121,10 @@ final class HtmlDeadLinkTest extends TestCase
     private function outcome(ResourceInterface $resource, string $target): string
     {
         $path = (string) parse_url($target, PHP_URL_PATH);
+        if (preg_match('/[{}\s]/', $path) === 1 || ($path !== '/' && str_ends_with($path, '/'))) {
+            return 'dead (malformed)'; // an unexpanded placeholder, or a trailing slash the router strips
+        }
+
         parse_str((string) parse_url($target, PHP_URL_QUERY), $query);
         try {
             $resource->get('page://self' . $path, $query);
