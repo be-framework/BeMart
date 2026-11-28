@@ -1230,7 +1230,7 @@ final class LinkStories
                 ])),
                 Code::BAD_REQUEST,
                 '/admin/order/create',
-                [],
+                ['message' => 'orderItems'],
                 ['flow-admin-order-fulfillment', 'flow-manage-order'],
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
