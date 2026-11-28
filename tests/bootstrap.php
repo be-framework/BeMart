@@ -29,6 +29,10 @@ use Ray\Compiler\Compiler;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
+// HttpResource writes each request to a log under this directory and does not create it
+$httpLog = __DIR__ . '/Http/log';
+is_dir($httpLog) || mkdir($httpLog, 0777, true);
+
 // #[RunInSeparateProcess] children re-run this bootstrap. Without this guard a
 // child would clear the script dirs the parent is still reading (the compile-
 // warmup race the shared-context compile exists to fix). Only the top-level
