@@ -175,7 +175,7 @@ Punch-list, roughly highest-effort first:
 | Phase A detail (Be domain + JSON) | `docs/HANDOVER.md` |
 | Phase 2 detail (SQL) | `sql/diff/entity-vs-eccube.md` · `var/sql/` · `src/Module/MediaQueryRuntimeModule.php` |
 | Phase 3 detail (HTML) | `docs/phases/alps-audit-phase3.md` · `var/templates/README.md` |
-| Route/function status + migration difficulty | `docs/eccube-feature-alps-status.html` |
+| Route/function status + migration difficulty（2026-05-29 のスナップショット） | `docs/eccube-feature-alps-status.html` |
 | Migration skills / lessons (G-14…G-25) | `docs/skills/` |
 | Docs map / index | `docs/README.md` |
 | Continuation guide | `docs/HOW_TO_CONTINUE.md` |
