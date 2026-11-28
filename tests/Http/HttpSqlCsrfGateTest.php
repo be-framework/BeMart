@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Http;
 
 use Koriym\PhpServer\PhpServer;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 use PHPUnit\Framework\TestCase;
 
 use function escapeshellarg;
@@ -30,14 +31,12 @@ use function trim;
  */
 final class HttpSqlCsrfGateTest extends TestCase
 {
-    private const HOST = '127.0.0.1:18208';
-
     private static PhpServer|null $server = null;
     private string $cookieJar;
 
     public static function setUpBeforeClass(): void
     {
-        self::$server = new PhpServer(self::HOST, __DIR__ . '/html-sql-index.php');
+        self::$server = new PhpServer(LocalServerHost::for(self::class)->host, __DIR__ . '/html-sql-index.php');
         self::$server->start();
     }
 
@@ -60,7 +59,7 @@ final class HttpSqlCsrfGateTest extends TestCase
     {
         $token = $this->csrfToken($this->request('GET', '/entry')['body']);
 
-        $submitted = $this->request('POST', '/entry', $this->entryFields($token), ['Origin: http://' . self::HOST]);
+        $submitted = $this->request('POST', '/entry', $this->entryFields($token), ['Origin: http://' . LocalServerHost::for(self::class)->host]);
 
         $this->assertSame(400, $submitted['status'], $submitted['body']);
         $this->assertStringContainsString('入力してください。', $submitted['body']);
@@ -122,7 +121,7 @@ final class HttpSqlCsrfGateTest extends TestCase
             $curl .= ' -d ' . escapeshellarg(http_build_query($fields));
         }
 
-        $curl .= ' ' . escapeshellarg('http://' . self::HOST . $path);
+        $curl .= ' ' . escapeshellarg('http://' . LocalServerHost::for(self::class)->host . $path);
         $raw = shell_exec($curl);
         $this->assertIsString($raw);
 

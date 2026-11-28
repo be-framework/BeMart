@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Story;
 
 use BEAR\Dev\Http\HttpResource;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 use PHPUnit\Framework\Attributes\DataProviderExternal;
 
 use function dirname;
@@ -17,14 +18,12 @@ use function dirname;
  */
 final class HtmlLinkStoryTest extends AbstractLinkStoryCase
 {
-    private const string HOST = '127.0.0.1:18492';
-
     private HttpResource $resource;
 
     protected function setUp(): void
     {
         $http = dirname(__DIR__) . '/Http';
-        $this->resource = new HttpResource(self::HOST, $http . '/index.php', $http . '/log', ['Sec-Fetch-Site' => 'same-origin']);
+        $this->resource = new HttpResource(LocalServerHost::for(self::class)->host, $http . '/index.php', $http . '/log', ['Sec-Fetch-Site' => 'same-origin']);
     }
 
     /**

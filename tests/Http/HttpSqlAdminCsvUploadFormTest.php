@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Http;
 
 use Koriym\PhpServer\PhpServer;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 use PHPUnit\Framework\TestCase;
 
 use function bin2hex;
@@ -32,7 +33,6 @@ use function unlink;
  */
 final class HttpSqlAdminCsvUploadFormTest extends TestCase
 {
-    private const HOST = '127.0.0.1:18186';
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'admin-csv-upload-csrf-token';
 
@@ -41,7 +41,7 @@ final class HttpSqlAdminCsvUploadFormTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        self::$server = new PhpServer(self::HOST, __DIR__ . '/html-sql-index.php');
+        self::$server = new PhpServer(LocalServerHost::for(self::class)->host, __DIR__ . '/html-sql-index.php');
         self::$server->start();
     }
 
@@ -166,7 +166,7 @@ final class HttpSqlAdminCsvUploadFormTest extends TestCase
             escapeshellarg('X-BeMart-Test-Csrf-Token: ' . self::CSRF_TOKEN),
             escapeshellarg('Sec-Fetch-Site: same-origin'),
             escapeshellarg($method),
-            escapeshellarg('http://' . self::HOST . $path),
+            escapeshellarg('http://' . LocalServerHost::for(self::class)->host . $path),
         );
         $raw = shell_exec($curl);
         $this->assertIsString($raw);
@@ -190,7 +190,7 @@ final class HttpSqlAdminCsvUploadFormTest extends TestCase
             escapeshellarg('Sec-Fetch-Site: same-origin'),
             escapeshellarg('csrfToken=' . self::CSRF_TOKEN),
             escapeshellarg('import_file=@' . $file . ';type=text/csv;filename=' . $fileName),
-            escapeshellarg('http://' . self::HOST . $path),
+            escapeshellarg('http://' . LocalServerHost::for(self::class)->host . $path),
         );
         $raw = shell_exec($curl);
         unlink($file);
@@ -216,7 +216,7 @@ final class HttpSqlAdminCsvUploadFormTest extends TestCase
             escapeshellarg('Sec-Fetch-Site: same-origin'),
             escapeshellarg($method),
             escapeshellarg(http_build_query($fields)),
-            escapeshellarg('http://' . self::HOST . $path),
+            escapeshellarg('http://' . LocalServerHost::for(self::class)->host . $path),
         );
         $raw = shell_exec($curl);
         $this->assertIsString($raw);
@@ -236,7 +236,7 @@ final class HttpSqlAdminCsvUploadFormTest extends TestCase
             escapeshellarg('Sec-Fetch-Site: same-origin'),
             escapeshellarg('csrfToken=' . self::CSRF_TOKEN),
             escapeshellarg('classNameLabel=' . $className),
-            escapeshellarg('http://' . self::HOST . '/admin/class-name/class-name-list'),
+            escapeshellarg('http://' . LocalServerHost::for(self::class)->host . '/admin/class-name/class-name-list'),
         );
         $raw = shell_exec($curl);
         $this->assertIsString($raw);

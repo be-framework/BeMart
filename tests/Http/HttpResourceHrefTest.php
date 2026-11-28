@@ -6,17 +6,16 @@ namespace MyVendor\BeMart\Tests\Http;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\Uri as ResourceUri;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 use PHPUnit\Framework\TestCase;
 
 final class HttpResourceHrefTest extends TestCase
 {
-    private const HOST = '127.0.0.1:18080';
-
     private HttpResource $resource;
 
     protected function setUp(): void
     {
-        $this->resource = new HttpResource(self::HOST, __DIR__ . '/index.php', __DIR__ . '/log/href.log');
+        $this->resource = new HttpResource(LocalServerHost::for(self::class)->host, __DIR__ . '/index.php', __DIR__ . '/log/href.log');
     }
 
     public function testFollowsHtmlSemanticLinkBeforeLinkHeader(): void
@@ -64,7 +63,7 @@ final class HttpResourceHrefTest extends TestCase
     private function source(string $view, array $headers): HttpResponse
     {
         $source = new HttpResponse();
-        $source->uri = new ResourceUri('http://' . self::HOST . '/');
+        $source->uri = new ResourceUri('http://' . LocalServerHost::for(self::class)->host . '/');
         $source->code = Code::OK;
         $source->headers = $headers;
         $source->view = $view;

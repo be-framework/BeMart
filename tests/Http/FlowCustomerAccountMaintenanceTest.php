@@ -6,13 +6,14 @@ namespace MyVendor\BeMart\Tests\Http;
 
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Tests\Hypermedia\FlowCustomerAccountMaintenanceTest as Workflow;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 
 final class FlowCustomerAccountMaintenanceTest extends Workflow
 {
     protected function newResource(): ResourceInterface
     {
         return new HttpResource(
-            '127.0.0.1:18092',
+            LocalServerHost::for(self::class)->host,
             __DIR__ . '/prod-json-index.php',
             __DIR__ . '/log/' . self::FLOW_ID . '.log',
         );
