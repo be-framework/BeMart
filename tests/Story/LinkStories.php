@@ -69,13 +69,13 @@ final class LinkStories
                 [],
                 'flow-customer-inquiry',
             ],
-            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-inquiry,flow-customer-purchase&tagOnly=1&label=title
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-inquiry&tagOnly=1&label=title
             'rejected inquiry stops the chain' => [
                 uri_template($inquiry . ',self:goTop', ['form' => self::form(['contactEmail' => 'not-an-email', 'mode' => 'contact'] + self::inquiry())]),
                 Code::BAD_REQUEST,
                 '/contact',
                 [],
-                ['flow-customer-inquiry', 'flow-customer-purchase'],
+                'flow-customer-inquiry',
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'guest adds a cart item and is sent to checkout as a non-member' => [
