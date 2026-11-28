@@ -13,6 +13,8 @@ golden では、リクエストの順、method、params、becoming、応答の c
 
 ツリーの後の `events:` は、bear/event-sourcing の抽出器がこのログからイベントとして取り出すリクエスト（再生で再び実行されるもの）。連鎖の途中で成功した POST・PUT・DELETE が 1 件ずつ並び、GET だけの連鎖と、状態を変えるリクエストが成功する前に止まった連鎖は `(none)` になる。
 
+遷移を「辿った」と数えるのは、golden に記録されたステップだけ（`composer story:flows`・`composer story:uncovered`）。400 などで連鎖が止まった行は、止まった所までを数え、その先の rel は辿っていない。201・303 の Location の GET はリンクを消費しない。golden を持たない `persisted()`・`uploads()` の行は、URI の rel を数える。
+
 ## URI の書き方
 
 URI は `uri_template()`（RFC 6570）で組み、値は行ごとに渡す。文字列の値は `{?form*}` のように書く。フォームの値は `LinkStories::form()` で CSRF トークンを足す。

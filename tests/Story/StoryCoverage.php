@@ -9,6 +9,7 @@ use LogicException;
 use function array_diff;
 use function array_filter;
 use function array_intersect;
+use function array_key_last;
 use function array_keys;
 use function array_map;
 use function array_unique;
@@ -22,9 +23,11 @@ use function file_put_contents;
 use function implode;
 use function in_array;
 use function is_array;
+use function is_file;
 use function is_string;
 use function json_decode;
 use function ksort;
+use function preg_match;
 use function preg_match_all;
 use function preg_quote;
 use function preg_replace;
@@ -34,7 +37,9 @@ use function sprintf;
 use function str_starts_with;
 use function strlen;
 use function strstr;
+use function strtolower;
 use function str_replace;
+use function trim;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -82,8 +87,7 @@ final class StoryCoverage
     {
         $any = [];
         $declared = [];
-        foreach ($this->followingStories() as [$uri, $flows]) {
-            $rels = $this->relsOf($uri);
+        foreach ($this->followingStories() as [, $flows, $rels]) {
             $any = [...$any, ...$rels];
             foreach ($flows as $flow) {
                 $declared[$flow] = [...($declared[$flow] ?? []), ...$rels];
@@ -152,12 +156,19 @@ final class StoryCoverage
      *
      * - unknown: ストーリーが辿る rel が、ALPS の遷移にない（`<rel>`）
      * - flow: 行が宣言した `flow-*` が、ALPS にない、辿る遷移のタグと合わない、または辿る遷移に `flow-*` があるのに宣言しない（`<ストーリー名>: <理由>`）
+     * - golden: golden を照合する行に golden がない（`<ストーリー名>`）
      *
-     * @return array{unknown: list<string>, flow: list<string>}
+     * @return array{unknown: list<string>, flow: list<string>, golden: list<string>}
      */
     public function drift(): array
     {
-        $drift = ['unknown' => [], 'flow' => []];
+        $drift = ['unknown' => [], 'flow' => [], 'golden' => []];
+        foreach (array_keys($this->goldenBacked()) as $name) {
+            if (! is_file($this->goldenFile($name))) {
+                $drift['golden'][] = sprintf('%s: no golden; record it with UPDATE_GOLDEN=1', $name);
+            }
+        }
+
         foreach ($this->stories() as $name => [$uri, $flows]) {
             foreach ($this->relsOf($uri) as $rel) {
                 if (! isset($this->transitions[$rel])) {
@@ -262,6 +273,56 @@ final class StoryCoverage
         file_put_contents($this->root . '/' . self::STORIES, $this->linkedStories());
     }
 
+    public function goldenFile(string $name): string
+    {
+        return sprintf('%s/tests/Story/golden/%s.stree.txt', $this->root, trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower($name)), '-'));
+    }
+
+    /**
+     * golden が記録した、辿った順の rel。4xx・5xx で終わったリクエストも、その遷移を辿ったものとして数える。
+     *
+     * `link_request` の直下の `resource_request` が、順に、開始 URI、次のリンク、または 201・303 の Location の GET。
+     *
+     * @return list<string>
+     */
+    public function followedRels(string $golden): array
+    {
+        $links = [];
+        $codes = [];
+        $inResponse = false;
+        foreach (explode("\n", $golden) as $line) {
+            if (preg_match('/^├── links\[\d+\]: [a-z]+:(\w+)$/u', $line, $match) === 1) {
+                $links[] = $match[1];
+            } elseif (preg_match('/^[├└]── /u', $line) === 1) {
+                $inResponse = false;
+                if (preg_match('/^[├└]── resource_request /u', $line) === 1) {
+                    $codes[] = null;
+                }
+            } elseif (preg_match('/^(?:│   |    )└── close resource_response$/u', $line) === 1) {
+                $inResponse = true;
+            } elseif ($inResponse && preg_match('/^(?:│   |    )    [├└]── code: (\d+)$/u', $line, $match) === 1) {
+                $codes[array_key_last($codes)] = (int) $match[1];
+            }
+        }
+
+        $followed = [];
+        $next = 0;
+        foreach ($codes as $i => $code) {
+            $isLocation = $i > 0 && in_array($codes[$i - 1], [201, 303], true);
+            if ($i === 0 || $isLocation) {
+                continue;
+            }
+
+            if (isset($links[$next])) {
+                $followed[] = $links[$next];
+            }
+
+            $next++;
+        }
+
+        return $followed;
+    }
+
     public function transitionCount(): int
     {
         return count($this->transitions);
@@ -276,11 +337,11 @@ final class StoryCoverage
     {
         $withFlow = [];
         $withoutFlow = [];
-        foreach ($this->followingStories() as [$uri, $flows]) {
+        foreach ($this->followingStories() as [, $flows, $rels]) {
             if ($flows === []) {
-                $withoutFlow = [...$withoutFlow, ...$this->relsOf($uri)];
+                $withoutFlow = [...$withoutFlow, ...$rels];
             } else {
-                $withFlow = [...$withFlow, ...$this->relsOf($uri)];
+                $withFlow = [...$withFlow, ...$rels];
             }
         }
 
@@ -312,22 +373,33 @@ final class StoryCoverage
     }
 
     /**
-     * 辿るストーリー（golden を持つ行、SQL で流す行、ファイルを送る行）の URI と `flow-*`。
+     * 辿るストーリーの URI・`flow-*`・辿った rel。golden を照合する行の rel は golden が記録した順、SQL で流す行とファイルを送る行は URI のとおり。
      *
-     * @return array<string, array{string, list<string>}>
+     * @return array<string, array{string, list<string>, list<string>}>
      */
     private function followingStories(): array
     {
         $stories = [];
-        foreach (LinkStories::followable() + LinkStories::forMembers() + LinkStories::forBuyers() + LinkStories::persisted() as $name => $row) {
-            $stories[$name] = [$row[0], $this->flows($row[4] ?? [])];
+        foreach ($this->goldenBacked() as $name => $row) {
+            $golden = $this->goldenFile($name);
+            $stories[$name] = [$row[0], $this->flows($row[4] ?? []), is_file($golden) ? $this->followedRels((string) file_get_contents($golden)) : []];
+        }
+
+        foreach (LinkStories::persisted() as $name => $row) {
+            $stories[$name] = [$row[0], $this->flows($row[4] ?? []), $this->relsOf($row[0])];
         }
 
         foreach (LinkStories::uploads() as $name => $row) {
-            $stories[$name] = [$row[0], $this->flows($row[5])];
+            $stories[$name] = [$row[0], $this->flows($row[5]), $this->relsOf($row[0])];
         }
 
         return $stories;
+    }
+
+    /** @return array<string, array<array-key, mixed>> */
+    private function goldenBacked(): array
+    {
+        return LinkStories::followable() + LinkStories::forMembers() + LinkStories::forBuyers();
     }
 
     /**
@@ -337,7 +409,11 @@ final class StoryCoverage
      */
     private function stories(): array
     {
-        $stories = $this->followingStories();
+        $stories = [];
+        foreach ($this->followingStories() as $name => [$uri, $flows]) {
+            $stories[$name] = [$uri, $flows];
+        }
+
         foreach (LinkStories::unfollowable() as $name => $row) {
             $stories[$name] = [$row[0], $this->flows($row[2])];
         }
