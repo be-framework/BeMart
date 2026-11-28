@@ -1190,8 +1190,7 @@ final class LinkStories
     }
 
     /**
-     * Admin stories that read and change an order. Same row shape as followable(), but not part of it: only the Fake
-     * of the in-process app holds the order, the HTTP apps have none.
+     * Admin stories that read and change the order the Fake fixtures hold. Same row shape as followable().
      *
      * @return array<string, StoryRow>
      */
@@ -1280,7 +1279,7 @@ final class LinkStories
 
     /**
      * Stories a signed-in customer follows, run with StoryModule::MEMBER_ID. Same row shape as followable(), but not part
-     * of it: the HTTP apps have no customer signed in.
+     * of it: followable() runs as a guest.
      *
      * @return array<string, StoryRow>
      */
