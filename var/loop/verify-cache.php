@@ -387,9 +387,11 @@ $known = [];
 $sessions = [];
 
 $codes = [];
-$read = static function (string $label) use ($resource, $logger, $flow, &$sessions, &$codes): array {
+$etags = [];
+$read = static function (string $label) use ($resource, $logger, $flow, &$sessions, &$codes, &$etags): array {
     $ro = $resource->get($flow['read']);
     $codes[$label] = $ro->code;
+    $etags[$label] = $ro->headers['ETag'] ?? null;
     $entries = flatten($logger->flush());
     $sessions[$label] = $entries;
 
@@ -507,14 +509,21 @@ if ($mode === 'cdn') {
         record('17: the edge was given no lifetime directive - it decides for itself how long to keep the page', $violations, $known);
     }
 
-    // A write drops the edge's copy too. With a year-long Surrogate-Control the purge is the only
-    // way a change reaches the edge, so the write path issuing one is load-bearing, not noise.
-    $sentOnWrite = RecordingPurger::instance()->purged;
-    if (array_intersect($keptUnder, $sentOnWrite) === []) {
+    // A store that replaces the edge's copy has to drop it. With a year-long Surrogate-Control the
+    // purge is the only way a change reaches the edge. The cold read stored into an empty slot and
+    // replaced nothing, so the page is stored again over that entry, as #[Refresh] or a repository
+    // write would.
+    RecordingPurger::instance()->purged = [];
+    $stored = $resource->get($flow['read']);
+    $logger->flush();
+    $injector->getInstance(QueryRepositoryInterface::class)->put($stored);
+    $sessions['store over the page'] = flatten($logger->flush());
+    $sentOnReplace = RecordingPurger::instance()->purged;
+    if (array_intersect($keptUnder, $sentOnReplace) === []) {
         record(sprintf(
-            '20: the write told the edge to keep %s without dropping the copy it replaced (sent %s) - with a %s lifetime the edge serves the old page until it lapses',
+            '20: storing over the page told the edge to keep %s without dropping the copy it replaced (sent %s) - with a %s lifetime the edge serves the old page until it lapses',
             json_encode($keptUnder),
-            json_encode($sentOnWrite),
+            json_encode($sentOnReplace),
             json_encode(array_values($lifetime)),
         ), $violations, $known);
     }
@@ -551,13 +560,14 @@ if ($mode === 'cdn') {
     }
 
     printf(
-        "%-22s keep=%s drop-on-write=%s drop-on-purge=%s lifetime=%s\n",
+        "%-22s keep=%s drop-on-store-over=%s drop-on-purge=%s lifetime=%s\n",
         'cdn',
         json_encode($keptUnder),
-        json_encode($sentOnWrite),
+        json_encode($sentOnReplace),
         json_encode($sent),
         json_encode($lifetime),
     );
+    printf("%-22s check 20 reads 'store over the page': a store that replaces a stored copy drops it at the edge\n", '');
 
     foreach (array_unique($known) as $entry) {
         printf("KNOWN %s\n", $entry);
@@ -578,16 +588,11 @@ if ($mode === 'cdn') {
 }
 
 if ($mode === 'revalidate') {
-    // The client's copy of this page, and what the app says when it offers it back.
-    $etag = null;
-    foreach ($cold as $entry) {
-        if ($entry['type'] === 'save_etag' && ($entry['context']['uri'] ?? '') === $flow['read']) {
-            $etag = (string) $entry['context']['etag'];
-        }
-    }
-
-    if ($etag === null) {
-        printf("FAIL %s\n  - 10: the page stored no validator, so a client has nothing to revalidate with\n", $flowName);
+    // The client's copy of this page is the ETag the response carried, and what the app says
+    // when it offers it back.
+    $etag = $etags['cold read'];
+    if ($etag === null || $etag === '') {
+        printf("FAIL %s\n  - 10: the page handed out no validator, so a client has nothing to revalidate with\n", $flowName);
 
         exit(1);
     }
@@ -622,9 +627,9 @@ if ($mode === 'revalidate') {
     }
 
     // Another live page's validator, offered for this one. HTTP scopes an entity-tag to the
-    // resource it came from; the ETag pool is a set of live validators, so the answer is 304 for
-    // any URI. A client that returns the validator it was given cannot reach this - the value is
-    // derived from the URI - but a proxy or client that mixes them is served the wrong page.
+    // resource it came from. A client that returns the validator it was given cannot reach this -
+    // the value is derived from the URI - but a proxy or client that mixes them is served the
+    // wrong page.
     $other = $resource->get('page://self/help/privacy');
     $otherEtag = (string) ($other->headers['ETag'] ?? '');
     $logger->flush();
