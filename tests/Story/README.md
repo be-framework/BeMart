@@ -40,7 +40,7 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 
 1. `LinkStories::forGuests()`（ゲストが辿る）か `forAdmins()`（管理者が辿る）に行を足す。`followable()` はこの 2 つを合わせたもの。会員として辿る行は `forMembers()`・`forBuyers()` に、注文を読み書きする管理者の行は `forAdminOrders()` に足す。キーは、そのストーリーが示すことを書いた文にする。値は URI、終点の code、終点の path、終点の body の部分一致（キーの `.` で入れ子の配列を指す）、**そのストーリーが辿る `flow-*` タグ**。タグは `alps.json` の遷移に付いたもので、2 つのフローを辿るなら配列で書く。
 2. `UPDATE_GOLDEN=1 vendor/bin/phpunit tests/Story` でツリーを記録する。
-3. 新しい golden を読み、辿った順と各ステップの code が意図どおりかを確かめてから commit する。`followable()`・`forMembers()`・`forBuyers()` の行は、golden がないと失敗する。
+3. 新しい golden を読み、辿った順と各ステップの code が意図どおりかを確かめてから commit する。`followable()`・`forAdminOrders()`・`forMembers()`・`forBuyers()` の行は、golden がないと失敗する。
 4. `composer story:flows` で `docs/story-flows.md` と、行の上の図のリンクを作り直す。行は `'<ストーリー名>' => [` の形で書く（ループで組み立てた行にはリンクを付けられず、`composer cs:story` が失敗する）。
 
 `forAdminOrders()` は、注文を読み書きする管理者の行。注文は in-process の Fake にだけあり、HTTP の 2 つのアプリは持たないので、in-process だけで流す。

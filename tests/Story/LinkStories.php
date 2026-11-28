@@ -1210,13 +1210,21 @@ final class LinkStories
                 'flow-admin-order-fulfillment',
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
-            'order mail is composed, confirmed and sent' => [
-                uri_template('page://self/admin/order{?orderNo}#link=self:doUpdateTrackingNumber{?tracking*},self:goOrderMail{?orderNo},self:goOrderMailConfirm{?orderNo},self:doSendOrderMail{?mail*},self:goExportOrderPdf{?orderNo}', [
+            'tracking number is updated and the order mail is composed, confirmed and sent' => [
+                uri_template('page://self/admin/order{?orderNo}#link=self:doUpdateTrackingNumber{?tracking*},self:goOrderMail{?orderNo},self:goOrderMailConfirm{?orderNo},self:doSendOrderMail{?mail*},self:goExportOrder', [
                     'orderNo' => self::PAST_ORDER,
                     'tracking' => self::form(['orderNo' => self::PAST_ORDER, 'trackingNumber' => 'TRK0001']),
                     'mail' => self::form(['orderNo' => self::PAST_ORDER]),
                 ]),
-                501, // the Fake build has no PDF renderer
+                Code::OK,
+                '/admin/order/export-order',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'order pdf is requested from the order page' => [
+                uri_template('page://self/admin/order{?orderNo}#link=self:goExportOrderPdf{?orderNo}', ['orderNo' => self::PAST_ORDER]),
+                501, // the PDF renderer is not implemented
                 '/admin/order/export-order-pdf',
                 [],
                 'flow-admin-order-fulfillment',
