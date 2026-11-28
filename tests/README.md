@@ -163,8 +163,7 @@ Runs that share one MySQL drop and recreate each other's database. To run
 the SQL-backed tests beside another run, start a MySQL for your worktree:
 
 ```bash
-eval "$(bin/test-mysql start)"   # free port, data under var/mysql/, database prepared, DATABASE_URL exported
-composer test
+start=$(bin/test-mysql start) && eval "$start" && composer test   # free port, data under var/mysql/
 bin/test-mysql stop
 ```
 
