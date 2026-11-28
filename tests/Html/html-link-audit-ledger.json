@@ -324,6 +324,11 @@
     "note": "この画面の HTML に 二要素認証 への導線を描画しない",
     "reason": "target-missing"
   },
+  "GET page://self/cart doRemoveCartItem": {
+    "classification": "resourceOnly",
+    "note": "削除は operation=remove 付きの POST /cart/item の form で送り、DELETE の form は描画しない",
+    "reason": "method-mismatch"
+  },
   "GET page://self/cart doUpdateCartItemQuantity": {
     "classification": "resourceOnly",
     "note": "数量の増減は operation 付きの POST /cart/item の form で送り、PUT の form は描画しない",
