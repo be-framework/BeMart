@@ -47,6 +47,8 @@ ALPS `goClassCategoryList` に対応する GET 操作。
 | doUpdateClassCategory | [<code>page://self/admin/class-category/class-category</code>](/admin/class-category/class-category.md) |
 | doDeleteClassCategory | [<code>page://self/admin/class-category/class-category</code>](/admin/class-category/class-category.md) |
 | goClassNameList | [<code>page://self/admin/class-name/class-name-list</code>](/admin/class-name/class-name-list.md) |
+| doSortNoMove | [<code>page://self/admin/sort-no-move</code>](/admin/sort-no-move.md) |
+| doToggleVisible | [<code>page://self/admin/toggle-visible</code>](/admin/toggle-visible.md) |
 ## POST
 ALPS `doCreateClassCategory` に対応する POST 操作。
 

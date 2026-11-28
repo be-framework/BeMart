@@ -45,6 +45,7 @@ list doubles as the AUTHZ gate — no admin session → 403.
 | Relation | URL |
 |----------|-----|
 | doUpdateDelivery | [<code>page://self/admin/delivery/delivery</code>](/admin/delivery/delivery.md) |
+| doDeleteDelivery | [<code>page://self/admin/delivery/delivery</code>](/admin/delivery/delivery.md) |
 ## PUT
 ALPS `doUpdateDelivery` に対応する PUT 操作。
 

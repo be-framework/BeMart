@@ -53,6 +53,7 @@ _No parameters required_
 | doEnablePlugin | [<code>page://self/admin/plugin-enable</code>](/admin/plugin-enable.md) |
 | doDisablePlugin | [<code>page://self/admin/plugin-disable</code>](/admin/plugin-disable.md) |
 | doUninstallPlugin | [<code>page://self/admin/plugin</code>](/admin/plugin.md) |
+| doInstallPlugin | [<code>page://self/admin/plugin-list</code>](/admin/plugin-list.md) |
 ## POST
 Wave 8: every form field is admin-form input.
 

@@ -42,6 +42,8 @@ _No parameters required_
 | doToggleVisible | [<code>page://self/admin/toggle-visible</code>](/admin/toggle-visible.md) |
 | goProductList | [<code>page://self/admin/product-list</code>](/admin/product-list.md) |
 | goOrderList | [<code>page://self/admin/order-list</code>](/admin/order-list.md) |
+| doSortNoMove | [<code>page://self/admin/sort-no-move</code>](/admin/sort-no-move.md) |
+| goDeliveryList | [<code>page://self/admin/delivery/delivery-list</code>](/admin/delivery/delivery-list.md) |
 ## POST
 ALPS `doCreatePayment` に対応する POST 操作。
 

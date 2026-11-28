@@ -68,6 +68,7 @@ _No parameters required_
 |----------|-----|
 | doUpdateAuthorityRole | [<code>page://self/admin/authority-role</code>](/admin/authority-role.md) |
 | goMemberList | [<code>page://self/admin/member-list</code>](/admin/member-list.md) |
+| goLoginHistoryList | [<code>page://self/admin/login-history</code>](/admin/login-history.md) |
 ## POST
 Wave 8: browser form input for URL deny rules. The primary HTML
 shape carries CSRF at the request boundary plus

@@ -50,6 +50,7 @@ The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
 |----------|-----|
 | goLayoutList | [<code>page://self/admin/layout/layout-list</code>](/admin/layout/layout-list.md) |
 | doUpdateLayout | [<code>page://self/admin/layout/layout</code>](/admin/layout/layout.md) |
+| goTradeLawList | [<code>page://self/admin/trade-law</code>](/admin/trade-law.md) |
 ## PUT
 ALPS `doUpdateLayout` に対応する PUT 操作。
 

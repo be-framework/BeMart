@@ -35,6 +35,7 @@ _No parameters required_
 |----------|-----|
 | doCreateTag | [<code>page://self/admin/tag/tag-list</code>](/admin/tag/tag-list.md) |
 | doDeleteTag | [<code>page://self/admin/tag/tag</code>](/admin/tag/tag.md) |
+| doSortNoMove | [<code>page://self/admin/sort-no-move</code>](/admin/sort-no-move.md) |
 ## POST
 ALPS `doCreateTag` に対応する POST 操作。
 

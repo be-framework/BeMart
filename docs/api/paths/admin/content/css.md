@@ -40,6 +40,7 @@ _No parameters required_
 | Relation | URL |
 |----------|-----|
 | doUpdateContentCss | [<code>page://self/admin/content/css</code>](/admin/content/css.md) |
+| goContentJs | [<code>page://self/admin/content/js</code>](/admin/content/js.md) |
 ## PUT
 Saves the customize CSS (doUpdateContentCss). ALPS idempotent → PUT.
 

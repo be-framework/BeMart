@@ -53,3 +53,4 @@ _No parameters required_
 |----------|-----|
 | goLogin | [<code>page://self/login</code>](/login.md) |
 | goTop | [<code>page://self/</code>](/.md) |
+| doResetPassword | [<code>page://self/reset</code>](/reset.md) |

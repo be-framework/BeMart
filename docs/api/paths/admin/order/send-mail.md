@@ -58,6 +58,8 @@ render blank so the page is faithful with empty JSON-backed fake storage.
 | doSendOrderMail | [<code>page://self/admin/order/send-mail</code>](/admin/order/send-mail.md) |
 | goOrderMailConfirm | [<code>page://self/admin/order/mail-confirm</code>](/admin/order/mail-confirm.md) |
 | goOrder | [<code>page://self/admin/order</code>](/admin/order.md) |
+| goExportOrder | [<code>page://self/admin/order/export-order</code>](/admin/order/export-order.md) |
+| goExportOrderPdf | [<code>page://self/admin/order/export-order-pdf{?orderNo}</code>](/admin/order/export-order-pdf.md) |
 ## POST
 ALPS `doSendOrderMail` に対応する POST 操作。
 
@@ -91,5 +93,5 @@ ALPS `doSendOrderMail` に対応する POST 操作。
 | Relation | URL |
 |----------|-----|
 | goOrder | [<code>page://self/admin/order</code>](/admin/order.md) |
-| goExportOrderPdf | [<code>page://self/admin/order/export-order-pdf</code>](/admin/order/export-order-pdf.md) |
+| goExportOrderPdf | [<code>page://self/admin/order/export-order-pdf{?orderNo}</code>](/admin/order/export-order-pdf.md) |
 | goExportOrder | [<code>page://self/admin/order/export-order</code>](/admin/order/export-order.md) |

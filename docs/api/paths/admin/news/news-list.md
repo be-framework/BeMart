@@ -36,6 +36,8 @@ _No parameters required_
 | goNews | [<code>page://self/admin/news/news</code>](/admin/news/news.md) |
 | doUpdateNews | [<code>page://self/admin/news/news</code>](/admin/news/news.md) |
 | doDeleteNews | [<code>page://self/admin/news/news</code>](/admin/news/news.md) |
+| doToggleVisible | [<code>page://self/admin/toggle-visible</code>](/admin/toggle-visible.md) |
+| goPageList | [<code>page://self/admin/page/page-list</code>](/admin/page/page-list.md) |
 ## POST
 ALPS `doCreateNews` に対応する POST 操作。
 

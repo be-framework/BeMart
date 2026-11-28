@@ -169,7 +169,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | sessionPrefix | href(doAddCartItem), href(goCheckoutEntry) |
+| GET | sessionPrefix | href(doAddCartItem), href(doUpdateCartItemQuantity), href(doRemoveCartItem), href(goCheckoutEntry) |
 
 ### Page/Contact
 `/contact`
@@ -192,7 +192,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goLogin), href(goTop) |
+| GET | - | href(goLogin), href(goTop), href(doResetPassword) |
 
 ### Page/ForgotPassword
 `/forgot-password`
@@ -207,7 +207,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goProductList), href(goCart), href(goContactForm), href(goCustomerRegistration), href(goLogin), href(goMypage), href(goHelpAbout), href(goHelpGuide), href(goHelpAgreement), href(goHelpPrivacy), href(goHelpTradeLaw) |
+| GET | - | href(goProductList), href(goCart), href(goContactForm), href(goCustomerRegistration), href(goLogin), href(goMypage), href(goHelpAbout), href(goHelpGuide), href(goHelpAgreement), href(goHelpPrivacy), href(goHelpTradeLaw), href(goProduct) |
 
 ### Page/Login
 `/login`
@@ -258,7 +258,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | sessionPrefix | href(doConfirmOrder), href(goCart) |
+| GET | sessionPrefix | href(doConfirmOrder), href(goCart), href(goShopping), href(goShoppingLogin), href(goShoppingNonMember), href(goShoppingError), href(goShoppingShipping), href(goShoppingShippingEdit) |
 
 ### Page/UnsupportedRoute
 `/unsupported-route`
@@ -281,7 +281,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doUpdateAuthorityRole), href(goMemberList) |
+| GET | - | href(doUpdateAuthorityRole), href(goMemberList), href(goLoginHistoryList) |
 | POST | loginId, authority, AuthorityRoles | href(goMember), href(goMemberList), href(goLoginHistoryList) |
 
 ### Page/Admin/BaseInfo
@@ -321,7 +321,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | csvType | href(doUpdateCsv) |
+| GET | csvType | href(doUpdateCsv), href(goExportProduct) |
 | POST | csvType*, columns, csvOutput, csvNotOutput | href(goTop), href(goExportProduct) |
 
 ### Page/Admin/Customer
@@ -353,7 +353,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | nameKeyword, emailKeyword, limit | href(goCustomer), href(doCreateCustomer), href(doDeleteCustomer), href(doResendActivationMail) |
+| GET | nameKeyword, emailKeyword, limit | href(goCustomer), href(doCreateCustomer), href(doDeleteCustomer), href(doResendActivationMail), href(goExportClassName) |
 
 ### Page/Admin/DeleteCustomer
 `/admin/delete-customer`
@@ -374,7 +374,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goMemberList), href(goContentCache), href(doAdminLogout) |
+| GET | - | href(goMemberList), href(goContentCache), href(doAdminLogout), href(goBaseInfo), href(goBlockList), href(goClassCategoryList), href(goClassNameList), href(goCustomerList), href(goDeliveryList), href(goLayoutList), href(goLoginHistoryList), href(goMailTemplateList), href(goNewsList), href(goOrderList), href(goPageList), href(goPaymentList), href(goPluginList), href(goProductList), href(goTagList), href(goTaxRuleList), href(goTemplateList), href(goTradeLawList) |
 
 ### Page/Admin/Log
 `/admin/log`
@@ -451,7 +451,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | orderNo* | href(goOrderList), href(doUpdateOrder), href(doUpdateOrderStatus), href(goOrderShippingAddress) |
+| GET | orderNo* | href(goOrderList), href(doUpdateOrder), href(doUpdateOrderStatus), href(goOrderShippingAddress), href(doSendOrderMail), href(goExportOrderPdf), href(goOrderMail), href(doUpdateTrackingNumber), href(doSendShippingNotifyMail) |
 | PUT | orderNo*, discount, charge, usePoint | href(goOrder), href(doUpdateOrderStatus) |
 
 ### Page/Admin/OrderList
@@ -459,7 +459,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | limit, offset | href(goOrder), href(doCreateOrder) |
+| GET | limit, offset | href(goOrder), href(doCreateOrder), href(goExportCustomer) |
 
 ### Page/Admin/OrderStatus
 `/admin/order-status`
@@ -496,7 +496,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doEnablePlugin), href(doDisablePlugin), href(doUninstallPlugin) |
+| GET | - | href(doEnablePlugin), href(doDisablePlugin), href(doUninstallPlugin), href(doInstallPlugin) |
 | POST | pluginCode*, pluginName*, pluginVersion* | href(goPluginList) |
 
 ### Page/Admin/Product
@@ -504,7 +504,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | productCode* | href(goProductList), href(doUpdateProduct), href(doDeleteProduct), href(doCopyProduct) |
+| GET | productCode* | href(goProductList), href(doUpdateProduct), href(doDeleteProduct), href(doCopyProduct), href(goCategory) |
 | POST | productCode*, productName*, price02*, stock, productStatus, description, searchWord, note | - |
 | PUT | productCode*, productName, price02, stock, productStatus, description, searchWord, note | href(goProductList) |
 | DELETE | productCode* | - |
@@ -536,7 +536,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | nameKeyword, limit, offset | href(goProduct), href(doCreateProduct), href(doBulkUpdateProductStatus), href(goExportProduct) |
+| GET | nameKeyword, limit, offset | href(goProduct), href(doCreateProduct), href(doBulkUpdateProductStatus), href(goExportProduct), href(doCopyProduct), href(goCategoryList), href(goExportCategory) |
 
 ### Page/Admin/ProductNew
 `/admin/product-new`
@@ -550,7 +550,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doUpdateSecurity) |
+| GET | - | href(doUpdateSecurity), href(goTwoFactorAuthSet) |
 | PUT | adminAllowHosts, adminDenyHosts, frontAllowHosts, frontDenyHosts, trustedHosts | href(goTwoFactorAuthSet) |
 
 ### Page/Admin/SortNoMove
@@ -579,7 +579,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doUpdateTradeLaw) |
+| GET | - | href(doUpdateTradeLaw), href(goContentCss) |
 | POST | tradeLawBody, mode, trade_law_1_name, trade_law_1_description, trade_law_1_displayOrderScreen, trade_law_2_name, trade_law_2_description, trade_law_2_displayOrderScreen, trade_law_3_name, trade_law_3_description, trade_law_3_displayOrderScreen, trade_law_4_name, trade_law_4_description, trade_law_4_displayOrderScreen, trade_law_5_name, trade_law_5_description, trade_law_5_displayOrderScreen, trade_law_6_name, trade_law_6_description, trade_law_6_displayOrderScreen | href(goTop), href(goContentCss) |
 
 ### Page/Admin/TwoFactorAuth
@@ -587,7 +587,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doVerifyTwoFactorAuth), href(goAdminLogin) |
+| GET | - | href(doVerifyTwoFactorAuth), href(goAdminLogin), href(goContentCache) |
 | POST | deviceToken*, loginId, mode | href(goContentCache), href(goAdminHome) |
 
 ### Page/Admin/TwoFactorAuthEdit
@@ -602,7 +602,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doSetTwoFactorAuth), href(goAdminLogin) |
+| GET | - | href(doSetTwoFactorAuth), href(goAdminLogin), href(goTwoFactorAuth) |
 | PUT | deviceToken*, loginId, authKey, mode | href(goTwoFactorAuth), href(goAdminHome) |
 
 ### Page/Admin/UnsupportedRoute
@@ -698,7 +698,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | addressId | href(doCreateCustomerAddress), href(doUpdateCustomerAddress), href(goCustomerAddressList) |
+| GET | addressId | href(doCreateCustomerAddress), href(doUpdateCustomerAddress), href(goCustomerAddressList), href(doDeleteCustomerAddress) |
 | PUT | addressId*, name01, name02, kana01, kana02, companyName, postalCode, pref, addr01, addr02, phoneNumber | href(goCustomerAddressList) |
 | DELETE | addressId* | href(goFavoriteList), href(goCustomerAddressList) |
 
@@ -707,7 +707,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreateCustomerAddress), href(doUpdateCustomerAddress), href(doDeleteCustomerAddress), href(goMypage) |
+| GET | - | href(doCreateCustomerAddress), href(doUpdateCustomerAddress), href(doDeleteCustomerAddress), href(goMypage), href(goFavoriteList) |
 | POST | name01*, name02*, postalCode*, pref*, addr01*, addr02*, phoneNumber*, kana01, kana02, companyName | href(goCustomerAddressList) |
 
 ### Page/Mypage/Change
@@ -715,7 +715,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doUpdateCustomer), href(goMypage) |
+| GET | - | href(doUpdateCustomer), href(goMypage), href(goMypageChangeComplete) |
 | POST | email*, name01, name02, kana01, kana02, companyName, phoneNumber, postalCode, pref, addr01, addr02 | href(goMypageChangeComplete), href(goMypage) |
 
 ### Page/Mypage/ChangeComplete
@@ -738,14 +738,14 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doAddFavorite), href(doRemoveFavorite), href(goMypage) |
+| GET | - | href(doAddFavorite), href(doRemoveFavorite), href(goMypage), href(goMypageWithdraw) |
 
 ### Page/Mypage/History
 `/mypage/history`
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | orderNo* | href(doReorder), href(goMypage) |
+| GET | orderNo* | href(doReorder), href(goMypage), href(goProduct) |
 
 ### Page/Mypage/OrderHistory
 `/mypage/order-history`
@@ -766,7 +766,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doWithdrawCustomer) |
+| GET | - | href(doWithdrawCustomer), href(goMypageWithdrawConfirm) |
 | POST | - | href(goMypageWithdrawComplete), href(goTop) |
 
 ### Page/Mypage/WithdrawComplete
@@ -864,7 +864,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | blockId | href(goBlockList), href(doUpdateBlock), href(doDeleteBlock) |
+| GET | blockId | href(goBlockList), href(doUpdateBlock), href(doDeleteBlock), href(goLayoutList) |
 | PUT | blockId*, blockName, blockFileName | href(goBlockList) |
 | DELETE | blockId* | href(goBlockList), href(goLayoutList) |
 
@@ -873,7 +873,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreateBlock) |
+| GET | - | href(doCreateBlock), href(goLayoutList) |
 | POST | blockName*, blockFileName* | href(goBlockList) |
 
 ### Page/Admin/Category/Category
@@ -890,7 +890,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreateCategory), href(goCategory), href(doUpdateCategory), href(doDeleteCategory), href(doImportCategoryCsv), href(goExportCategory) |
+| GET | - | href(doCreateCategory), href(goCategory), href(doUpdateCategory), href(doDeleteCategory), href(doImportCategoryCsv), href(goExportCategory), href(goExportOrder) |
 | POST | categoryName*, sortNo*, parentId | href(goCategoryList) |
 
 ### Page/Admin/Category/Csv
@@ -906,7 +906,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | categoryId | href(doCreateCategory), href(doUpdateCategory), href(goCategoryList) |
+| GET | categoryId | href(doCreateCategory), href(doUpdateCategory), href(goCategoryList), href(doDeleteCategory), href(goProductList) |
 
 ### Page/Admin/ClassCategory/ClassCategory
 `/admin/class-category/class-category`
@@ -928,7 +928,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | classNameId | href(doCreateClassCategory), href(doUpdateClassCategory), href(doDeleteClassCategory), href(goClassNameList) |
+| GET | classNameId | href(doCreateClassCategory), href(doUpdateClassCategory), href(doDeleteClassCategory), href(goClassNameList), href(doSortNoMove), href(doToggleVisible) |
 | POST | classNameId*, classCategoryName* | href(goClassCategoryList) |
 
 ### Page/Admin/ClassName/ClassName
@@ -951,7 +951,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreateClassName), href(doUpdateClassName), href(doDeleteClassName), href(goClassCategoryList) |
+| GET | - | href(doCreateClassName), href(doUpdateClassName), href(doDeleteClassName), href(goClassCategoryList), href(doSortNoMove), href(goExportClassCategory) |
 | POST | classNameLabel* | href(goClassNameList) |
 
 ### Page/Admin/Content/Cache
@@ -959,7 +959,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doClearCache) |
+| GET | - | href(doClearCache), href(goMaintenance) |
 | PUT | mode | href(goMaintenance) |
 
 ### Page/Admin/Content/Css
@@ -967,7 +967,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doUpdateContentCss) |
+| GET | - | href(doUpdateContentCss), href(goContentJs) |
 | PUT | css, mode | href(goContentJs) |
 
 ### Page/Admin/Content/FileManager
@@ -990,7 +990,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doToggleMaintenance) |
+| GET | - | href(doToggleMaintenance), href(goSystemInfo) |
 | PUT | enabled*, mode | href(goSystemInfo) |
 
 ### Page/Admin/Customer/ResendActivationMail
@@ -1005,7 +1005,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | deliveryId | href(doUpdateDelivery) |
+| GET | deliveryId | href(doUpdateDelivery), href(doDeleteDelivery) |
 | PUT | deliveryId*, deliveryName, visible | href(goDeliveryList) |
 | DELETE | deliveryId* | href(goDeliveryList), href(goTaxRuleList) |
 
@@ -1014,7 +1014,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreateDelivery), href(goDelivery), href(doUpdateDelivery), href(doDeleteDelivery) |
+| GET | - | href(doCreateDelivery), href(goDelivery), href(doUpdateDelivery), href(doDeleteDelivery), href(doSortNoMove), href(doToggleVisible), href(goTaxRuleList) |
 | POST | deliveryName*, visible | href(goDeliveryList) |
 
 ### Page/Admin/Layout/Layout
@@ -1022,7 +1022,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | layoutId | href(goLayoutList), href(doUpdateLayout) |
+| GET | layoutId | href(goLayoutList), href(doUpdateLayout), href(goTradeLawList) |
 | PUT | layoutId*, layoutName, name | href(goLayoutList), href(goTradeLawList) |
 
 ### Page/Admin/Layout/LayoutList
@@ -1044,7 +1044,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | newsId | href(goNewsList) |
+| GET | newsId | href(goNewsList), href(doUpdateNews), href(doDeleteNews), href(goPageList) |
 | PUT | newsId*, newsTitle, newsDescription, newsUrl, publishDate, linkMethod | href(goNews) |
 | DELETE | newsId* | href(goNewsList), href(goPageList) |
 
@@ -1053,7 +1053,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreateNews), href(goNews), href(doUpdateNews), href(doDeleteNews) |
+| GET | - | href(doCreateNews), href(goNews), href(doUpdateNews), href(doDeleteNews), href(doToggleVisible), href(goPageList) |
 | POST | newsTitle*, publishDate*, newsDescription, newsUrl, linkMethod | href(goNewsList) |
 
 ### Page/Admin/Order/BulkDelete
@@ -1126,7 +1126,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | orderNo | href(doSendOrderMail), href(goOrderMailConfirm), href(goOrder) |
+| GET | orderNo | href(doSendOrderMail), href(goOrderMailConfirm), href(goOrder), href(goExportOrder), href(goExportOrderPdf) |
 | POST | orderNo* | href(goOrder), href(goExportOrderPdf), href(goExportOrder) |
 
 ### Page/Admin/Order/ShippingAddress
@@ -1158,7 +1158,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | pageId | href(goPageList) |
+| GET | pageId | href(goPageList), href(doDeletePage), href(goBlockList) |
 | PUT | pageId*, pageName, pageUrl, pageFileName | href(goPage) |
 | DELETE | pageId* | href(goPageList), href(goBlockList) |
 
@@ -1167,7 +1167,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreatePage), href(goPage), href(doUpdatePage), href(doDeletePage) |
+| GET | - | href(doCreatePage), href(goPage), href(doUpdatePage), href(doDeletePage), href(goBlockList) |
 | POST | pageName*, pageUrl*, pageFileName* | href(goPageList) |
 
 ### Page/Admin/Payment/Payment
@@ -1184,7 +1184,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreatePayment), href(goPayment), href(doToggleVisible), href(goProductList), href(goOrderList) |
+| GET | - | href(doCreatePayment), href(goPayment), href(doToggleVisible), href(goProductList), href(goOrderList), href(doSortNoMove), href(goDeliveryList) |
 | POST | paymentMethodName*, charge, ruleMin, ruleMax, visible | href(goPaymentList) |
 
 ### Page/Admin/Product/CsvCategory
@@ -1244,7 +1244,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreateTag), href(doDeleteTag) |
+| GET | - | href(doCreateTag), href(doDeleteTag), href(doSortNoMove) |
 | POST | tagName* | href(goTagList) |
 
 ### Page/Admin/TaxRule/TaxRule
@@ -1259,7 +1259,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreateTaxRule), href(doDeleteTaxRule) |
+| GET | - | href(doCreateTaxRule), href(doDeleteTaxRule), href(goCalendar) |
 | POST | taxRate*, applyDate*, roundingType | href(goTaxRuleList) |
 
 ### Page/Admin/Template/TemplateAdd

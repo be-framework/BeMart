@@ -47,6 +47,7 @@ _No parameters required_
 |----------|-----|
 | doCreateTaxRule | [<code>page://self/admin/tax-rule/tax-rule-list</code>](/admin/tax-rule/tax-rule-list.md) |
 | doDeleteTaxRule | [<code>page://self/admin/tax-rule/tax-rule</code>](/admin/tax-rule/tax-rule.md) |
+| goCalendar | [<code>page://self/admin/calendar</code>](/admin/calendar.md) |
 ## POST
 ALPS `doCreateTaxRule` に対応する POST 操作。
 

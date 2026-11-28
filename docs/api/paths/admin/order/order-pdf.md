@@ -46,5 +46,5 @@ ALPS `goOrderPdf` に対応する GET 操作。
 
 | Relation | URL |
 |----------|-----|
-| goExportOrderPdf | [<code>page://self/admin/order/export-order-pdf</code>](/admin/order/export-order-pdf.md) |
+| goExportOrderPdf | [<code>page://self/admin/order/export-order-pdf{?orderNo}</code>](/admin/order/export-order-pdf.md) |
 | goOrderList | [<code>page://self/admin/order-list</code>](/admin/order-list.md) |

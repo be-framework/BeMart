@@ -43,6 +43,8 @@ _No parameters required_
 | doUpdateClassName | [<code>page://self/admin/class-name/class-name</code>](/admin/class-name/class-name.md) |
 | doDeleteClassName | [<code>page://self/admin/class-name/class-name</code>](/admin/class-name/class-name.md) |
 | goClassCategoryList | [<code>page://self/admin/class-category/class-category-list{?classNameId}</code>](/admin/class-category/class-category-list.md) |
+| doSortNoMove | [<code>page://self/admin/sort-no-move</code>](/admin/sort-no-move.md) |
+| goExportClassCategory | [<code>page://self/admin/class-category/class-category-export</code>](/admin/class-category/class-category-export.md) |
 ## POST
 ALPS `doCreateClassName` に対応する POST 操作。
 

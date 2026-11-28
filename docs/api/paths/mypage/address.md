@@ -75,6 +75,7 @@ contexts ignore `body['form']`.
 | doCreateCustomerAddress | [<code>page://self/mypage/address-list</code>](/mypage/address-list.md) |
 | doUpdateCustomerAddress | [<code>page://self/mypage/address</code>](/mypage/address.md) |
 | goCustomerAddressList | [<code>page://self/mypage/address-list</code>](/mypage/address-list.md) |
+| doDeleteCustomerAddress | [<code>page://self/mypage/address</code>](/mypage/address.md) |
 ## PUT
 ALPS `doUpdateCustomerAddress` に対応する PUT 操作。
 

@@ -84,6 +84,11 @@ row, or pasted into the URL).
 | doUpdateOrder | [<code>page://self/admin/order</code>](/admin/order.md) |
 | doUpdateOrderStatus | [<code>page://self/admin/order-status</code>](/admin/order-status.md) |
 | goOrderShippingAddress | [<code>page://self/admin/order/shipping-address</code>](/admin/order/shipping-address.md) |
+| doSendOrderMail | [<code>page://self/admin/order/send-mail</code>](/admin/order/send-mail.md) |
+| goExportOrderPdf | [<code>page://self/admin/order/export-order-pdf{?orderNo}</code>](/admin/order/export-order-pdf.md) |
+| goOrderMail | [<code>page://self/admin/order/send-mail</code>](/admin/order/send-mail.md) |
+| doUpdateTrackingNumber | [<code>page://self/admin/order/tracking-number</code>](/admin/order/tracking-number.md) |
+| doSendShippingNotifyMail | [<code>page://self/admin/order/shipping-notify-mail</code>](/admin/order/shipping-notify-mail.md) |
 ## PUT
 Wave 7: every editable field is admin-form input. The orderNo
 selector is also admin-controlled. Same taint discipline as the

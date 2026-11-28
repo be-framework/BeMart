@@ -61,3 +61,4 @@ ALPS `goMypageHistory` に対応する GET 操作。
 |----------|-----|
 | doReorder | [<code>page://self/mypage/reorder</code>](/mypage/reorder.md) |
 | goMypage | [<code>page://self/mypage</code>](/mypage.md) |
+| goProduct | [<code>page://self/product</code>](/product.md) |

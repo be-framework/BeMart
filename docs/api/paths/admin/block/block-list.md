@@ -33,6 +33,7 @@ _No parameters required_
 | Relation | URL |
 |----------|-----|
 | doCreateBlock | [<code>page://self/admin/block/block-list</code>](/admin/block/block-list.md) |
+| goLayoutList | [<code>page://self/admin/layout/layout-list</code>](/admin/layout/layout-list.md) |
 ## POST
 ALPS `doCreateBlock` に対応する POST 操作。
 

@@ -56,3 +56,6 @@ ALPS `goProductList` に対応する GET 操作。
 | doCreateProduct | [<code>page://self/admin/product</code>](/admin/product.md) |
 | doBulkUpdateProductStatus | [<code>page://self/admin/product-bulk-status</code>](/admin/product-bulk-status.md) |
 | goExportProduct | [<code>page://self/admin/product-csv</code>](/admin/product-csv.md) |
+| doCopyProduct | [<code>page://self/admin/product-copy</code>](/admin/product-copy.md) |
+| goCategoryList | [<code>page://self/admin/category/category-list</code>](/admin/category/category-list.md) |
+| goExportCategory | [<code>page://self/admin/category/csv</code>](/admin/category/csv.md) |

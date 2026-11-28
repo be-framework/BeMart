@@ -66,6 +66,7 @@ goProduct (admin variant) — fetch full product detail.
 | doUpdateProduct | [<code>page://self/admin/product</code>](/admin/product.md) |
 | doDeleteProduct | [<code>page://self/admin/product</code>](/admin/product.md) |
 | doCopyProduct | [<code>page://self/admin/product-copy</code>](/admin/product-copy.md) |
+| goCategory | [<code>page://self/admin/category/category{?categoryId}</code>](/admin/category/category.md) |
 ## POST
 doCreateProduct — create a new product.
 

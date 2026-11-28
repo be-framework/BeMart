@@ -56,6 +56,7 @@ persists a submitted vector; this GET serves the editor body.
 | Relation | URL |
 |----------|-----|
 | doUpdateCsv | [<code>page://self/admin/csv-config</code>](/admin/csv-config.md) |
+| goExportProduct | [<code>page://self/admin/product-csv</code>](/admin/product-csv.md) |
 ## POST
 Wave 9: admin-form input. The columns list is sanitized by Be /
 Semantic; the column entries themselves carry user-supplied

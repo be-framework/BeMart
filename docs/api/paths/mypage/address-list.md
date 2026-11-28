@@ -51,6 +51,7 @@ _No parameters required_
 | doUpdateCustomerAddress | [<code>page://self/mypage/address</code>](/mypage/address.md) |
 | doDeleteCustomerAddress | [<code>page://self/mypage/address</code>](/mypage/address.md) |
 | goMypage | [<code>page://self/mypage</code>](/mypage.md) |
+| goFavoriteList | [<code>page://self/mypage/favorite-list</code>](/mypage/favorite-list.md) |
 ## POST
 ALPS `doCreateCustomerAddress` に対応する POST 操作。
 
