@@ -8,6 +8,7 @@ use BEAR\Resource\ResourceObject;
 use PHPUnit\Framework\TestCase;
 
 use function explode;
+use function getenv;
 use function is_array;
 use function is_string;
 
@@ -19,8 +20,13 @@ abstract class AbstractLinkStoryCase extends TestCase
     /** @param string|list<string> $flow the `flow-*` tags of alps.json the story walks; empty when the row declares none */
     protected function assertFlow(string $uri, string|array $flow): void
     {
+        // The golden being recorded is not written yet, and the one on disk may be the old one
+        if (getenv('UPDATE_GOLDEN') === '1') {
+            return;
+        }
+
         $flows = is_string($flow) ? [$flow] : $flow;
-        $this->assertSame([], StoryCoverage::forRepository()->flowMismatch($uri, $flows), 'The flow tags of the row and of alps.json disagree.');
+        $this->assertSame([], StoryCoverage::forRepository()->flowMismatch((string) $this->dataName(), $uri, $flows), 'The flow tags of the row and of alps.json disagree.');
     }
 
     /** @param array<string, mixed> $body values the end body holds; a dot in a key reaches into a nested array */

@@ -69,13 +69,13 @@ final class LinkStories
                 [],
                 'flow-customer-inquiry',
             ],
-            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-inquiry,flow-customer-purchase&tagOnly=1&label=title
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-inquiry&tagOnly=1&label=title
             'rejected inquiry stops the chain' => [
                 uri_template($inquiry . ',self:goTop', ['form' => self::form(['contactEmail' => 'not-an-email', 'mode' => 'contact'] + self::inquiry())]),
                 Code::BAD_REQUEST,
                 '/contact',
                 [],
-                ['flow-customer-inquiry', 'flow-customer-purchase'],
+                'flow-customer-inquiry',
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'guest adds a cart item and is sent to checkout as a non-member' => [
@@ -712,17 +712,6 @@ final class LinkStories
                 'flow-admin-order-fulfillment',
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
-            'shipping notice is sent from the order page' => [
-                uri_template('page://self/admin/order{?orderNo}#link=self:doSendShippingNotifyMail{?form*}', [
-                    'orderNo' => self::PAST_ORDER,
-                    'form' => self::form(['orderNo' => self::PAST_ORDER]),
-                ]),
-                Code::OK,
-                '/admin/order/shipping-notify-mail',
-                [],
-                'flow-admin-order-fulfillment',
-            ],
-            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
             'order pdf leads back to the list' => [
                 'page://self/admin/order/order-pdf#link=self:goOrderList',
                 Code::OK,
@@ -1195,6 +1184,72 @@ final class LinkStories
                 '/admin/order/import-shipping',
                 [],
                 'flow-admin-csv-exchange',
+            ],
+        ];
+    }
+
+    /**
+     * Admin stories that read and change an order. Same row shape as followable(), but not part of it: only the Fake
+     * of the in-process app holds the order, the HTTP apps have none.
+     *
+     * @return array<string, StoryRow>
+     */
+    public static function forAdminOrders(): array
+    {
+        return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'order is picked from the list, edited and its status changed' => [
+                uri_template('page://self/admin/order-list#link=self:goOrder{?orderNo},self:doUpdateOrder{?update*},self:doUpdateOrderStatus{?status*}', [
+                    'orderNo' => self::PAST_ORDER,
+                    'update' => self::form(['orderNo' => self::PAST_ORDER, 'discount' => 100]),
+                    'status' => self::form(['orderNo' => self::PAST_ORDER, 'orderStatus' => 5]),
+                ]),
+                Code::OK,
+                '/admin/order-status',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'tracking number is updated and the order mail is composed, confirmed and sent' => [
+                uri_template('page://self/admin/order{?orderNo}#link=self:doUpdateTrackingNumber{?tracking*},self:goOrderMail{?orderNo},self:goOrderMailConfirm{?orderNo},self:doSendOrderMail{?mail*},self:goExportOrder', [
+                    'orderNo' => self::PAST_ORDER,
+                    'tracking' => self::form(['orderNo' => self::PAST_ORDER, 'trackingNumber' => 'TRK0001']),
+                    'mail' => self::form(['orderNo' => self::PAST_ORDER]),
+                ]),
+                Code::OK,
+                '/admin/order/export-order',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'order pdf is requested from the order page' => [
+                uri_template('page://self/admin/order{?orderNo}#link=self:goExportOrderPdf{?orderNo}', ['orderNo' => self::PAST_ORDER]),
+                501, // the PDF renderer is not implemented
+                '/admin/order/export-order-pdf',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'shipping notice is sent from the order page' => [
+                uri_template('page://self/admin/order{?orderNo}#link=self:doSendShippingNotifyMail{?form*}', [
+                    'orderNo' => self::PAST_ORDER,
+                    'form' => self::form(['orderNo' => self::PAST_ORDER]),
+                ]),
+                Code::OK,
+                '/admin/order/shipping-notify-mail',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'shipping address is updated' => [
+                uri_template('page://self/admin/order{?orderNo}#link=self:goOrderShippingAddress{?orderNo},self:doUpdateOrderShippingAddress{?form*}', [
+                    'orderNo' => self::PAST_ORDER,
+                    'form' => self::form(['orderNo' => self::PAST_ORDER, 'name01' => '山田', 'name02' => '太郎', 'postalCode' => '1500001', 'pref' => '13', 'addr01' => '渋谷区', 'addr02' => '神宮前1-1-1', 'phoneNumber' => '0312345678']),
+                ]),
+                Code::OK,
+                '/admin/order/shipping-address',
+                [],
+                'flow-admin-order-fulfillment',
             ],
         ];
     }

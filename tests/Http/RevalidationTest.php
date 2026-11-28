@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Http;
 
 use Koriym\PhpServer\PhpServer;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 use PHPUnit\Framework\TestCase;
 
 use function escapeshellarg;
@@ -33,19 +34,13 @@ use function trim;
  */
 final class RevalidationTest extends TestCase
 {
-    /**
-     * A port of its own, overridable. The flow tests keep their servers alive for the whole run
-     * through HttpResource's registry, so this one must not appear in any Flow test; a fixed guess
-     * in another project's range is how this suite once ended up talking to a foreign server.
-     */
-    private const HOST = '127.0.0.1:18095';
     private const PATH = '/help/about';
 
     private static PhpServer|null $server = null;
 
     public static function setUpBeforeClass(): void
     {
-        self::$server ??= new PhpServer(getenv('BEMART_REVALIDATE_HOST') ?: self::HOST, __DIR__ . '/prod-json-index.php');
+        self::$server ??= new PhpServer(LocalServerHost::for(self::class)->host, __DIR__ . '/prod-json-index.php');
         self::$server->start();
     }
 
@@ -58,7 +53,7 @@ final class RevalidationTest extends TestCase
     /** @return array{status: int, headers: string, body: string} */
     private function get(string|null $ifNoneMatch = null): array
     {
-        $host = getenv('BEMART_REVALIDATE_HOST') ?: self::HOST;
+        $host = LocalServerHost::for(self::class)->host;
         $curl = 'curl -s -i';
         if ($ifNoneMatch !== null) {
             $curl .= ' -H ' . escapeshellarg('If-None-Match: ' . $ifNoneMatch);

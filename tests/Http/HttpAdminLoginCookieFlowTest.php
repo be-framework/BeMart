@@ -9,6 +9,7 @@ use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Query\TwoFactorAuthStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Injector;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 use PHPUnit\Framework\TestCase;
 
 use function assert;
@@ -16,7 +17,6 @@ use function is_string;
 
 final class HttpAdminLoginCookieFlowTest extends TestCase
 {
-    private const HOST = '127.0.0.1:8101';
     private const ADMIN_LOGIN_ID = 'test-admin';
     private const ADMIN_PASSWORD = 'local-dev-admin-password';
     private const CSRF_TOKEN = 'http-admin-login-cookie-flow-csrf-token';
@@ -34,7 +34,7 @@ final class HttpAdminLoginCookieFlowTest extends TestCase
     public function testTwoFactorCompletionElevatesCookieSessionForAdminPages(): void
     {
         $resource = new HttpResource(
-            self::HOST,
+            LocalServerHost::for(self::class)->host,
             __DIR__ . '/prod-json-index.php',
             __DIR__ . '/log/admin-login-cookie-flow.log',
         );

@@ -4,14 +4,16 @@
 
 | テスト | 流し方 | 行 |
 |---|---|---|
-| `LinkStoryTest` | in-process、Fake。`followable()`・`forMembers()`・`forBuyers()` の行は、セマンティックログのツリーを `golden/<ストーリー名>.stree.txt` と照合する | `followable()`・`forMembers()`・`forBuyers()`・`unfollowable()`・`uploads()` |
-| `HttpLinkStoryTest` | HTTP、Fake の HAL（`tests/Http/admin-json-index.php`、管理者がログイン済み）。リンクは HAL の `_links` から読む | `followable()`・`unfollowable()`・`uploads()`（会員の `forMembers()`・`forBuyers()` は流さない） |
+| `LinkStoryTest` | in-process、Fake。`followable()`・`forAdminOrders()`・`forMembers()`・`forBuyers()` の行は、セマンティックログのツリーを `golden/<ストーリー名>.stree.txt` と照合する | `followable()`・`forAdminOrders()`・`forMembers()`・`forBuyers()`・`unfollowable()`・`uploads()` |
+| `HttpLinkStoryTest` | HTTP、Fake の HAL（`tests/Http/admin-json-index.php`、管理者がログイン済み）。リンクは HAL の `_links` から読む | `followable()`・`unfollowable()`・`uploads()`（`forAdminOrders()`・`forMembers()`・`forBuyers()` は流さない） |
 | `HtmlLinkStoryTest` | HTTP、Fake の HTML（`tests/Http/index.php`）。リンクはページの `<a>`・`<form>` から読む | `forGuests()` だけ（管理者のフォームは PUT・DELETE を `_method` 付きの POST で送り、クライアントはそれを辿らない） |
 | `PersistedLinkStoryTest` | in-process、SQL（tests/Hypermedia と同じ MySQL が要る） | `persisted()` |
 
 golden では、リクエストの順、method、params、becoming、応答の code が、そのまま読める。ツリーの根は `link_request` で、最初の URI と辿るリンク（`type:rel`。リンクの query は、それを辿ったリクエストの params に出る）を示す。辿ったリクエストはその下に並び、閉じの `link_response` は返った code を示す。
 
 ツリーの後の `events:` は、bear/event-sourcing の抽出器がこのログからイベントとして取り出すリクエスト（再生で再び実行されるもの）。連鎖の途中で成功した POST・PUT・DELETE が 1 件ずつ並び、GET だけの連鎖と、状態を変えるリクエストが成功する前に止まった連鎖は `(none)` になる。
+
+遷移を「辿った」と数えるのは、golden に記録されたステップだけ（`composer story:flows`・`composer story:uncovered`）。400 などで連鎖が止まった行は、止まった所までを数え、その先の rel は辿っていない。行が宣言する `flow-*` と辿る遷移の照合も同じ rel を使うので、止まった先の rel だけが持つフローは宣言できない。201・303 の Location の GET はリンクを消費しない。`persisted()`・`uploads()`・`unfollowable()` の行と、まだ golden を記録していない行は、URI の rel を数える。`UPDATE_GOLDEN=1` で記録する間は、宣言の照合を飛ばす（記録のあとの `composer cs` が照合する）。
 
 ## URI の書き方
 
@@ -36,10 +38,12 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 
 ## 行の足し方
 
-1. `LinkStories::forGuests()`（ゲストが辿る）か `forAdmins()`（管理者が辿る）に行を足す。`followable()` はこの 2 つを合わせたもの。会員として辿る行は `forMembers()`・`forBuyers()` に足す。キーは、そのストーリーが示すことを書いた文にする。値は URI、終点の code、終点の path、終点の body の部分一致（キーの `.` で入れ子の配列を指す）、**そのストーリーが辿る `flow-*` タグ**。タグは `alps.json` の遷移に付いたもので、2 つのフローを辿るなら配列で書く。
+1. `LinkStories::forGuests()`（ゲストが辿る）か `forAdmins()`（管理者が辿る）に行を足す。`followable()` はこの 2 つを合わせたもの。会員として辿る行は `forMembers()`・`forBuyers()` に、注文を読み書きする管理者の行は `forAdminOrders()` に足す。キーは、そのストーリーが示すことを書いた文にする。値は URI、終点の code、終点の path、終点の body の部分一致（キーの `.` で入れ子の配列を指す）、**そのストーリーが辿る `flow-*` タグ**。タグは `alps.json` の遷移に付いたもので、2 つのフローを辿るなら配列で書く。
 2. `UPDATE_GOLDEN=1 vendor/bin/phpunit tests/Story` でツリーを記録する。
-3. 新しい golden を読み、辿った順と各ステップの code が意図どおりかを確かめてから commit する。`followable()`・`forMembers()`・`forBuyers()` の行は、golden がないと失敗する。
+3. 新しい golden を読み、辿った順と各ステップの code が意図どおりかを確かめてから commit する。`followable()`・`forAdminOrders()`・`forMembers()`・`forBuyers()` の行は、golden がないと失敗する。
 4. `composer story:flows` で `docs/story-flows.md` と、行の上の図のリンクを作り直す。行は `'<ストーリー名>' => [` の形で書く（ループで組み立てた行にはリンクを付けられず、`composer cs:story` が失敗する）。
+
+`forAdminOrders()` は、注文を読み書きする管理者の行。注文は in-process の Fake にだけあり、HTTP の 2 つのアプリは持たないので、in-process だけで流す。
 
 会員のストーリーは in-process だけで流す（HTTP の 2 つのアプリには会員のログイン状態がない）。`forMembers()` は `StoryModule::MEMBER_ID`（プロフィール・住所・カート・購入前の注文がある会員）、`forBuyers()` は `StoryModule::BUYER_ID`（注文履歴だけがある会員。プロフィールがないので `/mypage` には入れず、履歴のページから始める）としてログインして辿る。
 
@@ -52,7 +56,7 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 テストは次を確かめる。`composer cs:story` はすべての行を、`testFollows*`・`testRefuses`・`testUploads` は流す行の上の 3 つを見る。
 
 - 宣言したタグが `alps.json` にある
-- URI の `#link=` が辿る rel のうち `flow-*` タグを持つものはすべて、宣言したタグのどれかを持つ（複数宣言したときは、宣言したタグのどれもが、どれかの rel に付いている）
+- 行が辿る rel（golden のある行は golden が記録したもの、ない行は URI の `#link=`）のうち `flow-*` タグを持つものはすべて、宣言したタグのどれかを持つ（複数宣言したときは、宣言したタグのどれもが、どれかの rel に付いている）
 - `flow-*` タグを持たない遷移（`goHelp*` など）はどのフローにも属さないので、照合では中立に扱う
 - 辿る遷移に `flow-*` タグがあれば、行はフローを宣言する。フローを宣言しない（図のリンクも付かない）のは、辿る遷移のどれにも `flow-*` タグがない行だけ
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Http;
 
 use BEAR\Resource\Code;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 use PHPUnit\Framework\TestCase;
 
 use function is_string;
@@ -15,7 +16,7 @@ final class HttpHtmlLinkFollowTest extends TestCase
     public function testFollowsLinkHeaderRenderedFromLinkAttribute(): void
     {
         $resource = new HttpResource(
-            '127.0.0.1:18097',
+            LocalServerHost::for(self::class)->host,
             __DIR__ . '/index.php',
             __DIR__ . '/log/html-link-follow.log',
         );

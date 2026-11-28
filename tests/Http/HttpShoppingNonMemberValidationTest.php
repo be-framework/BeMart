@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Http;
 
 use Koriym\PhpServer\PhpServer;
+use MyVendor\BeMart\Tests\Support\LocalServerHost;
 use PHPUnit\Framework\TestCase;
 
 use function escapeshellarg;
@@ -20,14 +21,12 @@ use function tempnam;
 
 final class HttpShoppingNonMemberValidationTest extends TestCase
 {
-    private const HOST = '127.0.0.1:18182';
-
     private static PhpServer|null $server = null;
     private string $cookieJar;
 
     public static function setUpBeforeClass(): void
     {
-        self::$server = new PhpServer(self::HOST, __DIR__ . '/index.php');
+        self::$server = new PhpServer(LocalServerHost::for(self::class)->host, __DIR__ . '/index.php');
         self::$server->start();
     }
 
@@ -75,7 +74,7 @@ final class HttpShoppingNonMemberValidationTest extends TestCase
             $curl .= ' -d ' . escapeshellarg(http_build_query($fields));
         }
 
-        $curl .= ' ' . escapeshellarg('http://' . self::HOST . $path);
+        $curl .= ' ' . escapeshellarg('http://' . LocalServerHost::for(self::class)->host . $path);
         $raw = shell_exec($curl);
         $this->assertIsString($raw);
 

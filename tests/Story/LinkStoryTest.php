@@ -33,8 +33,6 @@ use function preg_replace;
 use function preg_replace_callback;
 use function sprintf;
 use function str_replace;
-use function strtolower;
-use function trim;
 use function unlink;
 
 use const JSON_THROW_ON_ERROR;
@@ -59,6 +57,7 @@ final class LinkStoryTest extends AbstractLinkStoryCase
         '/INQ-[0-9a-f]+\.[0-9]+/' => 'INQ', // ContactSubmitted makes the ticket id with uniqid()
         '/(?<=orderNo: |orderNo=)[0-9a-f]{32}/' => 'OrderNo', // OrderNoProvider draws the number of a placed order at random
         '/(?<=orderDate: |paymentDate: )\d{4}-\d\d-\d\dT\S+/' => 'Now', // a placed order is stamped with the clock
+        '/(?<=── sendDate: )\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/' => 'SendDate', // the clock stamps the send of an order mail
     ];
 
     /** The line a throw sits on moves with any edit above it in that file; the file it names stays */
@@ -89,6 +88,16 @@ final class LinkStoryTest extends AbstractLinkStoryCase
      */
     #[DataProviderExternal(LinkStories::class, 'followable')]
     public function testFollows(string $uri, int $code, string $path, array $body, string|array $flow = []): void
+    {
+        $this->assertStory($uri, $code, $path, $body, $flow);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     * @param string|list<string> $flow
+     */
+    #[DataProviderExternal(LinkStories::class, 'forAdminOrders')]
+    public function testFollowsAdminOrders(string $uri, int $code, string $path, array $body, string|array $flow = []): void
     {
         $this->assertStory($uri, $code, $path, $body, $flow);
     }
@@ -176,7 +185,7 @@ final class LinkStoryTest extends AbstractLinkStoryCase
         $log = json_decode((string) json_encode($logJson), true);
         $this->assertIsArray($log);
         $tree = $this->stabilize($renderer->renderTree($log) . $this->events($logJson));
-        $golden = sprintf('%s/golden/%s.stree.txt', __DIR__, trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower((string) $this->dataName())), '-'));
+        $golden = StoryCoverage::forRepository()->goldenFile((string) $this->dataName());
         if (getenv('UPDATE_GOLDEN') === '1') {
             file_put_contents($golden, $tree);
         }
