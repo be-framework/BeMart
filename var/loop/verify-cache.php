@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 use BEAR\QueryRepository\Cdn\FastlyCacheControlHeaderSetter;
 use BEAR\QueryRepository\CdnCacheControlHeaderSetterInterface;
+use BEAR\QueryRepository\DonutRepositoryInterface;
 use BEAR\QueryRepository\Exception\CacheStoreException;
 use BEAR\QueryRepository\PurgerInterface;
 use BEAR\QueryRepository\Log\SafeSemanticLogger;
@@ -45,6 +46,7 @@ use Koriym\SemanticLogger\LogJson;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Injector;
 use Ray\Di\AbstractModule;
+use Ray\Aop\WeavedInterface;
 use Ray\Di\Scope;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
@@ -511,12 +513,14 @@ if ($mode === 'cdn') {
 
     // A store that replaces the edge's copy has to drop it. With a year-long Surrogate-Control the
     // purge is the only way a change reaches the edge. The cold read stored into an empty slot and
-    // replaced nothing, so the page is stored again over that entry, as #[Refresh] or a repository
-    // write would.
+    // replaced nothing, so the page is rendered again and stored over that entry through the
+    // repository its cache interceptor writes to, as a second miss racing the first would.
     RecordingPurger::instance()->purged = [];
-    $stored = $resource->get($flow['read']);
+    $fresh = $resource->newInstance($flow['read']);
+    $page = $fresh instanceof WeavedInterface ? (string) get_parent_class($fresh) : $fresh::class;
+    (new ReflectionMethod($page, 'onGet'))->invoke($fresh); // the page itself, not its cache interceptor
     $logger->flush();
-    $injector->getInstance(QueryRepositoryInterface::class)->put($stored);
+    $injector->getInstance(DonutRepositoryInterface::class)->putStatic($fresh);
     $sessions['store over the page'] = flatten($logger->flush());
     $sentOnReplace = RecordingPurger::instance()->purged;
     if (array_intersect($keptUnder, $sentOnReplace) === []) {
