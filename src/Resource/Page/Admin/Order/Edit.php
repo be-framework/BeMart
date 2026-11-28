@@ -58,7 +58,6 @@ class Edit extends ResourceObject
     #[JsonSchema(schema: 'get-admin-order-edit.json', params: 'get-admin-order-edit.param.json')]
     #[Link(rel: 'doUpdateOrder', href: 'page://self/admin/order', method: 'put')]
     #[Link(rel: 'doCreateOrder', href: 'page://self/admin/order/create', method: 'post')]
-    #[Link(rel: 'goCustomer', href: 'page://self/admin/customer', method: 'get')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     public function onGet(string $orderNo = ''): static
     {

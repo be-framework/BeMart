@@ -214,19 +214,9 @@
     "note": "この画面の HTML に メール送信画面 への導線を描画しない",
     "reason": "target-missing"
   },
-  "GET page://self/admin/order-list doCreateOrder": {
-    "classification": "resourceOnly",
-    "note": "一覧に登録の form は無い。「新規受注」は GET で編集画面（goOrderEdit）へ遷移し、登録の POST form は編集画面の新規モードにある",
-    "reason": "target-missing"
-  },
   "GET page://self/admin/order/edit doUpdateOrder": {
     "classification": "resourceOnly",
     "note": "orderNo 無しの新規モードでは action が /admin/order/create になり、PUT の target /admin/order 自体が無い。orderNo 付きの編集モードでは PUT に action が変わり rel=\"doUpdateOrder\" も付与済み — 新規モード限定の話",
-    "reason": "target-missing"
-  },
-  "GET page://self/admin/order/edit goCustomer": {
-    "classification": "resourceOnly",
-    "note": "顧客リンクは既存受注の編集モードだけに描画される。監査は orderNo 無しの新規モードを描画するため affordance が無い",
     "reason": "target-missing"
   },
   "GET page://self/admin/order/send-mail goExportOrderPdf": {

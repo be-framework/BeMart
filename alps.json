@@ -740,22 +740,19 @@
           {"href": "#Order"},
           {"href": "#goOrder"},
           {"href": "#goOrderList"},
-          {"href": "#doCreateOrder"},
           {"href": "#doBulkDeleteOrder"},
-          {"href": "#goImportShippingCsv"},
           {"href": "#goOrderEdit"}
         ]
       },
       {"id": "AdminOrderEditPage", "title": "管理受注編集画面","tag": "order flow-manage-order actor-admin src-template src-router page page-admin page-detail page-edit route-ec-cube migration-target feature-admin-order flow-admin-order-fulfillment",
         "doc": {
           "href": "docs/states/admin-order-edit.md",
-          "value": "EC-CUBE route admin_order_edit / template Admin/Order/edit.twig に対応する管理受注編集ワークベンチ。Order状態を、受注基本情報・明細・配送・支払・対応状況・メール/PDF/CSV導線へ展開する画面状態。"
+          "value": "EC-CUBE route admin_order_edit / template Admin/Order/edit.twig に対応する管理受注編集ワークベンチ。受注の基本情報・明細・金額を編集する画面状態。orderNo なしは新規受注の登録。"
         },
         "descriptor": [
           {"href": "#Order"},
           {"href": "#doUpdateOrder"},
           {"href": "#doCreateOrder"},
-          {"href": "#goCustomer"},
           {"href": "#goOrderList"}
         ]
       },
@@ -1754,7 +1751,7 @@
         "tag": "order actor-admin src-router feature-admin-order flow-admin-order-fulfillment flow-admin-csv-exchange",
         "doc": {"value": "配送情報をCSV形式でダウンロードする。出荷管理用、伝票番号入力後のインポートと対をなす。"},
         "descriptor": [{"href": "#doImportShippingCsv"}]},
-      {"id": "doImportShippingCsv", "title": "配送CSVをインポートする", "type": "unsafe", "rt": "#OrderList",
+      {"id": "doImportShippingCsv", "title": "配送CSVをインポートする", "type": "unsafe", "rt": "#ShippingCsvImport",
         "tag": "order actor-admin src-router feature-admin-order flow-admin-order-fulfillment flow-admin-csv-exchange",
         "doc": {"value": "配送CSVから伝票番号・出荷日を一括登録する。配送業者から受領した出荷情報の取り込み用。"},
         "descriptor": [{"href": "#goExportCustomer"}]},
@@ -2219,7 +2216,7 @@
         "descriptor": [{"href": "#doUpdateOrderShippingAddress"}, {"href": "#doUpdateTrackingNumber"}]},
       {"id": "ShippingCsvImport", "title": "出荷CSV取込", "tag": "src-template flow-admin-order-fulfillment flow-admin-csv-exchange",
         "doc": {"value": "配送CSVから伝票番号・出荷日を一括登録する画面状態（管理画面）。"},
-        "descriptor": [{"href": "#doImportShippingCsv"}, {"href": "#goExportShipping"}]},
+        "descriptor": [{"href": "#doImportShippingCsv"}, {"href": "#goExportShipping"}, {"href": "#goImportShippingCsv"}]},
       {"id": "OrderStatusList", "title": "対応状況一覧", "tag": "src-template alps-route-gate flow-admin-order-fulfillment",
         "doc": {"value": "対応状況一覧を表す画面状態。"},
         "descriptor": [

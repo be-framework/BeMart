@@ -1221,17 +1221,6 @@ final class LinkStories
                 [],
                 'flow-admin-order-fulfillment',
             ],
-            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment,flow-manage-customer&tagOnly=1&label=title
-            'order editor leads to the customer of the order' => [
-                uri_template('page://self/admin/order-list#link=self:goOrderEdit{?orderNo},self:goCustomer{?customerId}', [
-                    'orderNo' => self::PAST_ORDER,
-                    'customerId' => self::MEMBER_CUSTOMER,
-                ]),
-                Code::OK,
-                '/admin/customer',
-                [],
-                ['flow-admin-order-fulfillment', 'flow-manage-customer'],
-            ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment,flow-manage-order&tagOnly=1&label=title
             'order creation from the blank editor is rejected without a complete item' => [
                 'page://self/admin/order-list#link=self:goOrderEdit,self:doCreateOrder?' . http_build_query(self::form([

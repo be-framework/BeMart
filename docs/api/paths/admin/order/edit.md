@@ -54,5 +54,4 @@ ALPS `goOrderEdit` に対応する GET 操作。
 |----------|-----|
 | doUpdateOrder | [<code>page://self/admin/order</code>](/admin/order.md) |
 | doCreateOrder | [<code>page://self/admin/order/create</code>](/admin/order/create.md) |
-| goCustomer | [<code>page://self/admin/customer</code>](/admin/customer.md) |
 | goOrderList | [<code>page://self/admin/order-list</code>](/admin/order-list.md) |

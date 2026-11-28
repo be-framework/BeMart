@@ -459,7 +459,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | limit, offset | href(goOrder), href(doCreateOrder), href(goOrderEdit), href(goExportCustomer) |
+| GET | limit, offset | href(goOrder), href(goOrderEdit), href(goExportCustomer) |
 
 ### Page/Admin/OrderStatus
 `/admin/order-status`
@@ -1075,7 +1075,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | orderNo | href(doUpdateOrder), href(doCreateOrder), href(goCustomer), href(goOrderList) |
+| GET | orderNo | href(doUpdateOrder), href(doCreateOrder), href(goOrderList) |
 
 ### Page/Admin/Order/ExportOrder
 `/admin/order/export-order`

@@ -19,9 +19,8 @@ resource. The original EC-CUBE admin search form additionally supports
 orderNo / customerName / dateRange / orderStatus / paymentMethod /
 deliveryMethod filters — those are Phase 2 scope.
 
-Hypermedia: links to the per-order detail and to the new-order create
-affordance (doCreateOrder, deferred — same forward-declaration
-convention as CustomerList).
+Hypermedia: links to the per-order detail and to the order editor
+(goOrderEdit; a blank editor creates an order).
 
 
 
@@ -59,6 +58,5 @@ discipline as Wave 5 / Wave 6 admin resources.
 | Relation | URL |
 |----------|-----|
 | goOrder | [<code>page://self/admin/order</code>](/admin/order.md) |
-| doCreateOrder | [<code>page://self/admin/order/create</code>](/admin/order/create.md) |
 | goOrderEdit | [<code>page://self/admin/order/edit{?orderNo}</code>](/admin/order/edit.md) |
 | goExportCustomer | [<code>page://self/admin/customer-csv</code>](/admin/customer-csv.md) |
