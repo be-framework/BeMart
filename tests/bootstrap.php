@@ -29,7 +29,7 @@ use Ray\Compiler\Compiler;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-// HttpResource writes each request to a log under this directory and does not create it
+// BEAR\Dev\Http\HttpResource writes each request to a log under this directory and does not create it
 $httpLog = __DIR__ . '/Http/log';
 is_dir($httpLog) || mkdir($httpLog, 0777, true);
 

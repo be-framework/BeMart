@@ -45,8 +45,12 @@ final class LocalServerHost
                 throw new RuntimeException($error);
             }
 
-            $host = (string) stream_socket_get_name($socket, false);
+            $host = stream_socket_get_name($socket, false);
             fclose($socket);
+            if ($host === false) {
+                throw new RuntimeException('The loopback socket has no name');
+            }
+
             // The OS may hand a released port out again, and another owner's server may not be up yet
             if (! in_array($host, $inUse, true)) {
                 return self::$taken[$owner] = new self($host);
