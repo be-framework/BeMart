@@ -45,7 +45,7 @@ list や入れ子の値（`productCodes[]` など）を含むリンクは、そ�
 
 `forAdminOrders()` は、注文を読み書きする管理者の行。注文は Fake の fixture にある。
 
-`forMembers()` は `StoryModule::MEMBER_ID`（プロフィール・住所・カート・購入前の注文がある会員）、`forBuyers()` は `StoryModule::BUYER_ID`（注文履歴だけがある会員。プロフィールがないので `/mypage` には入れず、履歴のページから始める）としてログインして辿る。どの行も、宣言した顧客として in-process と HTTP の両方で流す。
+`forMembers()` は `StoryModule::MEMBER_ID`（プロフィール・住所・カート・購入前の注文がある会員）、`forBuyers()` は `StoryModule::BUYER_ID`（注文履歴だけがある会員。プロフィールがないので `/mypage` には入れず、履歴のページから始める）としてログインして辿る。`LinkStoryTest` と `HttpLinkStoryTest` は、どの行も宣言した顧客（ほかはゲスト）として流す。
 
 辿れないことを示すストーリーは `unfollowable()`（URI、例外、`flow-*`）に、最初のリクエストでファイルを送るストーリーは `uploads()`（URI、query、ファイル、code、path、`flow-*`）に書く。作ったものを読み戻すストーリー（201 の Location など）は Fake では保存されないので `persisted()` に書く（DB が付ける ID が毎回変わるので、ツリーは照合しない）。
 
