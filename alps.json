@@ -302,7 +302,8 @@
           {"href": "#classCategory2"},
           {"href": "#classCategoryName"},
           {"href": "#classCategoryBackendName"},
-          {"href": "#doRegisterProductClass"}
+          {"href": "#doRegisterProductClass"},
+          {"href": "#goProductClass"}
         ]
       },
 
@@ -606,8 +607,7 @@
           {"href": "#addPoint"},
           {"href": "#usePoint"},
           {"href": "#doCheckout"},
-          {"href": "#goShoppingError"},
-          {"href": "#goShoppingComplete"}
+          {"href": "#goShoppingError"}
         ]
       },
       {"id": "ShoppingComplete", "title": "注文完了","tag": "checkout src-router src-template flow-customer-purchase",
@@ -616,7 +616,8 @@
           {"href": "#orderNo"},
           {"href": "#completeMessage"},
           {"href": "#goTop"},
-          {"href": "#goCart"}
+          {"href": "#goCart"},
+          {"href": "#goShoppingComplete"}
         ]
       },
       {"id": "ShoppingError", "title": "購入エラー","tag": "checkout src-router src-template",
@@ -710,7 +711,8 @@
           {"href": "#doUpdateTrackingNumber"},
           {"href": "#goExportOrderPdf"},
           {"href": "#doSendShippingNotifyMail"},
-          {"href": "#doReorder"}
+          {"href": "#doReorder"},
+          {"href": "#ShippingAddress"}
         ]
       },
       {"id": "ShippingAddress", "title": "配送先住所エンティティ","tag": "order src-entity",
@@ -912,14 +914,14 @@
           {"href": "#job"},
           {"href": "#goCustomerRegistration"},
           {"href": "#goCustomerRegistrationConfirm"},
-          {"href": "#doRegisterCustomer"},
-          {"href": "#goCustomerRegistrationComplete"}
+          {"href": "#doRegisterCustomer"}
         ]
       },
       {"id": "CustomerRegistrationComplete", "title": "会員登録完了","tag": "account src-router src-template flow-customer-registration",
         "doc": {"value": "会員登録完了画面。メール認証有効時は仮登録完了の案内を表示"},
         "descriptor": [
-          {"href": "#goTop"}
+          {"href": "#goTop"},
+          {"href": "#goCustomerRegistrationComplete"}
         ]
       },
 
@@ -1293,14 +1295,14 @@
           {"href": "#phoneNumber"},
           {"href": "#contactContents"},
           {"href": "#goContactForm"},
-          {"href": "#doSubmitContact"},
-          {"href": "#goContactComplete"}
+          {"href": "#doSubmitContact"}
         ]
       },
       {"id": "ContactComplete", "title": "お問い合わせ完了","tag": "contact src-template flow-customer-inquiry",
         "descriptor": [
           {"href": "#ticketId"},
-          {"href": "#goTop"}
+          {"href": "#goTop"},
+          {"href": "#goContactComplete"}
         ]
       },
 
@@ -2154,8 +2156,6 @@
       {"id": "Calendar", "title": "営業日カレンダー", "tag": "src-template alps-route-gate flow-admin-shop-configuration",
         "doc": {"value": "営業日カレンダーを表す画面状態。"},
         "descriptor": [{"href": "#goCalendar"}, {"href": "#doCreateCalendarHoliday"}, {"href": "#doUpdateCalendar"}, {"href": "#doDeleteCalendarHoliday"}]},
-      {"id": "ChangePassword", "title": "パスワード変更", "tag": "src-template alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "パスワード変更を表す画面状態。"}},
       {"id": "ContentCache", "title": "キャッシュ管理", "tag": "src-template alps-route-gate flow-admin-system-operation",
         "doc": {"value": "キャッシュ管理を表す画面状態。"},
         "descriptor": [{"href": "#doClearCache"}]},
@@ -2187,11 +2187,10 @@
         "doc": {"value": "受注配送先を表す画面状態。"},
         "descriptor": [{"href": "#doUpdateOrderShippingAddress"}, {"href": "#doUpdateTrackingNumber"}]},
       {"id": "OrderStatusList", "title": "対応状況一覧", "tag": "src-template alps-route-gate flow-admin-order-fulfillment",
-        "doc": {"value": "対応状況一覧を表す画面状態。"}},
-      {"id": "PasswordResetRequest", "title": "パスワード再発行依頼", "tag": "src-template alps-route-gate",
-        "doc": {"value": "パスワード再発行依頼を表す画面状態。"}},
-      {"id": "PasswordResetRequestComplete", "title": "パスワード再発行依頼完了", "tag": "src-template alps-route-gate",
-        "doc": {"value": "パスワード再発行依頼完了を表す画面状態。"}},
+        "doc": {"value": "対応状況一覧を表す画面状態。"},
+        "descriptor": [
+          {"href": "#doUpdateOrderStatusList"}
+        ]},
       {"id": "Security", "title": "セキュリティ設定", "tag": "src-template alps-route-gate flow-admin-system-operation",
         "doc": {"value": "セキュリティ設定を表す画面状態。"},
         "descriptor": [{"href": "#doUpdateSecurity"}]},
@@ -2199,7 +2198,10 @@
         "doc": {"value": "システム情報を表す画面状態。"},
         "descriptor": [{"href": "#doAdminLogout"}]},
       {"id": "Log", "title": "ログ表示", "tag": "src-template alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "モジュールが固定するログファイルパスから直近の行を tail 表示する読み取り専用画面（Setting/System Tier-2）。"}},
+        "doc": {"value": "モジュールが固定するログファイルパスから直近の行を tail 表示する読み取り専用画面（Setting/System Tier-2）。"},
+        "descriptor": [
+          {"href": "#goLog"}
+        ]},
       {"id": "TemplateInstall", "title": "テンプレート追加", "tag": "src-template alps-route-gate flow-admin-template-lifecycle",
         "doc": {"value": "テンプレート追加を表す画面状態。"},
         "descriptor": [{"href": "#doInstallTemplate"}]},
