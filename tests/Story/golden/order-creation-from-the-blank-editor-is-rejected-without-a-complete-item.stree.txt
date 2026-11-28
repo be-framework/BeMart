@@ -1,0 +1,54 @@
+link_request get 'page://self/admin/order-list#link=self:goOrderEdit,self:doCreateOrder'
+├── uri: page://self/admin/order-list
+├── method: GET
+├── links[0]: self:goOrderEdit
+├── links[1]: self:doCreateOrder
+├── resource_request get 'page://self/admin/order-list'
+│   ├── uri: page://self/admin/order-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminOrderListInput
+│   │   ├── limit: 50
+│   │   ├── offset: 0
+│   │   ├── being_final AdminOrderListFetched input=[limit, offset] inject=[adminSession, orderQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── orders[0].orderNo: past0000000000000000000000000001
+│   │   │       ├── orders[0].customerId: customer-001
+│   │   │       ├── orders[0].total: 12700
+│   │   │       ├── orders[0].paymentTotal: 12700
+│   │   │       ├── orders[0].orderDate: 2026-04-01 10:00:00
+│   │   │       ├── orders[0].orderStatus: 1
+│   │   │       ├── count: 1
+│   │   │       ├── limit: 50
+│   │   │       └── offset: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/order/edit'
+│   ├── uri: page://self/admin/order/edit
+│   ├── method: GET
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/admin/order/create?customerId=0123456789abcdef0123456789abcdef&paymentMethodId=2&orderItems%5B0%5D%5BproductCode%5D=sample-001&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/order/create
+│   ├── method: POST
+│   ├── params.customerId: 0123456789abcdef0123456789abcdef
+│   ├── params.paymentMethodId: 2
+│   ├── params.orderItems[0].productCode: sample-001
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 400
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 400
+    └── durationMs: [volatile]
+
+events:
+(none)

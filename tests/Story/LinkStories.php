@@ -29,6 +29,7 @@ final class LinkStories
 {
     private const string MEMBER_ADDRESS = 'addr00000000000000000000000000a1';
     private const string PAST_ORDER = 'past0000000000000000000000000001';
+    private const string MEMBER_CUSTOMER = '0123456789abcdef0123456789abcdef';
     /** The order the Fake shopping fixtures hold for the checkout of StoryModule::MEMBER_ID */
     private const string PRE_ORDER = 'aceface0000000000000000000000000000a11ce';
 
@@ -1208,6 +1209,29 @@ final class LinkStories
                 '/admin/order-status',
                 [],
                 'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'order is opened in the editor from the list and updated' => [
+                uri_template('page://self/admin/order-list#link=self:goOrderEdit{?orderNo},self:doUpdateOrder{?update*}', [
+                    'orderNo' => self::PAST_ORDER,
+                    'update' => self::form(['orderNo' => self::PAST_ORDER, 'discount' => 100]),
+                ]),
+                Code::OK,
+                '/admin/order',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment,flow-manage-order&tagOnly=1&label=title
+            'order creation from the blank editor is rejected without a complete item' => [
+                'page://self/admin/order-list#link=self:goOrderEdit,self:doCreateOrder?' . http_build_query(self::form([
+                    'customerId' => self::MEMBER_CUSTOMER,
+                    'paymentMethodId' => '2',
+                    'orderItems' => [['productCode' => 'sample-001']],
+                ])),
+                Code::BAD_REQUEST,
+                '/admin/order/create',
+                ['message' => 'orderItems'],
+                ['flow-admin-order-fulfillment', 'flow-manage-order'],
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
             'tracking number is updated and the order mail is composed, confirmed and sent' => [

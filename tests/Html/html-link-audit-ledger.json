@@ -209,11 +209,6 @@
     "note": "この画面の HTML に メール送信画面 への導線を描画しない",
     "reason": "target-missing"
   },
-  "GET page://self/admin/order-list doCreateOrder": {
-    "classification": "resourceOnly",
-    "note": "一覧からは GET で受注登録ページへ遷移する。直接の POST form は無い",
-    "reason": "method-mismatch"
-  },
   "GET page://self/admin/order/edit doUpdateOrder": {
     "classification": "resourceOnly",
     "note": "orderNo 無しの新規モードでは action が /admin/order/create になり、PUT の target /admin/order 自体が無い。orderNo 付きの編集モードでは PUT に action が変わり rel=\"doUpdateOrder\" も付与済み — 新規モード限定の話",

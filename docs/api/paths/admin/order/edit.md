@@ -9,7 +9,7 @@ GET /admin/order/edit            → blank "new order" editor
 
 Thin GET renderer. The sibling JSON resource {@see \MyVendor\BeMart\Resource\Page\Admin\Order}
 carries the `goOrder` read + `doUpdateOrder` write; this resource is
-the HTML editor shell only. An empty `$orderNo` renders the blank
+the HTML editor shell only (ALPS state `AdminOrderEditPage`, template `Admin/Order/edit.twig`). An empty `$orderNo` renders the blank
 editor (EC-CUBE's "受注登録" path — the render-smoke test exercises
 this with empty JSON-backed fake storage); a known orderNo pre-fills; an unknown
 orderNo is 404.
@@ -24,9 +24,9 @@ firewall. Both surface 403.
 
 
 ## GET
-ALPS `goOrder` に対応する GET 操作。
+ALPS `goOrderEdit` に対応する GET 操作。
 
-**ALPS**: `goOrder`
+**ALPS**: `goOrderEdit`
 
 
 
@@ -53,4 +53,5 @@ ALPS `goOrder` に対応する GET 操作。
 | Relation | URL |
 |----------|-----|
 | doUpdateOrder | [<code>page://self/admin/order</code>](/admin/order.md) |
+| doCreateOrder | [<code>page://self/admin/order/create</code>](/admin/order/create.md) |
 | goOrderList | [<code>page://self/admin/order-list</code>](/admin/order-list.md) |

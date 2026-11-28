@@ -100,7 +100,7 @@
   id="order_form"
   method="post"
   action="{{ isNew ? '/admin/order/create' : '/admin/order' }}"
-  {% if not isNew %}rel="doUpdateOrder"{% endif %}
+  rel="{{ isNew ? 'doCreateOrder' : 'doUpdateOrder' }}"
   novalidate
 >
   {% if not isNew %}
