@@ -65,7 +65,7 @@ final class HttpSqlAdminMailTemplateFormTest extends TestCase
             'mailSubject' => 'Initial HTTP subject',
             'csrfToken' => $this->csrfToken($list['body']),
         ]);
-        $this->assertSame(201, $created['status'], $created['body']);
+        $this->assertSame(303, $created['status'], $created['body']);
         $this->assertSame('/admin/mail-template', $created['headers']['Location'] ?? null);
 
         $afterCreate = $this->request('GET', '/admin/mail-template');

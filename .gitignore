@@ -5,6 +5,7 @@
 /build/
 /var/log/
 /var/tmp/
+/var/build/
 /var/loop/last-*.txt
 /var/loop/loop.log
 /tests/Http/log/*.log
