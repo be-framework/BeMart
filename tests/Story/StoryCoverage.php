@@ -416,7 +416,7 @@ final class StoryCoverage
     {
         $golden = $this->goldenFile($name);
 
-        return is_file($golden) ? $this->followedRels((string) file_get_contents($golden)) : null;
+        return is_file($golden) ? array_values(array_unique($this->followedRels((string) file_get_contents($golden)))) : null;
     }
 
     /** @return array<string, array<array-key, mixed>> */

@@ -13,7 +13,7 @@ golden では、リクエストの順、method、params、becoming、応答の c
 
 ツリーの後の `events:` は、bear/event-sourcing の抽出器がこのログからイベントとして取り出すリクエスト（再生で再び実行されるもの）。連鎖の途中で成功した POST・PUT・DELETE が 1 件ずつ並び、GET だけの連鎖と、状態を変えるリクエストが成功する前に止まった連鎖は `(none)` になる。
 
-遷移を「辿った」と数えるのは、golden に記録されたステップだけ（`composer story:flows`・`composer story:uncovered`）。400 などで連鎖が止まった行は、止まった所までを数え、その先の rel は辿っていない。行が宣言する `flow-*` と辿る遷移の照合も同じ rel を使うので、止まった先の rel だけが持つフローは宣言できない。201・303 の Location の GET はリンクを消費しない。golden を持たない `persisted()`・`uploads()` の行は、URI の rel を数える。
+遷移を「辿った」と数えるのは、golden に記録されたステップだけ（`composer story:flows`・`composer story:uncovered`）。400 などで連鎖が止まった行は、止まった所までを数え、その先の rel は辿っていない。行が宣言する `flow-*` と辿る遷移の照合も同じ rel を使うので、止まった先の rel だけが持つフローは宣言できない。201・303 の Location の GET はリンクを消費しない。`persisted()`・`uploads()`・`unfollowable()` の行と、まだ golden を記録していない行は、URI の rel を数える。`UPDATE_GOLDEN=1` で記録する間は、宣言の照合を飛ばす（記録のあとの `composer cs` が照合する）。
 
 ## URI の書き方
 
