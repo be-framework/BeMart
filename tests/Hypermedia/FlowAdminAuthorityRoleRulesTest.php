@@ -48,7 +48,7 @@ final class FlowAdminAuthorityRoleRulesTest extends AbstractWorkflowTest
         return self::$dbSession->resource();
     }
 
-    #[Alps('doUpdateAuthorityRole')]
+    #[Alps('goAuthorityRole')]
     public function testAuthorityRoleRules(): ResourceObject
     {
         $response = $this->resource->get('page://self/admin/authority-role');
