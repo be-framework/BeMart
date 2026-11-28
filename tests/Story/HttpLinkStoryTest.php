@@ -26,7 +26,7 @@ final class HttpLinkStoryTest extends AbstractLinkStoryCase
         $this->signIn(null);
     }
 
-    /** The guest rows also pass as the buyer; the order history opens to a signed-in customer only */
+    /** No guest row ends differently for a signed-in customer; the order history opens to a signed-in customer only */
     public function testRunsAsGuestUnlessSignedIn(): void
     {
         $this->assertSame(Code::UNAUTHORIZED, $this->resource->get('page://self/mypage/order-history')->code);
