@@ -324,6 +324,11 @@
     "note": "この画面の HTML に 二要素認証 への導線を描画しない",
     "reason": "target-missing"
   },
+  "GET page://self/cart doUpdateCartItemQuantity": {
+    "classification": "resourceOnly",
+    "note": "数量の増減は operation 付きの POST /cart/item の form で送り、PUT の form は描画しない",
+    "reason": "method-mismatch"
+  },
   "GET page://self/entry goCustomerRegistrationConfirm": {
     "classification": "targetOut",
     "note": "確認画面は入力 form の POST 結果として遷移する。GET affordance は描画しない",

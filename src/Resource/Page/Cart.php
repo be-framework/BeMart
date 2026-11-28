@@ -43,6 +43,7 @@ class Cart extends ResourceObject
     #[Alps('goCart')]
     #[JsonSchema(schema: 'get-cart.json', params: 'get-cart.param.json')]
     #[Link(rel: 'doAddCartItem', href: 'page://self/cart/item', method: 'post')]
+    #[Link(rel: 'doUpdateCartItemQuantity', href: 'page://self/cart/item', method: 'put')]
     #[Link(rel: 'goCheckoutEntry', href: 'page://self/shopping')]
     public function onGet(string $sessionPrefix = self::DEFAULT_SESSION_PREFIX): static
     {

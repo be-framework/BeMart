@@ -1,0 +1,129 @@
+link_request get 'page://self/cart#link=self:doUpdateCartItemQuantity'
+├── uri: page://self/cart
+├── method: GET
+├── links[0]: self:doUpdateCartItemQuantity
+├── resource_request get 'page://self/cart'
+│   ├── uri: page://self/cart
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCartsInput
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── carts[0].cartKey: session-prefix-1_1
+│   │   │       ├── carts[0].saleTypeId: 1
+│   │   │       ├── carts[0].saleTypeName: 通常販売
+│   │   │       ├── carts[0].items[0].productCode: sample-001
+│   │   │       ├── carts[0].items[0].quantity: 3
+│   │   │       ├── carts[0].items[0].price: 1200
+│   │   │       ├── carts[0].items[0].productClassId: 0
+│   │   │       ├── carts[0].items[0].productId: 0
+│   │   │       ├── carts[0].items[0].productName: サンプル商品 A
+│   │   │       ├── carts[0].totalPrice: 3600
+│   │   │       ├── carts[0].deliveryFeeTotal: 0
+│   │   │       ├── carts[0].preOrderId: deadbeefcafe1234567890abcdef01234567890a
+│   │   │       ├── carts[1].cartKey: session-prefix-1_2
+│   │   │       ├── carts[1].saleTypeId: 2
+│   │   │       ├── carts[1].saleTypeName: 予約販売
+│   │   │       ├── carts[1].totalPrice: 0
+│   │   │       ├── carts[1].deliveryFeeTotal: 0
+│   │   │       ├── carts[1].preOrderId: deadbeefcafe1234567890abcdef01234567890b
+│   │   │       ├── cartCount: 2
+│   │   │       ├── totalPrice: 3600
+│   │   │       └── deliveryFeeTotal: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/cart/item?productCode=sample-001&quantity=2&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/cart/item
+│   ├── method: PUT
+│   ├── params.productCode: sample-001
+│   ├── params.quantity: 2
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming UpdateCartItemQuantityInput
+│   │   ├── productCode: sample-001
+│   │   ├── quantity: 2
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being CartItemQuantityReplacing input=[productCode, quantity, sessionPrefix] inject=[productClassQuery, cartQuery]
+│   │   │   ├── inject.productClassQuery: MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface<Null>
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
+│   │   │   └── close being_close
+│   │   │       ├── productCode: sample-001
+│   │   │       ├── requestedQuantity: 2
+│   │   │       ├── adjustedQuantity: 2
+│   │   │       ├── unitPrice: 1200
+│   │   │       ├── cartKey: session-prefix-1_1
+│   │   │       ├── saleTypeName: 通常販売
+│   │   │       ├── mergedCart.cartKey: session-prefix-1_1
+│   │   │       ├── mergedCart.saleTypeId: 1
+│   │   │       ├── mergedCart.saleTypeName: 通常販売
+│   │   │       ├── mergedCart.items[0].productCode: sample-001
+│   │   │       ├── mergedCart.items[0].quantity: 2
+│   │   │       ├── mergedCart.items[0].price: 1200
+│   │   │       ├── mergedCart.items[0].productClassId: 0
+│   │   │       ├── mergedCart.items[0].productId: 0
+│   │   │       ├── mergedCart.items[0].productName: 
+│   │   │       ├── mergedCart.totalPrice: 2400
+│   │   │       ├── mergedCart.deliveryFeeTotal: 0
+│   │   │       └── mergedCart.preOrderId: deadbeefcafe1234567890abcdef01234567890a
+│   │   ├── being_final CartItemQuantityUpdated input=[productCode, requestedQuantity +5 items] inject=[cartCommand]
+│   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── cartKey: session-prefix-1_1
+│   │   │       ├── productCode: sample-001
+│   │   │       ├── requestedQuantity: 2
+│   │   │       ├── adjustedQuantity: 2
+│   │   │       ├── unitPrice: 1200
+│   │   │       ├── totalPrice: 2400
+│   │   │       ├── deliveryFeeTotal: 0
+│   │   │       └── saleTypeName: 通常販売
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 303
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/cart'
+│   ├── uri: page://self/cart
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetCartsInput
+│   │   ├── sessionPrefix: session-prefix-1
+│   │   ├── being_final CartsFetched input=[sessionPrefix] inject=[cartQuery]
+│   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── carts[0].cartKey: session-prefix-1_1
+│   │   │       ├── carts[0].saleTypeId: 1
+│   │   │       ├── carts[0].saleTypeName: 通常販売
+│   │   │       ├── carts[0].items[0].productCode: sample-001
+│   │   │       ├── carts[0].items[0].quantity: 3
+│   │   │       ├── carts[0].items[0].price: 1200
+│   │   │       ├── carts[0].items[0].productClassId: 0
+│   │   │       ├── carts[0].items[0].productId: 0
+│   │   │       ├── carts[0].items[0].productName: サンプル商品 A
+│   │   │       ├── carts[0].totalPrice: 3600
+│   │   │       ├── carts[0].deliveryFeeTotal: 0
+│   │   │       ├── carts[0].preOrderId: deadbeefcafe1234567890abcdef01234567890a
+│   │   │       ├── carts[1].cartKey: session-prefix-1_2
+│   │   │       ├── carts[1].saleTypeId: 2
+│   │   │       ├── carts[1].saleTypeName: 予約販売
+│   │   │       ├── carts[1].totalPrice: 0
+│   │   │       ├── carts[1].deliveryFeeTotal: 0
+│   │   │       ├── carts[1].preOrderId: deadbeefcafe1234567890abcdef01234567890b
+│   │   │       ├── cartCount: 2
+│   │   │       ├── totalPrice: 3600
+│   │   │       └── deliveryFeeTotal: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/cart/item {"productCode":"sample-001","quantity":"2","csrfToken":"[FILTERED]"}
