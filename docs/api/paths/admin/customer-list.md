@@ -61,3 +61,4 @@ mirrors the Wave 4 admin login.
 | doCreateCustomer | [<code>page://self/admin/create-customer</code>](/admin/create-customer.md) |
 | doDeleteCustomer | [<code>page://self/admin/delete-customer</code>](/admin/delete-customer.md) |
 | doResendActivationMail | [<code>page://self/admin/customer/resend-activation-mail</code>](/admin/customer/resend-activation-mail.md) |
+| goExportClassName | [<code>page://self/admin/class-name/class-name-export</code>](/admin/class-name/class-name-export.md) |

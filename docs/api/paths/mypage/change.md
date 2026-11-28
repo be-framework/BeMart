@@ -66,6 +66,7 @@ _No parameters required_
 |----------|-----|
 | doUpdateCustomer | [<code>page://self/mypage/change</code>](/mypage/change.md) |
 | goMypage | [<code>page://self/mypage</code>](/mypage.md) |
+| goMypageChangeComplete | [<code>page://self/mypage/change-complete</code>](/mypage/change-complete.md) |
 ## POST
 ALPS `doUpdateCustomer` に対応する POST 操作。
 

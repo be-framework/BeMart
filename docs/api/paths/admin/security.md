@@ -38,6 +38,7 @@ _No parameters required_
 | Relation | URL |
 |----------|-----|
 | doUpdateSecurity | [<code>page://self/admin/security</code>](/admin/security.md) |
+| goTwoFactorAuthSet | [<code>page://self/admin/two-factor-auth-set</code>](/admin/two-factor-auth-set.md) |
 ## PUT
 Updates the security settings (doUpdateSecurity). ALPS marks this
 `idempotent` → PUT.

@@ -37,6 +37,7 @@ _No parameters required_
 | Relation | URL |
 |----------|-----|
 | doToggleMaintenance | [<code>page://self/admin/content/maintenance</code>](/admin/content/maintenance.md) |
+| goSystemInfo | [<code>page://self/admin/system</code>](/admin/system.md) |
 ## PUT
 Toggles maintenance mode to an explicit state (doToggleMaintenance).
 

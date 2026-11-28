@@ -35,6 +35,7 @@ _No parameters required_
 | Relation | URL |
 |----------|-----|
 | doClearCache | [<code>page://self/admin/content/cache</code>](/admin/content/cache.md) |
+| goMaintenance | [<code>page://self/admin/content/maintenance</code>](/admin/content/maintenance.md) |
 ## PUT
 Clears the application cache (doClearCache).
 

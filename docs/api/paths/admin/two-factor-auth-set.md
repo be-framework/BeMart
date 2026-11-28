@@ -62,6 +62,7 @@ _No parameters required_
 |----------|-----|
 | doSetTwoFactorAuth | [<code>page://self/admin/two-factor-auth-set</code>](/admin/two-factor-auth-set.md) |
 | goAdminLogin | [<code>page://self/admin/login</code>](/admin/login.md) |
+| goTwoFactorAuth | [<code>page://self/admin/two-factor-auth</code>](/admin/two-factor-auth.md) |
 ## PUT
 Registers the TOTP device after confirming the first code
 (doSetTwoFactorAuth). ALPS marks this `idempotent` → PUT.

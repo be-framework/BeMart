@@ -51,6 +51,7 @@ _No parameters required_
 | doDeleteCategory | [<code>page://self/admin/category/category</code>](/admin/category/category.md) |
 | doImportCategoryCsv | [<code>page://self/admin/category/csv</code>](/admin/category/csv.md) |
 | goExportCategory | [<code>page://self/admin/category/csv</code>](/admin/category/csv.md) |
+| goExportOrder | [<code>page://self/admin/order/export-order</code>](/admin/order/export-order.md) |
 ## POST
 ALPS `doCreateCategory` に対応する POST 操作。
 

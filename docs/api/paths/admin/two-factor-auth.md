@@ -54,6 +54,7 @@ _No parameters required_
 |----------|-----|
 | doVerifyTwoFactorAuth | [<code>page://self/admin/two-factor-auth</code>](/admin/two-factor-auth.md) |
 | goAdminLogin | [<code>page://self/admin/login</code>](/admin/login.md) |
+| goContentCache | [<code>page://self/admin/content/cache</code>](/admin/content/cache.md) |
 ## POST
 Verifies the submitted TOTP code (doVerifyTwoFactorAuth).
 

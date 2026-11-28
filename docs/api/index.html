@@ -2989,7 +2989,7 @@ surfaces `alreadyDeleted=true`.</div><div class="method-alps"><a href="../alps.j
 <tr>
 
 
-  <td><span class="param">newProductCode</span><span class="req">*</span></td>
+  <td><a href="../alps.json.html#newProductCode" class="param alps-param" title="複製先の商品コード">newProductCode</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">処理識別子（入力） - /admin/product-copy のレスポンスで扱う処理識別子。ALPS、Fake観察、Resource境界の形状から導いた業務契約。</td>
   <td><div class="extra-info">
@@ -7401,6 +7401,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   </td>
 </tr>
 <tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateCartItemQuantity</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/cart/item</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doRemoveCartItem</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/cart/item</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goCheckoutEntry</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
@@ -7737,6 +7757,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doResetPassword</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/reset</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -7990,6 +8020,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/help/trade-law</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goProduct</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/product{?productCode}</span>
     </div>
   </td>
 </tr>
@@ -8891,6 +8931,66 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goShopping</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/shopping</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goShoppingLogin</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/shopping/login</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goShoppingNonMember</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/shopping/non-member</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goShoppingError</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/shopping/error</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goShoppingShipping</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/shopping/shipping</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goShoppingShippingEdit</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/shopping/shipping-edit</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -9037,6 +9137,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/member-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goLoginHistoryList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/login-history</span>
     </div>
   </td>
 </tr>
@@ -9947,6 +10057,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goExportProduct</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/product-csv</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -10743,6 +10863,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goExportClassName</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/class-name/class-name-export</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -10935,6 +11065,196 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/logout</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goBaseInfo</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/base-info</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goBlockList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/block/block-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goClassCategoryList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/class-category/class-category-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goClassNameList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/class-name/class-name-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goCustomerList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/customer-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goDeliveryList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/delivery/delivery-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goLayoutList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/layout/layout-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goLoginHistoryList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/login-history</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goMailTemplateList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/mail-template</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goNewsList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/news/news-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goOrderList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goPageList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/page/page-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goPaymentList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/payment/payment-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goPluginList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/plugin-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goProductList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/product-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goTagList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/tag/tag-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goTaxRuleList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/tax-rule/tax-rule-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goTemplateList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/template/template-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goTradeLawList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/trade-law</span>
     </div>
   </td>
 </tr>
@@ -12348,6 +12668,56 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doSendOrderMail</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/send-mail</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goExportOrderPdf</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/export-order-pdf{?orderNo}</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goOrderMail</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/send-mail</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateTrackingNumber</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/tracking-number</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doSendShippingNotifyMail</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/shipping-notify-mail</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -12562,6 +12932,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/order/create</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goExportCustomer</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/customer-csv</span>
     </div>
   </td>
 </tr>
@@ -12915,6 +13295,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doInstallPlugin</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/plugin-list</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -13160,6 +13550,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/product-copy</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goCategory</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/category/category{?categoryId}</span>
     </div>
   </td>
 </tr>
@@ -13702,6 +14102,36 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doCopyProduct</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/product-copy</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goCategoryList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/category/category-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goExportCategory</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/category/csv</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -13775,6 +14205,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/security</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goTwoFactorAuthSet</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/two-factor-auth-set</span>
     </div>
   </td>
 </tr>
@@ -14003,6 +14443,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goContentCss</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/content/css</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -14106,6 +14556,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/login</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goContentCache</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/content/cache</span>
     </div>
   </td>
 </tr>
@@ -14305,6 +14765,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/login</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goTwoFactorAuth</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/two-factor-auth</span>
     </div>
   </td>
 </tr>
@@ -15457,6 +15927,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doDeleteCustomerAddress</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/mypage/address</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -15736,6 +16216,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/mypage</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goFavoriteList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/mypage/favorite-list</span>
     </div>
   </td>
 </tr>
@@ -16056,6 +16546,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/mypage</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goMypageChangeComplete</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/mypage/change-complete</span>
     </div>
   </td>
 </tr>
@@ -16433,6 +16933,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goMypageWithdraw</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/mypage/withdraw</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -16626,6 +17136,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/mypage</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goProduct</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/product</span>
     </div>
   </td>
 </tr>
@@ -16873,6 +17393,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/mypage/withdraw</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goMypageWithdrawConfirm</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/mypage/withdraw-confirm</span>
     </div>
   </td>
 </tr>
@@ -18566,6 +19096,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goLayoutList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/layout/layout-list</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -18715,6 +19255,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/block/block-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goLayoutList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/layout/layout-list</span>
     </div>
   </td>
 </tr>
@@ -19048,6 +19598,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goExportOrder</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/export-order</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -19334,6 +19894,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doDeleteCategory</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/category/category</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goProductList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/product-list</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -19538,6 +20118,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/class-name/class-name-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doSortNoMove</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/sort-no-move</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doToggleVisible</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/toggle-visible</span>
     </div>
   </td>
 </tr>
@@ -19779,6 +20379,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doSortNoMove</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/sort-no-move</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goExportClassCategory</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/class-category/class-category-export</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -19840,6 +20460,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/content/cache</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goMaintenance</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/content/maintenance</span>
     </div>
   </td>
 </tr>
@@ -19911,6 +20541,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/content/css</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goContentJs</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/content/js</span>
     </div>
   </td>
 </tr>
@@ -20125,6 +20765,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goSystemInfo</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/system</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -20271,6 +20921,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 </tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doUpdateDelivery</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/delivery/delivery</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doDeleteDelivery</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
   <td>
@@ -20441,6 +21101,36 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doSortNoMove</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/sort-no-move</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doToggleVisible</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/toggle-visible</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goTaxRuleList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/tax-rule/tax-rule-list</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -20556,6 +21246,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/layout/layout</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goTradeLawList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/trade-law</span>
     </div>
   </td>
 </tr>
@@ -20836,6 +21536,36 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateNews</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/news/news{?newsId}</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doDeleteNews</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/news/news{?newsId}</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goPageList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/page/page-list</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -21026,6 +21756,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/news/news</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doToggleVisible</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/toggle-visible</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goPageList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/page/page-list</span>
     </div>
   </td>
 </tr>
@@ -21797,7 +22547,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc"></td>
   <td>
     <div class="extra-info">
-      <span class="badge href">href: page://self/admin/order/export-order-pdf</span>
+      <span class="badge href">href: page://self/admin/order/export-order-pdf{?orderNo}</span>
     </div>
   </td>
 </tr>
@@ -21867,6 +22617,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/order</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goExportOrder</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/export-order</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goExportOrderPdf</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/export-order-pdf{?orderNo}</span>
     </div>
   </td>
 </tr>
@@ -21960,7 +22730,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc"></td>
   <td>
     <div class="extra-info">
-      <span class="badge href">href: page://self/admin/order/export-order-pdf</span>
+      <span class="badge href">href: page://self/admin/order/export-order-pdf{?orderNo}</span>
     </div>
   </td>
 </tr>
@@ -22498,6 +23268,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doDeletePage</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/page/page</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goBlockList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/block/block-list</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -22689,6 +23479,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/page/page</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goBlockList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/block/block-list</span>
     </div>
   </td>
 </tr>
@@ -23019,6 +23819,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/order-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doSortNoMove</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/sort-no-move</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goDeliveryList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/delivery/delivery-list</span>
     </div>
   </td>
 </tr>
@@ -23686,6 +24506,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doSortNoMove</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/sort-no-move</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -23825,6 +24655,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/tax-rule/tax-rule</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goCalendar</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/calendar</span>
     </div>
   </td>
 </tr>

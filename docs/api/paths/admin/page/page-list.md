@@ -37,6 +37,7 @@ _No parameters required_
 | goPage | [<code>page://self/admin/page/page</code>](/admin/page/page.md) |
 | doUpdatePage | [<code>page://self/admin/page/page</code>](/admin/page/page.md) |
 | doDeletePage | [<code>page://self/admin/page/page</code>](/admin/page/page.md) |
+| goBlockList | [<code>page://self/admin/block/block-list</code>](/admin/block/block-list.md) |
 ## POST
 ALPS `doCreatePage` に対応する POST 操作。
 

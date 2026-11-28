@@ -40,6 +40,9 @@ _No parameters required_
 | goDelivery | [<code>page://self/admin/delivery/delivery</code>](/admin/delivery/delivery.md) |
 | doUpdateDelivery | [<code>page://self/admin/delivery/delivery</code>](/admin/delivery/delivery.md) |
 | doDeleteDelivery | [<code>page://self/admin/delivery/delivery</code>](/admin/delivery/delivery.md) |
+| doSortNoMove | [<code>page://self/admin/sort-no-move</code>](/admin/sort-no-move.md) |
+| doToggleVisible | [<code>page://self/admin/toggle-visible</code>](/admin/toggle-visible.md) |
+| goTaxRuleList | [<code>page://self/admin/tax-rule/tax-rule-list</code>](/admin/tax-rule/tax-rule-list.md) |
 ## POST
 ALPS `doCreateDelivery` に対応する POST 操作。
 

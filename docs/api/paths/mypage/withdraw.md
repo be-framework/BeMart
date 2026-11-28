@@ -54,6 +54,7 @@ _No parameters required_
 | Relation | URL |
 |----------|-----|
 | doWithdrawCustomer | [<code>page://self/mypage/withdraw</code>](/mypage/withdraw.md) |
+| goMypageWithdrawConfirm | [<code>page://self/mypage/withdraw-confirm</code>](/mypage/withdraw-confirm.md) |
 ## POST
 ALPS `doWithdrawCustomer` に対応する POST 操作。
 

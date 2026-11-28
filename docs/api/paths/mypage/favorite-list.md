@@ -44,3 +44,4 @@ _No parameters required_
 | doAddFavorite | [<code>page://self/mypage/favorite</code>](/mypage/favorite.md) |
 | doRemoveFavorite | [<code>page://self/mypage/favorite</code>](/mypage/favorite.md) |
 | goMypage | [<code>page://self/mypage</code>](/mypage.md) |
+| goMypageWithdraw | [<code>page://self/mypage/withdraw</code>](/mypage/withdraw.md) |

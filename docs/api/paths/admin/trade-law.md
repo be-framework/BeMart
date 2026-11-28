@@ -43,6 +43,7 @@ _No parameters required_
 | Relation | URL |
 |----------|-----|
 | doUpdateTradeLaw | [<code>page://self/admin/trade-law</code>](/admin/trade-law.md) |
+| goContentCss | [<code>page://self/admin/content/css</code>](/admin/content/css.md) |
 ## POST
 ALPS `doUpdateTradeLaw` に対応する POST 操作。
 

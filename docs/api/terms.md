@@ -5,8 +5,8 @@ This index reports lexical identifier matches only; it does not prove semantic e
 ## Summary
 
 - Terms used in API: 378
-- Terms with same-name ALPS descriptor: 128
-- Lexical ALPS coverage: 33.9%
+- Terms with same-name ALPS descriptor: 129
+- Lexical ALPS coverage: 34.1%
 - Reserved representation fields: 0
 - ☑︎ = ALPS descriptor binding
 
@@ -3013,8 +3013,11 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: get-admin-product-list.json#/properties/filters/properties/nameKeyword
   - schema property: get-products.json#/properties/filters/properties/nameKeyword
 
-### `newProductCode`
+### `newProductCode` ☑︎
 
+- title: 複製先の商品コード
+- def: https://schema.org/sku
+- doc: 商品を複製して作る新しい商品の商品コード。既存の商品コードと重複できない
 - usages:
   - parameter: POST /admin/product-copy {newProductCode}
   - schema property: post-admin-product-copy.param.json#/properties/newProductCode

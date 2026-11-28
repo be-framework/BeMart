@@ -45,6 +45,8 @@ ALPS `goPage` に対応する GET 操作。
 | Relation | URL |
 |----------|-----|
 | goPageList | [<code>page://self/admin/page/page-list</code>](/admin/page/page-list.md) |
+| doDeletePage | [<code>page://self/admin/page/page</code>](/admin/page/page.md) |
+| goBlockList | [<code>page://self/admin/block/block-list</code>](/admin/block/block-list.md) |
 ## PUT
 ALPS `doUpdatePage` に対応する PUT 操作。
 

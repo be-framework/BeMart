@@ -75,3 +75,9 @@ ALPS `goCheckoutEntry` / `goShopping` に対応する GET 操作。
 |----------|-----|
 | doConfirmOrder | [<code>page://self/shopping/confirm</code>](/shopping/confirm.md) |
 | goCart | [<code>page://self/cart</code>](/cart.md) |
+| goShopping | [<code>page://self/shopping</code>](/shopping.md) |
+| goShoppingLogin | [<code>page://self/shopping/login</code>](/shopping/login.md) |
+| goShoppingNonMember | [<code>page://self/shopping/non-member</code>](/shopping/non-member.md) |
+| goShoppingError | [<code>page://self/shopping/error</code>](/shopping/error.md) |
+| goShoppingShipping | [<code>page://self/shopping/shipping</code>](/shopping/shipping.md) |
+| goShoppingShippingEdit | [<code>page://self/shopping/shipping-edit</code>](/shopping/shipping-edit.md) |

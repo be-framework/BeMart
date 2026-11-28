@@ -57,3 +57,5 @@ ALPS `goCategory` に対応する GET 操作。
 | doCreateCategory | [<code>page://self/admin/category/category-list</code>](/admin/category/category-list.md) |
 | doUpdateCategory | [<code>page://self/admin/category/category</code>](/admin/category/category.md) |
 | goCategoryList | [<code>page://self/admin/category/category-list</code>](/admin/category/category-list.md) |
+| doDeleteCategory | [<code>page://self/admin/category/category</code>](/admin/category/category.md) |
+| goProductList | [<code>page://self/admin/product-list</code>](/admin/product-list.md) |
