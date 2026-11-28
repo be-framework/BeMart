@@ -64,7 +64,7 @@ class CsvConfig extends ResourceObject
      * Thin GET renderer for `Setting/Shop/csv.twig`. The existing POST
      * persists a submitted vector; this GET serves the editor body.
      */
-    #[Alps('doUpdateCsv')]
+    #[Alps('goCsv')]
     #[JsonSchema(schema: 'get-admin-csv-config.json', params: 'get-admin-csv-config.param.json')]
     #[Link(rel: 'doUpdateCsv', href: 'page://self/admin/csv-config', method: 'post')]
     #[Link(rel: 'goExportProduct', href: 'page://self/admin/product-csv', method: 'get')]

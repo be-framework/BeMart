@@ -520,7 +520,7 @@
         },
         "/forgot-complete": {
             "get": {
-                "operationId": "doRequestPasswordReset",
+                "operationId": "goPasswordResetRequestComplete",
                 "summary": "EC-CUBE goForgotComplete \u2014 render the reset-mail-sent confirmation\npage scaffolding.",
                 "responses": {
                     "200": {
@@ -538,7 +538,7 @@
         },
         "/forgot-password": {
             "get": {
-                "operationId": "doRequestPasswordReset",
+                "operationId": "goPasswordResetRequest",
                 "summary": "EC-CUBE goRequestPasswordReset \u2014 show the password-reset-request\nform scaffolding.",
                 "description": "Pure form-info endpoint: no Be Framework, no domain logic.\nAnonymous-accessible (returns 200 regardless of session state).",
                 "responses": {
@@ -887,7 +887,7 @@
         },
         "/reset": {
             "get": {
-                "operationId": "doResetPassword",
+                "operationId": "goPasswordReset",
                 "summary": "EC-CUBE goResetPassword \u2014 show the new-password form scaffolding\n(EC-CUBE `Forgot/reset.twig`).",
                 "description": "Pure form-info endpoint: no Be Framework, no domain logic.\nAnonymous-accessible (the reset-key check is the POST's job). The\n`resetKey` arrives as a query param on the emailed reset link and\nis carried into a hidden form field for the subsequent POST.",
                 "parameters": [
@@ -1172,7 +1172,7 @@
         },
         "/admin/authority-role": {
             "get": {
-                "operationId": "doUpdateAuthorityRole",
+                "operationId": "goAuthorityRole",
                 "summary": "Phase 3 admin HTML Tier-2: render the authority-rule management\nscreen. The ALPS transition covers `doUpdateAuthorityRole`; EC-CUBE\nuses the same resource to edit URL-deny rules stored in\n`dtb_authority_role`.",
                 "responses": {
                     "200": {
@@ -1616,7 +1616,7 @@
         },
         "/admin/change-password": {
             "get": {
-                "operationId": "doChangePassword",
+                "operationId": "goChangePassword",
                 "summary": "Renders the admin password-change form.",
                 "description": "Admin-only: returns 403 for an anonymous request \u2014 the same\nfirewall contract as the other admin pages, enforced at the\nresource layer (there is no Be Final to raise\n`UnauthorizedAdminAccessException`).",
                 "responses": {
@@ -1914,7 +1914,7 @@
         },
         "/admin/csv-config": {
             "get": {
-                "operationId": "doUpdateCsv",
+                "operationId": "goCsv",
                 "summary": "EC-CUBE CSV\u51fa\u529b\u9805\u76ee\u8a2d\u5b9a \u2014 Setting/Shop Tier-2.",
                 "description": "Thin GET renderer for `Setting/Shop/csv.twig`. The existing POST\npersists a submitted vector; this GET serves the editor body.",
                 "parameters": [
@@ -3699,7 +3699,7 @@
         },
         "/admin/order-status": {
             "get": {
-                "operationId": "doUpdateOrderStatus",
+                "operationId": "goOrderStatusList",
                 "summary": "EC-CUBE \u53d7\u6ce8\u5bfe\u5fdc\u72b6\u6cc1\u8a2d\u5b9a \u2014 Setting/Shop Tier-2.",
                 "description": "Thin GET renderer for `Setting/Shop/order_status.twig`. BeMart\nhas a per-order status-change transition on POST, but not yet a\nmaster-data transition for editing status labels/colors.",
                 "responses": {
@@ -5762,7 +5762,7 @@
         },
         "/mypage/address": {
             "get": {
-                "operationId": "doUpdateCustomerAddress",
+                "operationId": "goCustomerAddress",
                 "summary": "EC-CUBE \u304a\u5c4a\u3051\u5148\u60c5\u5831\u7de8\u96c6 \u2014 show the address add/edit form.",
                 "description": "Pure form-info endpoint: no Be Framework, no domain logic. Maps\nEC-CUBE's `mypage_delivery_new` (no `addressId`) and\n`mypage_delivery_edit` (`addressId` given) screens. AUTHN +\nownership AUTHZ are enforced here directly (mirrors Withdraw::onGet\n\u2014 a Resource-level guard on a no-domain form page):\n\n  - no session                    \u2192 401\n  - addressId of an unknown row    \u2192 404\n  - addressId owned by another     \u2192 403\n\nPhase 3 \u2014 HTML FORM page. The resource builds an {@see \\AddressForm}\n(Ray.WebFormModule AbstractForm) and exposes it as `body['form']`.\nFor the edit screen the form is pre-populated from the stored\naddress; for the new screen it is empty. VALIDATION AUTHORITY\nSTAYS WITH the Be Framework Becoming chain (onPost). The JSON\ncontexts ignore `body['form']`.",
                 "parameters": [
@@ -9924,7 +9924,7 @@
         },
         "/admin/order/import-shipping": {
             "get": {
-                "operationId": "doImportShippingCsv",
+                "operationId": "goImportShippingCsv",
                 "summary": "EC-CUBE \u51fa\u8377CSV\u767b\u9332 \u2014 Order Tier-2.",
                 "description": "Thin GET renderer for `admin/Order/csv_shipping.twig` \u2014 the\nshipping-CSV upload form. The POST below accepts the uploaded\nCSV; this GET serves the upload-form shell. AUTHZ is a direct\nadmin-session check (Pattern B \u2014 no Be transition is invoked on\nthe GET path); a non-admin firewall is refused with 403.",
                 "responses": {

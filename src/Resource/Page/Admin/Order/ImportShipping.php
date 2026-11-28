@@ -48,7 +48,7 @@ class ImportShipping extends ResourceObject
      * admin-session check (Pattern B — no Be transition is invoked on
      * the GET path); a non-admin firewall is refused with 403.
      */
-    #[Alps('doImportShippingCsv')]
+    #[Alps('goImportShippingCsv')]
     #[JsonSchema(schema: 'get-admin-order-import-shipping.json')]
     #[Link(rel: 'doImportShippingCsv', href: 'page://self/admin/order/import-shipping', method: 'post')]
     #[Link(rel: 'goExportShipping', href: 'page://self/admin/order/export-shipping', method: 'get')]

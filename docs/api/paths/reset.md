@@ -29,7 +29,7 @@ Anonymous-accessible (the reset-key check is the POST's job). The
 `resetKey` arrives as a query param on the emailed reset link and
 is carried into a hidden form field for the subsequent POST.
 
-**ALPS**: `doResetPassword`
+**ALPS**: `goPasswordReset`
 
 
 

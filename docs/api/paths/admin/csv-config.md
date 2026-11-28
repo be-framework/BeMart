@@ -29,7 +29,7 @@ EC-CUBE CSV出力項目設定 — Setting/Shop Tier-2.
 Thin GET renderer for `Setting/Shop/csv.twig`. The existing POST
 persists a submitted vector; this GET serves the editor body.
 
-**ALPS**: `doUpdateCsv`
+**ALPS**: `goCsv`
 
 
 

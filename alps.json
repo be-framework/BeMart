@@ -360,7 +360,8 @@
           {"href": "#doCreateProduct"},
           {"href": "#doCopyProduct"},
           {"href": "#doBulkUpdateProductStatus"},
-          {"href": "#doImportProductCsv"}
+          {"href": "#doImportProductCsv"},
+          {"href": "#goCsv"}
         ]
       },
 
@@ -430,7 +431,8 @@
           {"href": "#ClassName"},
           {"href": "#goClassNameList"},
           {"href": "#doCreateClassName"},
-          {"href": "#doSortNoMove"}
+          {"href": "#doSortNoMove"},
+          {"href": "#goCsv"}
         ]
       },
 
@@ -524,7 +526,8 @@
           {"href": "#password"},
           {"href": "#doLogin"},
           {"href": "#goShoppingNonMember"},
-          {"href": "#goCustomerRegistration"}
+          {"href": "#goCustomerRegistration"},
+          {"href": "#goPasswordResetRequest"}
         ]
       },
       {"id": "ShoppingNonMember", "title": "非会員購入情報入力","tag": "checkout src-router src-template flow-customer-purchase",
@@ -789,7 +792,8 @@
           {"href": "#goCustomer"},
           {"href": "#goCustomerList"},
           {"href": "#doCreateCustomer"},
-          {"href": "#doResendActivationMail"}
+          {"href": "#doResendActivationMail"},
+          {"href": "#goCsv"}
         ]
       },
       {"id": "AdminCustomerEditPage", "title": "管理会員編集画面","tag": "account flow-manage-customer actor-admin src-template src-router page page-admin page-detail page-edit route-ec-cube migration-target feature-admin-customer",
@@ -844,7 +848,8 @@
         "descriptor": [
           {"href": "#CustomerAddress"},
           {"href": "#doCreateCustomerAddress"},
-          {"href": "#goFavoriteList"}
+          {"href": "#goFavoriteList"},
+          {"href": "#goCustomerAddress"}
         ]
       },
 
@@ -883,7 +888,8 @@
           {"href": "#password"},
           {"href": "#doLogin"},
           {"href": "#goCustomerRegistration"},
-          {"href": "#doRequestPasswordReset"}
+          {"href": "#doRequestPasswordReset"},
+          {"href": "#goPasswordResetRequest"}
         ]
       },
       {"id": "PasswordReset", "title": "パスワードリセット","tag": "account src-template",
@@ -891,8 +897,7 @@
           {"href": "#email"},
           {"href": "#resetKey"},
           {"href": "#password"},
-          {"href": "#doResetPassword"},
-          {"href": "#doRequestPasswordReset"}
+          {"href": "#doResetPassword"}
         ]
       },
       {"id": "CustomerRegistration", "title": "会員登録","tag": "account src-template flow-customer-registration",
@@ -1786,7 +1791,7 @@
       {"id": "AdminTop", "title": "管理画面トップ",
         "tag": "admin-system flow-admin-auth actor-admin src-template page page-admin page-dashboard feature-admin-auth flow-admin-system-operation",
         "doc": {"value": "管理画面のダッシュボード。doAdminLogin 成功後の遷移先。受注・会員・商品・各種マスタ管理への入口を提供する。"},
-        "descriptor": [{"href": "#goOrderList"}, {"href": "#goCustomerList"}, {"href": "#goProductList"}, {"href": "#goMemberList"}, {"href": "#goBaseInfo"}, {"href": "#goPaymentList"}, {"href": "#goDeliveryList"}, {"href": "#goTaxRuleList"}, {"href": "#goNewsList"}, {"href": "#goPageList"}, {"href": "#goLayoutList"}, {"href": "#goBlockList"}, {"href": "#goTagList"}, {"href": "#goClassNameList"}, {"href": "#goClassCategoryList"}, {"href": "#goMailTemplateList"}, {"href": "#goLoginHistoryList"}, {"href": "#goPluginList"}, {"href": "#goTemplateList"}, {"href": "#goTradeLawList"}, {"href": "#goContentCache"}, {"href": "#doAdminLogout"}]},
+        "descriptor": [{"href": "#goOrderList"}, {"href": "#goCustomerList"}, {"href": "#goProductList"}, {"href": "#goMemberList"}, {"href": "#goBaseInfo"}, {"href": "#goPaymentList"}, {"href": "#goDeliveryList"}, {"href": "#goTaxRuleList"}, {"href": "#goNewsList"}, {"href": "#goPageList"}, {"href": "#goLayoutList"}, {"href": "#goBlockList"}, {"href": "#goTagList"}, {"href": "#goClassNameList"}, {"href": "#goClassCategoryList"}, {"href": "#goMailTemplateList"}, {"href": "#goLoginHistoryList"}, {"href": "#goPluginList"}, {"href": "#goTemplateList"}, {"href": "#goTradeLawList"}, {"href": "#goContentCache"}, {"href": "#doAdminLogout"}, {"href": "#goAuthorityRole"}, {"href": "#goCsv"}, {"href": "#goOrderStatusList"}]},
       {"id": "doRequestPasswordReset", "title": "パスワードリセットを依頼する", "type": "unsafe", "rt": "#PasswordReset",
         "tag": "account flow-account actor-customer src-router feature-account",
         "doc": {"value": "メールアドレスを受け取り、パスワード再発行用URLを含むメールを送信する。リセットキーには有効期限あり。"},
@@ -2156,6 +2161,8 @@
       {"id": "Calendar", "title": "営業日カレンダー", "tag": "src-template alps-route-gate flow-admin-shop-configuration",
         "doc": {"value": "営業日カレンダーを表す画面状態。"},
         "descriptor": [{"href": "#goCalendar"}, {"href": "#doCreateCalendarHoliday"}, {"href": "#doUpdateCalendar"}, {"href": "#doDeleteCalendarHoliday"}]},
+      {"id": "ChangePassword", "title": "パスワード変更", "tag": "src-template alps-route-gate flow-admin-system-operation",
+        "doc": {"value": "パスワード変更を表す画面状態。"}},
       {"id": "ContentCache", "title": "キャッシュ管理", "tag": "src-template alps-route-gate flow-admin-system-operation",
         "doc": {"value": "キャッシュ管理を表す画面状態。"},
         "descriptor": [{"href": "#doClearCache"}]},
@@ -2190,6 +2197,16 @@
         "doc": {"value": "対応状況一覧を表す画面状態。"},
         "descriptor": [
           {"href": "#doUpdateOrderStatusList"}
+        ]},
+      {"id": "PasswordResetRequest", "title": "パスワード再発行依頼", "tag": "src-template alps-route-gate",
+        "doc": {"value": "パスワード再発行依頼を表す画面状態。"},
+        "descriptor": [
+          {"href": "#doRequestPasswordReset"}
+        ]},
+      {"id": "PasswordResetRequestComplete", "title": "パスワード再発行依頼完了", "tag": "src-template alps-route-gate",
+        "doc": {"value": "パスワード再発行依頼完了を表す画面状態。"},
+        "descriptor": [
+          {"href": "#doResetPassword"}
         ]},
       {"id": "Security", "title": "セキュリティ設定", "tag": "src-template alps-route-gate flow-admin-system-operation",
         "doc": {"value": "セキュリティ設定を表す画面状態。"},
@@ -2296,11 +2313,17 @@
       {"id": "goAdminTop", "title": "管理画面トップを見る", "type": "safe", "rt": "#AdminTop",
         "tag": "src-router alps-route-gate flow-admin-system-operation",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+      {"id": "goAuthorityRole", "title": "権限管理を見る", "type": "safe", "rt": "#AuthorityRole",
+        "tag": "src-router alps-route-gate flow-admin-system-operation",
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "goBlock", "title": "ブロック詳細を見る", "type": "safe", "rt": "#Block",
         "tag": "src-router alps-route-gate flow-admin-content-publish",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "goCalendar", "title": "営業日カレンダーを見る", "type": "safe", "rt": "#Calendar",
         "tag": "src-router alps-route-gate flow-admin-shop-configuration",
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+      {"id": "goChangePassword", "title": "パスワード変更を見る", "type": "safe", "rt": "#ChangePassword",
+        "tag": "src-router alps-route-gate flow-admin-system-operation",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "goContactComplete", "title": "お問い合わせ完了を見る", "type": "safe", "rt": "#ContactComplete",
         "tag": "src-router alps-route-gate flow-customer-inquiry",
@@ -2313,6 +2336,12 @@
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "goContentJs", "title": "JavaScript管理を見る", "type": "safe", "rt": "#ContentJs",
         "tag": "src-router alps-route-gate flow-admin-content-publish",
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+      {"id": "goCsv", "title": "CSV出力設定を見る", "type": "safe", "rt": "#Csv",
+        "tag": "src-router alps-route-gate flow-admin-csv-exchange",
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+      {"id": "goCustomerAddress", "title": "配送先を見る", "type": "safe", "rt": "#CustomerAddress",
+        "tag": "src-router alps-route-gate",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "goCustomerRegistrationComplete", "title": "会員登録完了を見る", "type": "safe", "rt": "#CustomerRegistrationComplete",
         "tag": "src-router alps-route-gate flow-customer-registration",
@@ -2331,6 +2360,9 @@
         "tag": "src-router alps-route-gate flow-admin-csv-exchange",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
         "descriptor": [{"href": "#doImportClassNameCsv"}]},
+      {"id": "goImportShippingCsv", "title": "配送CSVインポートを見る", "type": "safe", "rt": "#OrderList",
+        "tag": "src-router alps-route-gate flow-admin-csv-exchange",
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "goLayout", "title": "レイアウト詳細を見る", "type": "safe", "rt": "#Layout",
         "tag": "src-router alps-route-gate flow-admin-content-publish",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
@@ -2354,6 +2386,18 @@
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "goOrderShippingAddress", "title": "受注配送先を見る", "type": "safe", "rt": "#OrderShippingAddress",
         "tag": "src-router alps-route-gate flow-admin-order-fulfillment",
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+      {"id": "goOrderStatusList", "title": "対応状況一覧を見る", "type": "safe", "rt": "#OrderStatusList",
+        "tag": "src-router alps-route-gate flow-admin-order-fulfillment",
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+      {"id": "goPasswordReset", "title": "パスワード再設定を見る", "type": "safe", "rt": "#PasswordReset",
+        "tag": "src-router alps-route-gate",
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+      {"id": "goPasswordResetRequest", "title": "パスワード再発行依頼を見る", "type": "safe", "rt": "#PasswordResetRequest",
+        "tag": "src-router alps-route-gate",
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+      {"id": "goPasswordResetRequestComplete", "title": "パスワード再発行依頼完了を見る", "type": "safe", "rt": "#PasswordResetRequestComplete",
+        "tag": "src-router alps-route-gate",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "goPayment", "title": "支払方法詳細を見る", "type": "safe", "rt": "#Payment",
         "tag": "src-router alps-route-gate flow-admin-shop-configuration",

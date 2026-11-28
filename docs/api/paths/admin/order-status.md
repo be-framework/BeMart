@@ -43,7 +43,7 @@ Thin GET renderer for `Setting/Shop/order_status.twig`. BeMart
 has a per-order status-change transition on POST, but not yet a
 master-data transition for editing status labels/colors.
 
-**ALPS**: `doUpdateOrderStatus`
+**ALPS**: `goOrderStatusList`
 
 
 

@@ -30,7 +30,7 @@ firewall contract as the other admin pages, enforced at the
 resource layer (there is no Be Final to raise
 `UnauthorizedAdminAccessException`).
 
-**ALPS**: `doChangePassword`
+**ALPS**: `goChangePassword`
 
 
 
