@@ -194,6 +194,11 @@
     "note": "メール送信 form は送信画面（/admin/order/send-mail）にあり、受注ページには描画しない",
     "reason": "target-missing"
   },
+  "GET page://self/admin/order doSendShippingNotifyMail": {
+    "classification": "resourceOnly",
+    "note": "出荷通知メールの送信 form は確認画面（/admin/order/shipping-notify-mail）にあり、受注ページには描画しない",
+    "reason": "target-missing"
+  },
   "GET page://self/admin/order doUpdateOrderStatus": {
     "classification": "resourceOnly",
     "note": "受注詳細に /admin/order-status への form が無い（リンクのみ）",
