@@ -157,6 +157,19 @@ BeMart-specific addition is a per-instance curl cookie jar, so the PHP
 session survives across the workflow; the skeleton's stock `HttpResource`
 targets stateless JSON APIs and omits cookie handling.
 
+### A MySQL of your own
+
+Runs that share one MySQL drop and recreate each other's database. To run
+the SQL-backed tests beside another run, start a MySQL for your worktree:
+
+```bash
+start=$(bin/test-mysql start) && eval "$start" && composer test   # free port, data under var/mysql/
+bin/test-mysql stop
+```
+
+Everything SQL-backed reads `DATABASE_URL` (host, port and database), and
+the HTTP test servers pick free ports, so two worktrees run side by side.
+
 ## Known provisional aspects
 
 These work today but are candidates for future consolidation:

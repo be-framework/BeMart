@@ -18,6 +18,7 @@
 /malt/tmp/
 /malt/var/
 /malt/conf/*.tmp
+/var/mysql/
 
 # EC-CUBE source clone for schema extraction and HTML parity tests
 /tools/ec-cube-source/
