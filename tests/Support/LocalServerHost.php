@@ -6,7 +6,10 @@ namespace MyVendor\BeMart\Tests\Support;
 
 use RuntimeException;
 
+use function array_map;
 use function fclose;
+use function in_array;
+use function sprintf;
 use function stream_socket_get_name;
 use function stream_socket_server;
 
@@ -18,6 +21,8 @@ use function stream_socket_server;
  */
 final class LocalServerHost
 {
+    private const ATTEMPTS = 10;
+
     /** @var array<string, self> */
     private static array $taken = [];
 
@@ -32,15 +37,22 @@ final class LocalServerHost
             return self::$taken[$owner];
         }
 
-        // Port 0 lets the OS pick a free port; it is released for the server to bind right after
-        $socket = stream_socket_server('tcp://127.0.0.1:0', $errno, $error);
-        if ($socket === false) {
-            throw new RuntimeException($error);
+        $inUse = array_map(static fn (self $taken): string => $taken->host, self::$taken);
+        for ($attempt = 0; $attempt < self::ATTEMPTS; $attempt++) {
+            // Port 0 lets the OS pick a free port; it is released for the server to bind right after
+            $socket = stream_socket_server('tcp://127.0.0.1:0', $errno, $error);
+            if ($socket === false) {
+                throw new RuntimeException($error);
+            }
+
+            $host = (string) stream_socket_get_name($socket, false);
+            fclose($socket);
+            // The OS may hand a released port out again, and another owner's server may not be up yet
+            if (! in_array($host, $inUse, true)) {
+                return self::$taken[$owner] = new self($host);
+            }
         }
 
-        $host = (string) stream_socket_get_name($socket, false);
-        fclose($socket);
-
-        return self::$taken[$owner] = new self($host);
+        throw new RuntimeException(sprintf('No loopback port for %s that this process has not given out already', $owner));
     }
 }
