@@ -14,6 +14,11 @@ use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 
+use function html_entity_decode;
+use function parse_str;
+use function parse_url;
+use function preg_match;
+
 /**
  * Phase 3 — HTML render check for the admin Product editor.
  *
@@ -202,6 +207,13 @@ final class AdminProductEditHtmlRenderTest extends TestCase
      */
     private function fetchEditModeHtml(string $productCode): string
     {
+        return $this->editModeResource($productCode)
+            ->get('page://self/admin/product/edit', ['productCode' => $productCode])
+            ->toString();
+    }
+
+    private function editModeResource(string $productCode): ResourceInterface
+    {
         $fakeProduct = new ProductEntity(
             productCode: $productCode,
             productName: 'テスト商品',
@@ -254,9 +266,27 @@ final class AdminProductEditHtmlRenderTest extends TestCase
             },
         );
 
-        return $injector->getInstance(ResourceInterface::class)
-            ->get('page://self/admin/product/edit', ['productCode' => $productCode])
-            ->toString();
+        return $injector->getInstance(ResourceInterface::class);
+    }
+
+    /**
+     * The 規格編集 link in the meta panel leads to the product-class page of the same product.
+     */
+    public function testClassEditLinkLeadsToTheProductClassPage(): void
+    {
+        $resource = $this->editModeResource('p-test-001');
+        $html = $resource->get('page://self/admin/product/edit', ['productCode' => 'p-test-001'])->toString();
+
+        $this->assertSame(1, preg_match('#<a\s(?:[^>]*\s)?href="([^"]+)"[^>]*>\s*規格編集\s*</a>#', $html, $match), 'the class edit link is missing');
+        $href = parse_url(html_entity_decode($match[1]));
+        $this->assertIsArray($href);
+        $this->assertArrayHasKey('path', $href);
+        parse_str($href['query'] ?? '', $query);
+
+        $ro = $resource->get('page://self' . $href['path'], $query);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('p-test-001', $ro->body['productCode']);
     }
 
     /**
