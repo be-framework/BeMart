@@ -54,7 +54,7 @@ class ForgotPassword extends ResourceObject
      * Pure form-info endpoint: no Be Framework, no domain logic.
      * Anonymous-accessible (returns 200 regardless of session state).
      */
-    #[Alps('doRequestPasswordReset')]
+    #[Alps('goPasswordResetRequest')]
     #[JsonSchema(schema: 'get-forgot-password.json')]
     #[Link(rel: 'doRequestPasswordReset', href: 'page://self/forgot-password', method: 'post')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]

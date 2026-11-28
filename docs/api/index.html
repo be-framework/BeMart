@@ -456,7 +456,7 @@ still need their own defense (bound params, HTML escape on render).</div><div cl
 <tr>
   <td rowspan="1" class="path-cell" id="path-forgot-complete">/forgot-complete</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goForgotComplete — render the reset-mail-sent confirmation
-page scaffolding.</div><div class="method-alps"><a href="../alps.json.html#doRequestPasswordReset" class="alps-link">doRequestPasswordReset</a></div></td>
+page scaffolding.</div><div class="method-alps"><a href="../alps.json.html#goPasswordResetRequestComplete" class="alps-link">goPasswordResetRequestComplete</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -466,7 +466,7 @@ page scaffolding.</div><div class="method-alps"><a href="../alps.json.html#doReq
   <td rowspan="2" class="path-cell" id="path-forgot-password">/forgot-password</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goRequestPasswordReset — show the password-reset-request
 form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework, no domain logic.
-Anonymous-accessible (returns 200 regardless of session state).</div><div class="method-alps"><a href="../alps.json.html#doRequestPasswordReset" class="alps-link">doRequestPasswordReset</a></div></td>
+Anonymous-accessible (returns 200 regardless of session state).</div><div class="method-alps"><a href="../alps.json.html#goPasswordResetRequest" class="alps-link">goPasswordResetRequest</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -696,7 +696,7 @@ as a BeMart/API-friendly alias.</div><div class="method-alps"><a href="../alps.j
 (EC-CUBE `Forgot/reset.twig`).</div><div class="method-desc">Pure form-info endpoint: no Be Framework, no domain logic.
 Anonymous-accessible (the reset-key check is the POST&#039;s job). The
 `resetKey` arrives as a query param on the emailed reset link and
-is carried into a hidden form field for the subsequent POST.</div><div class="method-alps"><a href="../alps.json.html#doResetPassword" class="alps-link">doResetPassword</a></div></td>
+is carried into a hidden form field for the subsequent POST.</div><div class="method-alps"><a href="../alps.json.html#goPasswordReset" class="alps-link">goPasswordReset</a></div></td>
   <td><a href="../alps.json.html#resetKey" class="param alps-param" title="リセットキー">resetKey</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">パスワードリセットキー（入力） - パスワードリセット用のワンタイムトークン。リセット要求時に生成、使用後にクリア Fake観察文字長 32〜34; 観察値 &#039;valid-reset-key-pilot15-aaaa1111&#039;, &#039;expired-token-key-pilot15-aaaa1111&#039;。</td>
@@ -826,7 +826,7 @@ is carried into a hidden form field for the subsequent POST.</div><div class="me
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Phase 3 admin HTML Tier-2: render the authority-rule management
 screen. The ALPS transition covers `doUpdateAuthorityRole`; EC-CUBE
 uses the same resource to edit URL-deny rules stored in
-`dtb_authority_role`.</div><div class="method-alps"><a href="../alps.json.html#doUpdateAuthorityRole" class="alps-link">doUpdateAuthorityRole</a></div></td>
+`dtb_authority_role`.</div><div class="method-alps"><a href="../alps.json.html#goAuthorityRole" class="alps-link">goAuthorityRole</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -1127,7 +1127,7 @@ with the dtb_base_info row for the HTML editor.</div><div class="method-alps"><a
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the admin password-change form.</div><div class="method-desc">Admin-only: returns 403 for an anonymous request — the same
 firewall contract as the other admin pages, enforced at the
 resource layer (there is no Be Final to raise
-`UnauthorizedAdminAccessException`).</div><div class="method-alps"><a href="../alps.json.html#doChangePassword" class="alps-link">doChangePassword</a></div></td>
+`UnauthorizedAdminAccessException`).</div><div class="method-alps"><a href="../alps.json.html#goChangePassword" class="alps-link">goChangePassword</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -1385,7 +1385,7 @@ can stay free of session lookups; we just map the exception.</div><div class="me
 <tr>
   <td rowspan="5" class="path-cell" id="path-admin/csv-config">/admin/csv-config</td>
   <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE CSV出力項目設定 — Setting/Shop Tier-2.</div><div class="method-desc">Thin GET renderer for `Setting/Shop/csv.twig`. The existing POST
-persists a submitted vector; this GET serves the editor body.</div><div class="method-alps"><a href="../alps.json.html#doUpdateCsv" class="alps-link">doUpdateCsv</a></div></td>
+persists a submitted vector; this GET serves the editor body.</div><div class="method-alps"><a href="../alps.json.html#goCsv" class="alps-link">goCsv</a></div></td>
   <td><a href="../alps.json.html#csvType" class="param alps-param" title="CSV種別">csvType</a></td>
   <td><span class="badge type-int">int</span></td>
   <td class="param-desc">CSV種別（入力） - CSV出力項目設定で編集対象にするCSV種別。1=商品CSV, 2=会員CSV, 3=受注CSV, 4=配送CSV。HTTP queryでは文字列として届く場合があるためtransport schemaではstring|integer|nullを許容し、意味検証はResource/Semantic層へ委ねる。</td>
@@ -2553,7 +2553,7 @@ discipline as Wave 5 / Wave 6 admin resources.</div><div class="method-alps"><a 
   <td rowspan="5" class="path-cell" id="path-admin/order-status">/admin/order-status</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE 受注対応状況設定 — Setting/Shop Tier-2.</div><div class="method-desc">Thin GET renderer for `Setting/Shop/order_status.twig`. BeMart
 has a per-order status-change transition on POST, but not yet a
-master-data transition for editing status labels/colors.</div><div class="method-alps"><a href="../alps.json.html#doUpdateOrderStatus" class="alps-link">doUpdateOrderStatus</a></div></td>
+master-data transition for editing status labels/colors.</div><div class="method-alps"><a href="../alps.json.html#goOrderStatusList" class="alps-link">goOrderStatusList</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -3896,7 +3896,7 @@ Phase 3 — HTML FORM page. The resource builds an {@see \AddressForm}
 For the edit screen the form is pre-populated from the stored
 address; for the new screen it is empty. VALIDATION AUTHORITY
 STAYS WITH the Be Framework Becoming chain (onPost). The JSON
-contexts ignore `body[&#039;form&#039;]`.</div><div class="method-alps"><a href="../alps.json.html#doUpdateCustomerAddress" class="alps-link">doUpdateCustomerAddress</a></div></td>
+contexts ignore `body[&#039;form&#039;]`.</div><div class="method-alps"><a href="../alps.json.html#goCustomerAddress" class="alps-link">goCustomerAddress</a></div></td>
   <td><a href="../alps.json.html#addressId" class="param alps-param" title="配送先住所ID">addressId</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">配送先住所ID（入力） - dtb_customer_address.id の不透明な文字列ハンドル。BeMart の AddressEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_customer_address.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。所有者は customerId、AUTHZ 検査は CustomerAddressUpdated / CustomerAddressDeleted で getById → customerId 一致確認の順で実施 Fake観察文字長 32〜32; 観察値 &#039;addr00000000000000000000000000a1&#039;。</td>
@@ -6327,7 +6327,7 @@ submits POST /admin/order/export-order-pdf. Same export pipeline as onGet.</div>
 shipping-CSV upload form. The POST below accepts the uploaded
 CSV; this GET serves the upload-form shell. AUTHZ is a direct
 admin-session check (Pattern B — no Be transition is invoked on
-the GET path); a non-admin firewall is refused with 403.</div><div class="method-alps"><a href="../alps.json.html#doImportShippingCsv" class="alps-link">doImportShippingCsv</a></div></td>
+the GET path); a non-admin firewall is refused with 403.</div><div class="method-alps"><a href="../alps.json.html#goImportShippingCsv" class="alps-link">goImportShippingCsv</a></div></td>
   <td></td>
   <td></td>
   <td></td>

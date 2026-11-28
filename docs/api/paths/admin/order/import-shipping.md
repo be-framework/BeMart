@@ -24,7 +24,7 @@ CSV; this GET serves the upload-form shell. AUTHZ is a direct
 admin-session check (Pattern B — no Be transition is invoked on
 the GET path); a non-admin firewall is refused with 403.
 
-**ALPS**: `doImportShippingCsv`
+**ALPS**: `goImportShippingCsv`
 
 
 

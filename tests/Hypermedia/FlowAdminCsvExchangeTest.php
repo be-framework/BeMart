@@ -49,7 +49,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
         return self::$dbSession->resource();
     }
 
-    #[Alps('doUpdateCsv')]
+    #[Alps('goCsv')]
     public function testCsvConfig(): ResourceObject
     {
         $response = $this->resource->get('page://self/admin/csv-config');

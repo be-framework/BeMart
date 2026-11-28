@@ -29,7 +29,7 @@ form scaffolding.
 Pure form-info endpoint: no Be Framework, no domain logic.
 Anonymous-accessible (returns 200 regardless of session state).
 
-**ALPS**: `doRequestPasswordReset`
+**ALPS**: `goPasswordResetRequest`
 
 
 

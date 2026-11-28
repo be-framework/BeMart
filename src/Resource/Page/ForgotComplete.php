@@ -40,7 +40,7 @@ class ForgotComplete extends ResourceObject
      * EC-CUBE goForgotComplete — render the reset-mail-sent confirmation
      * page scaffolding.
      */
-    #[Alps('doRequestPasswordReset')]
+    #[Alps('goPasswordResetRequestComplete')]
     #[JsonSchema(schema: 'get-forgot-complete.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[Link(rel: 'goTop', href: 'page://self/')]

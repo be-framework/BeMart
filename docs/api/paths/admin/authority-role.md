@@ -45,7 +45,7 @@ screen. The ALPS transition covers `doUpdateAuthorityRole`; EC-CUBE
 uses the same resource to edit URL-deny rules stored in
 `dtb_authority_role`.
 
-**ALPS**: `doUpdateAuthorityRole`
+**ALPS**: `goAuthorityRole`
 
 
 

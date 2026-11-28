@@ -79,7 +79,7 @@ class AuthorityRole extends ResourceObject
      * uses the same resource to edit URL-deny rules stored in
      * `dtb_authority_role`.
      */
-    #[Alps('doUpdateAuthorityRole')]
+    #[Alps('goAuthorityRole')]
     #[JsonSchema(schema: 'get-admin-authority-role.json')]
     #[Link(rel: 'doUpdateAuthorityRole', href: 'page://self/admin/authority-role', method: 'post')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]

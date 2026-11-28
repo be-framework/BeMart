@@ -85,7 +85,7 @@ class Address extends ResourceObject
      *
      * @psalm-taint-source input $addressId
      */
-    #[Alps('doUpdateCustomerAddress')]
+    #[Alps('goCustomerAddress')]
     #[JsonSchema(schema: 'get-mypage-address.json', params: 'get-mypage-address.param.json')]
     #[Link(rel: 'doCreateCustomerAddress', href: 'page://self/mypage/address-list', method: 'post')]
     #[Link(rel: 'doUpdateCustomerAddress', href: 'page://self/mypage/address', method: 'put')]

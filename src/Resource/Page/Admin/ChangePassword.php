@@ -63,7 +63,7 @@ class ChangePassword extends ResourceObject
      * resource layer (there is no Be Final to raise
      * `UnauthorizedAdminAccessException`).
      */
-    #[Alps('doChangePassword')]
+    #[Alps('goChangePassword')]
     #[JsonSchema(schema: 'get-admin-change-password.json')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onGet(): static

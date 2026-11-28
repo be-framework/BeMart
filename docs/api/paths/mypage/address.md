@@ -46,7 +46,7 @@ address; for the new screen it is empty. VALIDATION AUTHORITY
 STAYS WITH the Be Framework Becoming chain (onPost). The JSON
 contexts ignore `body['form']`.
 
-**ALPS**: `doUpdateCustomerAddress`
+**ALPS**: `goCustomerAddress`
 
 
 

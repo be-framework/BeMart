@@ -75,7 +75,7 @@ class OrderStatus extends ResourceObject
      * has a per-order status-change transition on POST, but not yet a
      * master-data transition for editing status labels/colors.
      */
-    #[Alps('doUpdateOrderStatus')]
+    #[Alps('goOrderStatusList')]
     #[JsonSchema(schema: 'get-admin-order-status.json')]
     public function onGet(): static
     {

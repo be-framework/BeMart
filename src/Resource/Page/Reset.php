@@ -58,7 +58,7 @@ class Reset extends ResourceObject
      *
      * @psalm-taint-source input $resetKey
      */
-    #[Alps('doResetPassword')]
+    #[Alps('goPasswordReset')]
     #[JsonSchema(schema: 'get-reset.json', params: 'get-reset.param.json')]
     #[Link(rel: 'doResetPassword', href: 'page://self/reset', method: 'post')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
