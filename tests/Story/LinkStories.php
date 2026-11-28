@@ -109,13 +109,13 @@ final class LinkStories
         $help = static fn (string $rel): string => 'self:' . $rel . ',self:goTop,';
 
         return [
-            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-browse&tagOnly=1&label=title
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-purchase&tagOnly=1&label=title
             'every help page leads back to the top' => [
                 'page://self/#link=' . $help('goHelpAbout') . $help('goHelpGuide') . $help('goHelpAgreement') . $help('goHelpPrivacy') . 'self:goHelpTradeLaw',
                 Code::OK,
                 '/help/trade-law',
                 [],
-                'flow-browse',
+                'flow-customer-purchase',
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-customer-account-maintenance,flow-customer-purchase,flow-customer-registration&tagOnly=1&label=title
             'registration confirmation leads back to the top and on to the login' => [
@@ -133,13 +133,13 @@ final class LinkStories
                 [],
                 'flow-customer-registration',
             ],
-            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-account&tagOnly=1&label=title
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-account,flow-customer-account-maintenance&tagOnly=1&label=title
             'password reset is requested from the login page' => [
                 uri_template('page://self/login#link=self:doRequestPasswordReset{?form*},self:goLogin', ['form' => self::form(['email' => 'alice@example.com'])]),
                 Code::OK,
                 '/login',
                 [],
-                'flow-account',
+                ['flow-account', 'flow-customer-account-maintenance'],
             ],
         ];
     }
@@ -1012,13 +1012,13 @@ final class LinkStories
             'admin top leads to the template list' => [$top . 'goTemplateList', Code::OK, '/admin/template/template-list', [], 'flow-admin-template-lifecycle'],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-content-publish&tagOnly=1&label=title
             'admin top leads to the trade law page' => [$top . 'goTradeLawList', Code::OK, '/admin/trade-law', [], 'flow-admin-content-publish'],
-            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product,flow-admin-csv-exchange&tagOnly=1&label=title
             'product list leads to the category list and its csv' => [
                 'page://self/admin/product-list#link=self:goCategoryList,self:goExportCategory',
                 Code::OK,
                 '/admin/category/csv',
                 [],
-                'flow-manage-product',
+                ['flow-manage-product', 'flow-admin-csv-exchange'],
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-product-publish&tagOnly=1&label=title
             'category edit leads to the product list' => [
@@ -1725,7 +1725,7 @@ final class LinkStories
                 ['productName' => 'Story Product'],
                 'flow-admin-product-publish',
             ],
-            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-product-publish,flow-manage-product&tagOnly=1&label=title
             'created product is copied and the copy is shown at its location' => [
                 uri_template('page://self/admin/product-new#link=self:doCreateProduct{?created*},self:doCopyProduct{?copy*}', [
                     'created' => self::form(['productCode' => 'story-product', 'productName' => 'Story Product', 'price02' => '2468', 'stock' => '8', 'productStatus' => '1', 'description' => 'Created by a story.']),
@@ -1734,7 +1734,7 @@ final class LinkStories
                 Code::OK,
                 '/admin/product',
                 ['productCode' => 'story-product.copy', 'productName' => '(コピー) Story Product'],
-                'flow-manage-product',
+                ['flow-admin-product-publish', 'flow-manage-product'],
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-manage-product&tagOnly=1&label=title
             'created category is shown at its location' => [
