@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
-use DateTimeImmutable;
 use MyVendor\BeMart\Be\Exception\ResetKeyInvalidException;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClockInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -49,13 +49,14 @@ final readonly class PasswordResetCompleted
         #[Inject] PasswordResetTokenStorageInterface $tokenStorage,
         #[Inject] CustomerCommandInterface $customerCommand,
         #[Inject] PasswordHasherInterface $passwordHasher,
+        #[Inject] ClockInterface $clock,
     ) {
         $token = $tokenStorage->byResetKey($resetKey);
         if ($token === null) {
             throw new ResetKeyInvalidException();
         }
 
-        if ($token->expiresAt < new DateTimeImmutable('now')) {
+        if ($token->expiresAt < $clock->now()) {
             throw new ResetKeyInvalidException();
         }
 

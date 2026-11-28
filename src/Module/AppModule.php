@@ -34,7 +34,6 @@ use MyVendor\BeMart\Be\Reason\Provider\ClassNameIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\DeliveryIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\NewsIdProvider;
-use MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider;
 use MyVendor\BeMart\Be\Reason\Provider\PageIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\PaymentMethodAdminIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\ResetKeyProvider;
@@ -53,7 +52,13 @@ use MyVendor\BeMart\Be\Reason\Query\Factory\OrderItemFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\ProductClassFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\ProductFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\TemplateFactory;
+use MyVendor\BeMart\Be\Reason\Service\ClockInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
+use MyVendor\BeMart\Be\Reason\Service\InquiryTicketIssuerInterface;
+use MyVendor\BeMart\Be\Reason\Service\OrderNoIssuerInterface;
+use MyVendor\BeMart\Be\Reason\Service\RandomOrderNoIssuer;
+use MyVendor\BeMart\Be\Reason\Service\SystemClock;
+use MyVendor\BeMart\Be\Reason\Service\UniqidInquiryTicketIssuer;
 use MyVendor\BeMart\Be\Reason\Service\DefaultPaymentMethodFactory;
 use MyVendor\BeMart\Be\Reason\Service\DefaultPurchaseFlow;
 use MyVendor\BeMart\Be\Reason\Service\FixedCustomerInitialPoint;
@@ -123,7 +128,6 @@ final class AppModule extends AbstractAppModule
         CustomerIdProvider::class,
         DeliveryIdProvider::class,
         NewsIdProvider::class,
-        OrderNoProvider::class,
         PageIdProvider::class,
         PaymentMethodAdminIdProvider::class,
         ResetKeyProvider::class,
@@ -216,6 +220,9 @@ final class AppModule extends AbstractAppModule
         $this->bind(PreOrderClaimInterface::class)->to(SqlPreOrderClaim::class)->in(Scope::SINGLETON);
         $this->bind(MailerInterface::class)->to(NoopMailer::class)->in(Scope::SINGLETON);
         $this->bind(CustomerInitialPointInterface::class)->to(FixedCustomerInitialPoint::class)->in(Scope::SINGLETON);
+        $this->bind(ClockInterface::class)->to(SystemClock::class)->in(Scope::SINGLETON);
+        $this->bind(OrderNoIssuerInterface::class)->to(RandomOrderNoIssuer::class)->in(Scope::SINGLETON);
+        $this->bind(InquiryTicketIssuerInterface::class)->to(UniqidInquiryTicketIssuer::class)->in(Scope::SINGLETON);
         $this->bind(PurchaseFlowInterface::class)->to(DefaultPurchaseFlow::class)->in(Scope::SINGLETON);
         $this->bind(PaymentMethodFactoryInterface::class)->to(DefaultPaymentMethodFactory::class)->in(Scope::SINGLETON);
         $this->bind(OrderPdfCompatibilityInterface::class)->to(OrderPdfCompatibilityService::class)->in(Scope::SINGLETON);

@@ -95,15 +95,16 @@ link_request get 'page://self/admin/order#link=self:doUpdateTrackingNumber,self:
 │   ├── replayable: true
 │   ├── becoming AdminSendOrderMailInput
 │   │   ├── orderNo: past0000000000000000000000000001
-│   │   ├── being_final AdminOrderMailSent input=[orderNo] inject=[adminSession, orderQuery +2 items]
+│   │   ├── being_final AdminOrderMailSent input=[orderNo] inject=[adminSession, orderQuery +3 items]
 │   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
 │   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
 │   │   │   ├── inject.mailHistoryCommand: MyVendor\BeMart\Be\Reason\Query\OrderMailHistoryCommandInterface<Null>
 │   │   │   ├── inject.mailer: MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer
+│   │   │   ├── inject.clock: MyVendor\BeMart\Be\Reason\Fake\Service\FakeClock
 │   │   │   └── close being_final_close
 │   │   │       ├── orderNo: past0000000000000000000000000001
 │   │   │       ├── customerId: customer-001
-│   │   │       ├── sendDate: <SendDate-1>
+│   │   │       ├── sendDate: 2026-05-15 12:34:56
 │   │   │       ├── mailSubject: 注文確認メール
 │   │   │       └── mailBody: 注文番号 past0000000000000000000000000001 の確認メールを送信しました。
 │   │   └── close becoming_close

@@ -17,7 +17,6 @@ use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\Attributes\DataProviderExternal;
 use Ray\Di\Injector;
 
-use function count;
 use function dirname;
 use function file_put_contents;
 use function getenv;
@@ -30,7 +29,6 @@ use function json_decode;
 use function json_encode;
 use function mkdir;
 use function preg_replace;
-use function preg_replace_callback;
 use function sprintf;
 use function str_replace;
 use function unlink;
@@ -47,19 +45,6 @@ use const JSON_UNESCAPED_UNICODE;
  */
 final class LinkStoryTest extends AbstractLinkStoryCase
 {
-    /**
-     * Values made anew on each run or checkout, written as one numbered placeholder per distinct value
-     *
-     * Neither the schemas nor the stories can fix them: a schema's x-volatile does not reach the request URI a value
-     * also appears in, and the code that makes them takes no generator to inject.
-     */
-    private const array VOLATILE = [
-        '/INQ-[0-9a-f]+\.[0-9]+/' => 'INQ', // ContactSubmitted makes the ticket id with uniqid()
-        '/(?<=orderNo: |orderNo=)[0-9a-f]{32}/' => 'OrderNo', // OrderNoProvider draws the number of a placed order at random
-        '/(?<=orderDate: |paymentDate: )\d{4}-\d\d-\d\dT\S+/' => 'Now', // a placed order is stamped with the clock
-        '/(?<=── sendDate: )\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/' => 'SendDate', // the clock stamps the send of an order mail
-    ];
-
     /** The line a throw sits on moves with any edit above it in that file; the file it names stays */
     private const string SOURCE_LINE = '/(\bline: )\d+$/m';
 
@@ -210,14 +195,6 @@ final class LinkStoryTest extends AbstractLinkStoryCase
         $tree = str_replace(dirname(__DIR__, 2), '<root>', $tree);
         $tree = (string) preg_replace(self::SOURCE_LINE, '$1[line]', $tree);
         $tree = (string) preg_replace(self::NULL_BINDING, '<Null>', $tree);
-        foreach (self::VOLATILE as $pattern => $name) {
-            $seen = [];
-            $tree = (string) preg_replace_callback($pattern, static function (array $match) use (&$seen, $name): string {
-                $seen[$match[0]] ??= sprintf('<%s-%d>', $name, count($seen) + 1);
-
-                return $seen[$match[0]];
-            }, $tree);
-        }
 
         return $tree;
     }

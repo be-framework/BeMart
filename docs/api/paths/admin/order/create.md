@@ -13,7 +13,7 @@ purchased line items (`orderItems`) plus the delivery / charge /
 discount columns; {@see \AdminOrderCreated} recomputes subtotal / tax /
 total via the shared PurchaseFlow and persists the dtb_order_item
 snapshot. The orderNo is allocated server-side via the existing
-{@see \MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider} — admins
+{@see \MyVendor\BeMart\Be\Reason\Service\OrderNoIssuerInterface} — admins
 cannot inject a chosen orderNo.
 
 Failure mapping:

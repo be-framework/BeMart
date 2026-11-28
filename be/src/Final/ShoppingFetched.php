@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
-use DateTimeImmutable;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
@@ -13,8 +12,9 @@ use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClockInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
+use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -109,6 +109,7 @@ final readonly class ShoppingFetched
         #[Inject] OrderCommandInterface $orderCommand,
         #[Inject] PaymentMethodAdminStorageInterface $paymentMethodStorage,
         #[Inject] PaymentMethodFactoryInterface $paymentMethodFactory,
+        #[Inject] ClockInterface $clock,
     ) {
         $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
@@ -128,7 +129,7 @@ final readonly class ShoppingFetched
         $paymentMethodId = (int) ($paymentMethods[0]['paymentMethodId'] ?? 1);
         $primaryCart = $carts[0] ?? null;
         if ($primaryCart instanceof CartEntity && $primaryCart->preOrderId !== '') {
-            $this->registerProcessingOrder($primaryCart, $customer->customerId, $paymentMethodId, $orderCommand);
+            $this->registerProcessingOrder($primaryCart, $customer->customerId, $paymentMethodId, $orderCommand, $clock);
         }
 
         $this->customerId = $customer->customerId;
@@ -193,8 +194,9 @@ final readonly class ShoppingFetched
         string $customerId,
         int $paymentMethodId,
         OrderCommandInterface $orderCommand,
+        ClockInterface $clock,
     ): void {
-        $now = (new DateTimeImmutable())->format('Y-m-d H:i:s');
+        $now = $clock->now()->format('Y-m-d H:i:s');
         $orderCommand->register(new FinalizedOrderEntity(
             orderNo: $cart->preOrderId,
             preOrderId: $cart->preOrderId,

@@ -76,6 +76,6 @@ composer story:flows       # docs/story-flows.md と、行の上の図のリン�
 | `LinkRelException` | 今いるリソースのメソッドに、その rel の `#[Link]` がない | リソースの宣言の問題。行で回避せず、止めて報告する |
 | `ParameterException` | 必要な値（実行中にできる ID など）が URI に書けない | 同上 |
 | `LinkException` | 辿った先の 201・303 の Location が、さらに転送する（リンクが辿る Location は 1 つ） | 実装の欠けなら報告する。決まった扱いなら `unfollowable()` に行を足し、キーに理由を書く |
-| golden が毎回変わる | 実行ごとに変わる値がツリーに出ている | `LinkStoryTest::VOLATILE` に足す前に報告する |
+| golden が毎回変わる | 実行ごとに変わる値（時刻、採番）がツリーに出ている | 報告する。直し方は、値を作る側を注入にして `StoryModule` で固定の実装を束縛すること（`ClockInterface`、`OrderNoIssuerInterface`、`InquiryTicketIssuerInterface` と同じ形）で、正規表現で消すことではない |
 
 `src/` の `#[Link]` の追加と、`LinkStoryTest`・`StoryModule` の変更は設計の判断になる。行と golden を足す作業の中ではしない。

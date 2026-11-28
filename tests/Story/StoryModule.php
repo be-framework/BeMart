@@ -21,9 +21,15 @@ use BEAR\Resource\InvokerInterface;
 use BEAR\Resource\LinkerInterface;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeClock;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeInquiryTicketIssuer;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeOrderNoIssuer;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\ClockInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
+use MyVendor\BeMart\Be\Reason\Service\InquiryTicketIssuerInterface;
+use MyVendor\BeMart\Be\Reason\Service\OrderNoIssuerInterface;
 use MyVendor\BeMart\Module\ObserveModule;
 use Ray\Di\AbstractModule;
 use Ray\Di\Scope;
@@ -76,5 +82,9 @@ final class StoryModule extends AbstractModule
         $this->bind(BecomingInterface::class)->to(Becoming::class);
         $this->bind(CustomerSession::class)->toInstance(new FakeSession($this->customerId));
         $this->bind(AdminSession::class)->toInstance(new FakeAdminSession(self::ADMIN_ID));
+        // Fixed time and numbering, so a run reproduces its golden
+        $this->bind(ClockInterface::class)->to(FakeClock::class)->in(Scope::SINGLETON);
+        $this->bind(OrderNoIssuerInterface::class)->to(FakeOrderNoIssuer::class)->in(Scope::SINGLETON);
+        $this->bind(InquiryTicketIssuerInterface::class)->to(FakeInquiryTicketIssuer::class)->in(Scope::SINGLETON);
     }
 }
