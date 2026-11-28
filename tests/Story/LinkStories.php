@@ -712,6 +712,17 @@ final class LinkStories
                 'flow-admin-order-fulfillment',
             ],
             // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'shipping notice is sent from the order page' => [
+                uri_template('page://self/admin/order{?orderNo}#link=self:doSendShippingNotifyMail{?form*}', [
+                    'orderNo' => self::PAST_ORDER,
+                    'form' => self::form(['orderNo' => self::PAST_ORDER]),
+                ]),
+                Code::OK,
+                '/admin/order/shipping-notify-mail',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
             'order pdf leads back to the list' => [
                 'page://self/admin/order/order-pdf#link=self:goOrderList',
                 Code::OK,

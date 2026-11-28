@@ -1,0 +1,74 @@
+link_request get 'page://self/admin/order#link=self:doSendShippingNotifyMail'
+├── uri: page://self/admin/order
+├── method: GET
+├── links[0]: self:doSendShippingNotifyMail
+├── resource_request get 'page://self/admin/order?orderNo=past0000000000000000000000000001'
+│   ├── uri: page://self/admin/order
+│   ├── method: GET
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── replayable: true
+│   ├── becoming GetAdminOrderInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── being_final AdminOrderFetched input=[orderNo] inject=[adminSession, orderQuery, orderItems +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── preOrderId: past00000000000000000000000000000000past
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── paymentMethodId: 2
+│   │   │       ├── subtotal: 11000
+│   │   │       ├── deliveryFeeTotal: 600
+│   │   │       ├── charge: 0
+│   │   │       ├── discount: 0
+│   │   │       ├── tax: 1100
+│   │   │       ├── total: 12700
+│   │   │       ├── paymentTotal: 12700
+│   │   │       ├── addPoint: 127
+│   │   │       ├── usePoint: 0
+│   │   │       ├── orderStatus: 1
+│   │   │       ├── orderDate: 2026-04-01 10:00:00
+│   │   │       ├── paymentDate: 2026-04-01 10:00:00
+│   │   │       ├── items[0].productCode: sample-001
+│   │   │       ├── items[0].productName: サンプル商品 A
+│   │   │       ├── items[0].quantity: 1
+│   │   │       ├── items[0].unitPrice: 1200
+│   │   │       ├── items[1].productCode: sample-002
+│   │   │       ├── items[1].productName: Sample Product B
+│   │   │       ├── items[1].quantity: 1
+│   │   │       ├── items[1].unitPrice: 9800
+│   │   │       └── itemCount: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/admin/order/shipping-notify-mail?orderNo=past0000000000000000000000000001&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/order/shipping-notify-mail
+│   ├── method: POST
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming SendShippingNotifyMailInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── being_final ShippingNotifyMailSent input=[orderNo] inject=[adminSession, orderQuery +2 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.shippingTracking: MyVendor\BeMart\Be\Reason\Query\ShippingTrackingQueryInterface<Null>
+│   │   │   ├── inject.mailer: MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       └── customerId: customer-001
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+POST page://self/admin/order/shipping-notify-mail {"orderNo":"past0000000000000000000000000001","csrfToken":"[FILTERED]"}
