@@ -1190,8 +1190,7 @@ final class LinkStories
     }
 
     /**
-     * Admin stories that read and change the order the Fake fixtures hold. Same row shape as followable(), but not part
-     * of it.
+     * Admin stories that read and change the order the Fake fixtures hold. Same row shape as followable().
      *
      * @return array<string, StoryRow>
      */
