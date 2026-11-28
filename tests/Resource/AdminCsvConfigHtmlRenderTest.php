@@ -121,7 +121,7 @@ final class AdminCsvConfigHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/admin/csv-config')->toString();
 
-        $this->assertStringContainsString('href="/admin"', $html);
+        $this->assertStringContainsString('href="/admin/index"', $html);
         $this->assertStringContainsString('rel="goTop"', $html);
     }
 
