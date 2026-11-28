@@ -26,42 +26,63 @@ url() {
     printf 'mysql://root@127.0.0.1:%s/%s?charset=utf8mb4&serverVersion=8.0.0\n' "$(port_of_config)" "$DATABASE"
 }
 
-# A config left behind by a failed start would point url at whatever holds that port
-forget() {
-    rm -f "$CONFIG"
-    echo "$1; see $DIR/malt/logs" >&2
-    exit 1
+# True only when the server on that port keeps its data under this worktree: nothing else is ever written to
+ours() {
+    [ "$(mysql --protocol=tcp -h127.0.0.1 -P"$1" -uroot -N -e 'SELECT @@datadir' 2>/dev/null)" = "$DIR/malt/var/mysql_0/" ]
+}
+
+listening() {
+    lsof -nP -iTCP:"$1" -sTCP:LISTEN > /dev/null 2>&1
 }
 
 start() {
     local port=${1:-}
-    if [ -z "$port" ] && [ -f "$CONFIG" ]; then
-        port=$(port_of_config)
-    fi
-    if [ -z "$port" ]; then
-        # The OS picks a free port; malt refuses to start if another process takes it first
-        port=$(php -r '$s = stream_socket_server("tcp://127.0.0.1:0"); echo explode(":", (string) stream_socket_get_name($s, false))[1];')
-    fi
+    local saved=''
+    [ -f "$CONFIG" ] && saved=$(port_of_config)
 
-    mkdir -p "$DIR/malt/conf" "$DIR/malt/tmp" "$DIR/malt/logs" "$DIR/malt/var"
-    cat > "$CONFIG" <<JSON
-{
-  "project_name": "be-bemart-test-mysql",
-  "dependencies": ["mysql@8.0"],
-  "ports": {"mysql": [$port]}
-}
-JSON
-    # malt fills in MALT_DIR when it starts the server, not the port, so the port is written here
-    sed "s/3306/$port/g" "$ROOT/malt/conf/my_3306.cnf" > "$DIR/malt/conf/my_$port.cnf"
+    if [ -n "$saved" ] && ours "$saved"; then
+        if [ -n "$port" ] && [ "$port" != "$saved" ]; then
+            echo "this worktree's MySQL runs on port $saved; run bin/test-mysql stop first" >&2
+            exit 1
+        fi
+        port=$saved
+    else
+        if [ -z "$port" ] && [ -n "$saved" ] && ! listening "$saved"; then
+            port=$saved
+        fi
+        if [ -z "$port" ]; then
+            # The OS picks a free port; malt refuses to start if another process takes it first
+            port=$(php -r '$s = stream_socket_server("tcp://127.0.0.1:0"); echo explode(":", (string) stream_socket_get_name($s, false))[1];')
+        fi
+        if listening "$port"; then
+            echo "port $port is held by another process" >&2
+            exit 1
+        fi
 
-    malt start --config="$CONFIG" >&2 || forget "malt could not start MySQL on port $port"
-    for _ in $(seq 1 60); do
-        mysqladmin --protocol=tcp -h127.0.0.1 -P"$port" -uroot status > /dev/null 2>&1 && break
-        sleep 1
-    done
-    if ! mysqladmin --protocol=tcp -h127.0.0.1 -P"$port" -uroot status > /dev/null 2>&1; then
-        malt stop --config="$CONFIG" >&2 || true
-        forget "MySQL on port $port did not answer"
+        mkdir -p "$DIR/malt/conf" "$DIR/malt/tmp" "$DIR/malt/logs" "$DIR/malt/var"
+        # Kept apart until the server answers, so a failed start leaves the saved config as it was
+        local next="$DIR/malt.next.json"
+        printf '{"project_name": "be-bemart-test-mysql", "dependencies": ["mysql@8.0"], "ports": {"mysql": [%s]}}\n' "$port" > "$next"
+        # malt fills in MALT_DIR when it starts the server, not the port, so the port is written here
+        sed "s/3306/$port/g" "$ROOT/malt/conf/my_3306.cnf" > "$DIR/malt/conf/my_$port.cnf"
+        if ! malt start --config="$next" >&2; then
+            rm -f "$next"
+            echo "malt could not start MySQL on port $port; see $DIR/malt/logs" >&2
+            exit 1
+        fi
+
+        for _ in $(seq 1 60); do
+            ours "$port" && break
+            sleep 1
+        done
+        if ! ours "$port"; then
+            malt stop --config="$next" >&2 || true
+            rm -f "$next"
+            echo "MySQL on port $port did not answer from $DIR; see $DIR/malt/logs" >&2
+            exit 1
+        fi
+
+        mv "$next" "$CONFIG"
     fi
 
     "$ROOT/sql/setup-db.sh" "$(url)" > /dev/null
