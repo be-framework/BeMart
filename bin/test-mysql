@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# A MySQL of this worktree's own, run by malt, for the SQL-backed tests.
+#
+#   bin/test-mysql start [port]   start it (a free port when none is given) and prepare the database
+#   bin/test-mysql url            print the DATABASE_URL that points at it
+#   bin/test-mysql stop           stop it
+#
+# Its config, data and socket live under var/mysql, so worktrees never share a server.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DIR="$ROOT/var/mysql"
+CONFIG="$DIR/malt.json"
+DATABASE=${TEST_MYSQL_DATABASE:-eccubedb_test}
+
+port_of_config() {
+    php -r '$c = json_decode((string) file_get_contents($argv[1]), true); echo $c["ports"]["mysql"][0] ?? "";' "$CONFIG"
+}
+
+url() {
+    printf 'mysql://root@127.0.0.1:%s/%s?charset=utf8mb4&serverVersion=8.0.0\n' "$(port_of_config)" "$DATABASE"
+}
+
+start() {
+    local port=${1:-}
+    if [ -z "$port" ] && [ -f "$CONFIG" ]; then
+        port=$(port_of_config)
+    fi
+    if [ -z "$port" ]; then
+        # The OS picks a free port; malt refuses to start if another process takes it first
+        port=$(php -r '$s = stream_socket_server("tcp://127.0.0.1:0"); echo explode(":", (string) stream_socket_get_name($s, false))[1];')
+    fi
+
+    mkdir -p "$DIR/malt/conf" "$DIR/malt/tmp" "$DIR/malt/logs" "$DIR/malt/var"
+    cat > "$CONFIG" <<JSON
+{
+  "project_name": "be-bemart-test-mysql",
+  "dependencies": ["mysql@8.0"],
+  "ports": {"mysql": [$port]}
+}
+JSON
+    # malt fills in MALT_DIR when it starts the server, not the port, so the port is written here
+    sed "s/3306/$port/g" "$ROOT/malt/conf/my_3306.cnf" > "$DIR/malt/conf/my_$port.cnf"
+
+    malt start --config="$CONFIG"
+    for _ in $(seq 1 60); do
+        mysqladmin --protocol=tcp -h127.0.0.1 -P"$port" -uroot status > /dev/null 2>&1 && break
+        sleep 1
+    done
+    mysqladmin --protocol=tcp -h127.0.0.1 -P"$port" -uroot status > /dev/null
+
+    "$ROOT/sql/setup-db.sh" "$(url)" > /dev/null
+    echo "export DATABASE_URL='$(url)'"
+}
+
+stop() {
+    [ -f "$CONFIG" ] && malt stop --config="$CONFIG"
+}
+
+case "${1:-}" in
+    start) start "${2:-}" ;;
+    stop) stop ;;
+    url) url ;;
+    *) echo "usage: bin/test-mysql start [port] | url | stop" >&2; exit 2 ;;
+esac
