@@ -72,6 +72,6 @@ class UnsupportedRoute extends ResourceObject
             return $returnTo;
         }
 
-        return '/admin';
+        return '/admin/index';
     }
 }

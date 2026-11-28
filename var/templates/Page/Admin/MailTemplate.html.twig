@@ -156,10 +156,16 @@ document.addEventListener('DOMContentLoaded', function () {
       メールテンプレート一覧
     </h3>
     <span class="idea-admin-count" style="margin-left:auto;">{{ count }}件</span>
-    <a rel="doCreateMailTemplate" href="/admin/mail-template/create" class="idea-admin-action" style="margin-left:1rem;">
-      <i class="fa fa-plus" aria-hidden="true"></i>
-      新規作成
-    </a>
+    <details style="margin-left:1rem;">
+      <summary class="idea-admin-action"><i class="fa fa-plus" aria-hidden="true"></i> 新規作成</summary>
+      <form method="post" action="/admin/mail-template/create" rel="doCreateMailTemplate">
+        {{ csrf_field() }}
+        <input type="text" name="mailTemplateName" placeholder="テンプレート名" aria-label="テンプレート名" required>
+        <input type="text" name="fileName" placeholder="ファイル名" aria-label="ファイル名" required>
+        <input type="text" name="mailSubject" placeholder="件名" aria-label="件名" required>
+        <button type="submit" class="idea-admin-action">作成</button>
+      </form>
+    </details>
   </div>
   <div class="idea-admin-panel__body" style="padding:0;">
 

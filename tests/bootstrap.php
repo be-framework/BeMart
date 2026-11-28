@@ -43,6 +43,19 @@ if (getenv('BEMART_TEST_CONTEXTS_COMPILED') === '1') {
 
 putenv('BEMART_TEST_CONTEXTS_COMPILED=1');
 
+// Compiled output that an earlier run left behind: Twig does not notice a template edit, and a compiled prod graph
+// built before a constructor changed fails with ArgumentCountError.
+foreach ([...(array) glob(dirname(__DIR__) . '/var/tmp/*/twig'), dirname(__DIR__) . '/var/build'] as $compiled) {
+    if (! is_string($compiled) || ! is_dir($compiled)) {
+        continue;
+    }
+
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($compiled, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
+    foreach ($files as $file) {
+        $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+    }
+}
+
 /**
  * The contexts more than one process touches. `test` / `test-admin` are driven in-process only,
  * by a plain Ray.Di injector, so nothing shares their script dir.

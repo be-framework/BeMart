@@ -14,6 +14,7 @@ use BEAR\Csrf\Attribute\SameOrigin;
 use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
 use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 
 use function array_map;
 use function max;
@@ -29,6 +30,7 @@ class Create extends ResourceObject
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly MailTemplateStorageInterface $mailTemplates,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -63,8 +65,7 @@ class Create extends ResourceObject
             deletable: 1,
         ));
 
-        $this->code = Code::CREATED;
-        $this->headers['Location'] = '/admin/mail-template';
+        ($this->mutationResponse)($this, Code::CREATED, '/admin/mail-template');
         $this->body = [
             'mailTemplateId' => $mailTemplateId,
             'mailTemplateName' => $mailTemplateName,

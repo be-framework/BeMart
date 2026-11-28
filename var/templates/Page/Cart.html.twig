@@ -69,14 +69,14 @@
               {% endif %}
 
               <article class="idea-cart-item">
-                <a class="idea-cart-item__image" href="/products/detail/{{ item.productCode }}">
+                <a class="idea-cart-item__image" href="/product?productCode={{ item.productCode|url_encode }}">
                   <img src="{{ image }}" alt="{{ item.productName|default(item.productCode) }}" loading="lazy">
                 </a>
 
                 <div class="idea-cart-item__body">
                   <p class="idea-card-kicker">{{ item.productCode }}</p>
                   <h3>
-                    <a href="/products/detail/{{ item.productCode }}">{{ item.productName|default(item.productCode) }}</a>
+                    <a href="/product?productCode={{ item.productCode|url_encode }}">{{ item.productName|default(item.productCode) }}</a>
                   </h3>
                   {% if item.classCategoryName1|default('') %}
                     <p class="idea-muted">{{ item.className1|default('規格') }}：{{ item.classCategoryName1 }}</p>

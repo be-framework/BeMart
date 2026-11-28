@@ -173,8 +173,8 @@ final class CartHtmlRenderTest extends TestCase
             'sessionPrefix' => 'session-prefix-1',
         ])->toString();
 
-        // L2 — product detail link includes productCode in the path
-        $this->assertStringContainsString('/products/detail/sample-001', $html, 'product detail link must include productCode');
+        // L2 — product detail link carries the productCode in the query of the product page
+        $this->assertStringContainsString('href="/product?productCode=sample-001"', $html, 'product detail link must include productCode');
     }
 
     // -------------------------------------------------------------------------
