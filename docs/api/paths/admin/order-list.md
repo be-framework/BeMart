@@ -60,4 +60,5 @@ discipline as Wave 5 / Wave 6 admin resources.
 |----------|-----|
 | goOrder | [<code>page://self/admin/order</code>](/admin/order.md) |
 | doCreateOrder | [<code>page://self/admin/order/create</code>](/admin/order/create.md) |
+| goOrderEdit | [<code>page://self/admin/order/edit{?orderNo}</code>](/admin/order/edit.md) |
 | goExportCustomer | [<code>page://self/admin/customer-csv</code>](/admin/customer-csv.md) |

@@ -1,0 +1,117 @@
+link_request get 'page://self/admin/order-list#link=self:goOrderEdit,self:goCustomer'
+├── uri: page://self/admin/order-list
+├── method: GET
+├── links[0]: self:goOrderEdit
+├── links[1]: self:goCustomer
+├── resource_request get 'page://self/admin/order-list'
+│   ├── uri: page://self/admin/order-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminOrderListInput
+│   │   ├── limit: 50
+│   │   ├── offset: 0
+│   │   ├── being_final AdminOrderListFetched input=[limit, offset] inject=[adminSession, orderQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── orders[0].orderNo: past0000000000000000000000000001
+│   │   │       ├── orders[0].customerId: customer-001
+│   │   │       ├── orders[0].total: 12700
+│   │   │       ├── orders[0].paymentTotal: 12700
+│   │   │       ├── orders[0].orderDate: 2026-04-01 10:00:00
+│   │   │       ├── orders[0].orderStatus: 1
+│   │   │       ├── count: 1
+│   │   │       ├── limit: 50
+│   │   │       └── offset: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/order/edit?orderNo=past0000000000000000000000000001'
+│   ├── uri: page://self/admin/order/edit
+│   ├── method: GET
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── replayable: true
+│   ├── becoming GetAdminOrderInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── being_final AdminOrderFetched input=[orderNo] inject=[adminSession, orderQuery, orderItems +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── preOrderId: past00000000000000000000000000000000past
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── paymentMethodId: 2
+│   │   │       ├── subtotal: 11000
+│   │   │       ├── deliveryFeeTotal: 600
+│   │   │       ├── charge: 0
+│   │   │       ├── discount: 0
+│   │   │       ├── tax: 1100
+│   │   │       ├── total: 12700
+│   │   │       ├── paymentTotal: 12700
+│   │   │       ├── addPoint: 127
+│   │   │       ├── usePoint: 0
+│   │   │       ├── orderStatus: 1
+│   │   │       ├── orderDate: 2026-04-01 10:00:00
+│   │   │       ├── paymentDate: 2026-04-01 10:00:00
+│   │   │       ├── items[0].productCode: sample-001
+│   │   │       ├── items[0].productName: サンプル商品 A
+│   │   │       ├── items[0].quantity: 1
+│   │   │       ├── items[0].unitPrice: 1200
+│   │   │       ├── items[1].productCode: sample-002
+│   │   │       ├── items[1].productName: Sample Product B
+│   │   │       ├── items[1].quantity: 1
+│   │   │       ├── items[1].unitPrice: 9800
+│   │   │       └── itemCount: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/customer?customerId=0123456789abcdef0123456789abcdef'
+│   ├── uri: page://self/admin/customer
+│   ├── method: GET
+│   ├── params.customerId: 0123456789abcdef0123456789abcdef
+│   ├── replayable: true
+│   ├── becoming GetAdminCustomerInput
+│   │   ├── selector: 0123456789abcdef0123456789abcdef
+│   │   ├── selectorType: customerId
+│   │   ├── being_final AdminCustomerFetched input=[selector, selectorType] inject=[adminSession, customerQuery, orderQuery +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.favorites: MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
+│   │   │       ├── email: alice@example.com
+│   │   │       ├── name01: 山田
+│   │   │       ├── name02: アリス
+│   │   │       ├── kana01: ヤマダ
+│   │   │       ├── kana02: アリス
+│   │   │       ├── phoneNumber: 0312345678
+│   │   │       ├── postalCode: 1500001
+│   │   │       ├── pref: 13
+│   │   │       ├── addr01: 渋谷区
+│   │   │       ├── addr02: 神宮前1-1-1
+│   │   │       ├── birth: 1990-04-01
+│   │   │       ├── sex: 2
+│   │   │       ├── job: 7
+│   │   │       ├── customerStatus: 2
+│   │   │       ├── initialPoint: 0
+│   │   │       ├── orderCount: 0
+│   │   │       ├── totalSpent: 0
+│   │   │       └── favoriteCount: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+(none)

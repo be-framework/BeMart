@@ -14,7 +14,7 @@ HTML移植の残差を「エンティティがある/ない」だけで判断す
 
 | ALPS node | EC-CUBE route | EC-CUBE template | BeMart現状 | ドキュメント |
 |---|---|---|---|---|
-| `Order` | `admin_order_edit` | `Admin/Order/edit.twig` | HTTP導線あり。受注編集フォームを追加 | - |
+| `AdminOrderEditPage` | `admin_order_edit` | `Admin/Order/edit.twig` | HTTP導線あり。受注編集フォームを追加 | `docs/states/admin-order-edit.md` |
 | `AdminCustomerEditPage` | `admin_customer_edit` | `Admin/Customer/edit.twig` | HTTP導線あり。EC-CUBE相当のID指定に対応 | `docs/states/admin-customer-edit.md` |
 
 既存の `OrderList` / `CustomerList` からこれらのページ状態へリンクすることで、一覧→編集画面の移植漏れを ALPS 上で説明できるようにしています。
