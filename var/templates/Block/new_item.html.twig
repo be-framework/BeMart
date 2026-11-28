@@ -7,7 +7,7 @@
                     mainListImage, categoryNames[], descriptionList }
   Hypermedia (from #[Link] in Index.php):
     goProductList → /products
-    goProduct     → /products/detail/{productCode}
+    goProduct     → /product?productCode={productCode}
   Design language: IdeaStore (idea-* classes from idea-store.css).
 #}
 
@@ -41,7 +41,7 @@
         {% set price       = product.price02|default(0) %}
         {% set stock       = product.stock|default(null) %}
         <a class="idea-card idea-product-card"
-           href="/products/detail/{{ code }}"
+           href="/product?productCode={{ code|url_encode }}"
            rel="goProduct">
           <span class="idea-product-card-media">
             <span class="idea-product-badge">NEW</span>

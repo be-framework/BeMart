@@ -53,7 +53,7 @@ final class ActionRedirectResourceTest extends TestCase
     {
         return [
             'storefront' => ['page://self/action-redirect', '/'],
-            'admin' => ['page://self/admin/action-redirect', '/admin'],
+            'admin' => ['page://self/admin/action-redirect', '/admin/index'],
         ];
     }
 
@@ -101,9 +101,9 @@ final class ActionRedirectResourceTest extends TestCase
     {
         return [
             'storefront action-redirect' => ['page://self/action-redirect', '/'],
-            'admin action-redirect' => ['page://self/admin/action-redirect', '/admin'],
+            'admin action-redirect' => ['page://self/admin/action-redirect', '/admin/index'],
             'storefront unsupported-route' => ['page://self/unsupported-route', '/'],
-            'admin unsupported-route' => ['page://self/admin/unsupported-route', '/admin'],
+            'admin unsupported-route' => ['page://self/admin/unsupported-route', '/admin/index'],
         ];
     }
 

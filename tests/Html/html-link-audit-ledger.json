@@ -139,11 +139,6 @@
     "note": "一覧からは GET で編集ページへ遷移する。直接の PUT form は無い",
     "reason": "method-mismatch"
   },
-  "GET page://self/admin/mail-template doCreateMailTemplate": {
-    "classification": "resourceOnly",
-    "note": "一覧からは GET で作成ページへ遷移する。直接の POST form は無い",
-    "reason": "method-mismatch"
-  },
   "GET page://self/admin/mail-template doDeleteMailTemplate": {
     "classification": "resourceOnly",
     "note": "削除フォームは isDeletable なテンプレートを選択したときだけ描画される。監査は未選択状態を描画するため、同じパスに残る更新フォーム（POST）だけが拾われる",

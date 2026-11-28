@@ -43,6 +43,18 @@ if (getenv('BEMART_TEST_CONTEXTS_COMPILED') === '1') {
 
 putenv('BEMART_TEST_CONTEXTS_COMPILED=1');
 
+// Twig compiles each template once and does not notice an edit; a cache left by an earlier run would show the old markup.
+foreach ((array) glob(dirname(__DIR__) . '/var/tmp/*/twig') as $twigCache) {
+    if (! is_string($twigCache) || ! is_dir($twigCache)) {
+        continue;
+    }
+
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($twigCache, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
+    foreach ($files as $file) {
+        $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+    }
+}
+
 /**
  * The contexts more than one process touches. `test` / `test-admin` are driven in-process only,
  * by a plain Ray.Di injector, so nothing shares their script dir.
