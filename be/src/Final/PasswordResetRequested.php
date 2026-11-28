@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
-use DateTimeImmutable;
 use MyVendor\BeMart\Be\Reason\Entity\PasswordResetTokenEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use MyVendor\BeMart\Be\Reason\Provider\ResetKeyProvider;
+use MyVendor\BeMart\Be\Reason\Service\ClockInterface;
+use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -41,6 +41,7 @@ final readonly class PasswordResetRequested
         #[Inject] PasswordResetTokenStorageInterface $tokenStorage,
         #[Inject] ResetKeyProvider $resetKeys,
         #[Inject] MailerInterface $mailer,
+        #[Inject] ClockInterface $clock,
     ) {
         $customer = $customerQuery->byEmail($email);
         $this->email = $email;
@@ -55,7 +56,7 @@ final readonly class PasswordResetRequested
         $tokenStorage->put(new PasswordResetTokenEntity(
             customerId: $customer->customerId,
             resetKey: $resetKey,
-            expiresAt: (new DateTimeImmutable('now'))->modify('+1 hour'),
+            expiresAt: $clock->now()->modify('+1 hour'),
         ));
         $mailer->sendPasswordReset($email, $resetKey);
 

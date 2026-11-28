@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Reason\Entity\ContactEntity;
+use MyVendor\BeMart\Be\Reason\Service\InquiryTicketIssuerInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
-
-use function uniqid;
 
 /**
  * Contact submitted — Final, proof the contact mails were dispatched.
@@ -40,6 +39,8 @@ final readonly class ContactSubmitted
         string $contactContents,
         #[Inject]
         MailerInterface $mailer,
+        #[Inject]
+        InquiryTicketIssuerInterface $tickets,
     ) {
         $mailer->sendContactInquiry(new ContactEntity(
             contactName01: $contactName01,
@@ -51,6 +52,6 @@ final readonly class ContactSubmitted
         $this->contactName01 = $contactName01;
         $this->contactName02 = $contactName02;
         $this->contactEmail = $contactEmail;
-        $this->ticketId = uniqid('INQ-', true);
+        $this->ticketId = $tickets->issue();
     }
 }

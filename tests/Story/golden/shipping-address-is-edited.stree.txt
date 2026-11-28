@@ -45,13 +45,14 @@ link_request get 'page://self/cart#link=self:goCheckoutEntry,self:goShoppingShip
 │   ├── replayable: true
 │   ├── becoming GetShoppingInput
 │   │   ├── sessionPrefix: session-prefix-1
-│   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +3 items]
+│   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +4 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
 │   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
 │   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null>
 │   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null>
 │   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
+│   │   │   ├── inject.clock: MyVendor\BeMart\Be\Reason\Fake\Service\FakeClock
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com
@@ -116,13 +117,14 @@ link_request get 'page://self/cart#link=self:goCheckoutEntry,self:goShoppingShip
 │   ├── replayable: true
 │   ├── becoming GetShoppingInput
 │   │   ├── sessionPrefix: session-prefix-1
-│   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +3 items]
+│   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +4 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
 │   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
 │   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null>
 │   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null>
 │   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
+│   │   │   ├── inject.clock: MyVendor\BeMart\Be\Reason\Fake\Service\FakeClock
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com

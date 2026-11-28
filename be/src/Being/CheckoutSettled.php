@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Being;
 
 use Be\Framework\Attribute\Be;
-use DateTimeImmutable;
 use DateTimeInterface;
 use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\PurchaseTotals;
+use MyVendor\BeMart\Be\Reason\Service\ClockInterface;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
-use MyVendor\BeMart\Be\Reason\Service\PreOrderClaimInterface;
-use MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider;
+use MyVendor\BeMart\Be\Reason\Service\OrderNoIssuerInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
+use MyVendor\BeMart\Be\Reason\Service\PreOrderClaimInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -22,7 +22,7 @@ use Ray\InputQuery\Attribute\Input;
  *
  * Four Reasons converge on a single Being, executed in strict sequence:
  *
- *   1. `OrderNoProvider::get()` — issues the customer-facing order number.
+ *   1. `OrderNoIssuerInterface::issue()` — issues the customer-facing order number.
  *      It runs first because it doubles as the claim token below.
  *   2. `PreOrderClaimInterface::claim()` — the concurrency arbiter. Stage 1
  *      only proves the pre-order WAS in PROCESSING when it was read; two
@@ -64,12 +64,13 @@ final readonly class CheckoutSettled
         #[Input] public string $preOrderId,
         #[Input] public OrderEntity $order,
         #[Input] public PurchaseTotals $totals,
-        #[Inject] OrderNoProvider $orderNumbers,
+        #[Inject] OrderNoIssuerInterface $orderNumbers,
         #[Inject] PreOrderClaimInterface $claim,
         #[Inject] InventoryAllocatorInterface $inventory,
         #[Inject] PaymentGatewayInterface $gateway,
+        #[Inject] ClockInterface $clock,
     ) {
-        $orderNo = $orderNumbers->get();
+        $orderNo = $orderNumbers->issue();
         $claim->claim($preOrderId, $orderNo)->assertHeldBy($orderNo);
 
         $inventory->allocate($order);
@@ -78,7 +79,7 @@ final readonly class CheckoutSettled
         $gateway->checkout($preOrderId, $order->paymentMethodId, $totals->paymentTotal);
 
         $this->orderNo = $orderNo;
-        $now = (new DateTimeImmutable())->format(DateTimeInterface::ATOM);
+        $now = $clock->now()->format(DateTimeInterface::ATOM);
         $this->orderDate = $now;
         $this->paymentDate = $now;
     }

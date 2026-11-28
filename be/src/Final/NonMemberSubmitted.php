@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
-use DateTimeImmutable;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClockInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -62,6 +62,7 @@ final readonly class NonMemberSubmitted
         #[Inject] OrderCommandInterface $orderCommand,
         #[Inject] PaymentMethodAdminStorageInterface $paymentMethods,
         #[Inject] PaymentMethodFactoryInterface $paymentMethodFactory,
+        #[Inject] ClockInterface $clock,
     ) {
         $this->preOrderId = bin2hex(random_bytes(20));
         $this->paymentMethodId = $this->selectPaymentMethodId($paymentMethods, $paymentMethodFactory);
@@ -117,7 +118,7 @@ final readonly class NonMemberSubmitted
             addPoint: 0,
             usePoint: 0,
             orderStatus: FinalizedOrderEntity::STATUS_PROCESSING,
-            orderDate: (new DateTimeImmutable())->format('Y-m-d H:i:s'),
+            orderDate: $clock->now()->format('Y-m-d H:i:s'),
             paymentDate: '',
             customerSnapshot: $customerSnapshot,
         ));

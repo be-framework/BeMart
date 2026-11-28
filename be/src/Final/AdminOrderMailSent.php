@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
-use DateTimeImmutable;
 use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryMailEntity;
 use MyVendor\BeMart\Be\Reason\Query\OrderMailHistoryCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\ClockInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -52,6 +52,7 @@ final readonly class AdminOrderMailSent
         #[Inject] OrderQueryInterface $orderQuery,
         #[Inject] OrderMailHistoryCommandInterface $mailHistoryCommand,
         #[Inject] MailerInterface $mailer,
+        #[Inject] ClockInterface $clock,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
@@ -65,7 +66,7 @@ final readonly class AdminOrderMailSent
         $mailer->sendOrderConfirmation($order);
 
         $mailHistory = new OrderHistoryMailEntity(
-            sendDate: (new DateTimeImmutable())->format('Y-m-d H:i:s'),
+            sendDate: $clock->now()->format('Y-m-d H:i:s'),
             mailSubject: '注文確認メール',
             mailBody: '注文番号 ' . $order->orderNo . ' の確認メールを送信しました。',
         );

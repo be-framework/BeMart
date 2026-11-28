@@ -143,13 +143,14 @@ link_request get 'page://self/cart#link=self:doAddCartItem,self:goCheckoutEntry,
 │   ├── replayable: true
 │   ├── becoming GetShoppingInput : Failed
 │   │   ├── sessionPrefix: session-prefix-1
-│   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +3 items] : Failed
+│   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +4 items] : Failed
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
 │   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
 │   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null>
 │   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null>
 │   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
+│   │   │   ├── inject.clock: MyVendor\BeMart\Be\Reason\Fake\Service\FakeClock
 │   │   │   └── close being_error_close
 │   │   │       ├── error: MyVendor\BeMart\Be\Exception\UnauthenticatedException
 │   │   │       ├── message: 

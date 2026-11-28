@@ -71,13 +71,14 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   ├── replayable: true
 │   ├── becoming GetShoppingInput
 │   │   ├── sessionPrefix: session-prefix-1
-│   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +3 items]
+│   │   ├── being_final ShoppingFetched input=[sessionPrefix] inject=[session, customerQuery, cartQuery +4 items]
 │   │   │   ├── inject.session: MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession
 │   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
 │   │   │   ├── inject.cartQuery: MyVendor\BeMart\Be\Reason\Query\CartQueryInterface<Null>
 │   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null>
 │   │   │   ├── inject.paymentMethodStorage: MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface<Null>
 │   │   │   ├── inject.paymentMethodFactory: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory
+│   │   │   ├── inject.clock: MyVendor\BeMart\Be\Reason\Fake\Service\FakeClock
 │   │   │   └── close being_final_close
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── email: alice@example.com
@@ -326,15 +327,16 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   │   │       ├── totals.addPoint: 182
 │   │   │       ├── totals.usePoint: 0
 │   │   │       └── preOrderId: aceface0000000000000000000000000000a11ce
-│   │   ├── being CheckoutSettled input=[preOrderId, order, totals] inject=[orderNumbers, claim, inventory, gateway]
-│   │   │   ├── inject.orderNumbers: MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider
+│   │   ├── being CheckoutSettled input=[preOrderId, order, totals] inject=[orderNumbers, claim, inventory, gateway +1 items]
+│   │   │   ├── inject.orderNumbers: MyVendor\BeMart\Be\Reason\Fake\Service\FakeOrderNoIssuer
 │   │   │   ├── inject.claim: MyVendor\BeMart\Be\Reason\Fake\Service\InMemoryPreOrderClaim
 │   │   │   ├── inject.inventory: MyVendor\BeMart\Be\Reason\Fake\Service\FakeInventoryAllocator
 │   │   │   ├── inject.gateway: MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentGateway
+│   │   │   ├── inject.clock: MyVendor\BeMart\Be\Reason\Fake\Service\FakeClock
 │   │   │   └── close being_close
-│   │   │       ├── orderNo: <OrderNo-1>
-│   │   │       ├── orderDate: <Now-1>
-│   │   │       ├── paymentDate: <Now-1>
+│   │   │       ├── orderNo: 00000000000000000000000000000001
+│   │   │       ├── orderDate: 2026-04-01T10:00:00+09:00
+│   │   │       ├── paymentDate: 2026-04-01T10:00:00+09:00
 │   │   │       ├── preOrderId: aceface0000000000000000000000000000a11ce
 │   │   │       ├── order.preOrderId: aceface0000000000000000000000000000a11ce
 │   │   │       ├── order.customerId: 0123456789abcdef0123456789abcdef
@@ -368,29 +370,29 @@ link_request get 'page://self/mypage#link=self:goCart,self:goCheckoutEntry,self:
 │   │   │   ├── inject.mailer: MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer
 │   │   │   ├── inject.cartCommand: MyVendor\BeMart\Be\Reason\Query\CartCommandInterface<Null>
 │   │   │   └── close being_final_close
-│   │   │       ├── orderNo: <OrderNo-1>
+│   │   │       ├── orderNo: 00000000000000000000000000000001
 │   │   │       ├── completeMessage: 
 │   │   │       ├── customerId: 0123456789abcdef0123456789abcdef
 │   │   │       ├── total: 18290
 │   │   │       ├── paymentTotal: 18290
 │   │   │       ├── addPoint: 182
 │   │   │       ├── orderStatus: 1
-│   │   │       ├── orderDate: <Now-1>
-│   │   │       └── paymentDate: <Now-1>
+│   │   │       ├── orderDate: 2026-04-01T10:00:00+09:00
+│   │   │       └── paymentDate: 2026-04-01T10:00:00+09:00
 │   │   └── close becoming_close
 │   │       └── exit: success
 │   └── close resource_response
 │       ├── code: 201
 │       └── durationMs: [volatile]
-├── resource_request get 'page://self/shopping/complete?orderNo=<OrderNo-1>'
+├── resource_request get 'page://self/shopping/complete?orderNo=00000000000000000000000000000001'
 │   ├── uri: page://self/shopping/complete
 │   ├── method: GET
-│   ├── params.orderNo: <OrderNo-1>
+│   ├── params.orderNo: 00000000000000000000000000000001
 │   ├── replayable: true
-│   ├── resource_request get 'app://self/order/header?orderNo=<OrderNo-1>'
+│   ├── resource_request get 'app://self/order/header?orderNo=00000000000000000000000000000001'
 │   │   ├── uri: app://self/order/header
 │   │   ├── method: GET
-│   │   ├── params.orderNo: <OrderNo-1>
+│   │   ├── params.orderNo: 00000000000000000000000000000001
 │   │   ├── replayable: true
 │   │   └── close resource_response
 │   │       ├── code: 200

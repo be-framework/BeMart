@@ -13,13 +13,13 @@ use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderItemCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\Param\OrderItemList;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\ClockInterface;
+use MyVendor\BeMart\Be\Reason\Service\OrderNoIssuerInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
-use MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
 use function count;
-use function date;
 
 /**
  * Admin order created — Final, proof an admin manually inserted a fresh
@@ -45,7 +45,7 @@ use function date;
  * PurchaseFlow base total (EC-CUBE lets back-office staff adjust those
  * on a manual order), so `total = purchaseFlowTotal + charge - discount`
  * and `paymentTotal = total` (usePoint is fixed to 0 for data-entry
- * orders). `orderNo` is allocated server-side via {@see OrderNoProvider}
+ * orders). `orderNo` is allocated server-side via {@see OrderNoIssuerInterface}
  * and `orderStatus` is fixed to NEW(1).
  */
 final readonly class AdminOrderCreated
@@ -76,7 +76,8 @@ final readonly class AdminOrderCreated
         #[Input] int $charge,
         #[Input] int $discount,
         #[Inject] AdminSession $adminSession,
-        #[Inject] OrderNoProvider $orderNumbers,
+        #[Inject] OrderNoIssuerInterface $orderNumbers,
+        #[Inject] ClockInterface $clock,
         #[Inject] PurchaseFlowInterface $purchaseFlow,
         #[Inject] OrderCommandInterface $orderCommand,
         #[Inject] OrderItemCommandInterface $orderItemCommand,
@@ -85,8 +86,8 @@ final readonly class AdminOrderCreated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $orderNo = $orderNumbers->get();
-        $orderDate = date('Y-m-d H:i:s');
+        $orderNo = $orderNumbers->issue();
+        $orderDate = $clock->now()->format('Y-m-d H:i:s');
 
         // Project the posted lines into the cart shape PurchaseFlow reads
         // and the snapshot shape dtb_order_item stores — same source, two
