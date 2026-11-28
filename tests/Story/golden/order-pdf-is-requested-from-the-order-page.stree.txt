@@ -1,0 +1,80 @@
+link_request get 'page://self/admin/order#link=self:goExportOrderPdf' : Failed
+├── uri: page://self/admin/order
+├── method: GET
+├── links[0]: self:goExportOrderPdf
+├── resource_request get 'page://self/admin/order?orderNo=past0000000000000000000000000001'
+│   ├── uri: page://self/admin/order
+│   ├── method: GET
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── replayable: true
+│   ├── becoming GetAdminOrderInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── being_final AdminOrderFetched input=[orderNo] inject=[adminSession, orderQuery, orderItems +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── preOrderId: past00000000000000000000000000000000past
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── paymentMethodId: 2
+│   │   │       ├── subtotal: 11000
+│   │   │       ├── deliveryFeeTotal: 600
+│   │   │       ├── charge: 0
+│   │   │       ├── discount: 0
+│   │   │       ├── tax: 1100
+│   │   │       ├── total: 12700
+│   │   │       ├── paymentTotal: 12700
+│   │   │       ├── addPoint: 127
+│   │   │       ├── usePoint: 0
+│   │   │       ├── orderStatus: 1
+│   │   │       ├── orderDate: 2026-04-01 10:00:00
+│   │   │       ├── paymentDate: 2026-04-01 10:00:00
+│   │   │       ├── items[0].productCode: sample-001
+│   │   │       ├── items[0].productName: サンプル商品 A
+│   │   │       ├── items[0].quantity: 1
+│   │   │       ├── items[0].unitPrice: 1200
+│   │   │       ├── items[1].productCode: sample-002
+│   │   │       ├── items[1].productName: Sample Product B
+│   │   │       ├── items[1].quantity: 1
+│   │   │       ├── items[1].unitPrice: 9800
+│   │   │       └── itemCount: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/order/export-order-pdf?orderNo=past0000000000000000000000000001' : Failed
+│   ├── uri: page://self/admin/order/export-order-pdf
+│   ├── method: GET
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── replayable: true
+│   ├── becoming AdminExportOrderPdfInput : Failed
+│   │   ├── orderNos[0]: past0000000000000000000000000001
+│   │   ├── being_final AdminOrderPdfExported input=[orderNos] inject=[adminSession, orderQuery, orderItems +2 items] : Failed
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.shippingAddresses: MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface<Null>
+│   │   │   ├── inject.pdfCompatibility: MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService
+│   │   │   └── close being_error_close
+│   │   │       ├── error: MyVendor\BeMart\Be\Exception\OrderPdfNotSupportedException
+│   │   │       ├── message: 
+│   │   │       ├── file: <root>/src/Compatibility/Eccube/OrderPdfCompatibilityService.php
+│   │   │       └── line: [line]
+│   │   └── close becoming_close
+│   │       ├── exit: error
+│   │       ├── error: MyVendor\BeMart\Be\Exception\OrderPdfNotSupportedException
+│   │       ├── message: 
+│   │       ├── file: <root>/src/Compatibility/Eccube/OrderPdfCompatibilityService.php
+│   │       └── line: [line]
+│   └── close resource_response
+│       ├── code: 501
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 501
+    └── durationMs: [volatile]
+
+events:
+(none)

@@ -1189,6 +1189,72 @@ final class LinkStories
     }
 
     /**
+     * Admin stories that read and change an order. Same row shape as followable(), but not part of it: only the Fake
+     * of the in-process app holds the order, the HTTP apps have none.
+     *
+     * @return array<string, StoryRow>
+     */
+    public static function forAdminOrders(): array
+    {
+        return [
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'order is picked from the list, edited and its status changed' => [
+                uri_template('page://self/admin/order-list#link=self:goOrder{?orderNo},self:doUpdateOrder{?update*},self:doUpdateOrderStatus{?status*}', [
+                    'orderNo' => self::PAST_ORDER,
+                    'update' => self::form(['orderNo' => self::PAST_ORDER, 'discount' => 100]),
+                    'status' => self::form(['orderNo' => self::PAST_ORDER, 'orderStatus' => 5]),
+                ]),
+                Code::OK,
+                '/admin/order-status',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'tracking number is updated and the order mail is composed, confirmed and sent' => [
+                uri_template('page://self/admin/order{?orderNo}#link=self:doUpdateTrackingNumber{?tracking*},self:goOrderMail{?orderNo},self:goOrderMailConfirm{?orderNo},self:doSendOrderMail{?mail*},self:goExportOrder', [
+                    'orderNo' => self::PAST_ORDER,
+                    'tracking' => self::form(['orderNo' => self::PAST_ORDER, 'trackingNumber' => 'TRK0001']),
+                    'mail' => self::form(['orderNo' => self::PAST_ORDER]),
+                ]),
+                Code::OK,
+                '/admin/order/export-order',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'order pdf is requested from the order page' => [
+                uri_template('page://self/admin/order{?orderNo}#link=self:goExportOrderPdf{?orderNo}', ['orderNo' => self::PAST_ORDER]),
+                501, // the PDF renderer is not implemented
+                '/admin/order/export-order-pdf',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'shipping notice is sent' => [
+                uri_template('page://self/admin/order/shipping-notify-mail{?orderNo}#link=self:doSendShippingNotifyMail{?form*}', [
+                    'orderNo' => self::PAST_ORDER,
+                    'form' => self::form(['orderNo' => self::PAST_ORDER]),
+                ]),
+                Code::OK,
+                '/admin/order/shipping-notify-mail',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+            // @see https://be-framework.github.io/BeMart/alps.json.html?tag=flow-admin-order-fulfillment&tagOnly=1&label=title
+            'shipping address is updated' => [
+                uri_template('page://self/admin/order{?orderNo}#link=self:goOrderShippingAddress{?orderNo},self:doUpdateOrderShippingAddress{?form*}', [
+                    'orderNo' => self::PAST_ORDER,
+                    'form' => self::form(['orderNo' => self::PAST_ORDER, 'name01' => '山田', 'name02' => '太郎', 'postalCode' => '1500001', 'pref' => '13', 'addr01' => '渋谷区', 'addr02' => '神宮前1-1-1', 'phoneNumber' => '0312345678']),
+                ]),
+                Code::OK,
+                '/admin/order/shipping-address',
+                [],
+                'flow-admin-order-fulfillment',
+            ],
+        ];
+    }
+
+    /**
      * Stories a signed-in customer follows, run with StoryModule::MEMBER_ID. Same row shape as followable(), but not part
      * of it: the HTTP apps have no customer signed in.
      *

@@ -422,7 +422,7 @@ final class StoryCoverage
     /** @return array<string, array<array-key, mixed>> */
     private function goldenBacked(): array
     {
-        return LinkStories::followable() + LinkStories::forMembers() + LinkStories::forBuyers();
+        return LinkStories::followable() + LinkStories::forAdminOrders() + LinkStories::forMembers() + LinkStories::forBuyers();
     }
 
     /**

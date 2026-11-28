@@ -57,6 +57,7 @@ final class LinkStoryTest extends AbstractLinkStoryCase
         '/INQ-[0-9a-f]+\.[0-9]+/' => 'INQ', // ContactSubmitted makes the ticket id with uniqid()
         '/(?<=orderNo: |orderNo=)[0-9a-f]{32}/' => 'OrderNo', // OrderNoProvider draws the number of a placed order at random
         '/(?<=orderDate: |paymentDate: )\d{4}-\d\d-\d\dT\S+/' => 'Now', // a placed order is stamped with the clock
+        '/(?<=── sendDate: )\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/' => 'SendDate', // the clock stamps the send of an order mail
     ];
 
     /** The line a throw sits on moves with any edit above it in that file; the file it names stays */
@@ -87,6 +88,16 @@ final class LinkStoryTest extends AbstractLinkStoryCase
      */
     #[DataProviderExternal(LinkStories::class, 'followable')]
     public function testFollows(string $uri, int $code, string $path, array $body, string|array $flow = []): void
+    {
+        $this->assertStory($uri, $code, $path, $body, $flow);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     * @param string|list<string> $flow
+     */
+    #[DataProviderExternal(LinkStories::class, 'forAdminOrders')]
+    public function testFollowsAdminOrders(string $uri, int $code, string $path, array $body, string|array $flow = []): void
     {
         $this->assertStory($uri, $code, $path, $body, $flow);
     }

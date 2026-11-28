@@ -1,0 +1,102 @@
+link_request get 'page://self/admin/order#link=self:goOrderShippingAddress,self:doUpdateOrderShippingAddress'
+├── uri: page://self/admin/order
+├── method: GET
+├── links[0]: self:goOrderShippingAddress
+├── links[1]: self:doUpdateOrderShippingAddress
+├── resource_request get 'page://self/admin/order?orderNo=past0000000000000000000000000001'
+│   ├── uri: page://self/admin/order
+│   ├── method: GET
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── replayable: true
+│   ├── becoming GetAdminOrderInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── being_final AdminOrderFetched input=[orderNo] inject=[adminSession, orderQuery, orderItems +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── preOrderId: past00000000000000000000000000000000past
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── paymentMethodId: 2
+│   │   │       ├── subtotal: 11000
+│   │   │       ├── deliveryFeeTotal: 600
+│   │   │       ├── charge: 0
+│   │   │       ├── discount: 0
+│   │   │       ├── tax: 1100
+│   │   │       ├── total: 12700
+│   │   │       ├── paymentTotal: 12700
+│   │   │       ├── addPoint: 127
+│   │   │       ├── usePoint: 0
+│   │   │       ├── orderStatus: 1
+│   │   │       ├── orderDate: 2026-04-01 10:00:00
+│   │   │       ├── paymentDate: 2026-04-01 10:00:00
+│   │   │       ├── items[0].productCode: sample-001
+│   │   │       ├── items[0].productName: サンプル商品 A
+│   │   │       ├── items[0].quantity: 1
+│   │   │       ├── items[0].unitPrice: 1200
+│   │   │       ├── items[1].productCode: sample-002
+│   │   │       ├── items[1].productName: Sample Product B
+│   │   │       ├── items[1].quantity: 1
+│   │   │       ├── items[1].unitPrice: 9800
+│   │   │       └── itemCount: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/order/shipping-address?orderNo=past0000000000000000000000000001'
+│   ├── uri: page://self/admin/order/shipping-address
+│   ├── method: GET
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── replayable: true
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/order/shipping-address?orderNo=past0000000000000000000000000001&name01=%E5%B1%B1%E7%94%B0&name02=%E5%A4%AA%E9%83%8E&postalCode=1500001&pref=13&addr01=%E6%B8%8B%E8%B0%B7%E5%8C%BA&addr02=%E7%A5%9E%E5%AE%AE%E5%89%8D1-1-1&phoneNumber=0312345678&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/order/shipping-address
+│   ├── method: PUT
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── params.name01: 山田
+│   ├── params.name02: 太郎
+│   ├── params.postalCode: 1500001
+│   ├── params.pref: 13
+│   ├── params.addr01: 渋谷区
+│   ├── params.addr02: 神宮前1-1-1
+│   ├── params.phoneNumber: 0312345678
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming AdminUpdateShippingAddressInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── name01: 山田
+│   │   ├── name02: 太郎
+│   │   ├── postalCode: 1500001
+│   │   ├── pref: 13
+│   │   ├── addr01: 渋谷区
+│   │   ├── addr02: 神宮前1-1-1
+│   │   ├── phoneNumber: 0312345678
+│   │   ├── being_final AdminShippingAddressUpdated input=[orderNo, name01, name02, postalCode +4 items] inject=[adminSession, orderQuery +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.shippingAddresses: MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── name01: 山田
+│   │   │       ├── name02: 太郎
+│   │   │       ├── postalCode: 1500001
+│   │   │       ├── pref: 13
+│   │   │       ├── addr01: 渋谷区
+│   │   │       ├── addr02: 神宮前1-1-1
+│   │   │       └── phoneNumber: 0312345678
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/order/shipping-address {"orderNo":"past0000000000000000000000000001","name01":"山田","name02":"太郎","postalCode":"1500001","pref":"13","addr01":"渋谷区","addr02":"神宮前1-1-1","phoneNumber":"0312345678","csrfToken":"[FILTERED]"}
