@@ -31,6 +31,19 @@ class StoryCoverageTest extends TestCase
         $this->assertTrue(StoryCoverage::forRepository()->isLinkedStoriesCurrent(), 'Run `composer story:flows`.');
     }
 
+    public function testAFlowCarriedOnlyByARelAfterTheStopIsMismatched(): void
+    {
+        $name = 'rejected inquiry stops the chain';
+        $coverage = StoryCoverage::forRepository();
+        $uri = LinkStories::followable()[$name][0];
+
+        $this->assertSame([], $coverage->flowMismatch($name, $uri, ['flow-customer-inquiry']));
+        $this->assertSame(
+            ['flow-customer-purchase is carried by none of the followed transitions'],
+            $coverage->flowMismatch($name, $uri, ['flow-customer-inquiry', 'flow-customer-purchase']),
+        );
+    }
+
     /**
      * @param list<string>   $links
      * @param list<int|null> $codes

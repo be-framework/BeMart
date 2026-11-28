@@ -20,7 +20,7 @@ abstract class AbstractLinkStoryCase extends TestCase
     protected function assertFlow(string $uri, string|array $flow): void
     {
         $flows = is_string($flow) ? [$flow] : $flow;
-        $this->assertSame([], StoryCoverage::forRepository()->flowMismatch($uri, $flows), 'The flow tags of the row and of alps.json disagree.');
+        $this->assertSame([], StoryCoverage::forRepository()->flowMismatch((string) $this->dataName(), $uri, $flows), 'The flow tags of the row and of alps.json disagree.');
     }
 
     /** @param array<string, mixed> $body values the end body holds; a dot in a key reaches into a nested array */

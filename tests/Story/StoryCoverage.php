@@ -111,13 +111,25 @@ final class StoryCoverage
     }
 
     /**
-     * 行が宣言した `flow-*` と、`#link=` が辿る遷移のタグの食い違い。宣言のない行は、ALPS にない rel だけを見る。
+     * 行が宣言した `flow-*` と、行が辿る遷移のタグの食い違い。宣言のない行は、ALPS にない rel だけを見る。
+     * 辿る遷移は、golden のある行は golden が記録したもの、ない行は `#link=` のもの。
      *
      * @param list<string> $flows
      *
      * @return list<string>
      */
-    public function flowMismatch(string $uri, array $flows): array
+    public function flowMismatch(string $name, string $uri, array $flows): array
+    {
+        return $this->mismatch($this->goldenRels($name) ?? $this->relsOf($uri), $flows);
+    }
+
+    /**
+     * @param list<string> $rels
+     * @param list<string> $flows
+     *
+     * @return list<string>
+     */
+    private function mismatch(array $rels, array $flows): array
     {
         $mismatch = [];
         foreach (array_diff($flows, $this->flowTags()) as $flow) {
@@ -125,7 +137,7 @@ final class StoryCoverage
         }
 
         $carried = [];
-        foreach ($this->relsOf($uri) as $rel) {
+        foreach ($rels as $rel) {
             if (! isset($this->transitions[$rel])) {
                 $mismatch[] = sprintf('%s is not a transition in alps.json', $rel);
                 continue;
@@ -154,7 +166,7 @@ final class StoryCoverage
     /**
      * ストーリーと ALPS の食い違い。どれかが空でなければ食い違っている。
      *
-     * - unknown: ストーリーが辿る rel が、ALPS の遷移にない（`<rel>`）
+     * - unknown: ストーリーの URI にある rel が、ALPS の遷移にない（`<rel>`）
      * - flow: 行が宣言した `flow-*` が、ALPS にない、辿る遷移のタグと合わない、または辿る遷移に `flow-*` があるのに宣言しない（`<ストーリー名>: <理由>`）
      * - golden: golden を照合する行に golden がない（`<ストーリー名>: no golden; …`）
      *
@@ -169,16 +181,20 @@ final class StoryCoverage
             }
         }
 
-        foreach ($this->stories() as $name => [$uri, $flows]) {
+        foreach ($this->stories() as $name => [$uri, $flows, $rels]) {
             foreach ($this->relsOf($uri) as $rel) {
                 if (! isset($this->transitions[$rel])) {
                     $drift['unknown'][] = $rel;
-                } elseif ($flows === [] && $this->transitions[$rel] !== []) {
+                }
+            }
+
+            foreach ($rels as $rel) {
+                if ($flows === [] && ($this->transitions[$rel] ?? []) !== []) {
                     $drift['flow'][] = sprintf('%s: follows %s of %s but declares no flow', $name, $rel, implode(' ', $this->transitions[$rel]));
                 }
             }
 
-            foreach ($this->flowMismatch($uri, $flows) as $reason) {
+            foreach ($this->mismatch($rels, $flows) as $reason) {
                 $drift['flow'][] = sprintf('%s: %s', $name, $reason);
             }
         }
@@ -381,8 +397,7 @@ final class StoryCoverage
     {
         $stories = [];
         foreach ($this->goldenBacked() as $name => $row) {
-            $golden = $this->goldenFile($name);
-            $stories[$name] = [$row[0], $this->flows($row[4] ?? []), is_file($golden) ? $this->followedRels((string) file_get_contents($golden)) : []];
+            $stories[$name] = [$row[0], $this->flows($row[4] ?? []), $this->goldenRels($name) ?? $this->relsOf($row[0])];
         }
 
         foreach (LinkStories::persisted() as $name => $row) {
@@ -396,6 +411,14 @@ final class StoryCoverage
         return $stories;
     }
 
+    /** @return list<string>|null golden が記録した rel。golden がなければ null */
+    private function goldenRels(string $name): array|null
+    {
+        $golden = $this->goldenFile($name);
+
+        return is_file($golden) ? $this->followedRels((string) file_get_contents($golden)) : null;
+    }
+
     /** @return array<string, array<array-key, mixed>> */
     private function goldenBacked(): array
     {
@@ -403,19 +426,15 @@ final class StoryCoverage
     }
 
     /**
-     * 辿るストーリーと、辿れないことを示すストーリーの URI と `flow-*`。
+     * 辿るストーリーと、辿れないことを示すストーリーの URI・`flow-*`・辿る rel（辿れないストーリーは URI のとおり）。
      *
-     * @return array<string, array{string, list<string>}>
+     * @return array<string, array{string, list<string>, list<string>}>
      */
     private function stories(): array
     {
-        $stories = [];
-        foreach ($this->followingStories() as $name => [$uri, $flows]) {
-            $stories[$name] = [$uri, $flows];
-        }
-
+        $stories = $this->followingStories();
         foreach (LinkStories::unfollowable() as $name => $row) {
-            $stories[$name] = [$row[0], $this->flows($row[2])];
+            $stories[$name] = [$row[0], $this->flows($row[2]), $this->relsOf($row[0])];
         }
 
         return $stories;
