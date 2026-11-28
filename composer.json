@@ -196,6 +196,7 @@
         "db:reset": "Rebuild the dev DB to a deterministic known state (schema + master + fake-derived fixture). Run BEFORE any browser/visual verification so mutating runs don't drift."
     },
     "config": {
+        "process-timeout": 0,
         "sort-packages": true,
         "allow-plugins": {
             "aura/installer-default": false,
