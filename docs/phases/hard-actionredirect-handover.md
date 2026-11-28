@@ -53,17 +53,11 @@ Phase-A stub 実体化（commit 7）:
 # 静的解析
 composer psalm        # No errors（179 は既存 info 級）
 composer psalm-taint  # No errors
-# ステータスHTML再生成（route 張替後に必須）
-php bin/generate-eccube-feature-alps-status.php
-# Hard ActionRedirect 残数の確認（0 のはず）
+# Hard ActionRedirect 残数の確認（2026-05-29 のスナップショットでの数。0 のはず）
 grep -oP 'data-implementation-status="安全退避\(ActionRedirect\)" data-difficulty="Hard"' docs/eccube-feature-alps-status.html | wc -l
 ```
 
-ステータス自動判定の要点: `bin/generate-eccube-feature-alps-status.php` は
-`config/aura-routes.php` の resource URI が `action-redirect` を含むか否かで「安全退避/実装済み」を
-判定する。**route を action-redirect → 具体URIへ張り替え + 再生成するだけで「実装済み」に変わる**。
-難易度 Hard は内容ベース判定なので維持される。`tests/Docs/EccubeFeatureAlpsStatusHtmlTest.php` の
-監査テストは「件数非依存（残った Hard ActionRedirect 行が既知監査セットに属するか）」へ更新済み。
+状態HTML（`docs/eccube-feature-alps-status.html`）は 2026-05-29 のスナップショットで、再生成しない（元にした Aura route が削除済みのため、生成スクリプトも削除）。`tests/Docs/EccubeFeatureAlpsStatusHtmlTest.php` はそのページ自体の内容を検査する。
 
 ## 正準パターン（残作業もこれに従う）
 

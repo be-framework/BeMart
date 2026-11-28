@@ -62,7 +62,7 @@ BeMart は Be Framework + BEAR.Sunday + ALPS による移植手法の **referent
 
 | 知りたいこと | 参照 |
 |---|---|
-| 機能一覧（正） | [`alps.json`](../alps.json) · [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) |
+| 機能一覧（正） | [`alps.json`](../alps.json) · [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html)（2026-05-29 のスナップショット） |
 | 移植ステータス（正） | [`migration-status.md`](migration-status.md) |
 | 構築プロセスの決定ログ | [`HANDOVER.md`](HANDOVER.md) |
 | 移植知見（G-14〜G-25） | [`skills/`](skills/) |

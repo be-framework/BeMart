@@ -36,7 +36,7 @@ title: "docs/ — ドキュメント索引"
 | [`flow-tag-migration-plan.md`](flow-tag-migration-plan.md) | **Flow tag 移行計画**。現行 `flow-*` を feature-area usage として扱い、`feature-*` と新しい `flow-*` に分離する手順。 |
 | [`PROJECT-REPORT.md`](PROJECT-REPORT.md) | **実証総括**。何を学び、何を成し遂げ、どこに限界を引いたかを一枚に束ねた documentary。各論への入口。 |
 | [`migration-status.md`](migration-status.md) | **移植ステータスの正**。ALPS / Be / Resource / Ray.MediaQuery / HTML のレイヤ別マトリクスと残作業 punch-list。「今どこまで出来ているか」はここが正。 |
-| [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ BeMart実装状態 ↔ 移植難易度の生成HTML表。 |
+| [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ BeMart実装状態 ↔ 移植難易度のHTML表（2026-05-29 のスナップショット。再生成しない）。 |
 | [`HANDOVER.md`](HANDOVER.md) | 構築プロセスの記録。Phase A / Phase 2 / Phase 3 の決定ログ、Pilot/Wave 報告、skill gap 発見の経緯。 |
 | [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) | 引き継ぎ手順。再開時に読むファイル順・次にやること・リポジトリ構造。`migration-status.md` を正として読む。 |
 | [`tag.md`](tag.md) | タグ分類体系（`flow-*` / `src-*` 等、ワークフロー・ドメイン・アクター・情報源の命名規則）。 |

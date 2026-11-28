@@ -17,7 +17,7 @@ Web+DB 全件run `20260610-web-db-all-routes` を反映しています。
 | 境界 | 証拠 | 規模 |
 |---|---|---:|
 | 意味論 | [`alps.json`](https://github.com/be-framework/BeMart/blob/1.x/alps.json) / [`alps.json.html`](alps.json.html) | 534 descriptor / 207 transition |
-| 機能対応 | [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) | 165 route names / 270 method entries |
+| 機能対応（2026-05-29 のスナップショット） | [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) | 165 route names / 270 method entries |
 | ドメイン | `be/src` | 147 Input / 148 Final / 157 Semantic / 14 Being |
 | HTTP Resource | `src/Resource/Page` | 146 page resources |
 | API契約 | [`api/`](api/) / [`api/openapi.json`](api/openapi.json) | 236 operations / 235 JSON Schema |
