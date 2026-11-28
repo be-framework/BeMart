@@ -319,7 +319,7 @@ final class StoryCoverage
     private function followingStories(): array
     {
         $stories = [];
-        foreach (LinkStories::followable() + LinkStories::forMembers() + LinkStories::forBuyers() + LinkStories::persisted() as $name => $row) {
+        foreach (LinkStories::followable() + LinkStories::forAdminOrders() + LinkStories::forMembers() + LinkStories::forBuyers() + LinkStories::persisted() as $name => $row) {
             $stories[$name] = [$row[0], $this->flows($row[4] ?? [])];
         }
 

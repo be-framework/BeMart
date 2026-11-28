@@ -1,0 +1,136 @@
+link_request get 'page://self/admin/order-list#link=self:goOrder,self:doUpdateOrder,self:doUpdateOrderStatus'
+├── uri: page://self/admin/order-list
+├── method: GET
+├── links[0]: self:goOrder
+├── links[1]: self:doUpdateOrder
+├── links[2]: self:doUpdateOrderStatus
+├── resource_request get 'page://self/admin/order-list'
+│   ├── uri: page://self/admin/order-list
+│   ├── method: GET
+│   ├── replayable: true
+│   ├── becoming GetAdminOrderListInput
+│   │   ├── limit: 50
+│   │   ├── offset: 0
+│   │   ├── being_final AdminOrderListFetched input=[limit, offset] inject=[adminSession, orderQuery]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── orders[0].orderNo: past0000000000000000000000000001
+│   │   │       ├── orders[0].customerId: customer-001
+│   │   │       ├── orders[0].total: 12700
+│   │   │       ├── orders[0].paymentTotal: 12700
+│   │   │       ├── orders[0].orderDate: 2026-04-01 10:00:00
+│   │   │       ├── orders[0].orderStatus: 1
+│   │   │       ├── count: 1
+│   │   │       ├── limit: 50
+│   │   │       └── offset: 0
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request get 'page://self/admin/order?orderNo=past0000000000000000000000000001'
+│   ├── uri: page://self/admin/order
+│   ├── method: GET
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── replayable: true
+│   ├── becoming GetAdminOrderInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── being_final AdminOrderFetched input=[orderNo] inject=[adminSession, orderQuery, orderItems +1 items]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderItems: MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface<Null>
+│   │   │   ├── inject.customerQuery: MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── preOrderId: past00000000000000000000000000000000past
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── paymentMethodId: 2
+│   │   │       ├── subtotal: 11000
+│   │   │       ├── deliveryFeeTotal: 600
+│   │   │       ├── charge: 0
+│   │   │       ├── discount: 0
+│   │   │       ├── tax: 1100
+│   │   │       ├── total: 12700
+│   │   │       ├── paymentTotal: 12700
+│   │   │       ├── addPoint: 127
+│   │   │       ├── usePoint: 0
+│   │   │       ├── orderStatus: 1
+│   │   │       ├── orderDate: 2026-04-01 10:00:00
+│   │   │       ├── paymentDate: 2026-04-01 10:00:00
+│   │   │       ├── items[0].productCode: sample-001
+│   │   │       ├── items[0].productName: サンプル商品 A
+│   │   │       ├── items[0].quantity: 1
+│   │   │       ├── items[0].unitPrice: 1200
+│   │   │       ├── items[1].productCode: sample-002
+│   │   │       ├── items[1].productName: Sample Product B
+│   │   │       ├── items[1].quantity: 1
+│   │   │       ├── items[1].unitPrice: 9800
+│   │   │       └── itemCount: 2
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request put 'page://self/admin/order?orderNo=past0000000000000000000000000001&discount=100&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/order
+│   ├── method: PUT
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── params.discount: 100
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming AdminUpdateOrderInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── discount: 100
+│   │   ├── being_final AdminOrderUpdated input=[orderNo, discount, charge, usePoint] inject=[adminSession, orderQuery, orderCommand]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── customerId: customer-001
+│   │   │       ├── discount: 100
+│   │   │       ├── charge: 0
+│   │   │       ├── usePoint: 0
+│   │   │       ├── subtotal: 11000
+│   │   │       ├── deliveryFeeTotal: 600
+│   │   │       ├── tax: 1100
+│   │   │       ├── total: 12700
+│   │   │       ├── paymentTotal: 12700
+│   │   │       └── orderStatus: 1
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+├── resource_request post 'page://self/admin/order-status?orderNo=past0000000000000000000000000001&orderStatus=5&csrfToken=%5BFILTERED%5D'
+│   ├── uri: page://self/admin/order-status
+│   ├── method: POST
+│   ├── params.orderNo: past0000000000000000000000000001
+│   ├── params.orderStatus: 5
+│   ├── params.csrfToken: [FILTERED]
+│   ├── replayable: true
+│   ├── becoming AdminUpdateOrderStatusInput
+│   │   ├── orderNo: past0000000000000000000000000001
+│   │   ├── orderStatus: 5
+│   │   ├── being_final AdminOrderStatusUpdated input=[orderNo, orderStatus] inject=[adminSession, orderQuery, orderCommand]
+│   │   │   ├── inject.adminSession: MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession
+│   │   │   ├── inject.orderQuery: MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface<Null>
+│   │   │   ├── inject.orderCommand: MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface<Null>
+│   │   │   └── close being_final_close
+│   │   │       ├── orderNo: past0000000000000000000000000001
+│   │   │       ├── previousStatus: 1
+│   │   │       ├── orderStatus: 5
+│   │   │       └── changed: true
+│   │   └── close becoming_close
+│   │       └── exit: success
+│   └── close resource_response
+│       ├── code: 200
+│       └── durationMs: [volatile]
+└── close link_response
+    ├── code: 200
+    └── durationMs: [volatile]
+
+events:
+PUT page://self/admin/order {"orderNo":"past0000000000000000000000000001","discount":"100","csrfToken":"[FILTERED]"}
+POST page://self/admin/order-status {"orderNo":"past0000000000000000000000000001","orderStatus":"5","csrfToken":"[FILTERED]"}
