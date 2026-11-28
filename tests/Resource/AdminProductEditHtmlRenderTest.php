@@ -277,14 +277,16 @@ final class AdminProductEditHtmlRenderTest extends TestCase
         $resource = $this->editModeResource('p-test-001');
         $html = $resource->get('page://self/admin/product/edit', ['productCode' => 'p-test-001'])->toString();
 
-        $this->assertSame(1, preg_match('#<a\s[^>]*href="([^"]+)"[^>]*>規格編集</a>#', $html, $match), 'the class edit link is missing');
+        $this->assertSame(1, preg_match('#<a\s(?:[^>]*\s)?href="([^"]+)"[^>]*>\s*規格編集\s*</a>#', $html, $match), 'the class edit link is missing');
         $href = parse_url(html_entity_decode($match[1]));
         $this->assertIsArray($href);
+        $this->assertArrayHasKey('path', $href);
         parse_str($href['query'] ?? '', $query);
 
         $ro = $resource->get('page://self' . $href['path'], $query);
 
         $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('p-test-001', $ro->body['productCode']);
     }
 
     /**
