@@ -156,7 +156,7 @@ final class StoryCoverage
      *
      * - unknown: ストーリーが辿る rel が、ALPS の遷移にない（`<rel>`）
      * - flow: 行が宣言した `flow-*` が、ALPS にない、辿る遷移のタグと合わない、または辿る遷移に `flow-*` があるのに宣言しない（`<ストーリー名>: <理由>`）
-     * - golden: golden を照合する行に golden がない（`<ストーリー名>`）
+     * - golden: golden を照合する行に golden がない（`<ストーリー名>: no golden; …`）
      *
      * @return array{unknown: list<string>, flow: list<string>, golden: list<string>}
      */

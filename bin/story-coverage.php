@@ -30,7 +30,7 @@ if (! in_array('--check', $argv, true)) {
 $messages = [
     'unknown' => 'a story follows it but it is not a transition in alps.json',
     'flow' => 'the flow tag a story declares does not match alps.json',
-    'golden' => 'the golden of a story is missing',
+    'golden' => 'a story and its golden disagree',
 ];
 $failed = false;
 foreach (array_filter($coverage->drift()) as $kind => $items) {

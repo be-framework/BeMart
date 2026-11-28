@@ -49,14 +49,16 @@ class StoryCoverageTest extends TestCase
         yield 'the chain stops early' => [['self:a', 'self:b', 'self:c'], [200, 200, 400], ['a', 'b']];
         yield 'a 303 is followed by the GET of its Location' => [['self:a', 'self:b'], [200, 303, 200, 200], ['a', 'b']];
         yield 'a 201 is followed by the GET of its Location' => [['self:a', 'self:b'], [200, 201, 200, 200], ['a', 'b']];
+        yield 'a link after a 303 and its Location GET is still followed' => [['self:a', 'self:b', 'self:c'], [200, 303, 200, 400], ['a', 'b']];
+        yield 'a link after a 201 and its Location GET is still followed' => [['self:a', 'self:b', 'self:c'], [200, 201, 200, 400], ['a', 'b']];
         yield 'a failed request without a code still follows its link' => [['self:a', 'self:b'], [200, null], ['a']];
         yield 'a story that follows nothing' => [[], [200], []];
     }
 
-    /** A request inside another request, and the code of its response, belong to no link */
+    /** A request inside another request belongs to no link */
     public function testARequestInsideARequestIsNotAStep(): void
     {
-        $golden = self::golden(['self:a'], [200, 200], "│   ├── resource_request get 'page://self/embedded'\n│   │   └── close resource_response\n│   │       ├── code: 303");
+        $golden = self::golden(['self:a', 'self:b'], [200, 400], "│   ├── resource_request get 'page://self/embedded'\n│   │   └── close resource_response\n│   │       ├── code: 303");
 
         $this->assertSame(['a'], StoryCoverage::forRepository()->followedRels($golden));
     }
