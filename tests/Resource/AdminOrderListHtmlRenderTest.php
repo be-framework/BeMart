@@ -185,13 +185,13 @@ final class AdminOrderListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('href="/admin/order?orderNo=', $html);
     }
 
-    /** New-order creation link carries rel="doCreateOrder" (ALPS unsafe transition). */
-    public function testOrderListNewOrderLinkCarriesDoCreateOrderRel(): void
+    /** The new-order link opens the blank editor and carries rel="goOrderEdit". */
+    public function testOrderListNewOrderLinkOpensTheEditor(): void
     {
         $html = $this->resource->get('page://self/admin/order-list')->toString();
 
-        $this->assertStringContainsString('rel="doCreateOrder"', $html);
-        $this->assertStringContainsString('href="/admin/order/create"', $html);
+        $this->assertStringContainsString('rel="goOrderEdit"', $html);
+        $this->assertStringContainsString('href="/admin/order/edit"', $html);
     }
 
     /** CSV export links target the declared resource endpoints. */

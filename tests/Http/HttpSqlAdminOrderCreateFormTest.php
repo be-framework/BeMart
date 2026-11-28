@@ -67,7 +67,7 @@ final class HttpSqlAdminOrderCreateFormTest extends TestCase
 
         $list = $this->request('GET', '/admin/order-list');
         $this->assertSame(200, $list['status'], $list['body']);
-        $this->assertStringContainsString('rel="doCreateOrder"', $list['body']);
+        $this->assertStringContainsString('rel="goOrderEdit"', $list['body']);
 
         $editor = $this->request('GET', '/admin/order/edit');
         $this->assertSame(200, $editor['status'], $editor['body']);

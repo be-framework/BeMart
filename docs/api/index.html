@@ -6242,7 +6242,7 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 </tr>
 <tr>
   <td rowspan="1" class="path-cell" id="path-admin/order/edit">/admin/order/edit</td>
-  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">ALPS `goOrder` に対応する GET 操作。</div><div class="method-alps"><a href="../alps.json.html#goOrder" class="alps-link">goOrder</a></div></td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">ALPS `goOrderEdit` に対応する GET 操作。</div><div class="method-alps"><a href="../alps.json.html#goOrderEdit" class="alps-link">goOrderEdit</a></div></td>
   <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">注文番号（入力） - 顧客向けの注文番号。フォーマットはカスタマイズ可能 Fake観察文字長 32〜32; 観察値 &#039;past0000000000000000000000000001&#039;。</td>
@@ -12926,12 +12926,12 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   </td>
 </tr>
 <tr class="link-row">
-  <td class="prop-name"><span class="ti unsafe"></span>doCreateOrder</td>
+  <td class="prop-name"><span class="ti safe"></span>goOrderEdit</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
   <td>
     <div class="extra-info">
-      <span class="badge href">href: page://self/admin/order/create</span>
+      <span class="badge href">href: page://self/admin/order/edit{?orderNo}</span>
     </div>
   </td>
 </tr>
@@ -22143,6 +22143,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/order</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doCreateOrder</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/create</span>
     </div>
   </td>
 </tr>

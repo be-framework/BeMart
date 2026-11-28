@@ -30,7 +30,7 @@ use function assert;
  *
  * Thin GET renderer. The sibling JSON resource {@see \MyVendor\BeMart\Resource\Page\Admin\Order}
  * carries the `goOrder` read + `doUpdateOrder` write; this resource is
- * the HTML editor shell only. An empty `$orderNo` renders the blank
+ * the HTML editor shell only (ALPS state `AdminOrderEditPage`, template `Admin/Order/edit.twig`). An empty `$orderNo` renders the blank
  * editor (EC-CUBE's "受注登録" path — the render-smoke test exercises
  * this with empty JSON-backed fake storage); a known orderNo pre-fills; an unknown
  * orderNo is 404.
@@ -51,12 +51,13 @@ class Edit extends ResourceObject
     }
 
     /**
-     * ALPS `goOrder` に対応する GET 操作。
+     * ALPS `goOrderEdit` に対応する GET 操作。
      * @psalm-taint-source input $orderNo
      */
-    #[Alps('goOrder')]
+    #[Alps('goOrderEdit')]
     #[JsonSchema(schema: 'get-admin-order-edit.json', params: 'get-admin-order-edit.param.json')]
     #[Link(rel: 'doUpdateOrder', href: 'page://self/admin/order', method: 'put')]
+    #[Link(rel: 'doCreateOrder', href: 'page://self/admin/order/create', method: 'post')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     public function onGet(string $orderNo = ''): static
     {

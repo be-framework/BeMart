@@ -9780,8 +9780,8 @@
         },
         "/admin/order/edit": {
             "get": {
-                "operationId": "goOrder",
-                "summary": "ALPS `goOrder` \u306b\u5bfe\u5fdc\u3059\u308b GET \u64cd\u4f5c\u3002",
+                "operationId": "goOrderEdit",
+                "summary": "ALPS `goOrderEdit` \u306b\u5bfe\u5fdc\u3059\u308b GET \u64cd\u4f5c\u3002",
                 "parameters": [
                     {
                         "name": "orderNo",

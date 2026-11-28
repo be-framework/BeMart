@@ -740,9 +740,20 @@
           {"href": "#Order"},
           {"href": "#goOrder"},
           {"href": "#goOrderList"},
-          {"href": "#doCreateOrder"},
           {"href": "#doBulkDeleteOrder"},
-          {"href": "#goImportShippingCsv"}
+          {"href": "#goOrderEdit"}
+        ]
+      },
+      {"id": "AdminOrderEditPage", "title": "管理受注編集画面","tag": "order flow-manage-order actor-admin src-template src-router page page-admin page-detail page-edit route-ec-cube migration-target feature-admin-order flow-admin-order-fulfillment",
+        "doc": {
+          "href": "docs/states/admin-order-edit.md",
+          "value": "EC-CUBE route admin_order_edit / template Admin/Order/edit.twig に対応する管理受注編集ワークベンチ。受注の基本情報・明細・金額を編集する画面状態。orderNo なしは新規受注の登録。"
+        },
+        "descriptor": [
+          {"href": "#Order"},
+          {"href": "#doUpdateOrder"},
+          {"href": "#doCreateOrder"},
+          {"href": "#goOrderList"}
         ]
       },
 
@@ -1695,6 +1706,10 @@
         "tag": "order src-router feature-admin-order flow-admin-order-fulfillment",
         "doc": {"value": "受注詳細を表示する（管理画面）。明細・配送先・お支払い・税送料計算・ステータス操作を含む。"},
         "descriptor": [{"href": "#orderNo"}]},
+      {"id": "goOrderEdit", "title": "受注編集を見る", "type": "safe", "rt": "#AdminOrderEditPage",
+        "tag": "order actor-admin src-router feature-admin-order flow-admin-order-fulfillment",
+        "doc": {"value": "受注の編集画面を表示する（管理画面）。orderNo なしは新規受注の登録画面。"},
+        "descriptor": [{"href": "#orderNo"}]},
       {"id": "goOrderHistory", "title": "注文履歴を見る", "type": "safe", "rt": "#OrderList",
         "tag": "order actor-customer src-router feature-account flow-customer-account-maintenance",
         "doc": {"value": "ログイン会員の注文履歴を表示する。受注詳細・再注文への導線を含む。"},
@@ -1736,7 +1751,7 @@
         "tag": "order actor-admin src-router feature-admin-order flow-admin-order-fulfillment flow-admin-csv-exchange",
         "doc": {"value": "配送情報をCSV形式でダウンロードする。出荷管理用、伝票番号入力後のインポートと対をなす。"},
         "descriptor": [{"href": "#doImportShippingCsv"}]},
-      {"id": "doImportShippingCsv", "title": "配送CSVをインポートする", "type": "unsafe", "rt": "#OrderList",
+      {"id": "doImportShippingCsv", "title": "配送CSVをインポートする", "type": "unsafe", "rt": "#ShippingCsvImport",
         "tag": "order actor-admin src-router feature-admin-order flow-admin-order-fulfillment flow-admin-csv-exchange",
         "doc": {"value": "配送CSVから伝票番号・出荷日を一括登録する。配送業者から受領した出荷情報の取り込み用。"},
         "descriptor": [{"href": "#goExportCustomer"}]},
@@ -1794,7 +1809,7 @@
         "tag": "admin-system flow-admin-auth actor-admin src-template page page-admin page-dashboard feature-admin-auth flow-admin-system-operation",
         "doc": {"value": "管理画面のダッシュボード。doAdminLogin 成功後の遷移先。受注・会員・商品・各種マスタ管理への入口を提供する。"},
         "descriptor": [{"href": "#goOrderList"}, {"href": "#goCustomerList"}, {"href": "#goProductList"}, {"href": "#goMemberList"}, {"href": "#goBaseInfo"}, {"href": "#goPaymentList"}, {"href": "#goDeliveryList"}, {"href": "#goTaxRuleList"}, {"href": "#goNewsList"}, {"href": "#goPageList"}, {"href": "#goLayoutList"}, {"href": "#goBlockList"}, {"href": "#goTagList"}, {"href": "#goClassNameList"}, {"href": "#goClassCategoryList"}, {"href": "#goMailTemplateList"}, {"href": "#goLoginHistoryList"}, {"href": "#goPluginList"}, {"href": "#goTemplateList"}, {"href": "#goTradeLawList"}, {"href": "#goContentCache"}, {"href": "#doAdminLogout"}, {"href": "#goAuthorityRole"}, {"href": "#goCsv"}, {"href": "#goOrderStatusList"}]},
-      {"id": "doRequestPasswordReset", "title": "パスワードリセットを依頼する", "type": "unsafe", "rt": "#PasswordReset",
+      {"id": "doRequestPasswordReset", "title": "パスワードリセットを依頼する", "type": "unsafe", "rt": "#PasswordResetRequest",
         "tag": "account flow-account actor-customer src-router feature-account",
         "doc": {"value": "メールアドレスを受け取り、パスワード再発行用URLを含むメールを送信する。リセットキーには有効期限あり。"},
         "descriptor": [{"href": "#email"}]},
@@ -2199,6 +2214,9 @@
       {"id": "OrderShippingAddress", "title": "受注配送先", "tag": "src-template alps-route-gate flow-admin-order-fulfillment",
         "doc": {"value": "受注配送先を表す画面状態。"},
         "descriptor": [{"href": "#doUpdateOrderShippingAddress"}, {"href": "#doUpdateTrackingNumber"}]},
+      {"id": "ShippingCsvImport", "title": "出荷CSV取込", "tag": "src-template flow-admin-order-fulfillment flow-admin-csv-exchange",
+        "doc": {"value": "配送CSVから伝票番号・出荷日を一括登録する画面状態（管理画面）。"},
+        "descriptor": [{"href": "#doImportShippingCsv"}, {"href": "#goExportShipping"}, {"href": "#goImportShippingCsv"}]},
       {"id": "OrderStatusList", "title": "対応状況一覧", "tag": "src-template alps-route-gate flow-admin-order-fulfillment",
         "doc": {"value": "対応状況一覧を表す画面状態。"},
         "descriptor": [
@@ -2366,7 +2384,7 @@
         "tag": "src-router alps-route-gate flow-admin-csv-exchange",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
         "descriptor": [{"href": "#doImportClassNameCsv"}]},
-      {"id": "goImportShippingCsv", "title": "配送CSVインポートを見る", "type": "safe", "rt": "#OrderList",
+      {"id": "goImportShippingCsv", "title": "配送CSVインポートを見る", "type": "safe", "rt": "#ShippingCsvImport",
         "tag": "src-router alps-route-gate flow-admin-csv-exchange",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "goLayout", "title": "レイアウト詳細を見る", "type": "safe", "rt": "#Layout",
